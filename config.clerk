@@ -1,0 +1,20 @@
+# set backend, valid choices: rofi, teiler
+backend=rofi
+
+# path to your music
+music_path="/mnt/wasteland/Audio/Rips"
+
+# Number of Songs to be added for "Random Tracks"
+value=20
+
+# Change this, if you have subfolders for multi-disc albums.
+# This should match the name of your subfolders, exluding the number
+cd_divider=CD
+
+# use artist or albumartist for album ratings
+mpd_artist=albumartist
+
+# Fill these if mpdscribble runs on a different host
+# set to 0 if mpdscribble runs locally
+ssh_lastfm=1
+ssh_host=picon
