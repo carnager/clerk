@@ -33,6 +33,7 @@ dplayPrompt () {
           "7  Ratings"
           "8  Lookup"
           "---"
+          "0  Testing"
           "/  Search")
 
     prompt() {
@@ -49,6 +50,7 @@ dplayPrompt () {
         6*) dplayOptionsPrompt ;;
         7*) ratingPrompt ;;
         8*) infoPrompt ;;
+        0*) testingPrompt;;
           *) exit
     esac
 }
@@ -366,7 +368,7 @@ rateAlbum () {
         echo "$(mpc current -f "%$mpd_artist%")" >> rating.txt
         echo "$(mpc current -f '%album%')" >> rating.txt
         echo "$(mpc current -f '%date%')" >> rating.txt
-        notify-send "mpdMenu" "Rated $(mpc current -f "%$mpd_artist% - %album%") with $ratings"
+        notify-send "clerk" "Rated $(mpc current -f "%$mpd_artist% - %album%") with $ratings"
     fi
 }
 
@@ -380,7 +382,7 @@ rateTrack () {
         if [[ "$extension" == flac ]]; then
             metaflac --remove-tag=comment "$(mpc current -f %file%)"
             metaflac --set-tag=comment="$ratings" "$(mpc current -f %file%)"
-#             echo "Not yet implemented" && notify-send "mpdMenu" "Rating Tracks is not yet implemented"
+#             echo "Not yet implemented" && notify-send "clerk" "Rating Tracks is not yet implemented"
         elif [[ "$extension" == mp3 ]]; then
              eyeD3 --add-comment "$ratings" "$(mpc current -f %file%)"
         fi
@@ -495,6 +497,45 @@ case $1 in
 esac
 }
 
+testingPrompt() {
+    menu=("1  Play random Album"
+          "2  Play random Songs")
+
+    prompt() {
+        printf "%s\n" "$@" | dmenu_t -p "Testing Menu: > "
+    }
+
+    case "$(prompt "${menu[@]}")" in
+        1*) testAddAlbum ;;
+        2*) testAddTrack ;;
+    esac
+}
+
+testAddAlbum() {
+TRACK=$(echo -e "$(/home/carnager/bin/mppc listall --format '{date} - {albumartist} - {album}' | uniq | sed '/^ - /d' | rofi -dmenu -p "Choose Track > ")")
+if [[ "$TRACK" = "" ]]
+    then echo "no selection made"
+else
+    artist=$(echo "$TRACK" | awk -F ' - ' '{print $2}')
+    album=$(echo "$TRACK" | awk -F ' - ' '{print $3}')
+    /home/carnager/bin/mppc searchadd artist "$artist" album "$album" && mppc play
+fi
+}
+
+testAddTrack() {
+TRACK=$(echo -e "$(/home/carnager/bin/mppc listall --format '{artist} - {album} - {track} - {title}' | uniq | sed '/^ - /d' | rofi -dmenu -p "Choose Track > ")")
+if [[ "$TRACK" = "" ]]
+    then echo "no selection made"
+else
+    artist=$(echo "$TRACK" | awk -F ' - ' '{print $1}')
+    album=$(echo "$TRACK" | awk -F ' - ' '{print $2}')
+    track=$(echo "$TRACK" | awk -F ' - ' '{print $3}')
+    title=$(echo "$TRACK" | awk -F ' - ' '{print $4}')
+
+    /home/carnager/bin/mppc searchadd artist "$artist" album "$album" title "$title" && mppc play
+fi
+}
+
 
 ################################################################################
 
@@ -517,7 +558,7 @@ fi
 
 
 if [[ "$1" == "-h" ]]; then
-    echo "mpdMenu: little dmenu-driven MPD client"
+    echo "clerk: the mpd UI that needs typing"
     echo "Copyright © 2013 - 2014 Rasmus Steinke"
     echo ""
     echo "Options"
