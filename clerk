@@ -499,7 +499,8 @@ esac
 
 testingPrompt() {
     menu=("1  Play Album"
-          "2  Add a Song")
+          "2  Add a Song"
+          "3  Browse Library")
 
     prompt() {
         printf "%s\n" "$@" | dmenu_t -p "Testing Menu: > "
@@ -508,11 +509,12 @@ testingPrompt() {
     case "$(prompt "${menu[@]}")" in
         1*) testAddAlbum ;;
         2*) testAddTrack ;;
+        3*) browseLib ;;
     esac
 }
 
 testAddAlbum() {
-TRACK=$(mppc listall --format '{date} • {albumartist} • {album}' | uniq | sed '/^ • /d' | rofi -dmenu -p "Choose Track > ")
+TRACK=$(mppc listall --format '{date} • {albumartist} • {album}' | uniq | sed '/^ • /d' | rofi -dmenu -p "Choose Album > ")
 if [[ "$TRACK" = "" ]]
     then echo "no selection made"
 else
@@ -533,6 +535,25 @@ else
     title=$(echo "$TRACK" | awk -F ' • ' '{print $4}')
 
     mppc searchadd artist "$artist" album "$album" title "$title"
+fi
+}
+
+browseLib() {
+ARTIST=$(mppc list artist | rofi -dmenu -p "Choose Artist > ")
+if [[ "$ARTIST" = "" ]]
+    then echo "no selection made"
+else
+    ALBUM=$(mppc list album "$ARTIST" | rofi -dmenu -p "Choose Album > ")
+    if [[ "$ALBUM" = "" ]]
+        then echo "no selection made"
+    else
+        TRACK=$(mppc list title album "$ALBUM" | rofi -dmenu -p "Chose Track > ")
+        if [[ "$TRACK" = "" ]]
+            then echo "no selection made"
+        else
+            mppc searchadd artist "$ARTIST" album "$ALBUM" title "$TRACK"
+        fi
+    fi
 fi
 }
 
