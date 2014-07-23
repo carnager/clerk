@@ -570,7 +570,7 @@ browseLib() {
             if [[ "$TRACK" = "" ]]
                 then dplayPrompt
             elif [[ "$TRACK" = "replace all" ]]
-                then mpc clear && mppc searchadd artist "$ARTIST" album "$ALBUMFINAL" && mpc play
+                then mpc clear && mppc searchadd artist "$ARTIST" album "$ALBUM_FINAL" && mpc play
             elif [[ "$TRACK" = "add all" ]]
                 then mppc searchadd artist "$ARTIST" album "$ALBUM_FINAL"
             elif [[ "$TRACK" = "insert all" ]]
