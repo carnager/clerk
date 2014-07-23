@@ -569,7 +569,7 @@ browseLib() {
             elif [[ "$TRACK" = "add all" ]]
                 then mppc searchadd artist "$ARTIST" album "$ALBUMFINAL"
             else
-                mppc searchadd artist "$ARTIST" album "$ALBUM" title "$TRACKFINAL"
+                mppc searchadd artist "$ARTIST" album "$ALBUMFINAL" title "$TRACKFINAL"
             fi
         fi
     fi
