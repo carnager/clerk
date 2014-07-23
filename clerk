@@ -523,7 +523,7 @@ fi
 }
 
 testAddTrack() {
-TRACK=$(echo -e "$(mppc listall --format '{artist} - {album} - {track} - {title}' | uniq | sed '/^ - /d' | rofi -dmenu -p "Choose Track > ")")
+TRACK=$(echo -e "$(mppc listall --format '{artist} - {album} - {track} - {title}'| rofi -dmenu -p "Choose Track > ")")
 if [[ "$TRACK" = "" ]]
     then echo "no selection made"
 else
