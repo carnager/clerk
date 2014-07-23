@@ -555,7 +555,7 @@ browseLib() {
         ALBUM_FINAL=$(echo "$ALBUM" | cut -d ' ' -f2-)
         DATE=$(echo "$ALBUM" | cut -d ' ' -f1)
         if [[ "$ALBUM" = "" ]]
-            then browseLib
+            then dplayPrompt
         elif [[ "$ALBUM" = "replace all" ]]
             then mpc clear && mppc searchadd artist "$ARTIST" && mpc play
         elif [[ "$ALBUM" = "add all" ]]
@@ -564,7 +564,7 @@ browseLib() {
             TRACK=$(echo -e "replace all\nadd all\n--------------------------\n$(mppc search artist "$ARTIST" album "$ALBUMFINAL" --format '{track} {title}')" | rofi -dmenu -p "Chose Track > ")
             TRACKFINAL=$(echo "$TRACK" | cut -d ' ' -f2-)
             if [[ "$TRACK" = "" ]]
-                then browseLib
+                then dplayPrompt
             elif [[ "$TRACK" = "replace all" ]]
                 then mpc clear && mppc searchadd artist "$ARTIST" album "$ALBUMFINAL" && mpc play
             elif [[ "$TRACK" = "add all" ]]
