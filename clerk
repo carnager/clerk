@@ -498,8 +498,8 @@ esac
 }
 
 testingPrompt() {
-    menu=("1  Play random Album"
-          "2  Play random Songs")
+    menu=("1  Play Album"
+          "2  Add a Song")
 
     prompt() {
         printf "%s\n" "$@" | dmenu_t -p "Testing Menu: > "
@@ -532,7 +532,7 @@ else
     track=$(echo "$TRACK" | awk -F ' - ' '{print $3}')
     title=$(echo "$TRACK" | awk -F ' - ' '{print $4}')
 
-    mppc searchadd artist "$artist" album "$album" title "$title" && mppc play
+    mppc searchadd artist "$artist" album "$album" title "$title"
 fi
 }
 
