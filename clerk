@@ -553,6 +553,7 @@ browseLib() {
         ALBUMS=$(mppc list album "$ARTIST")
         ALBUM=$(echo -e "replace all\nadd all\n--------------------------\n$(mppc search artist "$ARTIST" album "$ALBUM" --format '{date} {album}' |uniq)" | rofi -dmenu -p "Choose Album > ")
         ALBUM_FINAL=$(echo "$ALBUM" | cut -d ' ' -f2-)
+        DATE=$(echo "$ALBUM" | cut -d ' ' -f1)
         if [[ "$ALBUM" = "" ]]
             then browseLib
         elif [[ "$ALBUM" = "replace all" ]]
@@ -569,7 +570,7 @@ browseLib() {
             elif [[ "$TRACK" = "add all" ]]
                 then mppc searchadd artist "$ARTIST" album "$ALBUMFINAL"
             else
-                mppc searchadd artist "$ARTIST" album "$ALBUMFINAL" title "$TRACKFINAL"
+                mppc searchadd artist "$ARTIST" album "$ALBUMFINAL" date "$DATE" title "$TRACKFINAL"
             fi
         fi
     fi
