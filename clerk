@@ -551,9 +551,9 @@ browseLib() {
         if [[ "$ALBUM" = "" ]]
             then echo "no selection made"
         elif [[ "$ALBUM" = "replace all" ]]
-            then mpc clear && mppc searchadd artist "$ARTIST" album "$ALBUM" && mpc play
+            then mpc clear && mppc searchadd artist "$ARTIST" && mpc play
         elif [[ "$ALBUM" = "add all" ]]
-            then mppc searchadd artist "$ARTIST" "$ALBUM"
+            then mppc searchadd artist "$ARTIST"
         else
             TRACK=$(echo -e "replace all\nadd all\n--------------------------\n$(mppc list title album "$ALBUM")" | rofi -dmenu -p "Chose Track > ")
             if [[ "$TRACK" = "" ]]
