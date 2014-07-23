@@ -523,7 +523,7 @@ fi
 }
 
 testAddTrack() {
-TRACK=$(echo -e "$(/home/carnager/bin/mppc listall --format '{artist} - {album} - {track} - {title}' | uniq | sed '/^ - /d' | rofi -dmenu -p "Choose Track > ")")
+TRACK=$(echo -e "$(mppc listall --format '{artist} - {album} - {track} - {title}' | uniq | sed '/^ - /d' | rofi -dmenu -p "Choose Track > ")")
 if [[ "$TRACK" = "" ]]
     then echo "no selection made"
 else
@@ -532,7 +532,7 @@ else
     track=$(echo "$TRACK" | awk -F ' - ' '{print $3}')
     title=$(echo "$TRACK" | awk -F ' - ' '{print $4}')
 
-    /home/carnager/bin/mppc searchadd artist "$artist" album "$album" title "$title" && mppc play
+    mppc searchadd artist "$artist" album "$album" title "$title" && mppc play
 fi
 }
 
