@@ -2,7 +2,7 @@
 shopt -s globstar
 
 source $HOME/.config/clerk/config
-
+echo $PATH
 #backend=rofi
 
 # Number of Songs to be added for "Random Tracks"
@@ -512,25 +512,25 @@ testingPrompt() {
 }
 
 testAddAlbum() {
-TRACK=$(echo -e "$(/home/carnager/bin/mppc listall --format '{date} - {albumartist} - {album}' | uniq | sed '/^ - /d' | rofi -dmenu -p "Choose Track > ")")
+TRACK=$(mppc listall --format '{date} • {albumartist} • {album}' | uniq | sed '/^ • /d' | rofi -dmenu -p "Choose Track > ")
 if [[ "$TRACK" = "" ]]
     then echo "no selection made"
 else
-    artist=$(echo "$TRACK" | awk -F ' - ' '{print $2}')
-    album=$(echo "$TRACK" | awk -F ' - ' '{print $3}')
+    artist=$(echo "$TRACK" | awk -F ' • ' '{print $2}')
+    album=$(echo "$TRACK" | awk -F ' • ' '{print $3}')
     /home/carnager/bin/mppc searchadd artist "$artist" album "$album" && mppc play
 fi
 }
 
 testAddTrack() {
-TRACK=$(echo -e "$(mppc listall --format '{artist} - {album} - {track} - {title}'| rofi -dmenu -p "Choose Track > ")")
+TRACK=$(mppc listall --format '{artist} • {album} • {track} • {title}'| rofi -dmenu -p "Choose Track > ")
 if [[ "$TRACK" = "" ]]
     then echo "no selection made"
 else
-    artist=$(echo "$TRACK" | awk -F ' - ' '{print $1}')
-    album=$(echo "$TRACK" | awk -F ' - ' '{print $2}')
-    track=$(echo "$TRACK" | awk -F ' - ' '{print $3}')
-    title=$(echo "$TRACK" | awk -F ' - ' '{print $4}')
+    artist=$(echo "$TRACK" | awk -F ' • ' '{print $1}')
+    album=$(echo "$TRACK" | awk -F ' • ' '{print $2}')
+    track=$(echo "$TRACK" | awk -F ' • ' '{print $3}')
+    title=$(echo "$TRACK" | awk -F ' • ' '{print $4}')
 
     mppc searchadd artist "$artist" album "$album" title "$title"
 fi
