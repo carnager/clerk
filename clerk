@@ -27,11 +27,12 @@ dplayPrompt () {
           "---"
           "3  Current Artist"
           "4  Current Queue"
-          "5  Love current Song on LastFM"
+          "5  Browse Library"
+          "6  Love current Song on LastFM"
           "---"
-          "6  Options"
-          "7  Ratings"
-          "8  Lookup"
+          "7  Options"
+          "8  Ratings"
+          "9  Lookup"
           "---"
           "0  Testing"
           "/  Search")
@@ -45,11 +46,12 @@ dplayPrompt () {
         2*) mpc clear && mpc listall | shuf | head -n "$value" | mpc add && mpc play ;;
         3*) currentPrompt ;;
         4*) dplayQueue ;;
-        5*) lastfm-mpd-cli love > /dev/null && notify-send "MPD" "Loved $(mpc current -f '%title%') on LastFM" ;;
+        5*) browseLib ;;
+        6*) lastfm-mpd-cli love > /dev/null && notify-send "MPD" "Loved $(mpc current -f '%title%') on LastFM" ;;
         /*) searchPrompt ;;
-        6*) dplayOptionsPrompt ;;
-        7*) ratingPrompt ;;
-        8*) infoPrompt ;;
+        7*) dplayOptionsPrompt ;;
+        8*) ratingPrompt ;;
+        9*) infoPrompt ;;
         0*) testingPrompt;;
           *) exit
     esac
@@ -500,7 +502,8 @@ esac
 testingPrompt() {
     menu=("1  Play Album"
           "2  Add a Song"
-          "3  Browse Library")
+          "---"
+          "0  back to mpd menu")
 
     prompt() {
         printf "%s\n" "$@" | dmenu_t -p "Testing Menu: > "
@@ -509,7 +512,7 @@ testingPrompt() {
     case "$(prompt "${menu[@]}")" in
         1*) testAddAlbum ;;
         2*) testAddTrack ;;
-        3*) browseLib ;;
+        0*) dplayPrompt ;;
     esac
 }
 
