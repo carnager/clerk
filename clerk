@@ -439,7 +439,7 @@ case $1 in
     -x)
      ARTIST=$(echo -e "$(mpc list "$mpd_artist")" | dmenu_t -p "$2 Choose Artist: > ");
      if [[ "$ARTIST" = "" ]]
-         then echo "no selection made"
+         then dplayPrompt
      else
          if [[ $2 == replace ]]
            then mpc clear
@@ -453,7 +453,7 @@ case $1 in
     -a)
      ALBUM=$(echo -e "$(mpc list album)" | dmenu_t -p "$2 Choose Album: > ");
      if [[ "$ALBUM" = "" ]]
-         then echo "no selection made"
+         then dplayPrompt
      else
          if [[ $2 == replace ]]
            then mpc clear
@@ -467,7 +467,7 @@ case $1 in
     -t)
      TRACK=$(echo -e "$(mpc listall)" | dmenu_t -p "$2 Choose Track: > ");
      if [[ "$TRACK" = "" ]]
-         then echo "no selection made"
+         then dplayPrompt
      else
          if [[ $2 == replace ]]
            then mpc clear
@@ -519,7 +519,7 @@ testingPrompt() {
 testAddAlbum() {
 TRACK=$(mppc listall --format '{date} • {albumartist} • {album}' | uniq | sed '/^ • /d' | rofi -dmenu -p "Choose Album > ")
 if [[ "$TRACK" = "" ]]
-    then echo "no selection made"
+    then dplayPrompt
 else
     artist=$(echo "$TRACK" | awk -F ' • ' '{print $2}')
     album=$(echo "$TRACK" | awk -F ' • ' '{print $3}')
@@ -530,7 +530,7 @@ fi
 testAddTrack() {
 TRACK=$(mppc listall --format '{artist} • {album} • {track} • {title}'| rofi -dmenu -p "Choose Track > ")
 if [[ "$TRACK" = "" ]]
-    then echo "no selection made"
+    then dplayPrompt
 else
     artist=$(echo "$TRACK" | awk -F ' • ' '{print $1}')
     album=$(echo "$TRACK" | awk -F ' • ' '{print $2}')
@@ -544,29 +544,32 @@ fi
 browseLib() {
     ARTIST=$(echo -e "replace all\nadd all\n--------------------------\n$(mppc list artist)" | rofi -dmenu -p "Choose Artist > ")
     if [[ "$ARTIST" = "" ]]
-        then echo "no selection made"
+        then dplayPrompt
     elif [[ "$ARTIST" = "replace all" ]]
         then mpc clear && mpc add / && mpc play
     elif [[ "$ARTIST" = "add all" ]]
         then mpc add /
     else
-        ALBUM=$(echo -e "replace all\nadd all\n--------------------------\n$(mppc list album "$ARTIST")" | rofi -dmenu -p "Choose Album > ")
+        ALBUMS=$(mppc list album "$ARTIST")
+        ALBUM=$(echo -e "replace all\nadd all\n--------------------------\n$(mppc search artist "$ARTIST" album "$ALBUM" --format '{date} {album}' |uniq)" | rofi -dmenu -p "Choose Album > ")
+        ALBUM_FINAL=$(echo "$ALBUM" | cut -d ' ' -f2-)
         if [[ "$ALBUM" = "" ]]
-            then echo "no selection made"
+            then browseLib
         elif [[ "$ALBUM" = "replace all" ]]
             then mpc clear && mppc searchadd artist "$ARTIST" && mpc play
         elif [[ "$ALBUM" = "add all" ]]
             then mppc searchadd artist "$ARTIST"
         else
-            TRACK=$(echo -e "replace all\nadd all\n--------------------------\n$(mppc list title album "$ALBUM")" | rofi -dmenu -p "Chose Track > ")
+            TRACK=$(echo -e "replace all\nadd all\n--------------------------\n$(mppc search artist "$ARTIST" album "$ALBUMFINAL" --format '{track} {title}')" | rofi -dmenu -p "Chose Track > ")
+            TRACKFINAL=$(echo "$TRACK" | cut -d ' ' -f2-)
             if [[ "$TRACK" = "" ]]
-                then echo "no selection made"
+                then browseLib
             elif [[ "$TRACK" = "replace all" ]]
-                then mpc clear && mppc searchadd artist "$ARTIST" album "$ALBUM" && mpc play
+                then mpc clear && mppc searchadd artist "$ARTIST" album "$ALBUMFINAL" && mpc play
             elif [[ "$TRACK" = "add all" ]]
-                then mppc searchadd artist "$ARTIST" album "$ALBUM" 
+                then mppc searchadd artist "$ARTIST" album "$ALBUMFINAL"
             else
-                mppc searchadd artist "$ARTIST" album "$ALBUM" title "$TRACK"
+                mppc searchadd artist "$ARTIST" album "$ALBUM" title "$TRACKFINAL"
             fi
         fi
     fi
