@@ -535,14 +535,14 @@ fi
 }
 
 testAddTrack() {
-TRACK=$(mppc listall --format '{artist} • {album} • {track} • {title}'| rofi -dmenu -p "Choose Track > ")
+TRACK=$(mppc listall --format '{artist} • {track} • {title} • {album}'| rofi -dmenu -p "Choose Track > ")
 if [[ "$TRACK" = "" ]]
     then dplayPrompt
 else
     artist=$(echo "$TRACK" | awk -F ' • ' '{print $1}')
-    album=$(echo "$TRACK" | awk -F ' • ' '{print $2}')
-    track=$(echo "$TRACK" | awk -F ' • ' '{print $3}')
-    title=$(echo "$TRACK" | awk -F ' • ' '{print $4}')
+    album=$(echo "$TRACK" | awk -F ' • ' '{print $4}')
+    track=$(echo "$TRACK" | awk -F ' • ' '{print $2}')
+    title=$(echo "$TRACK" | awk -F ' • ' '{print $3}')
 
     mppc searchadd artist "$artist" album "$album" title "$title"
 fi
