@@ -3,7 +3,7 @@
 clerk uses dmenu (or rofi) to draw a menu which lets you
 manage your mpd server.
 
-Functions:
+# Functions:
 
 * Play random album
 * Play x random tracks
@@ -19,7 +19,7 @@ Functions:
 * Control mpd options (modes, replaygain, crossfade)
 * Lookup artist/album/lyrics in webbrowser
 
-
+g
 # Dependencies:
 
 * dmenu2 (https://bitbucket.org/melek/dmenu2) OR
