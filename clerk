@@ -520,13 +520,13 @@ testingPrompt() {
 }
 
 testAddAlbum() {
-TRACK=$(mppc listall --format '{date} • {albumartist} • {album}' | uniq | sed '/^ • /d' | rofi -dmenu -p "Choose Album > ")
+TRACK=$(mppc listall --format '{date} • {album}' | uniq | sed '/^ • /d' | rofi -dmenu -p "Choose Album > ")
 if [[ "$TRACK" = "" ]]
     then dplayPrompt
 else
-    artist=$(echo "$TRACK" | awk -F ' • ' '{print $2}')
-    album=$(echo "$TRACK" | awk -F ' • ' '{print $3}')
-    mppc searchadd artist "$artist" album "$album" && mppc play
+    date=$(echo "$TRACK" | awk -F ' • ' '{print $1}')
+    album=$(echo "$TRACK" | awk -F ' • ' '{print $2}')
+    mppc searchadd date "$date" album "$album" && mppc play
 fi
 }
 
