@@ -524,7 +524,7 @@ testingPrompt() {
 }
 
 testAddAlbum() {
-TRACK=$(mppc listall --format '{date} {album}' | uniq | rofi -dmenu -p "Choose Album > ")
+TRACK=$(mppc listall --format '{date} {album}' | uniq | dmenu_t -dmenu -p "Choose Album > ")
 if [[ "$TRACK" = "" ]]
     then dplayPrompt
 else
@@ -535,7 +535,7 @@ fi
 }
 
 testAddTrack() {
-TRACK=$(mppc listall --format '{artist} • {track} • {title} • {album}'| rofi -dmenu -p "Choose Track > ")
+TRACK=$(mppc listall --format '{artist} • {track} • {title} • {album}'| dmenu_t -dmenu -p "Choose Track > ")
 if [[ "$TRACK" = "" ]]
     then dplayPrompt
 else
@@ -549,22 +549,14 @@ fi
 }
 
 browseLib() {
-    ARTIST=$(echo -e "replace all\nadd all\ninsert all\n--------------------------\n$(mppc list artist)" | rofi -dmenu -p "Choose Artist > ")
-    if [[ "$ARTIST" = "" ]]
-        then dplayPrompt
-    elif [[ "$ARTIST" = "replace all" ]]
-        then mpc clear && mpc add / && mpc play
-    elif [[ "$ARTIST" = "add all" ]]
-        then mpc add /
-    elif [[ "$ARTIST" = "insert all" ]]
-        then mpc insert /
-    else
+
+    browseAlbum() {
         ALBUMS=$(mppc list album "$ARTIST")
-        ALBUM=$(echo -e "replace all\nadd all\ninsert all\n--------------------------\n$(mppc search artist "$ARTIST" album "$ALBUM" --format '{date} {album}' |uniq)" | rofi -dmenu -p "Choose Album > ")
+        ALBUM=$(echo -e "replace all\nadd all\ninsert all\n--------------------------\n$(mppc search artist "$ARTIST" --format '{date} {album}' |uniq)" | dmenu_t -dmenu -p "Choose Album > ")
         ALBUM_FINAL=$(echo "$ALBUM" | cut -d ' ' -f2-)
         DATE=$(echo "$ALBUM" | cut -d ' ' -f1)
         if [[ "$ALBUM" = "" ]]
-            then dplayPrompt
+            then browseArtist
         elif [[ "$ALBUM" = "replace all" ]]
             then mpc clear && mppc searchadd artist "$ARTIST" && mpc play
         elif [[ "$ALBUM" = "add all" ]]
@@ -572,30 +564,49 @@ browseLib() {
         elif [[ "$ALBUM" = "insert all" ]]
             then mppc search artist "$ARTIST" --format '{file}'| mpc insert
         else
-            TRACK=$(echo -e "replace all\nadd all\ninsert all\n--------------------------\n$(mppc search artist "$ARTIST" album "$ALBUM_FINAL" --format '{track} {title}')" | rofi -dmenu -p "Chose Track > ")
-            TRACKFINAL=$(echo "$TRACK" | cut -d ' ' -f2-)
-            if [[ "$TRACK" = "" ]]
-                then dplayPrompt
-            elif [[ "$TRACK" = "replace all" ]]
-                then mpc clear && mppc searchadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" && mpc play
-            elif [[ "$TRACK" = "add all" ]]
-                then mppc searchadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE"
-            elif [[ "$TRACK" = "insert all" ]]
-                then mppc search artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" --format '{file}' | mpc insert
-            else
-                mppc searchadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL"
-            fi
+            browseTrack
         fi
-    fi
-}
+    }
+    browseTrack() {
+        TRACK=$(echo -e "replace all\nadd all\ninsert all\n--------------------------\n$(mppc search artist "$ARTIST" album "$ALBUM_FINAL" --format '{track} {title}')" | dmenu_t -dmenu -p "Chose Track > ")
+        TRACKFINAL=$(echo "$TRACK" | cut -d ' ' -f2-)
+        if [[ "$TRACK" = "" ]]
+            then browseAlbum
+        elif [[ "$TRACK" = "replace all" ]]
+            then mpc clear && mppc searchadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" && mpc play
+        elif [[ "$TRACK" = "add all" ]]
+            then mppc searchadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE"
+        elif [[ "$TRACK" = "insert all" ]]
+            then mppc search artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" --format '{file}' | mpc insert
+        else
+            mppc searchadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL"
+        fi
+    }
 
+    browseArtist() {
+        ARTIST=$(echo -e "replace all\nadd all\ninsert all\n--------------------------\n$(mppc list artist)" | dmenu_t -dmenu -p "Choose Artist > ")
+        export ARTIST="$ARTIST"
+        if [[ "$ARTIST" = "" ]]
+            then dplayPrompt
+        elif [[ "$ARTIST" = "replace all" ]]
+            then mpc clear && mpc add / && mpc play
+        elif [[ "$ARTIST" = "add all" ]]
+            then mpc add /
+        elif [[ "$ARTIST" = "insert all" ]]
+            then mpc insert /
+        else
+            browseAlbum
+        fi
+}
+browseArtist
+}
 
 ################################################################################
 
 
 if [[ "$backend" == "rofi" ]]
     then function dmenu_t () {
-    rofi -dmenu "$@"
+    rofi -dmenu -width 2560 -location 2 "$@"
 }
 
 elif [[ "$backend" == "dmenu" ]]
