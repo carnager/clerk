@@ -19,7 +19,13 @@ manage your mpd server.
 * Control mpd options (modes, replaygain, crossfade)
 * Lookup artist/album/lyrics in webbrowser
 
-g
+Being written completely functional means, every option is accessible
+Some example arguments have been added. e.g:
+`clerk -rs` will play random songs.
+
+see `clerk -h` for all default arguments.
+
+
 # Dependencies:
 
 * dmenu2 (https://bitbucket.org/melek/dmenu2) OR
