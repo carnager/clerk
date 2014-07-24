@@ -282,10 +282,14 @@ crossfadePrompt () {
 
 
 dplayQueue () {
-    TITLE=$(mpc playlist | dmenu_t);
-    if [ "$TITLE" = "" ]; then exit; fi
-    POS=$(mpc playlist | grep -n "$TITLE" | awk -F: '{print $1}')
-    mpc play $POS;
+    TRACKDISPLAY=$(mppc playlist --format '{track} {title}'| dmenu_t);
+    TITLE=$(echo "$TRACKDISPLAY" | cut -d ' ' -f2-)
+    if [ "$TRACKDISPLAY" = "" ]; then
+        dplayPrompt
+    else
+        POS=$(mpc playlist | grep -n "$TITLE" | awk -F: '{print $1}')
+        mpc play $POS;
+    fi
 }
 
 
@@ -526,7 +530,7 @@ if [[ "$TRACK" = "" ]]
 else
     date=$(echo "$TRACK" | awk -F ' • ' '{print $1}')
     album=$(echo "$TRACK" | awk -F ' • ' '{print $2}')
-    mppc searchadd date "$date" album "$album" && mppc play
+    mpc clear && mppc searchadd date "$date" album "$album" && mppc play
 fi
 }
 
