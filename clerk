@@ -556,7 +556,7 @@ browseLib() {
         ALBUM_FINAL=$(echo "$ALBUM" | cut -d ' ' -f2-)
         DATE=$(echo "$ALBUM" | cut -d ' ' -f1)
         if [[ "$ALBUM" = "" ]]
-            then browseArtist
+            then dplayPrompt
         elif [[ "$ALBUM" = "replace all" ]]
             then mpc clear && mppc searchadd artist "$ARTIST" && mpc play
         elif [[ "$ALBUM" = "add all" ]]
