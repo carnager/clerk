@@ -73,7 +73,8 @@ searchPrompt () {
         1*) dplaySubPrompt -x ;;
         2*) dplaySubPrompt -a ;;
         3*) dplaySubPrompt -t ;;
-        0*) dplayPrompt
+        0*) dplayPrompt ;;
+        *) dplayPrompt
     esac
 }
 
@@ -113,7 +114,7 @@ currentPrompt () {
         1*) currentAlbums ;;
         2*) currentTracks ;;
         0*) dplayPrompt ;;
-          *) return
+          *) dplayPrompt
     esac
 }
 
@@ -300,14 +301,15 @@ outputPrompt () {
 
 currentAlbums () {
     ARTIST=$(mpc current -f %artist%)
-    ALBUM=$(mpc list album artist "$ARTIST" | dmenu_t -p "Albums by current Artist: > ")
+    ALBUM=$(mppc search artist "$ARTIST" --format '{date} {album}' | uniq | dmenu_t -p "Albums by current Artist: > ")
+    ALBUM_FINAL=$(echo "$ALBUM" | cut -d ' ' -f2-)
     if [ "$ALBUM" = "" ]; then currentPrompt;
-    else currentSubAlbum -ca "$ALBUM";
+    else currentSubAlbum -ca "$ALBUM_FINAL";
     fi
 }
 
 currentTracks () {
-    TRACK=$(mpc find artist "$(mpc current -f %artist%)" | dmenu_t -p "Tracks by current Artist: > ")
+    TRACK=$(mpc search artist "$(mpc current -f %artist%)" | dmenu_t -p "Tracks by current Artist: > ")
     if [ "$TRACK" = "" ]; then currentPrompt;
     else currentSubTrack -ct "$TRACK";
     fi
@@ -329,7 +331,7 @@ currentSubTrack () {
         2*) dplay $1 insert "$2";;
         3*) dplay $1 replace "$2";;
         0*) dplayPrompt ;;
-          *) return
+          *) dplayPrompt
    esac
 }
 
@@ -349,7 +351,7 @@ currentSubAlbum () {
         2*) dplay $1 insert "$2";;
         3*) dplay $1 replace "$2";;
         0*) dplayPrompt ;;
-          *) return
+          *) dplayPrompt
    esac
 }
 
@@ -513,6 +515,7 @@ testingPrompt() {
         1*) testAddAlbum ;;
         2*) testAddTrack ;;
         0*) dplayPrompt ;;
+        *) dplayPrompt
     esac
 }
 
@@ -523,7 +526,7 @@ if [[ "$TRACK" = "" ]]
 else
     artist=$(echo "$TRACK" | awk -F ' • ' '{print $2}')
     album=$(echo "$TRACK" | awk -F ' • ' '{print $3}')
-    /home/carnager/bin/mppc searchadd artist "$artist" album "$album" && mppc play
+    mppc searchadd artist "$artist" album "$album" && mppc play
 fi
 }
 
