@@ -606,7 +606,7 @@ browseArtist
 
 if [[ "$backend" == "rofi" ]]
     then function dmenu_t () {
-    rofi -dmenu -width 2560 -location 2 "$@"
+    rofi -dmenu "$@"
 }
 
 elif [[ "$backend" == "dmenu" ]]
