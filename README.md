@@ -11,7 +11,7 @@ manage your mpd server.
 * Show current Playback Queue
 * Show Albums/Tracks by currently playing Artist
 * Enable or disable scrobbling (with support for remote mpdscribble)
-* Love current song on lastfm
+* Love current song on lastfm (Using lastfm-mpd-cli)
 * Rate albums (using rating.txt in album folder - needs local access to
 * directories)
 * Load rated album
@@ -35,7 +35,8 @@ see `clerk -h` for all default arguments.
 
 
 # Optional Dependencies
-
+ 
 * python-eyed3 (for track ratings)
 * metaflac (for track ratings)
 * surfraw (for lookup)
+* lastfm-mpd-cli for loving tracks (https://github.com/morendi/lastfm-mpd-cli)
