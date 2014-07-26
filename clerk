@@ -311,8 +311,8 @@ crossfadePrompt () {
 
 
 dplayQueue () {
-    TRACKDISPLAY=$(mppc playlist --format '{track} {title}'| dmenu_t);
-    TITLE=$(echo "$TRACKDISPLAY" | cut -d ' ' -f2-)
+    TRACKDISPLAY=$(mppc playlist --format '{track} • {title}'| dmenu_t);
+    TITLE=$(echo "$TRACKDISPLAY" | awk -F ' • ' '{ print $2 }')
     if [ "$TRACKDISPLAY" = "" ]; then
         dplayPrompt
     else
