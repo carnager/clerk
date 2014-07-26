@@ -493,7 +493,7 @@ case $1 in
      else
          if [[ "$ALBUM" == "Adding Mode: Add" ]]; then
             dplay -ai
-         else mpc find "$ALBUM" | mpc add
+         else mpc find album "$ALBUM" | mpc add
          fi
      fi
 ;;
@@ -504,7 +504,7 @@ case $1 in
      else
          if [[ "$ALBUM" == "Adding Mode: Insert" ]]; then
             dplay -ar
-         else mpc find "$ALBUM" | mpc insert
+         else mpc find album "$ALBUM" | mpc insert
          fi
      fi
 ;;
@@ -515,7 +515,7 @@ case $1 in
      else
          if [[ "$ALBUM" == "Adding Mode: Replace" ]]; then
             dplay -a
-         else mpc clear && mpc find "$ALBUM" | mpc add && mpc play
+         else mpc clear && mpc find album "$ALBUM" | mpc add && mpc play
          fi
      fi
 ;;
