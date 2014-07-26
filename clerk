@@ -502,7 +502,7 @@ case $1 in
      if [[ "$ALBUM" = "" ]]
          then dplayPrompt
      else
-         if [[ "$ALBUM" == "Adding Mode: Inseet" ]]; then
+         if [[ "$ALBUM" == "Adding Mode: Insert" ]]; then
             dplay -ar
          else mpc find "$ALBUM" | mpc insert
          fi
