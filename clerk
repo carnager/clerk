@@ -552,37 +552,37 @@ browseLib() {
 
     browseAlbum() {
         ALBUMS=$(mppc list album "$ARTIST")
-        ALBUM=$(echo -e "replace all\nadd all\ninsert all\n--------------------------\n$(mppc search artist "$ARTIST" --format '{date} • {album}' | sort | uniq)" | dmenu_t -dmenu -p "Choose Album > ")
+        ALBUM=$(echo -e "replace all\nadd all\ninsert all\n--------------------------\n$(mppc find artist "$ARTIST" --format '{date} • {album}' | sort | uniq)" | dmenu_t -dmenu -p "Choose Album > ")
         ALBUM_FINAL=$(echo "$ALBUM" | awk -F ' • ' '{ print $2 }')
         DATE=$(echo "$ALBUM" | awk -F ' • ' '{ print $1 }')
         if [[ "$ALBUM" = "" ]]
             then dplayPrompt
         elif [[ "$ALBUM" = "replace all" ]]
-            then mpc clear && mppc searchadd artist "$ARTIST" && mpc play
+            then mpc clear && mppc findadd artist "$ARTIST" && mpc play
         elif [[ "$ALBUM" = "add all" ]]
-            then mppc searchadd artist "$ARTIST"
+            then mppc findadd artist "$ARTIST"
         elif [[ "$ALBUM" = "insert all" ]]
-            then mppc search artist "$ARTIST" --format '{file}'| mpc insert
+            then mppc find artist "$ARTIST" --format '{file}'| mpc insert
         else
             browseTrack
         fi
     }
     browseTrack() {
-        TRACK=$(echo -e "replace all\nadd all\ninsert all\n--------------------------\n$(mppc search artist "$ARTIST" album "$ALBUM_FINAL" --format '{track} • {title}')" | dmenu_t -dmenu -p "Chose Track > ")
+        TRACK=$(echo -e "replace all\nadd all\ninsert all\n--------------------------\n$(mppc find artist "$ARTIST" album "$ALBUM_FINAL" --format '{track} • {title}')" | dmenu_t -dmenu -p "Chose Track > ")
         TRACKFINAL=$(echo "$TRACK" | awk -F ' • ' '{ print $2}')
         if [[ "$TRACK" = "" ]]
             then browseAlbum
         elif [[ "$TRACK" = "replace all" ]]
-            then mpc clear && mppc searchadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" && mpc play
+            then mpc clear && mppc findadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" && mpc play
         elif [[ "$TRACK" = "add all" ]]
-            then mppc searchadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE"
+            then mppc findadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE"
         elif [[ "$TRACK" = "insert all" ]]
-            then mppc search artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" --format '{file}' | mpc insert
+            then mppc find artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" --format '{file}' | mpc insert
         else
             if [[ $(mpc playlist) == "" ]]; then
-                mppc searchadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL" && mpc play
+                mppc findadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL" && mpc play
             else
-                mppc searchadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL"
+                mppc findadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL"
             fi
         fi
     }
