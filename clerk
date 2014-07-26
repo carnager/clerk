@@ -457,7 +457,7 @@ case $1 in
          then dplayPrompt
      else
          if [[ "$ARTIST" == "Adding Mode: Add" ]]; then
-            dplay -ai
+            dplay -xi
          else mpc find artist "$ARTIST" | mpc add
          fi
      fi
@@ -468,7 +468,7 @@ case $1 in
          then dplayPrompt
      else
          if [[ "$ARTIST" == "Adding Mode: Insert" ]]; then
-            dplay -ar
+            dplay -xr
          else mpc find artist "$ARTIST" | mpc insert
          fi
      fi
@@ -479,7 +479,7 @@ case $1 in
          then dplayPrompt
      else
          if [[ "$ARTIST" == "Adding Mode: Replace" ]]; then
-            dplay -a
+            dplay -x
          else mpc clear && mpc find artist "$ARTIST" | mpc add && mpc play
          fi
      fi
