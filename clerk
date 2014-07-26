@@ -28,11 +28,11 @@ dplayPrompt () {
           "3  Current Artist"
           "4  Current Queue"
           "5  Browse Library"
-          "6  Love current Song on LastFM"
           "---"
-          "7  Options"
-          "8  Ratings"
-          "9  Lookup"
+          "6  Options"
+          "7  Ratings/LastFM"
+          "8  Lookup"
+          "9  Playback"
           "---"
           "0  Testing"
           "/  Search")
@@ -47,15 +47,40 @@ dplayPrompt () {
         3*) currentPrompt ;;
         4*) dplayQueue ;;
         5*) browseLib ;;
-        6*) lastfm-mpd-cli love > /dev/null && notify-send "MPD" "Loved $(mpc current -f '%title%') on LastFM" ;;
         /*) searchPrompt ;;
-        7*) dplayOptionsPrompt ;;
-        8*) ratingPrompt ;;
-        9*) infoPrompt ;;
+        6*) dplayOptionsPrompt ;;
+        7*) ratingPrompt ;;
+        8*) infoPrompt ;;
+        9*) playbackPrompt ;;
         0*) testingPrompt;;
           *) exit
     esac
 }
+
+playbackPrompt () {
+    menu=("1  Toggle Playback"
+          "2  Next Song"
+          "3  Prev Song"
+          "4  Stop"
+          "5  Clear Playlist"
+          "---"
+          "0  back to MPD Menu")
+
+   prompt() {
+        printf "%s\n" "$@" | dmenu_t -p "Playback: > "
+    }
+
+    case "$(prompt "${menu[@]}")" in
+        1*) mpc toggle  && playbackPrompt;;
+        2*) mpc next && playbackPrompt ;;
+        3*) mpc prev && playbackPrompt ;;
+        4*) mpc stop && playbackPrompt ;;
+        5*) mpc clear && dplayPrompt ;;
+        0*) dplayPrompt ;;
+        *) dplayPrompt ;;
+    esac
+}
+
 
 searchPrompt () {
     menu=("1  Search for Artist"
@@ -127,6 +152,7 @@ ratingPrompt () {
           "5  Load Rated Tracks"
           "6  Load Random Rated Tracks"
           "---"
+          "7  Love current Song on LastFM"
           "0  back to MPD menu")
 
     prompt() {
@@ -140,6 +166,7 @@ ratingPrompt () {
         4*) rateTrack ;;
         5*) loadRatedTracks ;;
         6*) loadRandomRatedTracks ;;
+        7*) lastfm-mpd-cli love > /dev/null && notify-send "MPD" "Loved $(mpc current -f '%title%') on LastFM" ;;
         0*) dplayPrompt ;;
           *) return
     esac
