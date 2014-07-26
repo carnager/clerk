@@ -96,7 +96,7 @@ searchPrompt () {
 
     case "$(prompt "${menu[@]}")" in
         1*) dplaySubPrompt -x ;;
-        2*) dplaySubPrompt -a ;;
+        2*) dplay -a ;;
         3*) dplay -t ;;
         0*) dplayPrompt ;;
         *) dplayPrompt
