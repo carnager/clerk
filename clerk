@@ -153,6 +153,7 @@ ratingPrompt () {
           "6  Load Random Rated Tracks"
           "---"
           "7  Love current Song on LastFM"
+          "---"
           "0  back to MPD menu")
 
     prompt() {
