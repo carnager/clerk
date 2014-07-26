@@ -95,7 +95,7 @@ searchPrompt () {
     }
 
     case "$(prompt "${menu[@]}")" in
-        1*) dplaySubPrompt -x ;;
+        1*) dplay -x ;;
         2*) dplay -a ;;
         3*) dplay -t ;;
         0*) dplayPrompt ;;
@@ -196,27 +196,6 @@ infoPrompt () {
     esac
 }
 
-
-
-dplaySubPrompt () {
-    menu=("1  Add"
-          "2  Insert"
-          "3  Replace"
-          "---"
-          "0  back to MPD Menu")
-
-    prompt() {
-        printf "%s\n" "$@" | dmenu_t -p "MPD Menu: > "
-    }
-
-    case "$(prompt "${menu[@]}")" in
-        1*) dplay $1 add ;;
-        2*) dplay $1 insert ;;
-        3*) dplay $1 replace ;;
-        0*) dplayPrompt ;;
-          *) return
-   esac
-}
 
 
 dplayOptionsPrompt () {
@@ -473,19 +452,42 @@ loadRandomRating () {
 dplay () {
 case $1 in
     -x)
-     ARTIST=$(echo -e "$(mpc list "$mpd_artist")" | dmenu_t -p "$2 Choose Artist: > ");
+     ALBUM=$(echo -e "Adding Mode: Add\n----------------\n$(mpc list artist)" | dmenu_t -p "$2 Choose Artist: > ");
      if [[ "$ARTIST" = "" ]]
          then dplayPrompt
      else
-         if [[ $2 == replace ]]
-           then mpc clear
-                mpc find "$mpd_artist" "$ARTIST" | mpc add && mpc play;
-         elif [[ $2 == insert ]]
-            then mpc find "$mpd_artist" "$ARTIST" | mpc insert;
-         else mpc find "$mpd_artist" "$ARTIST" | mpc add;
+         if [[ "$ARTIST" == "Adding Mode: Add" ]]; then
+            dplay -ai
+         else mpc find artist "$ARTIST" | mpc add
          fi
      fi
 ;;
+    -xi)
+     ALBUM=$(echo -e "Adding Mode: Insert\n----------------\n$(mpc list artist)" | dmenu_t -p "$2 Choose Artist: > ");
+     if [[ "$ARTIST" = "" ]]
+         then dplayPrompt
+     else
+         if [[ "$ARTIST" == "Adding Mode: Insert" ]]; then
+            dplay -ar
+         else mpc find artist "$ARTIST" | mpc insert
+         fi
+     fi
+;;
+    -xr)
+     ARTIST=$(echo -e "Adding Mode: Replace\n----------------\n$(mpc list artist)" | dmenu_t -p "$2 Choose Artist: > ");
+     if [[ "$ARTIST" = "" ]]
+         then dplayPrompt
+     else
+         if [[ "$ARTIST" == "Adding Mode: Replace" ]]; then
+            dplay -a
+         else mpc clear && mpc find artist "$ARTIST" | mpc add && mpc play
+         fi
+     fi
+;;
+
+
+
+
     -a)
      ALBUM=$(echo -e "Adding Mode: Add\n----------------\n$(mpc list album)" | dmenu_t -p "$2 Choose Album: > ");
      if [[ "$ALBUM" = "" ]]
