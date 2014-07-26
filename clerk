@@ -305,7 +305,7 @@ outputPrompt () {
 
 currentAlbums () {
     ARTIST=$(mpc current -f %artist%)
-    ALBUM=$(mppc search artist "$ARTIST" --format '{date} {album}' | uniq | dmenu_t -p "Albums by current Artist: > ")
+    ALBUM=$(mppc search artist "$ARTIST" --format '{date} {album}' | sort | uniq | dmenu_t -p "Albums by current Artist: > ")
     ALBUM_FINAL=$(echo "$ALBUM" | cut -d ' ' -f2-)
     if [ "$ALBUM" = "" ]; then currentPrompt;
     else currentSubAlbum -ca "$ALBUM_FINAL";
@@ -552,7 +552,7 @@ browseLib() {
 
     browseAlbum() {
         ALBUMS=$(mppc list album "$ARTIST")
-        ALBUM=$(echo -e "replace all\nadd all\ninsert all\n--------------------------\n$(mppc search artist "$ARTIST" --format '{date} {album}' |uniq)" | dmenu_t -dmenu -p "Choose Album > ")
+        ALBUM=$(echo -e "replace all\nadd all\ninsert all\n--------------------------\n$(mppc search artist "$ARTIST" --format '{date} {album}'| sort | uniq)" | dmenu_t -dmenu -p "Choose Album > ")
         ALBUM_FINAL=$(echo "$ALBUM" | cut -d ' ' -f2-)
         DATE=$(echo "$ALBUM" | cut -d ' ' -f1)
         if [[ "$ALBUM" = "" ]]
@@ -635,6 +635,7 @@ if [[ "$1" == "-h" ]]; then
     echo "  -rs        play x random songs (defined with "value" variable)"
     echo "  -show      show currently playing track"
     echo "  -lrated    add x random tracks with rating >=4"
+    echo "  -library   browse the library"
 
 elif [[ "$1" == "-album" ]]; then
     dplay -a replace
@@ -652,6 +653,8 @@ elif [[ "$1" == "-show" ]]; then
     notify-send "$(mpc current --format '%artist% - %title%')" "$(mpc current --format '\n%date% %album%')"
 elif [[ "$1" == "-lrated" ]]; then
     mpc clear && for ((i=4; i<="5"; i++)); do mpc find comment "$i" | shuf | head -n "$value" | mpc add; done && mpc play
+elif [[ "$1" == "-library" ]]; then
+    browseLib
 else
 dplayPrompt
 fi
