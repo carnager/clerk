@@ -712,7 +712,7 @@ if [[ "$1" == "-h" ]]; then
     echo "  -library   browse the library"
 
 elif [[ "$1" == "-album" ]]; then
-    dplay -a replace
+    dplay -a
 elif [[ "$1" == "-track" ]]; then
     dplay -t
 elif [[ "$1" == "-rate" ]]; then
