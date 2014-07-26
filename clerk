@@ -97,7 +97,7 @@ searchPrompt () {
     case "$(prompt "${menu[@]}")" in
         1*) dplaySubPrompt -x ;;
         2*) dplaySubPrompt -a ;;
-        3*) dplaySubPrompt -t ;;
+        3*) dplay -t ;;
         0*) dplayPrompt ;;
         *) dplayPrompt
     esac
@@ -501,19 +501,39 @@ case $1 in
      fi
 ;;
     -t)
-     TRACK=$(echo -e "$(mpc listall)" | dmenu_t -p "$2 Choose Track: > ");
+     TRACK=$(echo -e "Adding Mode: Add\n---------------\n$(mpc listall)" | dmenu_t -p "$2 Choose Track: > ");
      if [[ "$TRACK" = "" ]]
          then dplayPrompt
      else
-         if [[ $2 == replace ]]
-           then mpc clear
-                mpc add "$TRACK" && mpc play;
-         elif [[ $2 == insert ]]
-           then mpc insert "$TRACK";
-         else mpc add "$TRACK";
+         if [[ "$TRACK" == "Adding Mode: Add" ]]; then
+            dplay -ti
+         else mpc add "$TRACK"
          fi
      fi
 ;;
+   -ti)
+    TRACK=$(echo -e "Adding Mode: Insert\n---------------\n$(mpc listall)" | dmenu_t -p "$2 Choose Track: > ");
+    if [[ "$TRACK" = "" ]]
+        then dplayPrompt
+    else
+        if [[ "$TRACK" = "Adding Mode: Insert" ]]; then
+            dplay -tr
+        else mpc insert "$TRACK"
+        fi
+    fi
+;;
+   -tr)
+    TRACK=$(echo -e "Adding Mode: Replace\n----------------\n$(mpc listall)" | dmenu_t -p "$2 Choose Track: > ");
+    if [[ "$TRACK" = "" ]]
+        then dplayPrompt
+    else
+        if [[ "$TRACK" = "Adding Mode: Replace" ]]; then
+            dplay -t
+        else mpc clear && mpc add "$TRACK" && mpc play
+        fi
+    fi
+;;
+
    -ct)
         if [[ $2 == replace ]]
           then mpc clear
