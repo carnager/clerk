@@ -150,6 +150,7 @@ infoPrompt () {
     menu=("1  Artist Info"
           "2  Album Info"
           "3  Current Track Lyrics"
+          "4  Show current Tracks Tags"
           "---"
           "0  back to MPD menu")
 
@@ -161,6 +162,7 @@ infoPrompt () {
         1*) surfraw yubnub allmusic $(mpc current -f %artist%) ;;
         2*) surfraw yubnub allmusic $(mpc current -f %album%) ;;
         3*) surfraw yubnub google $(mpc current -f %title%) $(mpc current -f %artist%) lyrics ;;
+        4*) mpc current --format "Artist: %artist%\nAlbum: %album%\nDate: %date%\nTrack: %track%\nTitle: %title%" | rofi -dmenu -p 'tags' ;;
         0*) dplayPrompt ;;
           *) return
     esac
