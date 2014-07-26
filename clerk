@@ -132,7 +132,7 @@ currentPrompt () {
           "0  back to MPD menu")
 
     prompt() {
-        printf "%s\n" "$@" | dmenu_t -p "Current Artist: > "
+        printf "%s\n" "$@" | dmenu_t -p "$(mpc current --format '%artist%') > "
     }
 
     case "$(prompt "${menu[@]}")" in
