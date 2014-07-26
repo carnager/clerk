@@ -30,7 +30,7 @@ dplayPrompt () {
           "5  Browse Library"
           "---"
           "6  Options"
-          "7  Ratings/LastFM"
+          "7  Ratings"
           "8  Lookup"
           "9  Playback"
           "---"
@@ -190,7 +190,7 @@ infoPrompt () {
         1*) surfraw yubnub allmusic $(mpc current -f %artist%) ;;
         2*) surfraw yubnub allmusic $(mpc current -f %album%) ;;
         3*) surfraw yubnub google $(mpc current -f %title%) $(mpc current -f %artist%) lyrics ;;
-        4*) mpc current --format "Artist: %artist%\nAlbum: %album%\nDate: %date%\nTrack: %track%\nTitle: %title%" | rofi -dmenu -p 'tags' ;;
+        4*) mpc current --format "Artist: %artist%\nAlbum: %album%\nDate: %date%\nTrack: %track%\nTitle: %title%" | rofi -dmenu -p 'tags' && dplayPrompt;;
         0*) dplayPrompt ;;
           *) return
     esac
