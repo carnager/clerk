@@ -694,7 +694,7 @@ if [[ "$1" == "-h" ]]; then
 elif [[ "$1" == "-album" ]]; then
     dplay -a replace
 elif [[ "$1" == "-track" ]]; then
-    dplay -t add
+    dplay -t
 elif [[ "$1" == "-rate" ]]; then
     ratingPrompt
 elif [[ "$1" == "-tr" ]]; then
