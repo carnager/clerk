@@ -452,7 +452,7 @@ loadRandomRating () {
 dplay () {
 case $1 in
     -x)
-     ALBUM=$(echo -e "Adding Mode: Add\n----------------\n$(mpc list artist)" | dmenu_t -p "$2 Choose Artist: > ");
+     ARTIST=$(echo -e "Adding Mode: Add\n----------------\n$(mpc list artist)" | dmenu_t -p "$2 Choose Artist: > ");
      if [[ "$ARTIST" = "" ]]
          then dplayPrompt
      else
@@ -463,7 +463,7 @@ case $1 in
      fi
 ;;
     -xi)
-     ALBUM=$(echo -e "Adding Mode: Insert\n----------------\n$(mpc list artist)" | dmenu_t -p "$2 Choose Artist: > ");
+     ARTIST=$(echo -e "Adding Mode: Insert\n----------------\n$(mpc list artist)" | dmenu_t -p "$2 Choose Artist: > ");
      if [[ "$ARTIST" = "" ]]
          then dplayPrompt
      else
