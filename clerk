@@ -253,7 +253,7 @@ mpds_check="$(ssh $ssh_host -q -t 'bash -c "pgrep mpdscribble"')"
          7*) crossfadePrompt ;;
          8*) outputPrompt ;;
          0*) dplayPrompt ;;
-           *) return
+           *) dplayPrompt ;;
     esac
 }
 
