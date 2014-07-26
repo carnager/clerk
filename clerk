@@ -568,8 +568,8 @@ browseLib() {
         fi
     }
     browseTrack() {
-        TRACK=$(echo -e "replace all\nadd all\ninsert all\n--------------------------\n$(mppc search artist "$ARTIST" album "$ALBUM_FINAL" --format '{track} {title}')" | dmenu_t -dmenu -p "Chose Track > ")
-        TRACKFINAL=$(echo "$TRACK" | cut -d ' ' -f2-)
+        TRACK=$(echo -e "replace all\nadd all\ninsert all\n--------------------------\n$(mppc search artist "$ARTIST" album "$ALBUM_FINAL" --format '{track} • {title}')" | dmenu_t -dmenu -p "Chose Track > ")
+        TRACKFINAL=$(echo "$TRACK" | awk -F ' • ' '{ print $2}')
         if [[ "$TRACK" = "" ]]
             then browseAlbum
         elif [[ "$TRACK" = "replace all" ]]
