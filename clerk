@@ -703,23 +703,35 @@ if [[ "$1" == "-h" ]]; then
     echo ""
     echo "Options"
     echo "  -h         this help message"
-    echo "  -album     replace current with album()"
-    echo "  -track     add track()"
+    echo "  -a         add album()"
+    echo "  -ai        insert album()"
+    echo "  -ar        replace album()"
+    echo "  -t         add track()"
+    echo "  -ti        insert track()"
+    echo "  -tr        replace track()"
     echo "  -rate      show rating prompt"
-    echo "  -tr        rate current track"
+    echo "  -rtrack    rate current track"
     echo "  -ra        play random album"
     echo "  -rs        play x random songs (defined with "value" variable)"
     echo "  -show      show currently playing track"
     echo "  -lrated    add x random tracks with rating >=4"
     echo "  -library   browse the library"
 
-elif [[ "$1" == "-album" ]]; then
+elif [[ "$1" == "-a" ]]; then
     dplay -a
-elif [[ "$1" == "-track" ]]; then
+elif [[ "$1" == "-ai" ]]; then
+    dplay -ai
+elif [[ "$1" == "-ar" ]]: then
+    dplay -ar
+elif [[ "$1" == "-t" ]]; then
     dplay -t
+elif [[ "$1" == "-ti" ]]; then
+    dplay -ti
+elif [[ "$1" == "-tr" ]]; then
+    dplay -tr
 elif [[ "$1" == "-rate" ]]; then
     ratingPrompt
-elif [[ "$1" == "-tr" ]]; then
+elif [[ "$1" == "-rtrack" ]]; then
     rateTrack
 elif [[ "$1" == "-ra" ]]; then
     mpc clear; mpc findadd album "$(mpc list album | shuf -n1)"; mpc play
