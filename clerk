@@ -552,9 +552,9 @@ browseLib() {
 
     browseAlbum() {
         ALBUMS=$(mppc list album "$ARTIST")
-        ALBUM=$(echo -e "replace all\nadd all\ninsert all\n--------------------------\n$(mppc search artist "$ARTIST" --format '{date} {album}'| sort | uniq)" | dmenu_t -dmenu -p "Choose Album > ")
-        ALBUM_FINAL=$(echo "$ALBUM" | cut -d ' ' -f2-)
-        DATE=$(echo "$ALBUM" | cut -d ' ' -f1)
+        ALBUM=$(echo -e "replace all\nadd all\ninsert all\n--------------------------\n$(mppc search artist "$ARTIST" --format '{date} • {album}' | sort | uniq)" | dmenu_t -dmenu -p "Choose Album > ")
+        ALBUM_FINAL=$(echo "$ALBUM" | awk -F ' • ' '{ print $2 }')
+        DATE=$(echo "$ALBUM" | awk -F ' • ' '{ print $1 }')
         if [[ "$ALBUM" = "" ]]
             then dplayPrompt
         elif [[ "$ALBUM" = "replace all" ]]
@@ -579,7 +579,11 @@ browseLib() {
         elif [[ "$TRACK" = "insert all" ]]
             then mppc search artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" --format '{file}' | mpc insert
         else
-            mppc searchadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL"
+            if [[ $(mpc playlist) == "" ]]; then
+                mppc searchadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL" && mpc play
+            else
+                mppc searchadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL"
+            fi
         fi
     }
 
