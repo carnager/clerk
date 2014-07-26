@@ -721,7 +721,7 @@ elif [[ "$1" == "-a" ]]; then
     dplay -a
 elif [[ "$1" == "-ai" ]]; then
     dplay -ai
-elif [[ "$1" == "-ar" ]]: then
+elif [[ "$1" == "-ar" ]]; then
     dplay -ar
 elif [[ "$1" == "-t" ]]; then
     dplay -t
