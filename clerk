@@ -487,19 +487,39 @@ case $1 in
      fi
 ;;
     -a)
-     ALBUM=$(echo -e "$(mpc list album)" | dmenu_t -p "$2 Choose Album: > ");
+     ALBUM=$(echo -e "Adding Mode: Add\n----------------\n$(mpc list album)" | dmenu_t -p "$2 Choose Album: > ");
      if [[ "$ALBUM" = "" ]]
          then dplayPrompt
      else
-         if [[ $2 == replace ]]
-           then mpc clear
-                mpc find album "$ALBUM" | mpc add && mpc play;
-         elif [[ $2 == insert ]]
-            then mpc find album "$ALBUM" | mpc insert;
-         else mpc find album "$ALBUM" | mpc add;
+         if [[ "$ALBUM" == "Adding Mode: Add" ]]; then
+            dplay -ai
+         else mpc find "$ALBUM" | mpc add
          fi
      fi
 ;;
+    -ai)
+     ALBUM=$(echo -e "Adding Mode: Insert\n----------------\n$(mpc list album)" | dmenu_t -p "$2 Choose Album: > ");
+     if [[ "$ALBUM" = "" ]]
+         then dplayPrompt
+     else
+         if [[ "$ALBUM" == "Adding Mode: Inseet" ]]; then
+            dplay -ar
+         else mpc find "$ALBUM" | mpc insert
+         fi
+     fi
+;;
+    -ar)
+     ALBUM=$(echo -e "Adding Mode: Replace\n----------------\n$(mpc list album)" | dmenu_t -p "$2 Choose Album: > ");
+     if [[ "$ALBUM" = "" ]]
+         then dplayPrompt
+     else
+         if [[ "$ALBUM" == "Adding Mode: Replace" ]]; then
+            dplay -a
+         else mpc clear && mpc find "$ALBUM" | mpc add && mpc play
+         fi
+     fi
+;;
+
     -t)
      TRACK=$(echo -e "Adding Mode: Add\n---------------\n$(mpc listall)" | dmenu_t -p "$2 Choose Track: > ");
      if [[ "$TRACK" = "" ]]
