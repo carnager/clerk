@@ -735,7 +735,7 @@ elif [[ "$1" == "-rtrack" ]]; then
 elif [[ "$1" == "-ra" ]]; then
     mpc clear; mpc findadd album "$(mpc list album | shuf -n1)"; mpc play
 elif [[ "$1" == "-rs" ]]; then
-    n=0; while (( n++ < 20 ));
+    n=0; while (( n++ < $value ));
     do
         artist="$(mpc list artist | shuf | head -1)"
         album="$(mpc list album artist "$artist" | shuf | head -1)"
