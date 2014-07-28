@@ -456,6 +456,22 @@ loadRandomRating () {
     mpc add "$line" && mpc play; done
 }
 
+playRandomAlbum () {
+    mpc clear
+    artist="$(mpc list "$mpd_artist" | shuf | head -1)"
+    album="$(mpc list album "$mpd_artist" "$artist" | shuf | head -1)"
+    mpc find album "$album" "$mpd_artist" "$artist" | mpc add && mpc play
+}
+
+playRandomTracks () {
+    n=0; while (( n++ < $value ));
+    do
+        artist="$(mpc list artist | shuf | head -1)"
+        album="$(mpc list album artist "$artist" | shuf | head -1)"
+        title="$(mpc list title album "$album" artist "$artist" | shuf | head -1)"
+        mpc find album "$album" artist "$artist" title "$title" | mpc add
+    done
+}
 
 
 dplay () {
@@ -743,18 +759,9 @@ elif [[ "$1" == "-rate" ]]; then
 elif [[ "$1" == "-rtrack" ]]; then
     rateTrack
 elif [[ "$1" == "-ra" ]]; then
-    mpc clear
-    artist="$(mpc list "$mpd_artist" | shuf | head -1)"
-    album="$(mpc list album "$mpd_artist" "$artist" | shuf | head -1)"
-    mpc find album "$album" "$mpd_artist" "$artist" | mpc add && mpc play
+    playRandomAlbum
 elif [[ "$1" == "-rs" ]]; then
-    n=0; while (( n++ < $value ));
-    do
-        artist="$(mpc list artist | shuf | head -1)"
-        album="$(mpc list album artist "$artist" | shuf | head -1)"
-        title="$(mpc list title album "$album" artist "$artist" | shuf | head -1)"
-        mpc find album "$album" artist "$artist" title "$title" | mpc add
-    done
+    playRandomTracks
 elif [[ "$1" == "-show" ]]; then
     notify-send "$(mpc current --format '%artist% - %title%')" "$(mpc current --format '\n%date% %album%')"
 elif [[ "$1" == "-lrated" ]]; then
