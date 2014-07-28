@@ -242,6 +242,7 @@ mpds_check="$(ssh $ssh_host -q -t 'bash -c "pgrep mpdscribble"')"
           "---"
           "7  Set Crossfade"
           "8  Manage Outputs"
+          "9  Number of Random Songs: $(echo $value)"
           "---"
           "0  back to MPD Menu")
 
@@ -258,10 +259,19 @@ mpds_check="$(ssh $ssh_host -q -t 'bash -c "pgrep mpdscribble"')"
          6*) lastFM && dplayOptionsPrompt ;;
          7*) crossfadePrompt ;;
          8*) outputPrompt ;;
+         9*) optionRandomPrompt ;;
          0*) dplayPrompt ;;
            *) dplayPrompt ;;
     esac
 }
+
+optionRandomPrompt() {
+    number="$(echo " " | dmenu_t -p 'Set No. of Songs for random Songs: > ')"
+    sed -i "s/value=.*/value="$number"/" $HOME/.config/clerk/config
+    export value="$number"
+    dplayOptionsPrompt
+}
+
 
 
 crossfadePrompt () {
