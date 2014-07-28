@@ -733,7 +733,10 @@ elif [[ "$1" == "-rate" ]]; then
 elif [[ "$1" == "-rtrack" ]]; then
     rateTrack
 elif [[ "$1" == "-ra" ]]; then
-    mpc clear; mpc findadd album "$(mpc list album | shuf -n1)"; mpc play
+    mpc clear
+    artist="$(mpc list albumartist | shuf | head -1)"
+    album="$(mpc list album artist "$artist" | shuf | head -1)"
+    mpc find album "$album" artist "$artist" | mpc add
 elif [[ "$1" == "-rs" ]]; then
     n=0; while (( n++ < $value ));
     do
