@@ -2,7 +2,6 @@
 shopt -s globstar
 
 source $HOME/.config/clerk/config
-echo $PATH
 #backend=rofi
 
 # Number of Songs to be added for "Random Tracks"
@@ -314,7 +313,7 @@ outputPrompt () {
 
 currentAlbums () {
     ARTIST=$(mpc current -f %artist%)
-    ALBUM=$(mppc search artist "$ARTIST" --format '{date} {album}' | sort | uniq | dmenu_t -p "Albums by current Artist: > ")
+    ALBUM=$(mppc search artist "$ARTIST" --format '{date} {album}' | sort | uniq | dmenu_t -p "Albums by $(mpc current --format '%artist%'): > ")
     ALBUM_FINAL=$(echo "$ALBUM" | cut -d ' ' -f2-)
     if [ "$ALBUM" = "" ]; then currentPrompt;
     else currentSubAlbum -ca "$ALBUM_FINAL";
@@ -322,7 +321,7 @@ currentAlbums () {
 }
 
 currentTracks () {
-    TRACK=$(mpc search artist "$(mpc current -f %artist%)" | dmenu_t -p "Tracks by current Artist: > ")
+    TRACK=$(mpc search artist "$(mpc current -f %artist%)" | dmenu_t -p "Tracks by $(mpc current --format '%artist%'): > ")
     if [ "$TRACK" = "" ]; then currentPrompt;
     else currentSubTrack -ct "$TRACK";
     fi
@@ -736,7 +735,13 @@ elif [[ "$1" == "-rtrack" ]]; then
 elif [[ "$1" == "-ra" ]]; then
     mpc clear; mpc findadd album "$(mpc list album | shuf -n1)"; mpc play
 elif [[ "$1" == "-rs" ]]; then
-    mpc clear && mpc listall | shuf | head -n 20 | mpc add && mpc play
+    n=0; while (( n++ < 20 ));
+    do
+        artist="$(mpc list artist | shuf | head -1)"
+        album="$(mpc list album artist "$artist" | shuf | head -1)"
+        title="$(mpc list title album "$album" artist "$artist" | shuf | head -1)"
+        mpc find album "$album" artist "$artist" title "$title" | mpc add
+    done
 elif [[ "$1" == "-show" ]]; then
     notify-send "$(mpc current --format '%artist% - %title%')" "$(mpc current --format '\n%date% %album%')"
 elif [[ "$1" == "-lrated" ]]; then
