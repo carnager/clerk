@@ -168,7 +168,7 @@ ratingPrompt () {
         6*) loadRandomRatedTracks ;;
         7*) lastfm-mpd-cli love > /dev/null && notify-send "MPD" "Loved $(mpc current -f '%title%') on LastFM" ;;
         0*) dplayPrompt ;;
-          *) return
+          *) dplayPrompt
     esac
 }
 
