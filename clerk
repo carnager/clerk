@@ -605,6 +605,7 @@ esac
 testingPrompt() {
     menu=("1  Play Album"
           "2  Add a Song"
+          "3  Browse by Date"
           "---"
           "0  back to mpd menu")
 
@@ -615,6 +616,7 @@ testingPrompt() {
     case "$(prompt "${menu[@]}")" in
         1*) testAddAlbum ;;
         2*) testAddTrack ;;
+        3*) browseDate ;;
         0*) dplayPrompt ;;
         *) dplayPrompt
     esac
@@ -644,6 +646,23 @@ else
     mppc searchadd artist "$artist" album "$album" title "$title"
 fi
 }
+
+browseDate() {
+    date=$(mpc list date | dmenu_t -dmenu -p "Choose Date > ")
+    if [[ "$date" = "" ]]
+        then dplayPrompt
+    else
+        select=$(mppc list artist date "$date" | while read line; do mppc find artist "$line" date "$date" --format '{artist} • {album}' | uniq; done | dmenu_t -dmenu -p 'Select')
+        if [[ "$select" = "" ]]
+            then dplayPrompt
+        else
+            artist=$(echo "$select" | awk -F ' • ' '{print $1}')
+            album=$(echo "$select" | awk -F ' • ' '{print $2}')
+            mpc clear && mpc find artist "$artist" album "$album" | mpc add && mpc play
+        fi
+    fi
+}
+
 
 browseLib() {
 
