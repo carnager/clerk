@@ -652,14 +652,18 @@ browseDate() {
     if [[ "$date" = "" ]]
         then dplayPrompt
     else
-        select=$(mppc list artist date "$date" | while read line; do mppc find artist "$line" date "$date" --format '{artist} • {album}' | uniq; done | dmenu_t -dmenu -p 'Select')
-        if [[ "$select" = "" ]]
-            then dplayPrompt
-        else
+        select=$(mppc find date "$date" --format '{artist} • {album}' | uniq | dmenu_t -dmenu -p "Select Album > ")
             artist=$(echo "$select" | awk -F ' • ' '{print $1}')
             album=$(echo "$select" | awk -F ' • ' '{print $2}')
-            mpc clear && mpc find artist "$artist" album "$album" | mpc add && mpc play
-        fi
+            mpc clear && mpc findadd artist "$artist" album "$album" && mpc play
+#        select=$(mppc list artist date "$date" | while read line; do mppc find artist "$line" date "$date" --format '{artist} • {album}' | uniq; done | dmenu_t -dmenu -p 'Select')
+#        if [[ "$select" = "" ]]
+#            then dplayPrompt
+#        else
+#            artist=$(echo "$select" | awk -F ' • ' '{print $1}')
+#            album=$(echo "$select" | awk -F ' • ' '{print $2}')
+#            mpc clear && mpc find artist "$artist" album "$album" | mpc add && mpc play
+#        fi
     fi
 }
 
