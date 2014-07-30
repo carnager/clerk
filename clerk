@@ -648,8 +648,8 @@ fi
 }
 
 browseDate() {
-    date=$(mpc list date | dmenu_t -dmenu -p "Choose Date > ")
-    if [[ "$date" = "" ]]
+    date=$(mpc list date | tac | dmenu_t -dmenu -p "Choose Date > ")
+    if [[ "$date" == "" ]]
         then dplayPrompt
     else
         select=$(mppc find date "$date" --format "{$mpd_artist} • {album}" | uniq | dmenu_t -dmenu -p "Select Album > ")
