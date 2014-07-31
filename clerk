@@ -244,7 +244,7 @@ mpds_check="$(ssh $ssh_host -q -t 'bash -c "pgrep mpdscribble"')"
           "5  Replaygain:   $(echo $rgain)"
           "6  Scrobbling:   $(echo $scrobble)"
           "---"
-          "7  Set Crossfade"
+          "7  Set Crossfade$(mpc crossfade | cut -d ':' -f2)"
           "8  Manage Outputs"
           "9  Number of Random Songs: $(echo $value)"
           "---"
@@ -298,7 +298,7 @@ crossfadePrompt () {
          4) mpc crossfade 4 ;;
          5) mpc crossfade 5 ;;
          0:*) dplayOptionsPrompt ;;
-           *) return
+           *) dplayOptionsPrompot
     esac
 }
 
