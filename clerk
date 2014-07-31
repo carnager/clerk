@@ -653,9 +653,13 @@ browseDate() {
         then dplayPrompt
     else
         select=$(mppc find date "$date" --format "{$mpd_artist} • {album}" | uniq | dmenu_t -dmenu -p "Select Album > ")
-            artist=$(echo "$select" | awk -F ' • ' '{print $1}')
-            album=$(echo "$select" | awk -F ' • ' '{print $2}')
-            mpc clear && mpc findadd artist "$artist" album "$album" && mpc play
+            if [[ "$select" == "" ]]
+                then browseDate
+            else
+                artist=$(echo "$select" | awk -F ' • ' '{print $1}')
+                album=$(echo "$select" | awk -F ' • ' '{print $2}')
+                mpc clear && mpc findadd artist "$artist" album "$album" && mpc play
+            fi
     fi
 }
 
