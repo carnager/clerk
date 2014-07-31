@@ -379,7 +379,7 @@ currentAlbumsReplace () {
         if [[ "$ALBUM" == "Adding Mode: Replace" ]]; then
             currentAlbums
         else
-            mpc search && mpc findadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" && mpc play
+            mpc clear && mpc search artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" | mpc add && mpc play
         fi
     fi
 }
