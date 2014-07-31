@@ -599,16 +599,68 @@ browseDate() {
     if [[ "$date" == "" ]]
         then dplayPrompt
     else
-        select=$(mppc find date "$date" --format "{$mpd_artist} $seperator {album}" | uniq | dmenu_t -dmenu -p "Select Album > ")
+        browseDateAdd
+    fi
+}
+
+browseDateAdd() {
+        select=$(echo -e "Adding Mode: Add\n--------------------\nAdd All\nReplace All\n--------------------\n$(mppc find date "$date" --format "{$mpd_artist} $seperator {album}" | uniq)" | dmenu_t -dmenu -p "Select Album > ")
             if [[ "$select" == "" ]]
                 then browseDate
             else
                 artist=$(echo "$select" | awk -F " $seperator " '{print $1}')
                 album=$(echo "$select" | awk -F " $seperator " '{print $2}')
-                mpc clear && mpc findadd artist "$artist" album "$album" && mpc play
+                if [[ "$select" == "Add All" ]]; then
+                    mpc findadd date "$date"
+                elif [[ "$select" == "Replace All" ]]; then
+                    mpc clear && mpc findadd date "$date" && mpc play
+                elif [[ "$select" == "Adding Mode: Add" ]]; then
+                    browseDateInsert
+                else
+                    mpc findadd artist "$artist" album "$album"
+                fi
             fi
-    fi
 }
+
+browseDateInsert() {
+        select=$(echo -e "Adding Mode: Insert\n--------------------\nAdd All\nReplace All\n--------------------\n$(mppc find date "$date" --format "{$mpd_artist} $seperator {album}" | uniq)" | dmenu_t -dmenu -p "Select Album > ")
+            if [[ "$select" == "" ]]
+                then browseDate
+            else
+                artist=$(echo "$select" | awk -F " $seperator " '{print $1}')
+                album=$(echo "$select" | awk -F " $seperator " '{print $2}')
+                if [[ "$select" == "Add All" ]]; then
+                    mpc findadd date "$date"
+                elif [[ "$select" == "Replace All" ]]; then
+                    mpc clear && mpc findadd date "$date" && mpc play
+                elif [[ "$select" == "Adding Mode: Insert" ]]; then
+                    browseDateReplace
+                else
+                    mpc find artist "$artist" album "$album" | mpc insert
+                fi
+            fi
+}
+
+browseDateReplace() {
+        select=$(echo -e "Adding Mode: Replace\n--------------------\nAdd All\nReplace All\n--------------------\n$(mppc find date "$date" --format "{$mpd_artist} $seperator {album}" | uniq)" | dmenu_t -dmenu -p "Select Album > ")
+            if [[ "$select" == "" ]]
+                then browseDate
+            else
+                artist=$(echo "$select" | awk -F " $seperator " '{print $1}')
+                album=$(echo "$select" | awk -F " $seperator " '{print $2}')
+                if [[ "$select" == "Add All" ]]; then
+                    mpc findadd date "$date"
+                elif [[ "$select" == "Replace All" ]]; then
+                    mpc clear && mpc findadd date "$date" && mpc play
+                elif [[ "$select" == "Adding Mode: Replace" ]]; then
+                    browseDateAdd
+                else
+                    mpc clear && mpc find artist "$artist" album "$album" && mpc play
+                fi
+            fi
+}
+
+
 
 browseLibPrompt() {
     menu=("1  Browse by Artist"
