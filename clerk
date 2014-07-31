@@ -712,7 +712,6 @@ if [[ "$1" == "-h" ]]; then
     echo "  -ar        replace album()"
     echo "  -t         add track()"
     echo "  -ti        insert track()"
-    echo "  -tr        replace track()"
     echo "  -rate      show rating prompt"
     echo "  -rtrack    rate current track"
     echo "  -ra        play random album"
