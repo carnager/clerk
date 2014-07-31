@@ -13,6 +13,7 @@ cd_divider=CD
 
 # Seperator used for splitting tags - Make sure this is something most
 # likely not used in tags itself. Can be multiple characters
+# If you change seperator, update caches with clerk -update
 seperator=•
 
 # use artist or albumartist for album ratings
