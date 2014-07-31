@@ -47,7 +47,6 @@ updateCache() {
     echo "$tracks_temp_cur" > $HOME/.config/clerk/tracks.cache
 
     notify-send "Clerk" "Album/Track Caches updated"
-    browseLibPrompt
 }
 
 dplayPrompt () {
@@ -618,7 +617,7 @@ browseLibPrompt() {
         2*) browseDate ;;
         3*) AddAlbum ;;
         4*) AddTrack ;;
-        5*) updateCache ;;
+        5*) updateCache && browseLibPrompt ;;
         0*) dplayPrompt ;;
         *) dplayPrompt
     esac
@@ -746,6 +745,8 @@ elif [[ "$1" == "-lrated" ]]; then
     mpc clear && for ((i=4; i<="5"; i++)); do mpc find comment "$i" | shuf | head -n "$value" | mpc add; done && mpc play
 elif [[ "$1" == "-library" ]]; then
     browseLib
+elif [[ "$1" == "-update" ]]; then
+    updateCache
 else
 dplayPrompt
 fi
