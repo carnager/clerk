@@ -61,10 +61,7 @@ dplayPrompt () {
           "6  Options"
           "7  Ratings"
           "8  Lookup"
-          "9  Playback"
-          "---"
-          "0  Testing"
-          "/  Search")
+          "9  Playback")
 
     prompt() {
         printf "%s\n" "$@" | dmenu_t -p "MPD Menu: > "
@@ -76,12 +73,10 @@ dplayPrompt () {
         3*) currentPrompt ;;
         4*) dplayQueue ;;
         5*) browseLibPrompt ;;
-        /*) searchPrompt ;;
         6*) dplayOptionsPrompt ;;
         7*) ratingPrompt ;;
         8*) infoPrompt ;;
         9*) playbackPrompt ;;
-        0*) testingPrompt;;
           *) exit
     esac
 }
