@@ -723,17 +723,15 @@ if [[ "$1" == "-h" ]]; then
     echo "  -library   browse the library"
 
 elif [[ "$1" == "-a" ]]; then
-    dplay -a
+    AddAlbum
 elif [[ "$1" == "-ai" ]]; then
-    dplay -ai
+    InsertAlbum
 elif [[ "$1" == "-ar" ]]; then
-    dplay -ar
+    ReplaceAlbum
 elif [[ "$1" == "-t" ]]; then
-    dplay -t
+    AddTrack
 elif [[ "$1" == "-ti" ]]; then
-    dplay -ti
-elif [[ "$1" == "-tr" ]]; then
-    dplay -tr
+    InsertTrack
 elif [[ "$1" == "-rate" ]]; then
     ratingPrompt
 elif [[ "$1" == "-rtrack" ]]; then
