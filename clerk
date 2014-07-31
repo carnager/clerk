@@ -279,7 +279,8 @@ optionRandomPrompt() {
 
 
 crossfadePrompt () {
-    menu=("1"
+    menu=("0"
+          "1"
           "2"
           "3"
           "4"
