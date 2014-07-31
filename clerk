@@ -315,13 +315,15 @@ crossfadePrompt () {
 
 
 dplayQueue () {
-    TRACKDISPLAY=$(mppc playlist --format '{track} • {title}'| dmenu_t);
-    TITLE=$(echo "$TRACKDISPLAY" | awk -F ' • ' '{ print $2 }')
+    TRACKDISPLAY=$(mppc playlist --format '{pos} • {artist} • {title}'| dmenu_t);
+    TITLE=$(echo "$TRACKDISPLAY" | awk -F ' • ' '{ print $3 }')
+    ARTIST=$(echo "$TRACKDISPLAY" | awk -F ' • ' '{ print $2}')
+    POS=$(echo "$TRACKDISPLAY" | awk -F ' • ' '{ print $1}')
+    TRUE_POS=$(echo $(( $POS + 1 )))
     if [ "$TRACKDISPLAY" = "" ]; then
         dplayPrompt
     else
-        POS=$(mpc playlist | grep -n "$TITLE" | awk -F: '{print $1}')
-        mpc play $POS;
+        mpc play $TRUE_POS;
         dplayQueue
     fi
 }
