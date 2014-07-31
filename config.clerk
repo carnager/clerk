@@ -1,4 +1,4 @@
-# set backend, valid choices: rofi, dmenu
+# set backend, valid choices: rofi, dmenu, slmenu
 backend=rofi
 
 # path to your music
