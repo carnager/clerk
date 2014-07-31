@@ -720,6 +720,7 @@ if [[ "$1" == "-h" ]]; then
     echo "  -show      show currently playing track"
     echo "  -lrated    add x random tracks with rating >=4"
     echo "  -library   browse the library"
+    echo "  -update    update album/track caches"
 
 elif [[ "$1" == "-a" ]]; then
     AddAlbum
