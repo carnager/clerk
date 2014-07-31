@@ -205,7 +205,7 @@ infoPrompt () {
         3*) surfraw yubnub google $(mpc current -f %title%) $(mpc current -f %artist%) lyrics ;;
         4*) mpc current --format "Artist: %artist%\nAlbum: %album%\nDate: %date%\nTrack: %track%\nTitle: %title%" | rofi -dmenu -p 'tags' && dplayPrompt;;
         0*) dplayPrompt ;;
-          *) return
+          *) dplayPrompt
     esac
 }
 
