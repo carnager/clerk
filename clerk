@@ -728,6 +728,7 @@ if [[ "$1" == "-h" ]]; then
     echo "  -ra        play random album"
     echo "  -rs        play x random songs (defined with "value" variable)"
     echo "  -show      show currently playing track"
+    echo "  -queue     show current playlist"
     echo "  -lrated    add x random tracks with rating >=4"
     echo "  -library   browse the library"
     echo "  -update    update album/track caches"
@@ -758,6 +759,8 @@ elif [[ "$1" == "-library" ]]; then
     browseLib
 elif [[ "$1" == "-update" ]]; then
     updateCache
+elif [[ "$1" == "-queue" ]]; then
+    dplayQueue
 else
 dplayPrompt
 fi
