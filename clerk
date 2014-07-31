@@ -299,7 +299,7 @@ crossfadePrompt () {
          4) mpc crossfade 4 ;;
          5) mpc crossfade 5 ;;
          0:*) dplayOptionsPrompt ;;
-           *) dplayOptionsPrompot
+           *) dplayOptionsPrompt
     esac
 }
 
