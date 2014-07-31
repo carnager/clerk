@@ -349,7 +349,7 @@ currentAlbums () {
         if [[ "$ALBUM" == "Adding Mode: Add" ]]; then
             currentAlbumsInsert
         else
-            mpc search artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" | mpc add
+            mpc search album "$ALBUM_FINAL" date "$DATE" | mpc add
         fi
     fi
 }
@@ -364,7 +364,7 @@ currentAlbumsInsert () {
         if [[ "$ALBUM" == "Adding Mode: Insert" ]]; then
             currentAlbumsReplace
         else
-            mpc search artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" | mpc insert
+            mpc search album "$ALBUM_FINAL" date "$DATE" | mpc insert
         fi
     fi
 }
@@ -379,7 +379,7 @@ currentAlbumsReplace () {
         if [[ "$ALBUM" == "Adding Mode: Replace" ]]; then
             currentAlbums
         else
-            mpc clear && mpc search artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" | mpc add && mpc play
+            mpc clear && mpc search album "$ALBUM_FINAL" date "$DATE" | mpc add && mpc play
         fi
     fi
 }
