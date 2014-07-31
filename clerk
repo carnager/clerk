@@ -22,7 +22,6 @@ source $HOME/.config/clerk/config
 # create cached album list
 new_db="$(mpc stats | grep Updated | sed 's/ //g')"
 if [[ "$change_db" == "$new_db" ]]; then
-    echo "FURZ!"
     if [[ -f $HOME/.config/clerk/album.cache && -f $HOME/.config/clerk/tracks.cache ]]; then
         album_temp=$(cat $HOME/.config/clerk/album.cache)
         tracks_temp=$(cat $HOME/.config/clerk/tracks.cache)
