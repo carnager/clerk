@@ -20,22 +20,33 @@ source $HOME/.config/clerk/config
 #ssh_host=picon
 
 # create cached album list
-if [[ -e $HOME/.config/clerk/album.cache ]]; then
-    album_temp=$(cat $HOME/.config/clerk/album.cache)
+new_db="$(mpc stats | grep Updated | sed 's/ //g')"
+if [[ "$change_db" == "$new_db" ]]; then
+    echo "FURZ!"
+    if [[ -f $HOME/.config/clerk/album.cache && -f $HOME/.config/clerk/tracks.cache ]]; then
+        album_temp=$(cat $HOME/.config/clerk/album.cache)
+        tracks_temp=$(cat $HOME/.config/clerk/tracks.cache)
+        echo "album/track cache up to date"
+    else
+        album_temp_cur=$(mppc listall --format '{artist} • {album} • {date}' | uniq)
+        echo "$album_temp_cur" > $HOME/.config/clerk/album.cache
+        album_temp=$(cat $HOME/.config/clerk/album.cache)
+        tracks_temp_cur=$(mppc listall --format '{artist} • {track} • {title} • {album}')
+        echo "$tracks_temp_cur" > $HOME/.config/clerk/tracks.cache
+        tracks_temp=$(cat $HOME/.config/clerk/tracks.cache)
+    fi
 else
+    sed -i "s/change_db=".*"/change_db=""$new_db""/" $HOME/.config/clerk/config
+    rm -f $HOME/.config/clerk/album_cache
+    rm -f $HOME/.config/clerk/tracks.cache
     album_temp_cur=$(mppc listall --format '{artist} • {album} • {date}' | uniq)
     echo "$album_temp_cur" > $HOME/.config/clerk/album.cache
     album_temp=$(cat $HOME/.config/clerk/album.cache)
-fi
-
-# create cached track list
-if [[ -e $HOME/.config/clerk/tracks.cache ]]; then
-    tracks_temp=$(cat $HOME/.config/clerk/tracks.cache)
-else
     tracks_temp_cur=$(mppc listall --format '{artist} • {track} • {title} • {album}')
     echo "$tracks_temp_cur" > $HOME/.config/clerk/tracks.cache
     tracks_temp=$(cat $HOME/.config/clerk/tracks.cache)
 fi
+
 
 updateCache() {
     rm -f $HOME/.config/clerk/album_cache
