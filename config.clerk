@@ -2,7 +2,7 @@
 backend=rofi
 
 # path to your music
-music_path="/mnt/wasteland/Audio/Rips"
+music_path="/path/to/music_directory"
 
 # Number of Songs to be added for "Random Tracks"
 value=20
