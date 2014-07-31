@@ -11,6 +11,10 @@ value=20
 # This should match the name of your subfolders, exluding the number
 cd_divider=CD
 
+# Seperator used for splitting tags - Make sure this is something most
+# likely not used in tags itself. Can be multiple characters
+seperator=•
+
 # use artist or albumartist for album ratings
 mpd_artist=albumartist
 
