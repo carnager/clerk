@@ -326,7 +326,7 @@ outputPrompt () {
 
 currentAlbums () {
     ARTIST=$(mpc current -f %artist%)
-    ALBUM=$(echo -e "Adding Mode: Add\n-----------------------\n$(mppc search artist "$ARTIST" --format "{date} $seperator {album}" | sort | uniq)" | dmenu_t -p "Albums by $(mpc current --format '%artist%'): > ")
+    ALBUM=$(echo -e "Adding Mode: Add\n--------------------\n$(mppc search artist "$ARTIST" --format "{date} $seperator {album}" | sort | uniq)" | dmenu_t -p "Albums by $(mpc current --format '%artist%'): > ")
     ALBUM_FINAL=$(echo "$ALBUM" | awk -F " $seperator " '{print $2}')
     DATE=$(echo "$ALBUM" | awk -F " $seperator " '{print $1}')
     if [[ "$ALBUM" == "" ]]; then currentPrompt;
@@ -335,6 +335,7 @@ currentAlbums () {
             currentAlbumsInsert
         else
             mpc search album "$ALBUM_FINAL" date "$DATE" | mpc add
+            currentAlbums
         fi
     fi
 }
