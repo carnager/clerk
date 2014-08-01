@@ -1,23 +1,8 @@
 #!/bin/bash
+
 shopt -s globstar
-
 source $HOME/.config/clerk/config
-#backend=rofi
 
-# Number of Songs to be added for "Random Tracks"
-#value=20
-
-# Change this, if you have subfolders for multi-disc albums. this should match the name of your subfolders, exluding the number
-#cd_divider=CD
-
-# use artist or albumartist for album ratings
-#mpd_artist=albumartist
-#music_path="/mnt/wasteland/Audio/Rips"
-
-# Fill these if mpdscribble runs on a different host
-# set to 0 if mpdscribble runs locally
-#ssh_lastfm=1
-#ssh_host=picon
 
 # create cached album list
 new_db="$(mpc stats | grep Updated | sed 's/ //g')"
@@ -395,6 +380,7 @@ currentTracks () {
             currentTracksInsert
         else
             mpc findadd album "$ALBUM" title "$TITLE" track "$TRACKNUMBER"
+            currentTracks
         fi
     fi
 }
@@ -410,6 +396,7 @@ currentTracksInsert () {
             currentTracks
         else
             mpc find album "$ALBUM" title "$TITLE" track "$TRACK" | mpc insert
+            currentTracksInsert
         fi
     fi
 }
@@ -693,51 +680,53 @@ browseLib() {
 
     browseAlbum() {
         ALBUMS=$(mppc list album "$ARTIST")
-        ALBUM=$(echo -e "replace all\nadd all\ninsert all\n--------------------------\n$(mppc find artist "$ARTIST" --format "{date} $seperator {album}" | sort | uniq)" | dmenu_t -dmenu -p "Choose Album > ")
+        ALBUM=$(echo -e "Replace All\nAdd All\nInsert All\n--------------------------\n$(mppc find artist "$ARTIST" --format "{date} $seperator {album}" | sort | uniq)" | dmenu_t -dmenu -p "Choose Album > ")
         ALBUM_FINAL=$(echo "$ALBUM" | awk -F " $seperator " '{ print $2 }')
         DATE=$(echo "$ALBUM" | awk -F " $seperator " '{ print $1 }')
         if [[ "$ALBUM" = "" ]]
             then dplayPrompt
-        elif [[ "$ALBUM" = "replace all" ]]
+        elif [[ "$ALBUM" = "Replace All" ]]
             then mpc clear && mppc findadd artist "$ARTIST" && mpc play
-        elif [[ "$ALBUM" = "add all" ]]
+        elif [[ "$ALBUM" = "Add All" ]]
             then mppc findadd artist "$ARTIST"
-        elif [[ "$ALBUM" = "insert all" ]]
+        elif [[ "$ALBUM" = "Insert All" ]]
             then mppc find artist "$ARTIST" --format '{file}'| mpc insert
         else
             browseTrack
         fi
     }
     browseTrack() {
-        TRACK=$(echo -e "replace all\nadd all\ninsert all\n--------------------------\n$(mppc find artist "$ARTIST" album "$ALBUM_FINAL" --format "{track} $seperator {title}")" | dmenu_t -dmenu -p "Chose Track > ")
+        TRACK=$(echo -e "Replace All\nAdd All\nInsert All\n--------------------------\n$(mppc find artist "$ARTIST" album "$ALBUM_FINAL" --format "{track} $seperator {title}")" | dmenu_t -dmenu -p "Chose Track > ")
         TRACKFINAL=$(echo "$TRACK" | awk -F " $seperator " '{ print $2}')
         if [[ "$TRACK" = "" ]]
             then browseAlbum
-        elif [[ "$TRACK" = "replace all" ]]
+        elif [[ "$TRACK" = "Replace All" ]]
             then mpc clear && mppc findadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" && mpc play
-        elif [[ "$TRACK" = "add all" ]]
+        elif [[ "$TRACK" = "Add All" ]]
             then mppc findadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE"
-        elif [[ "$TRACK" = "insert all" ]]
+        elif [[ "$TRACK" = "Insert All" ]]
             then mppc find artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" --format '{file}' | mpc insert
         else
             if [[ $(mpc playlist) == "" ]]; then
                 mppc findadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL" && mpc play
+                browseTrack
             else
                 mppc findadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL"
+                browseTrack
             fi
         fi
     }
 
     browseArtist() {
-        ARTIST=$(echo -e "replace all\nadd all\ninsert all\n--------------------------\n$(mppc list artist)" | dmenu_t -dmenu -p "Choose Artist > ")
+        ARTIST=$(echo -e "Add All\nInsert all\nReplace all\n--------------------------\n$(mppc list artist)" | dmenu_t -dmenu -p "Choose Artist > ")
         export ARTIST="$ARTIST"
         if [[ "$ARTIST" = "" ]]
             then dplayPrompt
-        elif [[ "$ARTIST" = "replace all" ]]
+        elif [[ "$ARTIST" = "Replace All" ]]
             then mpc clear && mpc add / && mpc play
-        elif [[ "$ARTIST" = "add all" ]]
+        elif [[ "$ARTIST" = "Add All" ]]
             then mpc add /
-        elif [[ "$ARTIST" = "insert all" ]]
+        elif [[ "$ARTIST" = "Insert All" ]]
             then mpc insert /
         else
             browseAlbum
