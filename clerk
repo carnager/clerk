@@ -537,7 +537,7 @@ InsertAlbum() {
                 artist=$(echo "$TRACK" | awk -F " $seperator " '{print $1}')
                 date=$(echo "$TRACK" | awk -F " $seperator " '{print $3}')
                 album=$(echo "$TRACK" | awk -F " $seperator " '{print $2}')
-                mpc search date "$date" album "$album" artist "$mpd_artist" | mpc insert
+                mpc search date "$date" album "$album" artist "$artist" | mpc insert
             fi
         fi
     done < <(echo -e "Adding Mode: Insert\n----------------\n$(echo "$album_temp")" | dmenu_t -dmenu -p "Choose Album > ")
@@ -554,7 +554,7 @@ else
         artist=$(echo "$TRACK" | awk -F " $seperator " '{print $1}')
         date=$(echo "$TRACK" | awk -F " $seperator " '{print $3}')
         album=$(echo "$TRACK" | awk -F " $seperator " '{print $2}')
-        mpc clear && mpc findadd date "$date" album "$album" artist "$mpd_artist" && mpc play
+        mpc clear && mpc findadd date "$date" album "$album" artist "$artist" && mpc play
     fi
 fi
 }
