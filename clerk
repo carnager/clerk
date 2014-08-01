@@ -396,7 +396,7 @@ currentTracksInsert () {
         if [[ "$TRACK" == "Adding Mode: Insert" ]]; then
             currentTracks
         else
-            mpc find album "$ALBUM" title "$TITLE" track "$TRACK" | mpc insert
+            mpc find album "$ALBUM" title "$TITLE" track "$TRACKNUMBER" | mpc insert
             currentTracksInsert
         fi
     fi
