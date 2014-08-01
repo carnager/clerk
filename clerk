@@ -573,7 +573,6 @@ AddTrack() {
                 track=$(echo "$TRACK" | awk -F " $seperator " '{print $2}')
                 title=$(echo "$TRACK" | awk -F " $seperator " '{print $3}')
                 mpc findadd artist "$artist" album "$album" title "$title"
-                AddTrack
             fi
         fi
     done < <(echo -e "Adding Mode: Add\n-----------------\n$(echo "$tracks_temp")"| dmenu_t -dmenu -p "Choose Track > ")
@@ -593,7 +592,6 @@ InsertTrack() {
                 track=$(echo "$TRACK" | awk -F " $seperator " '{print $2}')
                 title=$(echo "$TRACK" | awk -F " $seperator " '{print $3}')
                 mpc find artist "$artist" album "$album" title "$title" | mpc insert
-                InsertTrack
             fi
         fi
     done < <(echo -e "Adding Mode: Insert\n-----------------\n$(echo "$tracks_temp")"| dmenu_t -dmenu -p "Choose Track > ")
