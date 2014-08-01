@@ -509,7 +509,7 @@ else
         artist=$(echo "$TRACK" | awk -F " $seperator " '{print $1}')
         date=$(echo "$TRACK" | awk -F " $seperator " '{print $3}')
         album=$(echo "$TRACK" | awk -F " $seperator " '{print $2}')
-        mppc searchadd date "$date" album "$album" artist "$artist"
+        mppc searchadd date "$date" album "$album" artist "$mpd_artist"
     fi
 fi
 }
@@ -525,7 +525,7 @@ else
         artist=$(echo "$TRACK" | awk -F " $seperator " '{print $1}')
         date=$(echo "$TRACK" | awk -F " $seperator " '{print $3}')
         album=$(echo "$TRACK" | awk -F " $seperator " '{print $2}')
-        mpc search date "$date" album "$album" artist "$artist" | mpc insert
+        mpc search date "$date" album "$album" artist "$mpd_artist" | mpc insert
     fi
 fi
 }
@@ -541,7 +541,7 @@ else
         artist=$(echo "$TRACK" | awk -F " $seperator " '{print $1}')
         date=$(echo "$TRACK" | awk -F " $seperator " '{print $3}')
         album=$(echo "$TRACK" | awk -F " $seperator " '{print $2}')
-        mpc clear && mpc findadd date "$date" album "$album" artist "$artist" && mpc play
+        mpc clear && mpc findadd date "$date" album "$album" artist "$mpd_artist" && mpc play
     fi
 fi
 }
