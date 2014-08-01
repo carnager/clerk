@@ -519,7 +519,7 @@ AddAlbum() {
                 artist=$(echo "$TRACK" | awk -F " $seperator " '{print $1}')
                 date=$(echo "$TRACK" | awk -F " $seperator " '{print $3}')
                 album=$(echo "$TRACK" | awk -F " $seperator " '{print $2}')
-                mppc searchadd date "$date" album "$album" artist "$mpd_artist"
+                mppc searchadd date "$date" album "$album" artist "$artist"
             fi
         fi
     done < <(echo -e "Adding Mode: Add\n----------------\n$(echo "$album_temp")" | dmenu_t -dmenu -p "Choose Album > ")
