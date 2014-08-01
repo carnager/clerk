@@ -12,7 +12,7 @@ if [[ "$change_db" == "$new_db" ]]; then
         tracks_temp=$(cat $HOME/.config/clerk/tracks.cache)
         echo "album/track cache up to date"
     else
-        album_temp_cur=$(mppc listall --format "{artist} $seperator {album} $seperator {date}" | uniq)
+        album_temp_cur=$(mppc listall --format "{$mpd_artist} $seperator {album} $seperator {date}" | uniq)
         echo "$album_temp_cur" > $HOME/.config/clerk/album.cache
         album_temp=$(cat $HOME/.config/clerk/album.cache)
         tracks_temp_cur=$(mppc listall --format "{artist} $seperator {track} $seperator {title} $seperator {album}")
@@ -23,7 +23,7 @@ else
     sed -i "s/change_db=".*"/change_db=""$new_db""/" $HOME/.config/clerk/config
     rm -f $HOME/.config/clerk/album_cache
     rm -f $HOME/.config/clerk/tracks.cache
-    album_temp_cur=$(mppc listall --format "{artist} $seperator {album} $seperator {date}" | uniq)
+    album_temp_cur=$(mppc listall --format "{$mpd_artist} $seperator {album} $seperator {date}" | uniq)
     echo "$album_temp_cur" > $HOME/.config/clerk/album.cache
     album_temp=$(cat $HOME/.config/clerk/album.cache)
     tracks_temp_cur=$(mppc listall --format "{artist} $seperator {track} $seperator {title} $seperator {album}")
@@ -34,7 +34,7 @@ fi
 
 updateCache() {
     rm -f $HOME/.config/clerk/album_cache
-    album_temp_cur=$(mppc listall --format "{artist} $seperator {album} $seperator {date}" | uniq)
+    album_temp_cur=$(mppc listall --format "{$mpd_artist} $seperator {album} $seperator {date}" | uniq)
     echo "$album_temp_cur" > $HOME/.config/clerk/album.cache
 
     rm -f $HOME/.config/clerk/tracks.cache
