@@ -313,7 +313,7 @@ dplayQueue () {
         else
             mpc play $TRUE_POS;
         fi
-    done < <(echo -e "Play Mode\n--------------------\n$(mppc playlist --format "{pos} $seperator {artist} $seperator {title}")" | dmenu_t)
+    done < <(echo -e "Play Mode\n--------------------\n$(mppc playlist --format "{pos} $seperator {artist} $seperator {title}")" | dmenu_t -p "Queue")
 }
 
 dplayQueueDelete () {
@@ -331,7 +331,7 @@ dplayQueueDelete () {
             mpc del $TRUE_POS;
             dplayQueueDelete
         fi
-    done < <(echo -e "Delete Mode\n--------------------\n$(mppc playlist --format "{pos} $seperator {artist} $seperator {title}")" | dmenu_t)
+    done < <(echo -e "Delete Mode\n--------------------\n$(mppc playlist --format "{pos} $seperator {artist} $seperator {title}")" | dmenu_t -p "Queue")
 }
 
 
