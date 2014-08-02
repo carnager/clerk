@@ -586,8 +586,10 @@ playRandomTracks () {
 
 
 AddAlbum() {
+    declare -i seen=0
     while read TRACK
     do
+        seen=1
         if [[ "$TRACK" = "0  Return to Main Menu" ]]
             then dplayPrompt
         else
@@ -601,7 +603,13 @@ AddAlbum() {
             fi
         fi
     done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Add\n---\n$(echo "$album_temp")" | dmenu_t -dmenu -p "Choose Album > ")
+
+    if [[  $seen = 0 ]]
+    then
+        exit
+    fi
 }
+
 
 InsertAlbum() {
     while read TRACK
