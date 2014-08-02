@@ -304,8 +304,9 @@ dplayQueue () {
     do
         TITLE=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $3 }')
         ARTIST=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $2 }')
-        POS=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $1 }')
-        TRUE_POS=$(echo $(( $POS + 1 )))
+#        POS=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $1 }')
+#        TRUE_POS=$(echo $(( $POS + 1 )))
+        TRUE_POS=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $1 }')
         if [[ "$TRACKDISPLAY" == "*" ]]; then
             dplayPrompt
         elif [[ "$TRACKDISPLAY" == "Play Mode" ]]; then
@@ -313,7 +314,7 @@ dplayQueue () {
         else
             mpc play $TRUE_POS;
         fi
-    done < <(echo -e "Play Mode\n--------------------\n$(mppc playlist --format "{pos} $seperator {artist} $seperator {title}")" | dmenu_t -p "Queue")
+    done < <(export seperator=$seperator; echo -e "Play Mode\n--------------------\n$(mppc playlist --format "{pos} $seperator {artist} $seperator {title}" | awk -F " $seperator " '{print $1 + 1, ENVIRON["seperator"], $2, ENVIRON["seperator"], $3 }')" | dmenu_t -p "Queue")
 }
 
 dplayQueueDelete () {
@@ -321,8 +322,9 @@ dplayQueueDelete () {
     do
         TITLE=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $3 }')
         ARTIST=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $2 }')
-        POS=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $1 }')
-        TRUE_POS=$(echo $(( $POS + 1 )))
+#        POS=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $1 }')
+#        TRUE_POS=$(echo $(( $POS + 1 )))
+        TRUE_POS=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $1 }')
         if [[ "$TRACKDISPLAY" == "" ]]; then
             dplayPrompt
         elif [[ "$TRACKDISPLAY" == "Delete Mode" ]]; then
@@ -331,7 +333,7 @@ dplayQueueDelete () {
             mpc del $TRUE_POS;
             dplayQueueDelete
         fi
-    done < <(echo -e "Delete Mode\n--------------------\n$(mppc playlist --format "{pos} $seperator {artist} $seperator {title}")" | dmenu_t -p "Queue")
+    done < <(export seperator=$seperator; echo -e "Delete Mode\n--------------------\n$(mppc playlist --format "{pos} $seperator {artist} $seperator {title}" | awk -F " $seperator " '{print $1 + 1, ENVIRON["seperator"], $2, ENVIRON["seperator"], $3 }')" | dmenu_t -p "Queue")
 }
 
 
