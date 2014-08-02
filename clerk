@@ -314,7 +314,7 @@ dplayQueue () {
         else
             mpc play $TRUE_POS;
         fi
-    done < <(export seperator=$seperator; echo -e "Play Mode\n--------------------\n$(mppc playlist --format "{pos} $seperator {artist} $seperator {title}" | awk -F " $seperator " '{print $1 + 1, ENVIRON["seperator"], $2, ENVIRON["seperator"], $3 }')" | dmenu_t -p "Queue")
+    done < <(export seperator=$seperator; echo -e "Play Mode\n--------------------\n$(mppc playlist --format "{pos} $seperator {artist} $seperator {title}" | awk -F " $seperator " '{OFS=FS; print $1 + 1, $2, $3 }')" | dmenu_t -p "Queue")
 }
 
 dplayQueueDelete () {
@@ -333,7 +333,7 @@ dplayQueueDelete () {
             mpc del $TRUE_POS;
             dplayQueueDelete
         fi
-    done < <(export seperator=$seperator; echo -e "Delete Mode\n--------------------\n$(mppc playlist --format "{pos} $seperator {artist} $seperator {title}" | awk -F " $seperator " '{print $1 + 1, ENVIRON["seperator"], $2, ENVIRON["seperator"], $3 }')" | dmenu_t -p "Queue")
+    done < <(export seperator=$seperator; echo -e "Delete Mode\n--------------------\n$(mppc playlist --format "{pos} $seperator {artist} $seperator {title}" | awk -F " $seperator " '{OFS=FS; print $1 + 1, $2, $3 }')" | dmenu_t -p "Queue")
 }
 
 
