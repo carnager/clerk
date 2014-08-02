@@ -188,7 +188,7 @@ infoPrompt () {
         1*) surfraw yubnub allmusic $(mpc current -f %artist%) ;;
         2*) surfraw yubnub allmusic $(mpc current -f %album%) ;;
         3*) surfraw yubnub google $(mpc current -f %title%) $(mpc current -f %artist%) lyrics ;;
-        4*) mpc current --format "Artist: %artist%\nAlbum: %album%\nDate: %date%\nTrack: %track%\nTitle: %title%" | rofi -dmenu -p 'tags' && dplayPrompt;;
+        4*) mpc current --format "Artist: %artist%\nAlbum: %album%\nDate: %date%\nTrack: %track%\nTitle: %title%" | dmenu_t -p 'tags' && dplayPrompt;;
         0*) dplayPrompt ;;
           *) exit
     esac
@@ -310,13 +310,20 @@ dplayQueue () {
             dplayPrompt
         elif [[ "$TRACKDISPLAY" == "Mode: Play" ]]; then
             dplayQueueDelete
+        elif [[ "$TRACKDISPLAY" == "Load Playlist" ]]; then
+            dplayQueueLoad
+        elif [[ "$TRACKDISPLAY" == "Save Playlist" ]]; then
+            dplayQueueSave
         elif [[ "$TRACKDISPLAY" == "Crop Playlist" ]]; then
-            mpc crop
+            mpc crop && dplayQueue
+        elif [[ "$TRACKDISPLAY" == "Clear Playlist" ]]; then
+            mpc clear && dplayQueue
         else
             mpc play $POS;
         fi
-    done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\nMode: Play\n---\nCrop Playlist\n$(mpc playlist --format "%position% $seperator %artist% $seperator %title%")" | dmenu_t -p "Queue")
+    done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\nMode: Play\n---\nLoad Playlist\nSave Playlist\nCrop Playlist\nClear Playlist\n---\n$(mpc playlist --format "%position% $seperator %artist% $seperator %title%")" | dmenu_t -p "Queue")
 }
+
 
 dplayQueueDelete () {
     while read TRACKDISPLAY
@@ -327,14 +334,58 @@ dplayQueueDelete () {
         if [[ "$TRACKDISPLAY" == "0  Return to Main Menu" ]]; then
             dplayPrompt
         elif [[ "$TRACKDISPLAY" == "Mode: Delete" ]]; then
-            dplayQueueCrop
+            dplayQueue
+        elif [[ "$TRACKDISPLAY" == "Save Playlist" ]]; then
+            dplayQueueSave
         elif [[ "$TRACKDISPLAY" == "Crop Playlist" ]]; then
-            mpc crop
+            mpc crop && dplayQueueDelete
+        elif [[ "$TRACKDISPLAY" == "Clear Playlist" ]]; then
+            mpc clear && dplayQueueDelete
         else
             mpc del $POS;
             dplayQueue
         fi
-    done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\nMode: Delete\n---\nCrop Playlist\n$(mpc playlist --format "%position% $seperator %artist% $seperator %title%")" | dmenu_t -p "Queue")
+    done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\nMode: Delete\n---\nSave Playlist\nCrop Playlist\nClear Playlist\n---\n$(mpc playlist --format "%position% $seperator %artist% $seperator %title%")" | dmenu_t -p "Queue")
+}
+
+dplayQueueLoad () {
+    playlist=$(echo -e "0  Return to Playlist Menu\n---\n$(mpc lsplaylists)" | dmenu_t -p "Load Playlist > ")
+    if [[ "$playlist" == "0  Return to Playlist Menu" ]]; then
+        dplayQueue
+    else
+        mpc load "$playlist" && dplayQueue
+    fi
+}
+
+dplayQueueSave () {
+    while read playlists
+    do
+        if [[ "$playlists" == "0  Return to Main Menu" ]]; then
+            dplayPrompt
+        elif [[ "$playlists" == "Save new Playlist" ]]; then
+            playlist=$(echo "" | dmenu_t -p "Type Name for Playlist > ")
+            if [[ "$playlist" == "" ]]; then
+                dplayQueueSave
+            else
+            mpc save "$playlist"
+            dplayQueue
+            fi
+        else
+            playlist=$(echo -e "0  Return to Playlist Menu\n---\nYes\nNo" | dmenu_t -p "Overwrite Playlist? > ")
+            if [[ "$playlist" == "Yes" ]]; then
+                mpc rm "$playlists"
+                mpc save "$playlists"
+            elif [[ "$playlist" == "No" ]]; then
+                playlist=$(echo "" | dmenu_t -p "Type Name for Playlist > ")
+                if [[ "$playlist" == "" ]]; then
+                    dplayQueue
+                else
+                    mpc save "$playlist"
+                    dplayQueue
+                fi
+            fi
+        fi
+    done < <(echo -e "0  Return to Main Menu\n---\nSave new Playlist\n---\n$(mpc lsplaylists)" | dmenu_t -p "Chose Playlist > ")
 }
 
 outputPrompt () {
