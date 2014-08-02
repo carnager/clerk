@@ -306,14 +306,14 @@ dplayQueue () {
         TITLE=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $3 }')
         ARTIST=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $2 }')
         POS=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $1 }')
-        if [[ "$TRACKDISPLAY" == "Return to Main Menu" ]]; then
+        if [[ "$TRACKDISPLAY" == "0  Return to Main Menu" ]]; then
             dplayPrompt
         elif [[ "$TRACKDISPLAY" == "Mode: Play" ]]; then
             dplayQueueDelete
         else
             mpc play $POS;
         fi
-    done < <(export seperator=$seperator; echo -e "Return to Main Menu\n--------------------\nMode: Play\n--------------------\n$(mpc playlist --format "%position% $seperator %artist% $seperator %title%")" | dmenu_t -p "Queue")
+    done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n--------------------\nMode: Play\n--------------------\n$(mpc playlist --format "%position% $seperator %artist% $seperator %title%")" | dmenu_t -p "Queue")
 }
 
 dplayQueueDelete () {
@@ -322,7 +322,7 @@ dplayQueueDelete () {
         TITLE=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $3 }')
         ARTIST=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $2 }')
         POS=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $1 }')
-        if [[ "$TRACKDISPLAY" == "Return to Main Menu" ]]; then
+        if [[ "$TRACKDISPLAY" == "0  Return to Main Menu" ]]; then
             dplayPrompt
         elif [[ "$TRACKDISPLAY" == "Mode: Delete" ]]; then
             dplayQueue
@@ -330,7 +330,7 @@ dplayQueueDelete () {
             mpc del $POS;
             dplayQueueDelete
         fi
-    done < <(export seperator=$seperator; echo -e "Return to Main Menu\n--------------------\nMode: Delete\n--------------------\n$(mpc playlist --format "%position% $seperator %artist% $seperator %title%")" | dmenu_t -p "Queue")
+    done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n--------------------\nMode: Delete\n--------------------\n$(mpc playlist --format "%position% $seperator %artist% $seperator %title%")" | dmenu_t -p "Queue")
 }
 
 
