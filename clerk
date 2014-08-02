@@ -377,7 +377,7 @@ currentAlbumsInsert () {
                 mpc search album "$ALBUM_FINAL" date "$DATE" | mpc insert
             fi
         fi
-    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Insert\n------\n$(mppc search artist "$ARTIST" --format "{date} $seperator {album}" | sort | uniq)" | dmenu_t -p "Albums by $(mpc current --format '%artist%') > ")
+    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Insert\n---\n$(mppc search artist "$ARTIST" --format "{date} $seperator {album}" | sort | uniq)" | dmenu_t -p "Albums by $(mpc current --format '%artist%') > ")
 }
 
 currentAlbumsReplace () {
@@ -395,7 +395,7 @@ currentAlbumsReplace () {
                 mpc clear && mpc search album "$ALBUM_FINAL" date "$DATE" | mpc add && mpc play
             fi
         fi
-    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Replace\n------\n$(mppc search artist "$ARTIST" --format "{date} $seperator {album}" | sort | uniq)" | dmenu_t -p "Albums by $(mpc current --format '%artist%') > ")
+    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Replace\n---\n$(mppc search artist "$ARTIST" --format "{date} $seperator {album}" | sort | uniq)" | dmenu_t -p "Albums by $(mpc current --format '%artist%') > ")
 }
 
 currentTracks () {
@@ -413,7 +413,7 @@ currentTracks () {
                mpc findadd album "$ALBUM" title "$TITLE" track "$TRACKNUMBER"
             fi
         fi
-    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Add\n-----------------\n$(mppc search artist "$(mpc current -f %artist%)" --format "{album} $seperator {track} $seperator {title}")" | dmenu_t -p "Tracks by $(mpc current --format '%artist%') > ")
+    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Add\n---\n$(mppc search artist "$(mpc current -f %artist%)" --format "{album} $seperator {track} $seperator {title}")" | dmenu_t -p "Tracks by $(mpc current --format '%artist%') > ")
 }
 
 currentTracksInsert () {
@@ -431,7 +431,7 @@ currentTracksInsert () {
                 mpc find album "$ALBUM" title "$TITLE" track "$TRACKNUMBER" | mpc insert
             fi
         fi
-    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Insert\n-----------------\n$(mppc search artist "$(mpc current -f %artist%)" --format "{album} $seperator {track} $seperator {title}")" | dmenu_t -p "Tracks by $(mpc current --format '%artist%') > ")
+    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Insert\n---\n$(mppc search artist "$(mpc current -f %artist%)" --format "{album} $seperator {track} $seperator {title}")" | dmenu_t -p "Tracks by $(mpc current --format '%artist%') > ")
 }
 
 
