@@ -310,10 +310,12 @@ dplayQueue () {
             dplayPrompt
         elif [[ "$TRACKDISPLAY" == "Mode: Play" ]]; then
             dplayQueueDelete
+        elif [[ "$TRACKDISPLAY" == "Crop Playlist" ]]; then
+            mpc crop
         else
             mpc play $POS;
         fi
-    done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\nMode: Play\n---\n$(mpc playlist --format "%position% $seperator %artist% $seperator %title%")" | dmenu_t -p "Queue")
+    done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\nMode: Play\n---\nCrop Playlist\n$(mpc playlist --format "%position% $seperator %artist% $seperator %title%")" | dmenu_t -p "Queue")
 }
 
 dplayQueueDelete () {
@@ -325,14 +327,15 @@ dplayQueueDelete () {
         if [[ "$TRACKDISPLAY" == "0  Return to Main Menu" ]]; then
             dplayPrompt
         elif [[ "$TRACKDISPLAY" == "Mode: Delete" ]]; then
-            dplayQueue
+            dplayQueueCrop
+        elif [[ "$TRACKDISPLAY" == "Crop Playlist" ]]; then
+            mpc crop
         else
             mpc del $POS;
-            dplayQueueDelete
+            dplayQueue
         fi
-    done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\nMode: Delete\n---\n$(mpc playlist --format "%position% $seperator %artist% $seperator %title%")" | dmenu_t -p "Queue")
+    done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\nMode: Delete\n---\nCrop Playlist\n$(mpc playlist --format "%position% $seperator %artist% $seperator %title%")" | dmenu_t -p "Queue")
 }
-
 
 outputPrompt () {
     menu="$(echo -e "0  Return to Options Menu\n---\n$(mpc outputs)" | dmenu_t -p "Outputs: > ")";
@@ -868,7 +871,7 @@ elif [[ "$1" == "-show" ]]; then
 elif [[ "$1" == "-lrated" ]]; then
     mpc clear && for ((i=4; i<="5"; i++)); do mpc find comment "$i" | shuf | head -n "$value" | mpc add; done && mpc play
 elif [[ "$1" == "-library" ]]; then
-    browseLib
+    browseArtist
 elif [[ "$1" == "-update" ]]; then
     updateCache
 elif [[ "$1" == "-queue" ]]; then
