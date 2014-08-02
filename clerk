@@ -630,19 +630,29 @@ InsertAlbum() {
 }
 
 ReplaceAlbum() {
+    declare -i seen=0
+    while read TRACK
+    do
+        seen=1
     TRACK=$(echo -e "0  Return to Main Menu\n---\nAdding Mode: Replace\n---\n$(echo "$album_temp")" | dmenu_t -dmenu -p "Choose Album > ")
-if [[ "$TRACK" = "0  Return to Main Menu" ]]
-    then dplayPrompt
-else
-    if [[ "$TRACK" == "Adding Mode: Replace" ]]
-        then AddAlbum
-    else
-        artist=$(echo "$TRACK" | awk -F " $seperator " '{print $1}')
-        date=$(echo "$TRACK" | awk -F " $seperator " '{print $3}')
-        album=$(echo "$TRACK" | awk -F " $seperator " '{print $2}')
-        mpc clear && mpc findadd date "$date" album "$album" $mpd_artist "$artist" && mpc play
+        if [[ "$TRACK" = "0  Return to Main Menu" ]]
+            then dplayPrompt
+        else
+            if [[ "$TRACK" == "Adding Mode: Replace" ]]
+                then AddAlbum
+            else
+                artist=$(echo "$TRACK" | awk -F " $seperator " '{print $1}')
+                date=$(echo "$TRACK" | awk -F " $seperator " '{print $3}')
+                album=$(echo "$TRACK" | awk -F " $seperator " '{print $2}')
+                mpc clear && mpc findadd date "$date" album "$album" $mpd_artist "$artist" && mpc play
+            fi
+        fi
+    done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Replace\n---\n$(echo "$album_temp")" | dmenu_t -dmenu -p "Choose Album > ")
+
+    if [[  $seen = 0 ]]
+    then
+        exit
     fi
-fi
 }
 
 AddTrack() {
