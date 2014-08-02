@@ -77,13 +77,13 @@ dplayPrompt () {
 
 
 playbackPrompt () {
-    menu=("1  Toggle Playback"
+    menu=("0  Return to Main Menu"
+          "--------------------"
+          "1  Toggle Playback"
           "2  Next Song"
           "3  Prev Song"
           "4  Stop"
-          "5  Clear Playlist"
-          "---"
-          "0  back to MPD Menu")
+          "5  Clear Playlist")
 
    prompt() {
         printf "%s\n" "$@" | dmenu_t -p "Playback: > "
@@ -96,7 +96,7 @@ playbackPrompt () {
         4*) mpc stop && playbackPrompt ;;
         5*) mpc clear && dplayPrompt ;;
         0*) dplayPrompt ;;
-        *) dplayPrompt ;;
+        *) exit ;;
     esac
 }
 
@@ -124,10 +124,10 @@ mpds_check="$(ssh $ssh_host -q -t 'bash -c "pgrep mpdscribble"')"
 
 
 currentPrompt () {
-    menu=("1  Albums"
-          "2  Tracks"
-          "---"
-          "0  back to MPD menu")
+    menu=("0  Return to Main Menu"
+          "--------------------"
+          "1  Albums"
+          "2  Tracks")
 
     prompt() {
         printf "%s\n" "$@" | dmenu_t -p "$(mpc current --format '%artist%') > "
@@ -137,12 +137,14 @@ currentPrompt () {
         1*) currentAlbums ;;
         2*) currentTracks ;;
         0*) dplayPrompt ;;
-          *) dplayPrompt
+          *) exit
     esac
 }
 
 ratingPrompt () {
-    menu=("1  Rate current Album"
+    menu=("0  Return to Main Menu"
+          "--------------------"
+          "1  Rate current Album"
           "2  Load Rated Albums"
           "3  Load Random Rated Album"
           "---"
@@ -150,9 +152,7 @@ ratingPrompt () {
           "5  Load Rated Tracks"
           "6  Load Random Rated Tracks"
           "---"
-          "7  Love current Song on LastFM"
-          "---"
-          "0  back to MPD menu")
+          "7  Love current Song on LastFM")
 
     prompt() {
         printf "%s\n" "$@" | dmenu_t -p "Ratings: > "
@@ -167,18 +167,18 @@ ratingPrompt () {
         6*) loadRandomRatedTracks ;;
         7*) lastfm-mpd-cli love > /dev/null && notify-send "MPD" "Loved $(mpc current -f '%title%') on LastFM" ;;
         0*) dplayPrompt ;;
-          *) dplayPrompt
+          *) exit
     esac
 }
 
 
 infoPrompt () {
-    menu=("1  Artist Info"
+    menu=("0  Return to Main Menu"
+          "--------------------"
+          "1  Artist Info"
           "2  Album Info"
           "3  Current Track Lyrics"
-          "4  Show current Tracks Tags"
-          "---"
-          "0  back to MPD menu")
+          "4  Show current Tracks Tags")
 
     prompt() {
         printf "%s\n" "$@" | dmenu_t -p "MPD Menu: > "
@@ -190,7 +190,7 @@ infoPrompt () {
         3*) surfraw yubnub google $(mpc current -f %title%) $(mpc current -f %artist%) lyrics ;;
         4*) mpc current --format "Artist: %artist%\nAlbum: %album%\nDate: %date%\nTrack: %track%\nTitle: %title%" | rofi -dmenu -p 'tags' && dplayPrompt;;
         0*) dplayPrompt ;;
-          *) dplayPrompt
+          *) exit
     esac
 }
 
@@ -232,7 +232,9 @@ mpds_check="$(ssh $ssh_host -q -t 'bash -c "pgrep mpdscribble"')"
     fi
     }
 
-    menu=("1  Random:                 $(echo $random)"
+    menu=("0  Return to Main Menu"
+          "--------------------"
+          "1  Random:                 $(echo $random)"
           "2  Repeat:                 $(echo $repeat)"
           "3  Single Mode:            $(echo $single)"
           "4  Consume Mode:           $(echo $consume)"
@@ -241,9 +243,7 @@ mpds_check="$(ssh $ssh_host -q -t 'bash -c "pgrep mpdscribble"')"
           "---"
           "7  Set Crossfade          $(mpc crossfade | cut -d ':' -f2)"
           "8  Manage Outputs"
-          "9  Number of Random Songs: $(echo $value)"
-          "---"
-          "0  back to MPD Menu")
+          "9  Number of Random Songs: $(echo $value)")
 
      prompt() {
          printf "%s\n" "$@" | dmenu_t -p "MPD Options: > "
@@ -260,7 +260,7 @@ mpds_check="$(ssh $ssh_host -q -t 'bash -c "pgrep mpdscribble"')"
          8*) outputPrompt ;;
          9*) optionRandomPrompt ;;
          0*) dplayPrompt ;;
-           *) dplayPrompt ;;
+           *) exit
     esac
 }
 
@@ -274,27 +274,28 @@ optionRandomPrompt() {
 
 
 crossfadePrompt () {
-    menu=("0"
+    menu=("0: Return to Main Menu"
+          "--------------------"
+          "0"
           "1"
           "2"
           "3"
           "4"
-          "5"
-          "---"
-          "0  back to MPD Options")
+          "5")
 
      prompt() {
          printf "%s\n" "$@" | dmenu_t -p "Crossfade: > "
      }
 
      case "$(prompt "${menu[@]}")" in
-         1) mpc crossfade 1 ;;
-         2) mpc crossfade 2 ;;
-         3) mpc crossfade 3 ;;
-         4) mpc crossfade 4 ;;
-         5) mpc crossfade 5 ;;
+         0) mpc crossfade 0 && dplayOptionsPrompt ;;
+         1) mpc crossfade 1 && dplayOptionsPrompt ;;
+         2) mpc crossfade 2 && dplayOptionsPrompt ;;
+         3) mpc crossfade 3 && dplayOptionsPrompt ;;
+         4) mpc crossfade 4 && dplayOptionsPrompt ;;
+         5) mpc crossfade 5 && dplayOptionsPrompt ;;
          0:*) dplayOptionsPrompt ;;
-           *) dplayOptionsPrompt
+           *) exit
     esac
 }
 
@@ -305,14 +306,14 @@ dplayQueue () {
         TITLE=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $3 }')
         ARTIST=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $2 }')
         POS=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $1 }')
-        if [[ "$TRACKDISPLAY" == "*" ]]; then
+        if [[ "$TRACKDISPLAY" == "Return to Main Menu" ]]; then
             dplayPrompt
-        elif [[ "$TRACKDISPLAY" == "Play Mode" ]]; then
+        elif [[ "$TRACKDISPLAY" == "Mode: Play" ]]; then
             dplayQueueDelete
         else
             mpc play $POS;
         fi
-    done < <(export seperator=$seperator; echo -e "Play Mode\n--------------------\n$(mpc playlist --format "%position% $seperator %artist% $seperator %title%")" | dmenu_t -p "Queue")
+    done < <(export seperator=$seperator; echo -e "Return to Main Menu\n--------------------\nMode: Play\n--------------------\n$(mpc playlist --format "%position% $seperator %artist% $seperator %title%")" | dmenu_t -p "Queue")
 }
 
 dplayQueueDelete () {
@@ -321,22 +322,22 @@ dplayQueueDelete () {
         TITLE=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $3 }')
         ARTIST=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $2 }')
         POS=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $1 }')
-        if [[ "$TRACKDISPLAY" == "" ]]; then
+        if [[ "$TRACKDISPLAY" == "Return to Main Menu" ]]; then
             dplayPrompt
-        elif [[ "$TRACKDISPLAY" == "Delete Mode" ]]; then
+        elif [[ "$TRACKDISPLAY" == "Mode: Delete" ]]; then
             dplayQueue
         else
             mpc del $POS;
             dplayQueueDelete
         fi
-    done < <(export seperator=$seperator; echo -e "Delete Mode\n--------------------\n$(mpc playlist --format "%position% $seperator %artist% $seperator %title%")" | dmenu_t -p "Queue")
+    done < <(export seperator=$seperator; echo -e "Return to Main Menu\n--------------------\nMode: Delete\n--------------------\n$(mpc playlist --format "%position% $seperator %artist% $seperator %title%")" | dmenu_t -p "Queue")
 }
 
 
 outputPrompt () {
-    menu="$(echo -e "$(mpc outputs)" | dmenu_t -p "Outputs: > ")";
-    if [[ "$menu" == "" ]]
-        then dplayPrompt;
+    menu="$(echo -e "0  Return to Options Menu\n--------------------\n$(mpc outputs)" | dmenu_t -p "Outputs: > ")";
+    if [[ "$menu" == "0  Return to Options Menu" ]]
+        then dplayOptionsPrompt;
     else
         mpc toggleoutput $(echo "$menu" | awk '{print $2}');
         notify-send "MPD" "$(echo "$menu" | sed -e 's/enabled$/disabled/;ta;s/disabled$/enabled/;:a;')";
@@ -349,7 +350,8 @@ currentAlbums () {
     do
         ALBUM_FINAL=$(echo "$ALBUM" | awk -F " $seperator " '{print $2}')
         DATE=$(echo "$ALBUM" | awk -F " $seperator " '{print $1}')
-        if [[ "$ALBUM" == "" ]]; then currentPrompt;
+        if [[ "$ALBUM" == "0  Return to current Artist Menu" ]]; then
+            currentPrompt;
         else
             if [[ "$ALBUM" == "Adding Mode: Add" ]]; then
                 currentAlbumsInsert
@@ -357,7 +359,7 @@ currentAlbums () {
                 mpc search album "$ALBUM_FINAL" date "$DATE" | mpc add
             fi
        fi
-    done < <(echo -e "Adding Mode: Add\n--------------------\n$(mppc search artist "$ARTIST" --format "{date} $seperator {album}" | sort | uniq)" | dmenu_t -p "Albums by $(mpc current --format '%artist%') > ")
+    done < <(echo -e "0  Return to current Artist Menu\n--------------------\nAdding Mode: Add\n--------------------\n$(mppc search artist "$ARTIST" --format "{date} $seperator {album}" | sort | uniq)" | dmenu_t -p "Albums by $(mpc current --format '%artist%') > ")
 }
 
 currentAlbumsInsert () {
@@ -366,7 +368,8 @@ currentAlbumsInsert () {
     do
         ALBUM_FINAL=$(echo "$ALBUM" | awk -F " $seperator " '{print $2}')
         DATE=$(echo "$ALBUM" | awk -F " $seperator " '{print $1}')
-        if [[ "$ALBUM" == "" ]]; then currentPrompt;
+        if [[ "$ALBUM" == "0  Return to current Artist Menu" ]]; then
+            currentPrompt;
         else
             if [[ "$ALBUM" == "Adding Mode: Insert" ]]; then
                 currentAlbumsReplace
@@ -374,7 +377,7 @@ currentAlbumsInsert () {
                 mpc search album "$ALBUM_FINAL" date "$DATE" | mpc insert
             fi
         fi
-    done < <(echo -e "Adding Mode: Insert\n-----------------------\n$(mppc search artist "$ARTIST" --format "{date} $seperator {album}" | sort | uniq)" | dmenu_t -p "Albums by $(mpc current --format '%artist%') > ")
+    done < <(echo -e "0  Return to current Artist Menu\n--------------------\nAdding Mode: Insert\n-----------------------\n$(mppc search artist "$ARTIST" --format "{date} $seperator {album}" | sort | uniq)" | dmenu_t -p "Albums by $(mpc current --format '%artist%') > ")
 }
 
 currentAlbumsReplace () {
@@ -383,7 +386,8 @@ currentAlbumsReplace () {
     do
         ALBUM_FINAL=$(echo "$ALBUM" | awk -F " $seperator " '{print $2}')
         DATE=$(echo "$ALBUM" | awk -F " $seperator " '{print $1}')
-        if [[ "$ALBUM" == "" ]]; then currentPrompt;
+        if [[ "$ALBUM" == "0  Return to current Artist Menu" ]]; then
+            currentPrompt;
         else
             if [[ "$ALBUM" == "Adding Mode: Replace" ]]; then
                 currentAlbums
@@ -391,7 +395,7 @@ currentAlbumsReplace () {
                 mpc clear && mpc search album "$ALBUM_FINAL" date "$DATE" | mpc add && mpc play
             fi
         fi
-    done < <(echo -e "Adding Mode: Replace\n-----------------------\n$(mppc search artist "$ARTIST" --format "{date} $seperator {album}" | sort | uniq)" | dmenu_t -p "Albums by $(mpc current --format '%artist%') > ")
+    done < <(echo -e "0  Return to current Artist Menu\n--------------------\nAdding Mode: Replace\n-----------------------\n$(mppc search artist "$ARTIST" --format "{date} $seperator {album}" | sort | uniq)" | dmenu_t -p "Albums by $(mpc current --format '%artist%') > ")
 }
 
 currentTracks () {
@@ -400,7 +404,8 @@ currentTracks () {
        TITLE=$(echo "$TRACK" | awk -F " $seperator " '{print $3}')
        ALBUM=$(echo "$TRACK" | awk -F " $seperator " '{print $1}')
        TRACKNUMBER=$(echo "$TRACK" | awk -F " $seperator " '{print $2}')
-       if [ "$TRACK" = "" ]; then currentPrompt;
+       if [ "$TRACK" = "0  Return to current Artist Menu" ]; then
+           currentPrompt;
        else
            if [[ "$TRACK" == "Adding Mode: Add" ]]; then
                currentTracksInsert
@@ -408,7 +413,7 @@ currentTracks () {
                mpc findadd album "$ALBUM" title "$TITLE" track "$TRACKNUMBER"
             fi
         fi
-    done < <(echo -e "Adding Mode: Add\n-----------------\n$(mppc search artist "$(mpc current -f %artist%)" --format "{album} $seperator {track} $seperator {title}")" | dmenu_t -p "Tracks by $(mpc current --format '%artist%') > ")
+    done < <(echo -e "0  Return to current Artist Menu\n--------------------\nAdding Mode: Add\n-----------------\n$(mppc search artist "$(mpc current -f %artist%)" --format "{album} $seperator {track} $seperator {title}")" | dmenu_t -p "Tracks by $(mpc current --format '%artist%') > ")
 }
 
 currentTracksInsert () {
@@ -417,7 +422,8 @@ currentTracksInsert () {
         TITLE=$(echo "$TRACK" | awk -F " $seperator " '{print $3}')
         ALBUM=$(echo "$TRACK" | awk -F " $seperator " '{print $1}')
         TRACKNUMBER=$(echo "$TRACK" | awk -F " $seperator " '{print $2}')
-        if [ "$TRACK" = "" ]; then currentPrompt;
+        if [ "$TRACK" = "0  Return to current Artist Menu" ]; then
+            currentPrompt;
         else
             if [[ "$TRACK" == "Adding Mode: Insert" ]]; then
                 currentTracks
@@ -425,7 +431,7 @@ currentTracksInsert () {
                 mpc find album "$ALBUM" title "$TITLE" track "$TRACKNUMBER" | mpc insert
             fi
         fi
-    done < <(echo -e "Adding Mode: Insert\n-----------------\n$(mppc search artist "$(mpc current -f %artist%)" --format "{album} $seperator {track} $seperator {title}")" | dmenu_t -p "Tracks by $(mpc current --format '%artist%') > ")
+    done < <(echo -e "0  Return to current Artist Menu\n--------------------\nAdding Mode: Insert\n-----------------\n$(mppc search artist "$(mpc current -f %artist%)" --format "{album} $seperator {track} $seperator {title}")" | dmenu_t -p "Tracks by $(mpc current --format '%artist%') > ")
 }
 
 
@@ -528,7 +534,7 @@ playRandomTracks () {
 AddAlbum() {
     while read TRACK
     do
-        if [[ "$TRACK" = "" ]]
+        if [[ "$TRACK" = "0  Return to Main Menu" ]]
             then dplayPrompt
         else
             if [[ "$TRACK" == "Adding Mode: Add" ]]
@@ -540,13 +546,13 @@ AddAlbum() {
                 mppc searchadd date "$date" album "$album" $mpd_artist "$artist"
             fi
         fi
-    done < <(echo -e "Adding Mode: Add\n----------------\n$(echo "$album_temp")" | dmenu_t -dmenu -p "Choose Album > ")
+    done < <(echo -e "0  Return to Main Menu\n--------------------\nAdding Mode: Add\n----------------\n$(echo "$album_temp")" | dmenu_t -dmenu -p "Choose Album > ")
 }
 
 InsertAlbum() {
     while read TRACK
     do
-        if [[ "$TRACK" = "" ]]
+        if [[ "$TRACK" = "0  Return to Main Menu" ]]
             then dplayPrompt
         else
             if [[ "$TRACK" == "Adding Mode: Insert" ]]
@@ -558,12 +564,12 @@ InsertAlbum() {
                 mpc search date "$date" album "$album" $mpd_artist "$artist" | mpc insert
             fi
         fi
-    done < <(echo -e "Adding Mode: Insert\n----------------\n$(echo "$album_temp")" | dmenu_t -dmenu -p "Choose Album > ")
+    done < <(echo -e "0  Return to Main Menu\n--------------------\nAdding Mode: Insert\n----------------\n$(echo "$album_temp")" | dmenu_t -dmenu -p "Choose Album > ")
 }
 
 ReplaceAlbum() {
-    TRACK=$(echo -e "Adding Mode: Replace\n----------------\n$(echo "$album_temp")" | dmenu_t -dmenu -p "Choose Album > ")
-if [[ "$TRACK" = "" ]]
+    TRACK=$(echo -e "0  Return to Main Menu\n--------------------\nAdding Mode: Replace\n----------------\n$(echo "$album_temp")" | dmenu_t -dmenu -p "Choose Album > ")
+if [[ "$TRACK" = "0  Return to Main Menu" ]]
     then dplayPrompt
 else
     if [[ "$TRACK" == "Adding Mode: Replace" ]]
@@ -580,7 +586,7 @@ fi
 AddTrack() {
     while read TRACK
     do
-        if [[ "$TRACK" == "" ]]
+        if [[ "$TRACK" == "0  Return to Main Menu" ]]
             then dplayPrompt
         else
             if [[ "$TRACK" == "Adding Mode: Add" ]]
@@ -593,13 +599,13 @@ AddTrack() {
                 mpc findadd artist "$artist" album "$album" title "$title"
             fi
         fi
-    done < <(echo -e "Adding Mode: Add\n-----------------\n$(echo "$tracks_temp")"| dmenu_t -dmenu -p "Choose Track > ")
+    done < <(echo -e "0  Return to Main Menu\n--------------------\nAdding Mode: Add\n-----------------\n$(echo "$tracks_temp")"| dmenu_t -dmenu -p "Choose Track > ")
 }
 
 InsertTrack() {
     while read TRACK
     do
-        if [[ "$TRACK" == "" ]]
+        if [[ "$TRACK" == "0  Return to Main Menu" ]]
             then dplayPrompt
         else
             if [[ "$TRACK" == "Adding Mode: Insert" ]]
@@ -612,13 +618,13 @@ InsertTrack() {
                 mpc find artist "$artist" album "$album" title "$title" | mpc insert
             fi
         fi
-    done < <(echo -e "Adding Mode: Insert\n-----------------\n$(echo "$tracks_temp")"| dmenu_t -dmenu -p "Choose Track > ")
+    done < <(echo -e "0  Return to Main Menu\n--------------------\nAdding Mode: Insert\n-----------------\n$(echo "$tracks_temp")"| dmenu_t -dmenu -p "Choose Track > ")
 }
 
 
 browseDate() {
-    date=$(mpc list date | tac | dmenu_t -dmenu -p "Choose Date > ")
-    if [[ "$date" == "" ]]
+    date=$(echo -e "0  Return to Main Menu\n--------------------\n$(mpc list date | tac)" | dmenu_t -dmenu -p "Choose Date > ")
+    if [[ "$date" == "0  Return to Main Menu" ]]
         then dplayPrompt
     else
         browseDateAdd
@@ -628,7 +634,7 @@ browseDate() {
 browseDateAdd() {
     while read select
     do
-        if [[ "$select" == "" ]]
+        if [[ "$select" == "0  Return to Date Menu" ]]
             then browseDate
         else
             artist=$(echo "$select" | awk -F " $seperator " '{print $1}')
@@ -643,13 +649,13 @@ browseDateAdd() {
                 mpc findadd artist "$artist" album "$album"
             fi
         fi
-    done < <(echo -e "Adding Mode: Add\n--------------------\nAdd All\nReplace All\n--------------------\n$(mppc find date "$date" --format "{$mpd_artist} $seperator {album}" | uniq)" | dmenu_t -dmenu -p "Select Album > ")
+    done < <(echo -e "0  Return to Date Menu\n--------------------\nAdding Mode: Add\n--------------------\nAdd All\nReplace All\n--------------------\n$(mppc find date "$date" --format "{$mpd_artist} $seperator {album}" | uniq)" | dmenu_t -dmenu -p "Select Album > ")
 }
 
 browseDateInsert() {
     while read select
     do
-        if [[ "$select" == "" ]]
+        if [[ "$select" == "0  Return to Date Menu" ]]
             then browseDate
         else
             artist=$(echo "$select" | awk -F " $seperator " '{print $1}')
@@ -664,13 +670,13 @@ browseDateInsert() {
                 mpc find artist "$artist" album "$album" | mpc insert
             fi
         fi
-    done < <(echo -e "Adding Mode: Insert\n--------------------\nAdd All\nReplace All\n--------------------\n$(mppc find date "$date" --format "{$mpd_artist} $seperator {album}" | uniq)" | dmenu_t -dmenu -p "Select Album > ")
+    done < <(echo -e "0  Return to Date Menu\n--------------------\nAdding Mode: Insert\n--------------------\nAdd All\nReplace All\n--------------------\n$(mppc find date "$date" --format "{$mpd_artist} $seperator {album}" | uniq)" | dmenu_t -dmenu -p "Select Album > ")
 }
 
 browseDateReplace() {
     while read select
     do
-        if [[ "$select" == "" ]]
+        if [[ "$select" == "0  Return to Date Menu" ]]
             then browseDate
         else
             artist=$(echo "$select" | awk -F " $seperator " '{print $1}')
@@ -685,47 +691,45 @@ browseDateReplace() {
                 mpc clear && mpc find artist "$artist" album "$album" && mpc play
             fi
         fi
-    done < <(echo -e "Adding Mode: Replace\n--------------------\nAdd All\nReplace All\n--------------------\n$(mppc find date "$date" --format "{$mpd_artist} $seperator {album}" | uniq)" | dmenu_t -dmenu -p "Select Album > ")
+    done < <(echo -e "0  Return to Date Menu\n--------------------\nAdding Mode: Replace\n--------------------\nAdd All\nReplace All\n--------------------\n$(mppc find date "$date" --format "{$mpd_artist} $seperator {album}" | uniq)" | dmenu_t -dmenu -p "Select Album > ")
 }
 
 
 
 browseLibPrompt() {
-    menu=("1  Browse by Artist"
+    menu=("0  Return to Main Menu"
+          "--------------------"
+          "1  Browse by Artist"
           "2  Browse by Date"
           "---"
           "3  Choose Albums"
           "4  Choose Track"
           "---"
-          "5  Update Album/Track Cache"
-          "---"
-          "0  back to mpd menu")
+          "5  Update Album/Track Cache")
 
     prompt() {
         printf "%s\n" "$@" | dmenu_t -p "Testing Menu: > "
     }
 
     case "$(prompt "${menu[@]}")" in
-        1*) browseLib ;;
+        1*) browseArtist ;;
         2*) browseDate ;;
         3*) AddAlbum ;;
         4*) AddTrack ;;
         5*) updateCache && browseLibPrompt ;;
         0*) dplayPrompt ;;
-        *) dplayPrompt
+        *) exit
     esac
 }
 
 
-browseLib() {
-
     browseAlbum() {
         ALBUMS=$(mppc list album "$ARTIST")
-        ALBUM=$(echo -e "Replace All\nAdd All\nInsert All\n--------------------------\n$(mppc find artist "$ARTIST" --format "{date} $seperator {album}" | sort | uniq)" | dmenu_t -dmenu -p "Choose Album > ")
+        ALBUM=$(echo -e "0  Return to Artist Menu\n--------------------\nReplace All\nAdd All\nInsert All\n--------------------------\n$(mppc find artist "$ARTIST" --format "{date} $seperator {album}" | sort | uniq)" | dmenu_t -dmenu -p "Choose Album > ")
         ALBUM_FINAL=$(echo "$ALBUM" | awk -F " $seperator " '{ print $2 }')
         DATE=$(echo "$ALBUM" | awk -F " $seperator " '{ print $1 }')
-        if [[ "$ALBUM" = "" ]]
-            then dplayPrompt
+        if [[ "$ALBUM" = "0  Return to Artist Menu" ]]
+            then browseArtist
         elif [[ "$ALBUM" = "Replace All" ]]
             then mpc clear && mppc findadd artist "$ARTIST" && mpc play
         elif [[ "$ALBUM" = "Add All" ]]
@@ -740,8 +744,8 @@ browseLib() {
     browseTrack() {
         while read TRACK
         do
-            TRACKFINAL=$(echo "$TRACK" | awk -F " $seperator " '{ print $2}')
-            if [[ "$TRACK" = "" ]]
+            TRACKFINAL=$(echo "$TRACK" | awk -F " $seperator " '{ print $2 }')
+            if [[ "$TRACK" = "0  Return to Album Menu" ]]
                 then browseAlbum
             elif [[ "$TRACK" = "Replace All" ]]
                 then mpc clear && mppc findadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" && mpc play
@@ -756,13 +760,13 @@ browseLib() {
                     mppc findadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL"
                 fi
             fi
-        done < <(echo -e "Replace All\nAdd All\nInsert All\n--------------------------\n$(mppc find artist "$ARTIST" album "$ALBUM_FINAL" --format "{track} $seperator {title}")" | dmenu_t -dmenu -p "Chose Track > ")
+        done < <(echo -e "0  Return to Album Menu\n--------------------\nReplace All\nAdd All\nInsert All\n--------------------------\n$(mppc find artist "$ARTIST" album "$ALBUM_FINAL" --format "{track} $seperator {title}")" | dmenu_t -dmenu -p "Chose Track > ")
     }
 
     browseArtist() {
-        ARTIST=$(echo -e "Add All\nInsert all\nReplace all\n--------------------------\n$(mppc list artist)" | dmenu_t -dmenu -p "Choose Artist > ")
+        ARTIST=$(echo -e "0  Return to Main Menu\n--------------------\nAdd All\nInsert all\nReplace all\n--------------------------\n$(mppc list artist)" | dmenu_t -dmenu -p "Choose Artist > ")
         export ARTIST="$ARTIST"
-        if [[ "$ARTIST" = "" ]]
+        if [[ "$ARTIST" = "0  Return to Main Menu" ]]
             then dplayPrompt
         elif [[ "$ARTIST" = "Replace All" ]]
             then mpc clear && mpc add / && mpc play
@@ -773,8 +777,6 @@ browseLib() {
         else
             browseAlbum
         fi
-}
-browseArtist
 }
 
 ################################################################################
