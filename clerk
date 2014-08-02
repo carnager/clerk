@@ -827,26 +827,37 @@ fi
 
 
 if [[ "$1" == "-h" ]]; then
+    echo "---"
     echo "clerk: the mpd UI that needs typing"
     echo "Copyright © 2013 - 2014 Rasmus Steinke"
-    echo ""
+    echo "---"
     echo "Options"
+    echo ""
+    echo "General"
     echo "  -h         this help message"
-    echo "  -a         add album()"
-    echo "  -ai        insert album()"
-    echo "  -ar        replace album()"
-    echo "  -t         add track()"
-    echo "  -ti        insert track()"
-    echo "  -rate      show rating prompt"
-    echo "  -rtrack    rate current track"
-    echo "  -ra        play random album"
-    echo "  -rs        play x random songs (defined with "value" variable)"
     echo "  -show      show currently playing track"
-    echo "  -queue     show current playlist"
-    echo "  -queuedl   remove items from current playlist"
-    echo "  -lrated    add x random tracks with rating >=4"
-    echo "  -library   browse the library"
     echo "  -update    update album/track caches"
+    echo ""
+    echo "Library"
+    echo "  -library   browse library"
+    echo "  -a         add album"
+    echo "  -ai        insert album"
+    echo "  -ar        replace album"
+    echo "  -ra        play random album"
+    echo "  -rs        play random songs"
+    echo "  -t         add track"
+    echo "  -ti        insert track"
+    echo ""
+    echo "Playlist"
+    echo "  -queue     show current queue"
+    echo "  -queuedl   delete items from current queue"
+    echo ""
+    echo "Ratings"
+    echo "  -rate      show rating prompt"
+    echo "  -ralbum    rate current album"
+    echo "  -rtrack    rate current track"
+    echo "  -lrated    add x random tracks with rating >=4"
+
 
 elif [[ "$1" == "-a" ]]; then
     AddAlbum
@@ -858,6 +869,8 @@ elif [[ "$1" == "-t" ]]; then
     AddTrack
 elif [[ "$1" == "-ti" ]]; then
     InsertTrack
+elif [[ "$1" == "-ralbum" ]]; then
+    rateAlbum
 elif [[ "$1" == "-rate" ]]; then
     ratingPrompt
 elif [[ "$1" == "-rtrack" ]]; then
