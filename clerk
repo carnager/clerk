@@ -306,12 +306,32 @@ dplayQueue () {
         ARTIST=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $2 }')
         POS=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $1 }')
         TRUE_POS=$(echo $(( $POS + 1 )))
-        if [[ "$TRACKDISPLAY" == "" ]]; then
+        if [[ "$TRACKDISPLAY" == "*" ]]; then
             dplayPrompt
+        elif [[ "$TRACKDISPLAY" == "Play Mode" ]]; then
+            dplayQueueDelete
         else
             mpc play $TRUE_POS;
         fi
-    done < <(mppc playlist --format "{pos} $seperator {artist} $seperator {title}"| dmenu_t)
+    done < <(echo -e "Play Mode\n--------------------\n$(mppc playlist --format "{pos} $seperator {artist} $seperator {title}")" | dmenu_t)
+}
+
+dplayQueueDelete () {
+    while read TRACKDISPLAY
+    do
+        TITLE=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $3 }')
+        ARTIST=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $2 }')
+        POS=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $1 }')
+        TRUE_POS=$(echo $(( $POS + 1 )))
+        if [[ "$TRACKDISPLAY" == "" ]]; then
+            dplayPrompt
+        elif [[ "$TRACKDISPLAY" == "Delete Mode" ]]; then
+            dplayQueue
+        else
+            mpc del $TRUE_POS;
+            dplayQueueDelete
+        fi
+    done < <(echo -e "Delete Mode\n--------------------\n$(mppc playlist --format "{pos} $seperator {artist} $seperator {title}")" | dmenu_t)
 }
 
 
@@ -796,6 +816,7 @@ if [[ "$1" == "-h" ]]; then
     echo "  -rs        play x random songs (defined with "value" variable)"
     echo "  -show      show currently playing track"
     echo "  -queue     show current playlist"
+    echo "  -queuedl   remove items from current playlist"
     echo "  -lrated    add x random tracks with rating >=4"
     echo "  -library   browse the library"
     echo "  -update    update album/track caches"
@@ -828,6 +849,8 @@ elif [[ "$1" == "-update" ]]; then
     updateCache
 elif [[ "$1" == "-queue" ]]; then
     dplayQueue
+elif [[ "$1" == "-queuedl" ]]; then
+    dplayQueueDelete
 else
 dplayPrompt
 fi
