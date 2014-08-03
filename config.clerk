@@ -1,6 +1,10 @@
 # set backend, valid choices: rofi, dmenu, slmenu
 backend=rofi
 
+# custom rofi settings (rofi reads settings from ~/.Xresources)
+# but you can override settings here.
+# rofiopts="-width 35 -padding 12 -lines 40"
+
 # path to your music
 music_path="/path/to/music_directory"
 
