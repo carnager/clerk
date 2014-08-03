@@ -641,7 +641,7 @@ ReplaceAlbum() {
             then dplayPrompt
         else
             if [[ "$TRACK" == "Adding Mode: Replace" ]]
-                then AddAlbum
+                then albumFlatAdd
             else
                 artist=$(echo "$TRACK" | awk -F " $seperator " '{print $1}')
                 date=$(echo "$TRACK" | awk -F " $seperator " '{print $3}')
@@ -656,6 +656,71 @@ ReplaceAlbum() {
         exit
     fi
 }
+
+albumFlatAdd () {
+    declare -i seen=0
+    while read TRACK
+    do
+        seen=1
+        if [[ "$TRACK" == "0  Return to Main Menu" ]]; then
+            dplayPrompt
+        else
+            if [[ "$TRACK" == "Adding Mode: Flat Add" ]]; then
+                albumFlatInsert
+            else
+                mpc findadd album "$TRACK"
+            fi
+        fi
+    done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Flat Add\n---\n$(mpc list album)" | dmenu_t -dmenu -p "Choose Album > ")
+
+    if [[ $seen = 0 ]]; then
+        exit
+    fi
+}
+
+albumFlatInsert () {
+    declare -i seen=0
+    while read TRACK
+    do
+        seen=1
+        if [[ "$TRACK" == "0  Return to Main Menu" ]]; then
+            dplayPrompt
+        else
+            if [[ "$TRACK" == "Adding Mode: Flat Insert" ]]; then
+                albumFlatReplace
+            else
+                mpc find album "$TRACK" | mpc insert
+            fi
+        fi
+    done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Flat Insert\n---\n$(mpc list album)" | dmenu_t -dmenu -p "Choose Album > ")
+
+    if [[ $seen = 0 ]]; then
+        exit
+    fi
+}
+
+albumFlatReplace () {
+    declare -i seen=0
+    while read TRACK
+    do
+        seen=1
+        if [[ "$TRACK" == "0  Return to Main Menu" ]]; then
+            dplayPrompt
+        else
+            if [[ "$TRACK" == "Adding Mode: Flat Replace" ]]; then
+                AddAlbum
+            else
+                mpc clear && mpc findadd album "$TRACK" && mpc play
+            fi
+        fi
+    done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Flat Replace\n---\n$(mpc list album)" | dmenu_t -dmenu -p "Choose Album > ")
+
+    if [[ $seen = 0 ]]; then
+        exit
+    fi
+}
+
+
 
 AddTrack() {
     while read TRACK
@@ -804,7 +869,7 @@ browseLibPrompt() {
     case "$(prompt "${menu[@]}")" in
         1*) browseArtist ;;
         2*) browseDate ;;
-        3*) AddAlbum ;;
+        3*) $AddAlbum ;;
         4*) AddTrack ;;
         5*) updateCache && browseLibPrompt ;;
         0*) dplayPrompt ;;
