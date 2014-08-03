@@ -815,7 +815,7 @@ InsertTrackFlat() {
             then dplayPrompt
         else
             if [[ "$TRACK" == "Adding Mode: Insert Flat" ]]
-                then AddAlbumTags
+                then AddTrackTags
             else
                 mpc insert "$TRACK"
             fi
