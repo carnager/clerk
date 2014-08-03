@@ -23,6 +23,10 @@ seperator=•
 # use artist or albumartist for album ratings
 mpd_artist=albumartist
 
+# if you have missing tags and experience non-adding albums, set this
+# # to "albumFlatAdd", otherwise leave the default of "AddAlbum"
+AddAlbum="AddAlbum"
+
 # Fill these if mpdscribble runs on a different host
 # set to 0 if mpdscribble runs locally
 ssh_lastfm=1
