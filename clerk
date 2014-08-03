@@ -155,7 +155,9 @@ ratingPrompt () {
           "5  Load Rated Tracks"
           "6  Load Random Rated Tracks"
           "---"
-          "7  Love current Song on LastFM")
+          "7  Maximum Albums Rating:  $(echo $maxratings)"
+          "---"
+          "8  Love current Song on LastFM")
 
     prompt() {
         printf "%s\n" "$@" | dmenu_t -p "Ratings: > "
@@ -168,7 +170,8 @@ ratingPrompt () {
         4*) rateTrack ;;
         5*) loadRatedTracks ;;
         6*) loadRandomRatedTracks ;;
-        7*) lastfm-mpd-cli love > /dev/null && notify-send "MPD" "Loved $(mpc current -f '%title%') on LastFM" ;;
+        7*) optionsRatingPrompt ;;
+        8*) lastfm-mpd-cli love > /dev/null && notify-send "MPD" "Loved $(mpc current -f '%title%') on LastFM" ;;
         0*) dplayPrompt ;;
           *) exit
     esac
@@ -246,8 +249,7 @@ mpds_check="$(ssh $ssh_host -q -t 'bash -c "pgrep mpdscribble"')"
           "---"
           "7  Set Crossfade          $(mpc crossfade | cut -d ':' -f2)"
           "8  Manage Outputs"
-          "9  Number of Random Songs: $(echo $value)"
-          "r  Maximum Albums Rating:  $(echo $maxratings)")
+          "9  Number of Random Songs: $(echo $value)")
 
      prompt() {
          printf "%s\n" "$@" | dmenu_t -p "MPD Options: > "
@@ -263,7 +265,6 @@ mpds_check="$(ssh $ssh_host -q -t 'bash -c "pgrep mpdscribble"')"
          7*) crossfadePrompt ;;
          8*) outputPrompt ;;
          9*) optionRandomPrompt ;;
-         r*) optionsRatingPrompt ;;
          0*) dplayPrompt ;;
            *) exit
     esac
@@ -280,7 +281,7 @@ optionsRatingPrompt() {
     number="$(echo " " | dmenu_t -p 'Set Maximum Rating for Albums: > ')"
     sed -i "s/maxratings=.*/maxratings="$number"/" $HOME/.config/clerk/config
     export maxratings="$number"
-    dplayOptionsPrompt
+    ratingPrompt
 }
 
 
