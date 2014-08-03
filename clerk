@@ -1054,13 +1054,13 @@ if [[ "$1" == "-h" ]]; then
 
 
 elif [[ "$1" == "-a" ]]; then
-    AddAlbum
+    $AddAlbum
 elif [[ "$1" == "-ai" ]]; then
     InsertAlbum
 elif [[ "$1" == "-ar" ]]; then
     ReplaceAlbum
 elif [[ "$1" == "-t" ]]; then
-    AddTrack
+    $AddTrack
 elif [[ "$1" == "-ti" ]]; then
     InsertTrack
 elif [[ "$1" == "-ralbum" ]]; then
