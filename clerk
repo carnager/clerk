@@ -246,7 +246,8 @@ mpds_check="$(ssh $ssh_host -q -t 'bash -c "pgrep mpdscribble"')"
           "---"
           "7  Set Crossfade          $(mpc crossfade | cut -d ':' -f2)"
           "8  Manage Outputs"
-          "9  Number of Random Songs: $(echo $value)")
+          "9  Number of Random Songs: $(echo $value)"
+          "r  Maximum Albums Rating:  $(echo $maxratings)")
 
      prompt() {
          printf "%s\n" "$@" | dmenu_t -p "MPD Options: > "
@@ -262,6 +263,7 @@ mpds_check="$(ssh $ssh_host -q -t 'bash -c "pgrep mpdscribble"')"
          7*) crossfadePrompt ;;
          8*) outputPrompt ;;
          9*) optionRandomPrompt ;;
+         r*) optionsRatingPrompt ;;
          0*) dplayPrompt ;;
            *) exit
     esac
@@ -274,6 +276,12 @@ optionRandomPrompt() {
     dplayOptionsPrompt
 }
 
+optionsRatingPrompt() {
+    number="$(echo " " | dmenu_t -p 'Set Maximum Rating for Albums: > ')"
+    sed -i "s/maxratings=.*/maxratings="$number"/" $HOME/.config/clerk/config
+    export maxratings="$number"
+    dplayOptionsPrompt
+}
 
 
 crossfadePrompt () {
