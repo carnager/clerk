@@ -898,7 +898,7 @@ browseArtist() {
 
 if [[ "$backend" == "rofi" ]]
     then function dmenu_t () {
-    rofi -dmenu "$@"
+    rofi -dmenu $(echo "$rofiopts") "$@"
 }
 
 elif [[ "$backend" == "dmenu" ]]
