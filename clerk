@@ -504,7 +504,7 @@ rateAlbum () {
         else echo " "
         fi
         rm -f rating.txt
-        echo "$ratings/$maxrating" > rating.txt
+        echo "$ratings/$maxratings" > rating.txt
         echo "$(mpc current -f "%$mpd_artist%")" >> rating.txt
         echo "$(mpc current -f '%album%')" >> rating.txt
         echo "$(mpc current -f '%date%')" >> rating.txt
