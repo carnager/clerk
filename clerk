@@ -184,7 +184,7 @@ infoPrompt () {
           "1  Artist Info"
           "2  Album Info"
           "3  Current Track Lyrics"
-          "4  Show current Tracks Tags")
+          "4  Current Track Tags")
 
     prompt() {
         printf "%s\n" "$@" | dmenu_t -p "MPD Menu: > "
@@ -194,13 +194,15 @@ infoPrompt () {
         1*) surfraw yubnub allmusic $(mpc current -f %artist%) ;;
         2*) surfraw yubnub allmusic $(mpc current -f %album%) ;;
         3*) surfraw yubnub google $(mpc current -f %title%) $(mpc current -f %artist%) lyrics ;;
-        4*) mpc current --format "Artist: %artist%\nAlbum: %album%\nDate: %date%\nTrack: %track%\nTitle: %title%" | dmenu_t -p 'tags' && dplayPrompt;;
+        4*) currentTag ;;
         0*) dplayPrompt ;;
           *) exit
     esac
 }
 
-
+currentTag () {
+    mpc current --format "Artist: %artist%\nAlbum: %album%\nDate: %date%\nTrack: %track%\nTitle: %title%" | dmenu_t -p 'Tags > ' && dplayPrompt
+}
 
 dplayOptionsPrompt () {
 export status="$(mpc status)"
@@ -1083,7 +1085,7 @@ elif [[ "$1" == "-ra" ]]; then
 elif [[ "$1" == "-rs" ]]; then
     playRandomTracks
 elif [[ "$1" == "-show" ]]; then
-    notify-send "$(mpc current --format '%artist% - %title%')" "$(mpc current --format '\n%date% %album%')"
+   currentTag
 elif [[ "$1" == "-lrated" ]]; then
     mpc clear && for ((i=4; i<="5"; i++)); do mpc find comment "$i" | shuf | head -n "$value" | mpc add; done && mpc play
 elif [[ "$1" == "-library" ]]; then
