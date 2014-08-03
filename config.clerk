@@ -5,6 +5,9 @@ backend=rofi
 # but you can override settings here.
 # rofiopts="-width 35 -padding 12 -lines 40"
 
+# maximum rating for album ratings
+maxratings=10
+
 # path to your music
 music_path="/path/to/music_directory"
 

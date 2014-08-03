@@ -504,7 +504,7 @@ rateAlbum () {
         else echo " "
         fi
         rm -f rating.txt
-        echo "$ratings/10" > rating.txt
+        echo "$ratings/$maxrating" > rating.txt
         echo "$(mpc current -f "%$mpd_artist%")" >> rating.txt
         echo "$(mpc current -f '%album%')" >> rating.txt
         echo "$(mpc current -f '%date%')" >> rating.txt
@@ -532,14 +532,14 @@ rateTrack () {
 loadRatedAlbums () {
     cd "$music_path"
     ratings="$(echo " " | dmenu_t -p "Rating: > " | xargs echo)"
-    albums="$(grep -r "$ratings/10" **/rating.txt | sed -e 's/\/rating.txt.*//g')"
+    albums="$(grep -r "$ratings/$maxratings" **/rating.txt | sed -e 's/\/rating.txt.*//g')"
     album="$(echo -e "replace all\nadd all\n---\n$albums" | dmenu_t)";
     if [ "$album" = "" ]; then ratePrompt;
     elif [ "$album" = "replace all" ]; then
         mpc clear
-        grep -r "$ratings/10" **/rating.txt | sed -e 's/\/rating.txt.*//g' | while read line; do mpc add "$line" && mpc play; done
+        grep -r "$ratings/$maxratings" **/rating.txt | sed -e 's/\/rating.txt.*//g' | while read line; do mpc add "$line" && mpc play; done
     elif [ "$album" = "add all" ]; then
-        grep -r "$ratings/10" **/rating.txt | sed -e 's/\/rating.txt.*//g' | while read line; do mpc add "$line"; done ;
+        grep -r "$ratings/$maxratings" **/rating.txt | sed -e 's/\/rating.txt.*//g' | while read line; do mpc add "$line"; done ;
     else mpc add "$album"
     fi
 }
