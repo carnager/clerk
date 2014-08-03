@@ -634,7 +634,6 @@ ReplaceAlbum() {
     while read TRACK
     do
         seen=1
-    TRACK=$(echo -e "0  Return to Main Menu\n---\nAdding Mode: Replace\n---\n$(echo "$album_temp")" | dmenu_t -dmenu -p "Choose Album > ")
         if [[ "$TRACK" = "0  Return to Main Menu" ]]
             then dplayPrompt
         else
