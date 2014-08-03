@@ -201,7 +201,21 @@ infoPrompt () {
 }
 
 currentTag () {
-    mpc current --format "Artist: %artist%\nAlbum: %album%\nDate: %date%\nTrack: %track%\nTitle: %title%" | dmenu_t -p 'Tags > ' && dplayPrompt
+    declare -i seen=0
+    while read line
+    do
+        seen=1
+        if [[ "$line" == "0  Return to Main Menu" ]]; then
+            dplayPrompt
+        elif [[ "$line" == "" ]]; then
+            return
+        fi
+    done < <(echo -e "0  Return to Main Menu\n---\n$(mpc current --format "Artist: %artist%\nAlbum: %album%\nDate: %date%\nTrack: %track%\nTitle: %title%")" | dmenu_t -p 'Tags > ')
+
+    if [[  $seen = 0 ]]
+    then
+        exit
+    fi
 }
 
 dplayOptionsPrompt () {
