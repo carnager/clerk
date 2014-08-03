@@ -45,7 +45,9 @@ updateCache() {
 }
 
 dplayPrompt () {
-    menu=("1  Play random Album"
+    menu=("0  Exit Clerk"
+          "---"
+          "1  Play random Album"
           "2  Play random Songs"
           "---"
           "3  Current Artist"
@@ -71,6 +73,7 @@ dplayPrompt () {
         7*) ratingPrompt ;;
         8*) infoPrompt ;;
         9*) playbackPrompt ;;
+        0*) exit ;;
           *) exit
     esac
 }
@@ -703,8 +706,10 @@ browseDate() {
 }
 
 browseDateAdd() {
+    declare -i seen=0
     while read select
     do
+        seen=1
         if [[ "$select" == "0  Return to Date Menu" ]]
             then browseDate
         else
@@ -721,11 +726,18 @@ browseDateAdd() {
             fi
         fi
     done < <(echo -e "0  Return to Date Menu\n---\nAdding Mode: Add\n---\nAdd All\nReplace All\n---\n$(mppc find date "$date" --format "{$mpd_artist} $seperator {album}" | uniq)" | dmenu_t -dmenu -p "Select Album > ")
+
+    if [[  $seen = 0 ]]
+    then
+        exit
+    fi
 }
 
 browseDateInsert() {
+    declare -i seen=0
     while read select
     do
+        seen=1
         if [[ "$select" == "0  Return to Date Menu" ]]
             then browseDate
         else
@@ -742,7 +754,14 @@ browseDateInsert() {
             fi
         fi
     done < <(echo -e "0  Return to Date Menu\n---\nAdding Mode: Insert\n---\nAdd All\nReplace All\n---\n$(mppc find date "$date" --format "{$mpd_artist} $seperator {album}" | uniq)" | dmenu_t -dmenu -p "Select Album > ")
+
+    if [[  $seen = 0 ]]
+    then
+        exit
+    fi
+
 }
+
 
 browseDateReplace() {
     while read select
