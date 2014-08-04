@@ -212,7 +212,7 @@ currentTag () {
         elif [[ "$line" == "" ]]; then
             return
         fi
-    done < <(echo -e "0  Return to Main Menu\n---\nShow all Tags\n---\n$(mpc current --format "Artist: %artist%\nAlbum: %album%\nDate: %date%\nTrack: %track%\nTitle: %title%")" | dmenu_t -p 'Tags > ')
+    done < <(echo -e "0  Return to Main Menu\n---\nShow all Tags\n---\n$(mpc current --format "Artist: %artist%\nAlbum: %album%\nDate: %date%\nTrack: %track%\nTitle: %title%")" | dmenu_t -p 'Current Song > ')
 
     if [[  $seen = 0 ]]
     then
@@ -227,10 +227,12 @@ readComments () {
         seen=1
         if [[ "$line" == "0  Return to Main Menu" ]]; then
             dplayPrompt
+        elif [[ "$line" == "Show Tags" ]]; then
+            currentTag
         elif [[ "$line" == "" ]]; then
             return
         fi
-    done < <(echo -e "0  Return to Main Menu\n---\nShow all Tags\n---\n$(mppc readcomments)" | dmenu_t -p 'Tags > ')
+    done < <(echo -e "0  Return to Main Menu\n---\nShow Tags\n---\n$(mppc readcomments)" | dmenu_t -p 'Current Song > ')
 
     if [[  $seen = 0 ]]
     then
