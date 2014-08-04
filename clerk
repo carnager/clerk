@@ -608,7 +608,7 @@ playRandomTracks () {
         artist="$(mpc list artist | shuf | head -1)"
         album="$(mpc list album artist "$artist" | shuf | head -1)"
         title="$(mpc list title album "$album" artist "$artist" | shuf | head -1)"
-        mpc find album "$album" artist "$artist" title "$title" | mpc add
+        mpc clear && mpc find album "$album" artist "$artist" title "$title" | mpc add && mpc play
     done
 }
 
