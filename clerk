@@ -350,6 +350,22 @@ crossfadePrompt () {
     esac
 }
 
+managePlaylists () {
+    while read TRACKDISPLAY
+    do
+        if [[ "$TRACKDISPLAY" == "0  Return to Playlist Menu" ]]; then
+            dplayQueue
+        elif [[ "$TRACKDISPLAY" == "Load Playlist" ]]; then
+            dplayQueueLoad
+        elif [[ "$TRACKDISPLAY" == "Save Playlist" ]]; then
+            dplayQueueSave
+        elif [[ "$TRACKDISPLAY" == "Crop Playlist" ]]; then
+            mpc crop && dplayQueue
+        elif [[ "$TRACKDISPLAY" == "Clear Playlist" ]]; then
+            mpc clear && dplayQueue
+        fi
+done < <(export seperator=$seperator; echo -e "0  Return to Playlist Menu\n---\nLoad Playlist\nSave Playlist\nCrop Playlist\nClear Playlist" | dmenu_t -p "Queue")
+}
 
 dplayQueue () {
     while read TRACKDISPLAY
@@ -359,20 +375,12 @@ dplayQueue () {
         POS=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $1 }')
         if [[ "$TRACKDISPLAY" == "0  Return to Main Menu" ]]; then
             dplayPrompt
-        elif [[ "$TRACKDISPLAY" == "Mode: Play" ]]; then
-            dplayQueueDelete
-        elif [[ "$TRACKDISPLAY" == "Load Playlist" ]]; then
-            dplayQueueLoad
-        elif [[ "$TRACKDISPLAY" == "Save Playlist" ]]; then
-            dplayQueueSave
-        elif [[ "$TRACKDISPLAY" == "Crop Playlist" ]]; then
-            mpc crop && dplayQueue
-        elif [[ "$TRACKDISPLAY" == "Clear Playlist" ]]; then
-            mpc clear && dplayQueue
+        elif [[ "$TRACKDISPLAY" == "Manage Playlists" ]]; then
+            managePlaylists
         else
             mpc play $POS;
         fi
-    done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\nMode: Play\n---\nLoad Playlist\nSave Playlist\nCrop Playlist\nClear Playlist\n---\n$(mpc playlist --format "%position% $seperator %artist% $seperator %title%")" | dmenu_t -p "Queue")
+    done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\nMode: Play\n---\nManage Playlists\n---\n$(mpc playlist --format "%position% $seperator %artist% $seperator %title%")" | dmenu_t -p "Queue")
 }
 
 
@@ -384,19 +392,13 @@ dplayQueueDelete () {
         POS=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $1 }')
         if [[ "$TRACKDISPLAY" == "0  Return to Main Menu" ]]; then
             dplayPrompt
-        elif [[ "$TRACKDISPLAY" == "Mode: Delete" ]]; then
-            dplayQueue
-        elif [[ "$TRACKDISPLAY" == "Save Playlist" ]]; then
-            dplayQueueSave
-        elif [[ "$TRACKDISPLAY" == "Crop Playlist" ]]; then
-            mpc crop && dplayQueueDelete
-        elif [[ "$TRACKDISPLAY" == "Clear Playlist" ]]; then
-            mpc clear && dplayQueueDelete
+        elif [[ "$TRACKDISPLAY" == "Manage Playlists" ]]; then
+            managePlaylists
         else
             mpc del $POS;
             dplayQueue
         fi
-    done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\nMode: Delete\n---\nSave Playlist\nCrop Playlist\nClear Playlist\n---\n$(mpc playlist --format "%position% $seperator %artist% $seperator %title%")" | dmenu_t -p "Queue")
+    done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\nMode: Delete\nManage Playlists\n---\n$(mpc playlist --format "%position% $seperator %artist% $seperator %title%")" | dmenu_t -p "Queue")
 }
 
 dplayQueueLoad () {
