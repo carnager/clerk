@@ -232,7 +232,7 @@ readComments () {
         elif [[ "$line" == "" ]]; then
             return
         fi
-    done < <(echo -e "0  Return to Main Menu\n---\nShow Tags\n---\n$(mppc readcomments)" | dmenu_t -p 'Current Song > ')
+    done < <(echo -e "0  Return to Main Menu\n---\nShow Tags\n---\n$(mpc --format '%file%' | mppc readcomments)" | dmenu_t -p 'Current Song > ')
 
     if [[  $seen = 0 ]]
     then
