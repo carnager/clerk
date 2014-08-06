@@ -540,7 +540,7 @@ currentTracksInsert () {
                     mpc find album "$ALBUM" title "$TITLE" track "$TRACKNUMBER" | mpc insert
                 else
                     mpc find album "$ALBUM" title "$TITLE" track "$TRACKNUMBER" | mpc add
-                    echo "$(( $(mpc playlist|wc -l) - 1 ))" | ./mppc prio
+                    echo "$(( $(mpc playlist|wc -l) - 1 ))" | mppc prio
                 fi
             fi
         fi
