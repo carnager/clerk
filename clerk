@@ -535,7 +535,12 @@ currentTracksInsert () {
             if [[ "$TRACK" == "Adding Mode: Insert" ]]; then
                 currentTracks
             else
-                mpc find album "$ALBUM" title "$TITLE" track "$TRACKNUMBER" | mpc insert
+                if [[ "$random" == "off" ]]; then
+                    mpc find album "$ALBUM" title "$TITLE" track "$TRACKNUMBER" | mpc insert
+                else
+                    mpc find album "$ALBUM" title "$TITLE" track "$TRACKNUMBER" | mpc add
+                    echo "$(( $(mpc playlist|wc -l) - 1 ))" | ./mppc prio
+                fi
             fi
         fi
     done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Insert\n---\n$(mppc search artist "$(mpc current -f %artist%)" --format "{album} $seperator {track} $seperator {title}")" | dmenu_t -p "Tracks by $(mpc current --format '%artist%') > ")
@@ -793,6 +798,7 @@ AddTrackTags() {
 }
 
 InsertTrackTags() {
+    random=$(echo "$status" | tail -1 | awk -F ':' '{ print $4 }' | cut -d ' ' -f 2)
     while read TRACK
     do
         if [[ "$TRACK" == "0  Return to Main Menu" ]]
@@ -801,11 +807,21 @@ InsertTrackTags() {
             if [[ "$TRACK" == "Adding Mode: Insert" ]]
                 then AddTrackFlat
             else
-                artist=$(echo "$TRACK" | awk -F " $seperator " '{print $1}')
-                album=$(echo "$TRACK" | awk -F " $seperator " '{print $4}')
-                track=$(echo "$TRACK" | awk -F " $seperator " '{print $2}')
-                title=$(echo "$TRACK" | awk -F " $seperator " '{print $3}')
-                mpc find artist "$artist" album "$album" title "$title" | mpc insert
+                if [[ "$random" == "off" ]]; then
+                    artist=$(echo "$TRACK" | awk -F " $seperator " '{print $1}')
+                    album=$(echo "$TRACK" | awk -F " $seperator " '{print $4}')
+                    track=$(echo "$TRACK" | awk -F " $seperator " '{print $2}')
+                    title=$(echo "$TRACK" | awk -F " $seperator " '{print $3}')
+                    mpc find artist "$artist" album "$album" title "$title" | mpc insert
+
+                else
+                    artist=$(echo "$TRACK" | awk -F " $seperator " '{print $1}')
+                    album=$(echo "$TRACK" | awk -F " $seperator " '{print $4}')
+                    track=$(echo "$TRACK" | awk -F " $seperator " '{print $2}')
+                    title=$(echo "$TRACK" | awk -F " $seperator " '{print $3}')
+                    mpc findadd artist "$artist" album "$album" title "$title"
+                    echo "$(( $(mpc playlist|wc -l) - 1 ))" | mppc prio
+                fi
             fi
         fi
     done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Insert\n---\n$(echo "$tracks_temp")"| dmenu_t -dmenu -p "Choose Track > ")
@@ -843,7 +859,12 @@ InsertTrackFlat() {
             if [[ "$TRACK" == "Adding Mode: Insert Flat" ]]
                 then AddTrackTags
             else
-                mpc insert "$TRACK"
+                if [[ "$random" == "off" ]]; then
+                    mpc insert "$TRACK"
+                else
+                    mpc add "$TRACK"
+                    echo "$(( $(mpc playlist|wc -l) - 1 ))" | ./mppc prio
+                fi
             fi
         fi
     done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Insert Flat\n---\n$(mpc listall)" | dmenu_t -dmenu -p "Choose Track > ")
