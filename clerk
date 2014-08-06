@@ -524,6 +524,7 @@ currentTracks () {
 }
 
 currentTracksInsert () {
+    random=$(echo "$status" | tail -1 | awk -F ':' '{ print $4 }' | cut -d ' ' -f 2)
     while read TRACK
     do
         TITLE=$(echo "$TRACK" | awk -F " $seperator " '{print $3}')
