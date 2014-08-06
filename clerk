@@ -64,8 +64,8 @@ dplayPrompt () {
     }
 
     case "$(prompt "${menu[@]}")" in
-        1*) mpc clear; mpc findadd album "$(mpc list album | shuf -n1)"; mpc play ;;
-        2*) mpc clear && mpc listall | shuf | head -n "$value" | mpc add && mpc play ;;
+        1*) playRandomAlbum ;;
+        2*) playRandomTracks ;;
         3*) currentPrompt ;;
         4*) dplayQueue ;;
         5*) browseLibPrompt ;;
