@@ -249,21 +249,21 @@ export status="$(mpc status)"
     repeat=$(echo "$status" | tail -1 | awk -F ':' '{ print $3 }' | cut -d ' ' -f 2)
 
 
-mpds_check="$(ssh $ssh_host -q -t 'bash -c "pgrep mpdscribble"')"
 
-        if ((ssh_lastfm)); then
-            if [ -n "$mpds_check" ];
-                then export scrobble=on
-            else export scrobble=off
-            fi
+    if [[ "$ssh_lastfm" == "1" ]]; then
+        mpds_check="$(ssh $ssh_host -q -t 'bash -c "pgrep mpdscribble"')"
+        if [ -n "$mpds_check" ];
+            then export scrobble=on
+        else export scrobble=off
+        fi
+    else
+        if pgrep mpdscribble
+            then
+            export scrobble=on
         else
-            if pgrep mpdscribble
-                then
-                export scrobble=on
-            else
-                export scrobble=off
-            fi
-       fi
+            export scrobble=off
+        fi
+    fi
 
 
     export rgain="$(mpc replaygain | cut -d ' ' -f 2)"
