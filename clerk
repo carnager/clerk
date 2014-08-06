@@ -540,7 +540,6 @@ currentTracksInsert () {
                     mpc find album "$ALBUM" title "$TITLE" track "$TRACKNUMBER" | mpc insert
                 else
                     mpc find album "$ALBUM" title "$TITLE" track "$TRACKNUMBER" | mpc add
-                    sleep 1
                     echo "$(( $(mpc playlist|wc -l) - 1 ))" | ./mppc prio
                 fi
             fi
@@ -822,7 +821,6 @@ InsertTrackTags() {
                     track=$(echo "$TRACK" | awk -F " $seperator " '{print $2}')
                     title=$(echo "$TRACK" | awk -F " $seperator " '{print $3}')
                     mpc findadd artist "$artist" album "$album" title "$title"
-                    sleep 1
                     echo "$(( $(mpc playlist|wc -l) - 1 ))" | mppc prio
                 fi
             fi
