@@ -463,7 +463,7 @@ currentAlbums () {
             if [[ "$ALBUM" == "Adding Mode: Add" ]]; then
                 currentAlbumsInsert
             else
-                mpc search album "$ALBUM_FINAL" date "$DATE" | mpc add
+                mpc search "$mpd_artist" "$ARTIST" album "$ALBUM_FINAL" date "$DATE" | mpc add
             fi
        fi
     done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Add\n---\n$(mppc search artist "$ARTIST" --format "{date} $seperator {album}" | sort | uniq)" | dmenu_t -p "Albums by $(mpc current --format '%artist%') > ")
@@ -481,7 +481,7 @@ currentAlbumsInsert () {
             if [[ "$ALBUM" == "Adding Mode: Insert" ]]; then
                 currentAlbumsReplace
             else
-                mpc search album "$ALBUM_FINAL" date "$DATE" | mpc insert
+                mpc search "$mpd_artist" "$ARTIST" album "$ALBUM_FINAL" date "$DATE" | mpc insert
             fi
         fi
     done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Insert\n---\n$(mppc search artist "$ARTIST" --format "{date} $seperator {album}" | sort | uniq)" | dmenu_t -p "Albums by $(mpc current --format '%artist%') > ")
@@ -499,7 +499,7 @@ currentAlbumsReplace () {
             if [[ "$ALBUM" == "Adding Mode: Replace" ]]; then
                 currentAlbums
             else
-                mpc clear && mpc search album "$ALBUM_FINAL" date "$DATE" | mpc add && mpc play
+                mpc clear && mpc search "$mpd_artist" "$ARTIST" album "$ALBUM_FINAL" date "$DATE" | mpc add && mpc play
             fi
         fi
     done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Replace\n---\n$(mppc search artist "$ARTIST" --format "{date} $seperator {album}" | sort | uniq)" | dmenu_t -p "Albums by $(mpc current --format '%artist%') > ")
@@ -822,7 +822,7 @@ InsertTrackTags() {
                     track=$(echo "$TRACK" | awk -F " $seperator " '{print $2}')
                     title=$(echo "$TRACK" | awk -F " $seperator " '{print $3}')
                     mpc findadd artist "$artist" album "$album" title "$title"
-                    echo "$(( $(mpc playlist|wc -l) - 1 ))" | mppc prio
+                    echo $(( $(mpc playlist|wc -l) - 1 )) | mppc prio
                 fi
             fi
         fi
