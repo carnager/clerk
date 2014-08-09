@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 shopt -s globstar
 source $HOME/.config/clerk/config
@@ -375,6 +375,8 @@ dplayQueue () {
         POS=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $1 }')
         if [[ "$TRACKDISPLAY" == "0  Return to Main Menu" ]]; then
             dplayPrompt
+        elif [[ "$TRACKDISPLAY" == "Mode: Play" ]]; then
+            dplayQueueDelete
         elif [[ "$TRACKDISPLAY" == "Manage Playlists" ]]; then
             managePlaylists
         else
@@ -392,13 +394,15 @@ dplayQueueDelete () {
         POS=$(echo "$TRACKDISPLAY" | awk -F " $seperator " '{ print $1 }')
         if [[ "$TRACKDISPLAY" == "0  Return to Main Menu" ]]; then
             dplayPrompt
+        elif [[ "$TRACKDISPLAY" == "Mode: Delete" ]]; then
+            dplayQueue
         elif [[ "$TRACKDISPLAY" == "Manage Playlists" ]]; then
             managePlaylists
         else
             mpc del $POS;
             dplayQueue
         fi
-    done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\nMode: Delete\nManage Playlists\n---\n$(mpc playlist --format "%position% $seperator %artist% $seperator %title%")" | dmenu_t -p "Queue")
+    done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\nMode: Delete\n---\nManage Playlists\n---\n$(mpc playlist --format "%position% $seperator %artist% $seperator %title%")" | dmenu_t -p "Queue")
 }
 
 dplayQueueLoad () {
