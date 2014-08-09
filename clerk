@@ -637,10 +637,10 @@ playRandomTracks () {
     mpc clear
     n=0; while (( n++ < $value ));
     do
-        artist="$(mpc list albumartist | shuf -n 1)"
-        album="$(mpc list album albumartist "$artist" | shuf -n 1)"
-        title="$(mpc list title album "$album" albumartist "$artist" | shuf -n 1)"
-        mpc find album "$album" albumartist "$artist" title "$title" | mpc add
+        artist="$(mpc list "$mpd_artist" | shuf -n 1)"
+        album="$(mpc list album "$mpd_artist" "$artist" | shuf -n 1)"
+        title="$(mpc list title album "$album" "$mpd_artist" "$artist" | shuf -n 1)"
+        mpc find album "$album" "$mpd_artist" "$artist" title "$title" | mpc add
     done
     mpc play
 }
