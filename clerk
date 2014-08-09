@@ -800,9 +800,10 @@ AddTrackTags() {
 }
 
 InsertTrackTags() {
-    random=$(echo "$status" | tail -1 | awk -F ':' '{ print $4 }' | cut -d ' ' -f 2)
+    random="$(mpc status | tail -1 | awk -F ':' '{ print $4 }' | cut -d ' ' -f 2)"
     while read TRACK
     do
+        echo $random
         if [[ "$TRACK" == "0  Return to Main Menu" ]]
             then dplayPrompt
         else
