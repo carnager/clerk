@@ -359,12 +359,58 @@ managePlaylists () {
             dplayQueueLoad
         elif [[ "$TRACKDISPLAY" == "Save Playlist" ]]; then
             dplayQueueSave
+        elif [[ "$TRACKDISPLAY" == "Load RSS Feed" ]]; then
+            loadRSS
         elif [[ "$TRACKDISPLAY" == "Crop Playlist" ]]; then
             mpc crop && dplayQueue
+        elif [[ "$TRACKDISPLAY" == "Suspend Playlist" ]]; then
+            suspendPlaylist
+        elif [[ "$TRACKDISPLAY" == "Resume Playlist" ]]; then
+            resumePlaylist
         elif [[ "$TRACKDISPLAY" == "Clear Playlist" ]]; then
             mpc clear && dplayQueue
         fi
-done < <(export seperator=$seperator; echo -e "0  Return to Playlist Menu\n---\nLoad Playlist\nSave Playlist\nCrop Playlist\nClear Playlist" | dmenu_t -p "Queue")
+done < <(export seperator=$seperator; echo -e "0  Return to Playlist Menu\n---\nLoad Playlist\nSave Playlist\nLoad RSS Feed\nCrop Playlist\n---\nSuspend Playlist\nResume Playlist\n---\nClear Playlist" | dmenu_t -p "Queue > ")
+}
+
+loadRSS () {
+    while read PODCAST
+    do
+        if [[ "$PODCAST" == "0  Return to Playlist Menu" ]]; then
+            managePlaylists
+        else
+            mpc clear
+            mpc load $(cat $HOME/.config/clerk/podcasts | cut -d '\' -f 2)
+        fi
+done < <(echo -e "0  Return to Playlist Menu\n---\n$(cat $HOME/.config/clerk/podcasts | cut -d '\' -f 1)" | dmenu_t -p "Load RSS Feed > ")
+}
+
+suspendPlaylist () {
+    playing=$(! mpc status | grep playing)
+    state=$(mpc status | tail -2 | head -1)
+    time=$(echo "$state" | awk -F ' ' '{ print $NF }' | sed 's/[)(]//g')
+    song=$(mpc current --format '%file%')
+    position=$(mpc current --format '%position%')
+
+    if [[ $1 == "save" ]]; then
+        if [[ -z "$playing" ]]; then
+            echo "mpd is not playing"
+        else
+            mpc rm resume
+            mpc save resume
+            rm -f $HOME/.config/clerk/mpd_saved
+            echo "song="$song"" > $HOME/.config/clerk/mpd_saved
+            echo "pos="$position"" >> $HOME/.config/clerk/mpd_saved
+            echo "time="$time"" >> $HOME/.config/clerk/mpd_saved
+        fi
+    elif [[ $1 == "load" ]]; then
+        source $HOME/.config/clerk/mpd_saved
+        mpc clear
+        mpc load resume
+        mpc play $pos
+        sleep 2
+        mpc seek "$time"
+    fi
 }
 
 dplayQueue () {
