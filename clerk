@@ -366,7 +366,7 @@ managePlaylists () {
         elif [[ "$TRACKDISPLAY" == "Suspend Playlist" ]]; then
             suspendPlaylist
         elif [[ "$TRACKDISPLAY" == "Resume Playlist" ]]; then
-            resumePlaylist
+            suspendPlaylist
         elif [[ "$TRACKDISPLAY" == "Clear Playlist" ]]; then
             mpc clear && dplayQueue
         fi
