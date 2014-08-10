@@ -395,8 +395,8 @@ suspendPlaylist () {
     if [[ -z "$playing" ]]; then
         echo "mpd is not playing"
     else
-        mpc rm resume
-        mpc save resume
+        mpc rm suspended
+        mpc save suspended
         rm -f $HOME/.config/clerk/suspend
         echo "pos="$position"" >> $HOME/.config/clerk/suspend
         echo "time="$time"" >> $HOME/.config/clerk/suspend
@@ -407,17 +407,12 @@ resumePlaylist () {
     http=$(! mpc current --format %file% | grep 'http://')
     source $HOME/.config/clerk/suspend
     mpc clear
-    mpc load resume
+    mpc load suspended
     mpc play $pos
     mpc toggle
-    if [[ -z "$http" ]]; then
-        sleep 2
-        mpc seek "$time"
-        mpc toggle
-    else
-        mpc seek "$time"
-        mpc toggle
-    fi
+    sleep 2
+    mpc seek "$time"
+    mpc toggle
 }
 
 dplayQueue () {
