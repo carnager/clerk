@@ -357,22 +357,22 @@ managePlaylists () {
     do
         if [[ "$TRACKDISPLAY" == "0  Return to Main Menu" ]]; then
             dplayPrompt
-        elif [[ "$TRACKDISPLAY" == "Load Playlist" ]]; then
+        elif [[ "$TRACKDISPLAY" == "1  Load Playlist" ]]; then
             dplayQueueLoad
-        elif [[ "$TRACKDISPLAY" == "Save Playlist" ]]; then
+        elif [[ "$TRACKDISPLAY" == "2  Save Playlist" ]]; then
             dplayQueueSave
-        elif [[ "$TRACKDISPLAY" == "Load RSS Feed" ]]; then
+        elif [[ "$TRACKDISPLAY" == "3  Load RSS Feed" ]]; then
             loadRSS
-        elif [[ "$TRACKDISPLAY" == "Crop Playlist" ]]; then
+        elif [[ "$TRACKDISPLAY" == "4  Crop Playlist" ]]; then
             mpc crop && dplayQueue
-        elif [[ "$TRACKDISPLAY" == "Suspend Playlist" ]]; then
+        elif [[ "$TRACKDISPLAY" == "5  Suspend Playlist" ]]; then
             suspendPlaylist
-        elif [[ "$TRACKDISPLAY" == "Resume Playlist" ]]; then
+        elif [[ "$TRACKDISPLAY" == "6  Resume Playlist" ]]; then
             resumePlaylist
-        elif [[ "$TRACKDISPLAY" == "Clear Playlist" ]]; then
+        elif [[ "$TRACKDISPLAY" == "7  Clear Playlist" ]]; then
             mpc clear && dplayQueue
         fi
-done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\nLoad Playlist\nSave Playlist\nLoad RSS Feed\nCrop Playlist\n---\nSuspend Playlist\nResume Playlist\n---\nClear Playlist" | dmenu_t -p "Queue > ")
+done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\n1  Load Playlist\n2  Save Playlist\n3  Load RSS Feed\n4  Crop Playlist\n---\n5  Suspend Playlist\n6  Resume Playlist\n---\n7  Clear Playlist" | dmenu_t -p "Queue > ")
 }
 
 loadRSS () {
