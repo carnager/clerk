@@ -355,8 +355,8 @@ crossfadePrompt () {
 managePlaylists () {
     while read TRACKDISPLAY
     do
-        if [[ "$TRACKDISPLAY" == "0  Return to Playlist Menu" ]]; then
-            dplayQueue
+        if [[ "$TRACKDISPLAY" == "0  Return to Main Menu" ]]; then
+            dplayPrompt
         elif [[ "$TRACKDISPLAY" == "Load Playlist" ]]; then
             dplayQueueLoad
         elif [[ "$TRACKDISPLAY" == "Save Playlist" ]]; then
@@ -372,7 +372,7 @@ managePlaylists () {
         elif [[ "$TRACKDISPLAY" == "Clear Playlist" ]]; then
             mpc clear && dplayQueue
         fi
-done < <(export seperator=$seperator; echo -e "0  Return to Playlist Menu\n---\nLoad Playlist\nSave Playlist\nLoad RSS Feed\nCrop Playlist\n---\nSuspend Playlist\nResume Playlist\n---\nClear Playlist" | dmenu_t -p "Queue > ")
+done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\nLoad Playlist\nSave Playlist\nLoad RSS Feed\nCrop Playlist\n---\nSuspend Playlist\nResume Playlist\n---\nClear Playlist" | dmenu_t -p "Queue > ")
 }
 
 loadRSS () {
