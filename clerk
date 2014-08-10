@@ -400,6 +400,7 @@ suspendPlaylist () {
         rm -f $HOME/.config/clerk/suspend
         echo "pos="$position"" >> $HOME/.config/clerk/suspend
         echo "time="$time"" >> $HOME/.config/clerk/suspend
+        notify-send "Clerk" "Playlist suspended"
     fi
 }
 
@@ -413,6 +414,7 @@ resumePlaylist () {
     sleep 2
     mpc seek "$time"
     mpc toggle
+    notify-send "Clerk" "Resumed last-suspended Playlist"
 }
 
 dplayQueue () {
