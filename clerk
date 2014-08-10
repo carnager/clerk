@@ -461,6 +461,7 @@ dplayQueueLoad () {
     if [[ "$playlist" == "0  Return to Playlist Menu" ]]; then
         dplayQueue
     else
+        mpc clear
         mpc load "$playlist" && dplayQueue
     fi
 }
