@@ -415,7 +415,6 @@ resumePlaylist () {
     mpc play $pos
     sleep 2
     mpc seek "$time"
-    fi
 }
 
 dplayQueue () {
