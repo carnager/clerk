@@ -60,7 +60,7 @@ dplayPrompt () {
           "9  Playback")
 
     prompt() {
-        printf "%s\n" "$@" | dmenu_t -p "MPD Menu: > "
+        printf "%s\n" "$@" | dmenu_t -p "MPD Menu > "
     }
 
     case "$(prompt "${menu[@]}")" in
@@ -89,7 +89,7 @@ playbackPrompt () {
           "5  Clear Playlist")
 
    prompt() {
-        printf "%s\n" "$@" | dmenu_t -p "Playback: > "
+        printf "%s\n" "$@" | dmenu_t -p "Playback > "
     }
 
     case "$(prompt "${menu[@]}")" in
@@ -160,7 +160,7 @@ ratingPrompt () {
           "8  Love current Song on LastFM")
 
     prompt() {
-        printf "%s\n" "$@" | dmenu_t -p "Ratings: > "
+        printf "%s\n" "$@" | dmenu_t -p "Ratings > "
     }
 
     case "$(prompt "${menu[@]}")" in
@@ -187,7 +187,7 @@ infoPrompt () {
           "4  Current Track Tags")
 
     prompt() {
-        printf "%s\n" "$@" | dmenu_t -p "MPD Menu: > "
+        printf "%s\n" "$@" | dmenu_t -p "MPD Menu > "
     }
 
     case "$(prompt "${menu[@]}")" in
@@ -291,7 +291,7 @@ export status="$(mpc status)"
           "9  Number of Random Songs: $(echo $value)")
 
      prompt() {
-         printf "%s\n" "$@" | dmenu_t -p "MPD Options: > "
+         printf "%s\n" "$@" | dmenu_t -p "MPD Options > "
      }
 
      case "$(prompt "${menu[@]}")" in
@@ -310,14 +310,14 @@ export status="$(mpc status)"
 }
 
 optionRandomPrompt() {
-    number="$(echo " " | dmenu_t -p 'Set No. of Songs for random Songs: > ')"
+    number="$(echo " " | dmenu_t -p 'Set No. of Songs for random Songs > ')"
     sed -i "s/value=.*/value="$number"/" $HOME/.config/clerk/config
     export value="$number"
     dplayOptionsPrompt
 }
 
 optionsRatingPrompt() {
-    number="$(echo " " | dmenu_t -p 'Set Maximum Rating for Albums: > ')"
+    number="$(echo " " | dmenu_t -p 'Set Maximum Rating for Albums > ')"
     sed -i "s/maxratings=.*/maxratings="$number"/" $HOME/.config/clerk/config
     export maxratings="$number"
     ratingPrompt
@@ -335,7 +335,7 @@ crossfadePrompt () {
           "5")
 
      prompt() {
-         printf "%s\n" "$@" | dmenu_t -p "Crossfade: > "
+         printf "%s\n" "$@" | dmenu_t -p "Crossfade > "
      }
 
      case "$(prompt "${menu[@]}")" in
@@ -382,7 +382,7 @@ dplayQueue () {
         else
             mpc play $POS;
         fi
-    done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\nMode: Play\n---\nManage Playlists\n---\n$(mpc playlist --format "%position% $seperator %artist% $seperator %title%")" | dmenu_t -p "Queue")
+    done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\nMode: Play\n---\nManage Playlists\n---\n$(mpc playlist --format "%position% $seperator %artist% $seperator %title%")" | dmenu_t -p "Queue > ")
 }
 
 
@@ -402,7 +402,7 @@ dplayQueueDelete () {
             mpc del $POS;
             dplayQueue
         fi
-    done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\nMode: Delete\n---\nManage Playlists\n---\n$(mpc playlist --format "%position% $seperator %artist% $seperator %title%")" | dmenu_t -p "Queue")
+    done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\nMode: Delete\n---\nManage Playlists\n---\n$(mpc playlist --format "%position% $seperator %artist% $seperator %title%")" | dmenu_t -p "Queue > ")
 }
 
 dplayQueueLoad () {
@@ -446,7 +446,7 @@ dplayQueueSave () {
 }
 
 outputPrompt () {
-    menu="$(echo -e "0  Return to Options Menu\n---\n$(mpc outputs)" | dmenu_t -p "Outputs: > ")";
+    menu="$(echo -e "0  Return to Options Menu\n---\n$(mpc outputs)" | dmenu_t -p "Outputs > ")";
     if [[ "$menu" == "0  Return to Options Menu" ]]
         then dplayOptionsPrompt;
     else
@@ -553,7 +553,7 @@ currentTracksInsert () {
 
 
 rateAlbum () {
-    ratings="$(echo " " | dmenu_t -p "Rating: > " | xargs echo)"
+    ratings="$(echo " " | dmenu_t -p "Rating > " | xargs echo)"
     if [ ratings = "" ]; then
         exit
     else
@@ -574,7 +574,7 @@ rateAlbum () {
 
 rateTrack () {
     extension=$(mpc current -f %file% | sed 's/.*\.//')
-    ratings="$(echo " " | dmenu_t -p "Rating: > " | xargs echo)"
+    ratings="$(echo " " | dmenu_t -p "Rating > " | xargs echo)"
     if [ ratings = "" ]; then
         exit
     else
@@ -591,7 +591,7 @@ rateTrack () {
 
 loadRatedAlbums () {
     cd "$music_path"
-    ratings="$(echo " " | dmenu_t -p "Rating: > " | xargs echo)"
+    ratings="$(echo " " | dmenu_t -p "Rating > " | xargs echo)"
     albums="$(grep -r "$ratings/$maxratings" **/rating.txt | sed -e 's/\/rating.txt.*//g')"
     album="$(echo -e "replace all\nadd all\n---\n$albums" | dmenu_t)";
     if [ "$album" = "" ]; then ratePrompt;
@@ -605,7 +605,7 @@ loadRatedAlbums () {
 }
 
 loadRatedTracks () {
-    ratings="$(echo " " | dmenu_t -p "Rating: > " | xargs echo)"
+    ratings="$(echo " " | dmenu_t -p "Rating > " | xargs echo)"
     if [ ratings = "" ]; then
         exit
     else
@@ -614,17 +614,17 @@ loadRatedTracks () {
 }
 
 loadRandomRatedTracks () {
-    number="$(echo " " | dmenu_t -p "Number of Songs: > " | xargs echo)"
-    ratings_min="$(echo " " | dmenu_t -p "Minimum Rating: > " | xargs echo)"
-    ratings_max="$(echo " " | dmenu_t -p "Maximum Rating: > " | xargs echo)"
+    number="$(echo " " | dmenu_t -p "Number of Songs > " | xargs echo)"
+    ratings_min="$(echo " " | dmenu_t -p "Minimum Rating > " | xargs echo)"
+    ratings_max="$(echo " " | dmenu_t -p "Maximum Rating > " | xargs echo)"
     for ((i="$ratings_min"; i<="$ratings_max"; i++)); do mpc find comment "$i" | shuf | head -n "$number" | mpc add; done
 }
 
 
 loadRandomRating () {
     cd "$music_path"
-    ratings_min="$(echo " " | dmenu_t -p "Minimum Rating: > " | xargs echo)"
-    ratings_max="$(echo " " | dmenu_t -p "Maximum Rating: > " | xargs echo)"
+    ratings_min="$(echo " " | dmenu_t -p "Minimum Rating > " | xargs echo)"
+    ratings_max="$(echo " " | dmenu_t -p "Maximum Rating > " | xargs echo)"
     mpc clear
     grep -lF "$(seq $ratings_min $ratings_max)" **/rating.txt | sed -e 's/\/rating.txt.*//g' | shuf -n 1 | while read line; do
     mpc add "$line" && mpc play; done
@@ -984,7 +984,7 @@ browseLibPrompt() {
           "5  Update Album/Track Cache")
 
     prompt() {
-        printf "%s\n" "$@" | dmenu_t -p "Testing Menu: > "
+        printf "%s\n" "$@" | dmenu_t -p "Testing Menu > "
     }
 
     case "$(prompt "${menu[@]}")" in
