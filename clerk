@@ -397,15 +397,15 @@ suspendPlaylist () {
     else
         mpc rm resume
         mpc save resume
-        rm -f $HOME/.config/clerk/mpd_saved
-        echo "pos="$position"" >> $HOME/.config/clerk/mpd_saved
-        echo "time="$time"" >> $HOME/.config/clerk/mpd_saved
+        rm -f $HOME/.config/clerk/suspend
+        echo "pos="$position"" >> $HOME/.config/clerk/suspend
+        echo "time="$time"" >> $HOME/.config/clerk/suspend
     fi
 }
 
 resumePlaylist () {
     http=$(! mpc current --format %file% | grep 'http://')
-    source $HOME/.config/clerk/mpd_saved
+    source $HOME/.config/clerk/suspend
     mpc clear
     mpc load resume
     mpc play $pos
