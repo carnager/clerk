@@ -45,7 +45,7 @@ updateCache() {
 }
 
 dplayPrompt () {
-    menu=("0  Exit Clerk"
+    menu=("Q  Exit Clerk"
           "---"
           "1  Play random Album"
           "2  Play random Songs"
@@ -53,11 +53,12 @@ dplayPrompt () {
           "3  Current Artist"
           "4  Current Queue"
           "5  Browse Library"
+          "6  Manage Playlists"
           "---"
-          "6  Options"
-          "7  Ratings"
-          "8  Lookup"
-          "9  Playback")
+          "7  Options"
+          "8  Ratings"
+          "9  Lookup"
+          "0  Playback")
 
     prompt() {
         printf "%s\n" "$@" | dmenu_t -p "MPD Menu > "
@@ -69,11 +70,12 @@ dplayPrompt () {
         3*) currentPrompt ;;
         4*) dplayQueue ;;
         5*) browseLibPrompt ;;
-        6*) dplayOptionsPrompt ;;
-        7*) ratingPrompt ;;
-        8*) infoPrompt ;;
-        9*) playbackPrompt ;;
-        0*) exit ;;
+        6*) managePlaylists ;;
+        7*) dplayOptionsPrompt ;;
+        8*) ratingPrompt ;;
+        9*) infoPrompt ;;
+        0*) playbackPrompt ;;
+        Q) exit ;;
           *) exit
     esac
 }
@@ -428,12 +430,10 @@ dplayQueue () {
             dplayPrompt
         elif [[ "$TRACKDISPLAY" == "Mode: Play" ]]; then
             dplayQueueDelete
-        elif [[ "$TRACKDISPLAY" == "Manage Playlists" ]]; then
-            managePlaylists
         else
             mpc play $POS;
         fi
-    done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\nMode: Play\n---\nManage Playlists\n---\n$(mpc playlist --format "%position% $seperator %artist% $seperator %title%")" | dmenu_t -p "Queue > ")
+    done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\nMode: Play\n---\n$(mpc playlist --format "%position% $seperator %artist% $seperator %title%")" | dmenu_t -p "Queue > ")
 }
 
 
