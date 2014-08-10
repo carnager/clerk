@@ -389,9 +389,9 @@ done < <(echo -e "0  Return to Playlist Menu\n---\n$(cat $HOME/.config/clerk/pod
 }
 
 suspendPlaylist () {
-    playing=$(! mpc status | grep playing)
-    state=$(mpc status | tail -2 | head -1)
-    time=$(echo "$state" | awk -F ' ' '{ print $NF }' | sed 's/[)(]//g')
+    playing=$(! mpc status | grep 'playing\|paused')
+    state=$(mpc status | sed '2!d')
+    time=$(echo "$state" | awk -F ' ' '{print $3 }' | awk -F '/' '{print $1 }')
     position=$(mpc current --format '%position%')
     if [[ -z "$playing" ]]; then
         echo "mpd is not playing"
