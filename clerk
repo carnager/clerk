@@ -1175,6 +1175,12 @@ if [[ "$1" == "-h" ]]; then
     echo "Playlist"
     echo "  -queue     show current queue"
     echo "  -queuedl   delete items from current queue"
+    echo "  -playlists manage playlists"
+    echo "  -suspend   suspend current queue"
+    echo "  -resume    resume suspended queue"
+    echo "  -rss       load podcast"
+    echo "  (podcast should be placed in ~/.config/clerk/podcasts"
+    echo "  with format NAME \ URL)"
     echo ""
     echo "Ratings"
     echo "  -rate      show rating prompt"
@@ -1215,6 +1221,14 @@ elif [[ "$1" == "-queue" ]]; then
     dplayQueue
 elif [[ "$1" == "-queuedl" ]]; then
     dplayQueueDelete
+elif [[ "$1" == "-rss" ]]; then
+    loadRSS
+elif [[ "$1" == "-suspend" ]]; then
+    suspendPlaylist
+elif [[ "$1" == "-resume" ]]; then
+    resumePlaylist
+elif [[ "$1" == "playlists" ]]; then
+    managePlaylists
 else
 dplayPrompt
 fi
