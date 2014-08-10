@@ -402,7 +402,7 @@ suspendPlaylist () {
 }
 
 resumePlaylist () {
-    http=$(! mpc current --format %file% | grep -eV 'http://')
+    http=$(! mpc current --format %file% | grep 'http://')
     source $HOME/.config/clerk/mpd_saved
     mpc clear
     mpc load resume
