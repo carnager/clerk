@@ -366,7 +366,7 @@ managePlaylists () {
         elif [[ "$TRACKDISPLAY" == "Suspend Playlist" ]]; then
             suspendPlaylist
         elif [[ "$TRACKDISPLAY" == "Resume Playlist" ]]; then
-            suspendPlaylist
+            resumePlaylist
         elif [[ "$TRACKDISPLAY" == "Clear Playlist" ]]; then
             mpc clear && dplayQueue
         fi
@@ -391,25 +391,30 @@ suspendPlaylist () {
     time=$(echo "$state" | awk -F ' ' '{ print $NF }' | sed 's/[)(]//g')
     song=$(mpc current --format '%file%')
     position=$(mpc current --format '%position%')
+    if [[ -z "$playing" ]]; then
+        echo "mpd is not playing"
+    else
+        mpc rm resume
+        mpc save resume
+        rm -f $HOME/.config/clerk/mpd_saved
+        echo "song="$song"" > $HOME/.config/clerk/mpd_saved
+        echo "pos="$position"" >> $HOME/.config/clerk/mpd_saved
+        echo "time="$time"" >> $HOME/.config/clerk/mpd_saved
+    fi
+}
 
-    if [[ $1 == "save" ]]; then
-        if [[ -z "$playing" ]]; then
-            echo "mpd is not playing"
-        else
-            mpc rm resume
-            mpc save resume
-            rm -f $HOME/.config/clerk/mpd_saved
-            echo "song="$song"" > $HOME/.config/clerk/mpd_saved
-            echo "pos="$position"" >> $HOME/.config/clerk/mpd_saved
-            echo "time="$time"" >> $HOME/.config/clerk/mpd_saved
-        fi
-    elif [[ $1 == "load" ]]; then
-        source $HOME/.config/clerk/mpd_saved
-        mpc clear
-        mpc load resume
-        mpc play $pos
-        sleep 2
-        mpc seek "$time"
+resumePlaylist () {
+    playing=$(! mpc status | grep playing)
+    state=$(mpc status | tail -2 | head -1)
+    time=$(echo "$state" | awk -F ' ' '{ print $NF }' | sed 's/[)(]//g')
+    song=$(mpc current --format '%file%')
+    position=$(mpc current --format '%position%')
+    source $HOME/.config/clerk/mpd_saved
+    mpc clear
+    mpc load resume
+    mpc play $pos
+    sleep 2
+    mpc seek "$time"
     fi
 }
 
