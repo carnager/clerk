@@ -383,6 +383,7 @@ loadRSS () {
         else
             mpc clear
             mpc load $(cat $HOME/.config/clerk/podcasts | cut -d '\' -f 2)
+            dplayQueue
         fi
 done < <(echo -e "0  Return to Playlist Menu\n---\n$(cat $HOME/.config/clerk/podcasts | cut -d '\' -f 1)" | dmenu_t -p "Load RSS Feed > ")
 }
@@ -401,6 +402,7 @@ suspendPlaylist () {
         echo "pos="$position"" >> $HOME/.config/clerk/suspend
         echo "time="$time"" >> $HOME/.config/clerk/suspend
         notify-send "Clerk" "Playlist suspended"
+        managePlaylists
     fi
 }
 
@@ -415,6 +417,7 @@ resumePlaylist () {
     mpc seek "$time"
     mpc toggle
     notify-send "Clerk" "Resumed last-suspended Playlist"
+    managePlaylists
 }
 
 dplayQueue () {
