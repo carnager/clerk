@@ -3,13 +3,13 @@
 shopt -s globstar
 source $HOME/.config/clerk/config
 
-
 # create cached album list
 new_db="$(mpc stats | grep Updated | sed 's/ //g')"
 if [[ "$change_db" == "$new_db" ]]; then
-    if [[ -f $HOME/.config/clerk/album.cache && -f $HOME/.config/clerk/tracks.cache ]]; then
+    if [[ -f $HOME/.config/clerk/album.cache && -f $HOME/.config/clerk/tracks.cache && -f $HOME/.config/clerk/last.cache ]]; then
         album_temp=$(cat $HOME/.config/clerk/album.cache)
         tracks_temp=$(cat $HOME/.config/clerk/tracks.cache)
+        last_temp=$(cat $HOME/.config/clerk/last.cache)
         echo "album/track cache up to date"
     else
         album_temp_cur=$(mppc listall --format "{$mpd_artist} $seperator {album} $seperator {date}" | uniq)
@@ -18,17 +18,25 @@ if [[ "$change_db" == "$new_db" ]]; then
         tracks_temp_cur=$(mppc listall --format "{artist} $seperator {track} $seperator {title} $seperator {album}")
         echo "$tracks_temp_cur" > $HOME/.config/clerk/tracks.cache
         tracks_temp=$(cat $HOME/.config/clerk/tracks.cache)
+        last_temp_cur=$(export seperator="$seperator"; mppc listall --format "{last-modified}$seperator{date}$seperator{$mpd_artist}$seperator{album}" | sort -r | awk -F "$seperator" '{ print $2,ENVIRON["seperator"],$3,ENVIRON["seperator"],$4 }' | awk '!x[$0]++')
+        echo "$last_temp_cur" > $HOME/.config/clerk/last.cache
+        last_temp=$(cat $HOME/.config/clerk/last.cache)
     fi
 else
     sed -i "s/change_db=".*"/change_db=""$new_db""/" $HOME/.config/clerk/config
     rm -f $HOME/.config/clerk/album_cache
     rm -f $HOME/.config/clerk/tracks.cache
+    rm -f $HOME/.config/clerk/last.cache
     album_temp_cur=$(mppc listall --format "{$mpd_artist} $seperator {album} $seperator {date}" | uniq)
     echo "$album_temp_cur" > $HOME/.config/clerk/album.cache
     album_temp=$(cat $HOME/.config/clerk/album.cache)
     tracks_temp_cur=$(mppc listall --format "{artist} $seperator {track} $seperator {title} $seperator {album}")
     echo "$tracks_temp_cur" > $HOME/.config/clerk/tracks.cache
     tracks_temp=$(cat $HOME/.config/clerk/tracks.cache)
+    last_temp_cur=$(export seperator="$seperator"; mppc listall --format "{last-modified}$seperator{date}$seperator{$mpd_artist}$seperator{album}" | sort -r | awk -F "$seperator" '{ print $2,ENVIRON["seperator"],$3,ENVIRON["seperator"],$4 }' | awk '!x[$0]++')
+    echo "$last_temp_cur" > $HOME/.config/clerk/last.cache
+    last_temp=$(cat $HOME/.config/clerk/last.cache)
+
 fi
 
 
@@ -700,13 +708,32 @@ playRandomTracks () {
     mpc play
 }
 
+addLastMod() {
+    declare -i seen=0
+    while read ALBUM
+    do
+        seen=1
+        if [[ "$ALBUM" == "0  Return to Main Menu" ]]
+            then dplayPrompt
+        else
+            if [[ "$ALBUM" == "Adding Mode: Add" ]]
+                then insertLastMod
+            else
+                artist=$(echo "$ALBUM" | awk -F " $seperator " '{print $2}')
+                date=$(echo "$ALBUM" | awk -F " $seperator " '{print $1}')
+                album=$(echo "$ALBUM" | awk -F " $seperator " '{print $3}')
+                mppc searchadd date "$date" album "$album" $mpd_artist "$artist"
+            fi
+        fi
+    done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Add\n---\n$(echo "$last_temp")" | dmenu_t -dmenu -p "Choose Album > ")
+}
 
 AddAlbumTags() {
     declare -i seen=0
     while read TRACK
     do
         seen=1
-        if [[ "$TRACK" = "0  Return to Main Menu" ]]
+        if [[ "$TRACK" == "0  Return to Main Menu" ]]
             then dplayPrompt
         else
             if [[ "$TRACK" == "Adding Mode: Add" ]]
@@ -1015,7 +1042,7 @@ browseDateReplace() {
             elif [[ "$select" == "Adding Mode: Replace" ]]; then
                 browseDateAdd
             else
-                mpc clear && mpc find artist "$artist" album "$album" && mpc play
+                mpc clear && mpc findadd artist "$artist" album "$album" && mpc play
             fi
         fi
     done < <(echo -e "0  Return to Date Menu\n---\nAdding Mode: Replace\n---\nAdd All\nReplace All\n---\n$(mppc find date "$date" --format "{$mpd_artist} $seperator {album}" | uniq)" | dmenu_t -dmenu -p "Select Album > ")
@@ -1028,6 +1055,7 @@ browseLibPrompt() {
           "---"
           "1  Browse by Artist"
           "2  Browse by Date"
+          "x  Browse newest"
           "---"
           "3  Choose Albums"
           "4  Choose Track"
@@ -1045,6 +1073,7 @@ browseLibPrompt() {
         4*) AddTrack$quirkTrack ;;
         5*) updateCache && browseLibPrompt ;;
         0*) dplayPrompt ;;
+        x*)  addLastMod ;;
         *) exit
     esac
 }
