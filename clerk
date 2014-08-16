@@ -676,7 +676,18 @@ loadRandomRatedTracks () {
     number="$(echo " " | dmenu_t -p "Number of Songs > " | xargs echo)"
     ratings_min="$(echo " " | dmenu_t -p "Minimum Rating > " | xargs echo)"
     ratings_max="$(echo " " | dmenu_t -p "Maximum Rating > " | xargs echo)"
-    for ((i="$ratings_min"; i<="$ratings_max"; i++)); do mpc find comment "$i" | shuf | head -n "$number" | mpc add; done
+    mpc clear
+    n=0; while (( n++ < $number ));
+    do
+        comment=$(for ((i="$ratings_min"; i<="$ratings_max"; i++)); do echo "$i"; done | shuf -n1)
+        artist=$(mpc list artist comment "$comment" | shuf -n1)
+        title=$(mpc list title artist "$artist" comment "$comment" | shuf -n1)
+        mpc findadd artist "$artist" comment "$comment" title "$title"
+    done
+    mpc play
+#        rating=$(for ((i="$ratings_min"; i<="$ratings_max"; i++)); do mpc find comment "$i" | shuf -n 1)
+#        title=$(for ((i="$ratings_min"; i<="$ratings_max"; i++)); do mpc list title comment "$i" | shuf -n 1)
+#        mpc find
 }
 
 
