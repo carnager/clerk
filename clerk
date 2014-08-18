@@ -739,6 +739,47 @@ addLastMod() {
     done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Add\n---\n$(echo "$last_temp")" | dmenu_t -dmenu -p "Choose Album > ")
 }
 
+insertLastMod() {
+    declare -i seen=0
+    while read ALBUM
+    do
+        seen=1
+        if [[ "$ALBUM" == "0  Return to Main Menu" ]]
+            then dplayPrompt
+        else
+            if [[ "$ALBUM" == "Adding Mode: Insert" ]]
+                then replaceLastMod
+            else
+                artist=$(echo "$ALBUM" | awk -F " $seperator " '{print $2}')
+                date=$(echo "$ALBUM" | awk -F " $seperator " '{print $1}')
+                album=$(echo "$ALBUM" | awk -F " $seperator " '{print $3}')
+                mppc search date "$date" album "$album" $mpd_artist "$artist" | mpc insert
+            fi
+        fi
+    done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Insert\n---\n$(echo "$last_temp")" | dmenu_t -dmenu -p "Choose Album > ")
+}
+
+replaceLastMod() {
+    declare -i seen=0
+    while read ALBUM
+    do
+        seen=1
+        if [[ "$ALBUM" == "0  Return to Main Menu" ]]
+            then dplayPrompt
+        else
+            if [[ "$ALBUM" == "Adding Mode: Replace" ]]
+                then addLastMod
+            else
+                artist=$(echo "$ALBUM" | awk -F " $seperator " '{print $2}')
+                date=$(echo "$ALBUM" | awk -F " $seperator " '{print $1}')
+                album=$(echo "$ALBUM" | awk -F " $seperator " '{print $3}')
+                mpc clear && mppc searchadd date "$date" album "$album" $mpd_artist "$artist" && mpc play
+            fi
+        fi
+    done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Replace\n---\n$(echo "$last_temp")" | dmenu_t -dmenu -p "Choose Album > ")
+}
+
+
 AddAlbumTags() {
     declare -i seen=0
     while read TRACK
@@ -1272,6 +1313,3 @@ elif [[ "$1" == "playlists" ]]; then
 else
 dplayPrompt
 fi
-
-
-
