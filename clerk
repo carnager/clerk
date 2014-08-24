@@ -236,6 +236,7 @@ updateDB () {
             sqlite3 ../ratings.db "insert into tracks (date, artist, album, directory, rating) values ('$date', '$artist', '$album', '$directory/$title', '$rating')"
         done
     done
+    ratingPrompt
 }
 
 killDB () {
