@@ -12,10 +12,9 @@ manage your mpd server.
 * Show Albums/Tracks by currently playing Artist
 * Enable or disable scrobbling (with support for remote mpdscribble)
 * Love current song on lastfm (Using lastfm-mpd-cli)
-* Rate albums (using rating.txt in album folder - needs local access to
-* directories)
+* Rate albums (Stored in flat files for portability & sqlite database)
 * Load rated album
-* Rate tracks (stored in comment tag - needs local access to files)
+* Rate tracks (Stored in flat files for portability & sqlite database)
 * Control mpd options (modes, replaygain, crossfade)
 * Lookup artist/album/lyrics in webbrowser
 
@@ -32,10 +31,11 @@ see `clerk -h` for all default arguments.
 * rofi (https://github.com/DaveDavenport/rofi)
 * mpc (will get completely replaced with mppc, once its finished)
 * mppc (https://github.com/carnager/mppc)
+* sqlite for ratings
 
 
 # Optional Dependencies
- 
+
 * python-eyed3 (for track ratings)
 * metaflac (for track ratings)
 * surfraw (for lookup)
