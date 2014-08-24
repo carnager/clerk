@@ -237,7 +237,7 @@ updateDB () {
             directory=${directory//\'/\\\'}
             title=${title//\'\\\'}
             rating=${rating//\'/\\\'}
-            sqlite3 ../ratings.db "insert into tracks (date, artist, album, directory, rating) values ('$date', '$artist', '$album', '$directory/$title', '$rating')"
+            sqlite3 ../ratings.db "insert or replace into tracks (date, artist, album, directory, rating) values ('$date', '$artist', '$album', '$directory/$title', '$rating')"
         done
     done
     ratingPrompt
