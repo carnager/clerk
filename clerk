@@ -632,6 +632,24 @@ rateAlbum () {
 }
 
 rateTrack () {
+    ratings="$(echo " " | dmenu_t -p "Rating > " | xargs echo)"
+    if [ ratings = "" ]; then
+        exit
+    else
+        cd "$music_path"
+        cd "$(dirname "$(mpc current -f %file%)")"
+        cur_file="$(basename "$(mpc current -f %file%)")"
+        if grep "$cur_file" track_ratings.txt > /dev/null; then
+            sed -i "/$cur_file/d" track_ratings.txt
+            echo "File already rated. Changing Rating..."
+        fi
+        echo "$ratings/$track_maxratings $(echo "$cur_file")" >> track_ratings.txt
+        notify-send "clerk" "Rated $(mpc current -f "%$mpd_artist% - %album%") with $ratings"
+    fi
+}
+
+
+rateTrack2 () {
     extension=$(mpc current -f %file% | sed 's/.*\.//')
     ratings="$(echo " " | dmenu_t -p "Rating > " | xargs echo)"
     if [ ratings = "" ]; then
