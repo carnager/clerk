@@ -199,6 +199,7 @@ ratingPrompt () {
 updateDB () {
     cd $HOME/.config/clerk/ratings
     rm -f ../ratings.db
+    sqlite3 ratings.db < /usr/share/doc/clerk/create_rating.sql
     for line in *.ratings; do
         artist=$(grep "^artist=" "$line" | cut -d '=' -f2- )
         date=$(grep "^date=" "$line" | cut -d '=' -f2-)
