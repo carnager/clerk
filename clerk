@@ -677,6 +677,10 @@ currentTracksInsert () {
 
 
 rateAlbum () {
+    artist=$(mpc current -f %artist%)
+    album=$(mpc current -f %album%)
+    date=$(mpc current -f %date%)
+    directory=$(dirname $(mpc current -f %file%))
     ratings="$(seq $maxratings | dmenu_t -p "Select Rating: > ")"
     if [ ratings = "" ]; then
         exit
@@ -704,7 +708,9 @@ rateAlbum () {
             cp $HOME/.config/clerk/ratings/"$(mpc current -f %artist%--%date%--%album%).ratings" .
         fi
         notify-send "clerk" "Rated $(mpc current -f "%$mpd_artist% - %album%") with $ratings"
+        sqlite3 ../ratings.db "insert or replace into albums (date, artist, album, directory, rating) values ('$date', '$artist', '$album', '$directory', '$rating')"
     fi
+    ratingPrompt
 }
 
 rateTrack () {
@@ -738,6 +744,8 @@ rateTrack () {
         cp $HOME/.config/clerk/ratings/"$(mpc current -f %artist%--%date%--%album%).ratings" .
     fi
         notify-send "clerk" "Rated $(mpc current -f "%$mpd_artist% - %title%") with $ratings"
+        updateDB
+        ratingPrompt
 }
 
 
