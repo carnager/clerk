@@ -198,8 +198,11 @@ ratingPrompt () {
 
 updateDB () {
     cd $HOME/.config/clerk/ratings
-    rm -f ../ratings.db
-    sqlite3 ../ratings.db < /usr/share/doc/clerk/create_rating.sql
+    if [[ -a ../ratings.db ]]; then
+        echo "database exists. using it"
+    else
+        sqlite3 ../ratings.db < /usr/share/doc/clerk/create_rating.sql
+    fi
     for line in *.ratings; do
         artist=$(grep "^artist=" "$line" | cut -d '=' -f2- )
         date=$(grep "^date=" "$line" | cut -d '=' -f2-)
@@ -214,7 +217,8 @@ updateDB () {
             album=${album//\'/\\\'}
             directory=${directory//\'/\\\'}
             rating=${rating//\'/\\\'}
-            sqlite3 ../ratings.db "insert into albums (date, artist, album, directory, rating) values ('$date', '$artist', '$album', '$directory', '$rating')"
+            sqlite3 ../ratings.db "insert or replace into albums (date, artist, album, directory, rating) values ('$date', '$artist', '$album', '$directory', '$rating')"
+            #sqlite3 ../ratings.db "insert into albums (date, artist, album, directory, rating) values ('$date', '$artist', '$album', '$directory', '$rating')"
         done
     done
         for line in *.ratings; do
