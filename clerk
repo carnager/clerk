@@ -616,12 +616,21 @@ rateAlbum () {
     if [ ratings = "" ]; then
         exit
     else
-        cd "$music_path"
-        cd "$(dirname "$(mpc current -f %file%)")"
-        if [[ "$(pwd)" == */"$cd_divider"* ]]; then
-            cd ..
-        else echo " "
+        if [[ "$music_dir_access" == "yes" ]]; then
+            cd "$music_path"
+            cd "$music_path"
+            cd "$(dirname "$(mpc current -f %file%)")"
+            if [[ "$(pwd)" == */"$cd_divider"* ]]; then
+                cd ..
+            else echo " "
+            fi
+            rm -f "$(mpc current -f %artist%--%date%--%album%).albumrating"
+            echo "$ratings/$maxratings" > "$(mpc current -f %artist%--%date%--%album%).albumrating"
+            echo "$(mpc current -f "%$mpd_artist%")" >> "$(mpc current -f %artist%--%date%--%album%).albumrating"
+            echo "$(mpc current -f '%album%')" >> "$(mpc current -f %artist%--%date%--%album%).albumrating"
+            echo "$(mpc current -f '%date%')" >> "$(mpc current -f %artist%--%date%--%album%).albumrating"
         fi
+        cd $HOME/.config/clerk/ratings
         rm -f "$(mpc current -f %artist%--%date%--%album%).albumrating"
         echo "$ratings/$maxratings" > "$(mpc current -f %artist%--%date%--%album%).albumrating"
         echo "$(mpc current -f "%$mpd_artist%")" >> "$(mpc current -f %artist%--%date%--%album%).albumrating"
@@ -647,7 +656,7 @@ rateTrack () {
             fi
             echo "$ratings/$track_maxratings $(echo "$cur_file")" >> "$(mpc current -f %artist%--%date%--%album%).trackratings"
         fi
-        cd $HOME/.config/clerk/ratings/flat/tracks
+        cd $HOME/.config/clerk/ratings
         if grep "$cur_file" "$(mpc current -f %artist%--%date%--%album%).trackratings" > /dev/null; then
             sed -i "/$cur_file/d" "$(mpc current -f %artist%--%date%--%album%).trackratings"
             echo "File already rated. Changing Rating..."
