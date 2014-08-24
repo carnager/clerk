@@ -155,7 +155,7 @@ currentPrompt () {
 }
 
 ratingPrompt () {
-    menu=("0  Return to Main Menu"
+    menu=("Q  Return to Main Menu"
           "---"
           "1  Rate current Album"
           "2  Load Rated Albums"
@@ -166,8 +166,11 @@ ratingPrompt () {
           "6  Load Random Rated Tracks"
           "---"
           "7  Maximum Albums Rating:  $(echo $maxratings)"
+          "8  Maximum Tracks Rating:  $(echo $track_maxratings)"
+          "9  Create/Update Database"
+          "0  Delete Database (Can be recreated)"
           "---"
-          "8  Love current Song on LastFM")
+          "F  Love current Song on LastFM")
 
     prompt() {
         printf "%s\n" "$@" | dmenu_t -p "Ratings > "
@@ -181,12 +184,63 @@ ratingPrompt () {
         5*) loadRatedTracks ;;
         6*) loadRandomRatedTracks ;;
         7*) optionsRatingPrompt ;;
-        8*) lastfm-mpd-cli love > /dev/null && notify-send "MPD" "Loved $(mpc current -f '%title%') on LastFM" ;;
-        0*) dplayPrompt ;;
+        8*) optionsTrackRatingPrompt ;;
+        9*) updateDB;;
+        0*) killDB ;;
+        F*) lastfm-mpd-cli love > /dev/null && notify-send "MPD" "Loved $(mpc current -f '%title%') on LastFM" ;;
+        Q*) dplayPrompt ;;
           *) exit
     esac
 }
 
+updateDB () {
+    cd $HOME/.config/clerk/ratings
+    if [[ -a ratings.db ]]; then
+        echo "using existing database"
+    else
+        sqlite3 ../ratings.db < /usr/share/doc/clerk/create_rating.sql
+    fi
+    for line in *.ratings; do
+        artist=$(grep "^artist=" "$line" | cut -d '=' -f2- )
+        date=$(grep "^date=" "$line" | cut -d '=' -f2-)
+        album=$(grep "^album=" "$line" | cut -d '=' -f2-)
+        rating_split=$(grep "album_rating=" "$line" | cut -d "=" -f2)
+        directory=$(grep "^directory=" "$line" | cut -d '=' -f2-)
+        echo "$rating_split" | while read ratings; do
+            rating=$(echo "$ratings" | cut -d '/' -f1)
+            rating_max=$(echo "$ratings" | cut -d '/' -f2)
+            date=${date//\'/\\\'}
+            artist=${artist//\'/\\\'}
+            album=${album//\'/\\\'}
+            directory=${directory//\'/\\\'}
+            rating=${rating//\'/\\\'}
+            sqlite3 ../ratings.db "insert into albums (date, artist, album, directory, rating) values ('$date', '$artist', '$album', '$directory', '$rating')"
+        done
+    done
+        for line in *.ratings; do
+        artist=$(grep "^artist=" "$line" | cut -d '=' -f2- )
+        date=$(grep "^date=" "$line" | cut -d '=' -f2-)
+        album=$(grep "^album=" "$line" | cut -d '=' -f2-)
+        rating_split=$(grep "^rating=" "$line" | cut -d "=" -f2-)
+        directory=$(grep "^directory=" "$line" | cut -d '=' -f2-)
+        echo "$rating_split" | while read ratings; do
+            rating=$(echo "$ratings" | cut -d '/' -f1)
+            rating_max=$(echo "$ratings" | cut -d '/' -f2)
+            title=$(echo "$ratings" | cut -d ' ' -f2-)
+            date=${date//\'/\\\'}
+            artist=${artist//\'/\\\'}
+            album=${album//\'/\\\'}
+            directory=${directory//\'/\\\'}
+            title=${title//\'\\\'}
+            rating=${rating//\'/\\\'}
+            sqlite3 ../ratings.db "insert into tracks (date, artist, album, directory, rating) values ('$date', '$artist', '$album', '$directory/$title', '$rating')"
+        done
+    done
+}
+
+killDB () {
+    rm -f $HOME/.config/clerk/ratings.db
+}
 
 infoPrompt () {
     menu=("0  Return to Main Menu"
@@ -333,6 +387,12 @@ optionsRatingPrompt() {
     ratingPrompt
 }
 
+optionsTrackRatingPrompt() {
+    number="$(echo " " | dmenu_t -p 'Set Maximum Rating for Tracks > ')"
+    sed -i "s/track_maxratings=.*/track_maxratings="$number"/" $HOME/.config/clerk/config
+    export track_maxratings="$number"
+    ratingPrompt
+}
 
 crossfadePrompt () {
     menu=("0: Return to Main Menu"
@@ -676,35 +736,26 @@ rateTrack () {
 }
 
 
-rateTrack2 () {
-    extension=$(mpc current -f %file% | sed 's/.*\.//')
-    ratings="$(echo " " | dmenu_t -p "Rating > " | xargs echo)"
-    if [ ratings = "" ]; then
-        exit
-    else
-    cd "$music_path"
-        if [[ "$extension" == flac ]]; then
-            metaflac --remove-tag=comment "$(mpc current -f %file%)"
-            metaflac --set-tag=comment="$ratings" "$(mpc current -f %file%)"
-#             echo "Not yet implemented" && notify-send "clerk" "Rating Tracks is not yet implemented"
-        elif [[ "$extension" == mp3 ]]; then
-             eyeD3 --add-comment "$ratings" "$(mpc current -f %file%)"
-        fi
-    fi
-}
-
 loadRatedAlbums () {
-    cd "$music_path"
-    ratings="$(echo " " | dmenu_t -p "Rating > " | xargs echo)"
-    albums="$(grep -r "$ratings/$maxratings" **/rating.txt | sed -e 's/\/rating.txt.*//g')"
-    album="$(echo -e "replace all\nadd all\n---\n$albums" | dmenu_t)";
-    if [ "$album" = "" ]; then ratePrompt;
-    elif [ "$album" = "replace all" ]; then
+    cd "$HOME/.config/clerk"
+    ratings="$(seq $maxratings | dmenu_t -p "Rating > ")"
+    album=$(echo -e ".separator \" $seperator \"\nselect artist, album, date from albums where rating > 7;" | sqlite3 ratings.db)
+    menu=$(echo -e "Add All\nReplace All\n---\n$(echo "$album")" | rofi -dmenu -p "Select Album > ")
+    artist=$(echo "$menu" | awk -F " $seperator " '{ print $1 }')
+    album=$(echo "$menu" | awk -F " $seperator " '{ print $2 }')
+    date=$(echo "$menu" | awk -F " $seperator " '{ print $3 }')
+    if [[ "$menu" == "" ]]; then ratingPrompt;
+    elif [[ "$menu" == "Replace All" ]]; then
         mpc clear
-        grep -r "$ratings/$maxratings" **/rating.txt | sed -e 's/\/rating.txt.*//g' | while read line; do mpc add "$line" && mpc play; done
-    elif [ "$album" = "add all" ]; then
-        grep -r "$ratings/$maxratings" **/rating.txt | sed -e 's/\/rating.txt.*//g' | while read line; do mpc add "$line"; done ;
-    else mpc add "$album"
+        for albums in "$(sqlite3 ratings.db "select directory from albums where rating > "$ratings";")"; do
+            echo "$albums"
+        done | mpc add
+        mpc play
+    elif [ "$menu" = "Add All" ]; then
+        for albums in "$(sqlite3 ratings.db "select directory from albums where rating > "$ratings";")"; do
+            echo "$albums"
+        done | mpc add
+    else mpc findadd artist "$artist" album "$album" date "$date"
     fi
 }
 
