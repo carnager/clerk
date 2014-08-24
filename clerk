@@ -612,7 +612,7 @@ currentTracksInsert () {
 
 
 rateAlbum () {
-    ratings="$(echo " " | dmenu_t -p "Rating > " | xargs echo)"
+    ratings="$(seq $maxratings | dmenu_t -p "Select Rating: > ")"
     if [ ratings = "" ]; then
         exit
     else
@@ -632,7 +632,7 @@ rateAlbum () {
 }
 
 rateTrack () {
-    ratings="$(echo " " | dmenu_t -p "Rating > " | xargs echo)"
+    ratings="$(seq $track_maxratings | rofi -dmenu -p "Select Rating: > ")"
     if [ ratings = "" ]; then
         exit
     else
