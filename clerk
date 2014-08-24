@@ -682,6 +682,12 @@ rateAlbum () {
     date=$(mpc current -f %date%)
     directory=$(dirname $(mpc current -f %file%))
     ratings="$(seq $maxratings | dmenu_t -p "Select Rating: > ")"
+    date=${date//\'/\\\'}
+    artist=${artist//\'/\\\'}
+    album=${album//\'/\\\'}
+    directory=${directory//\'/\\\'}
+    rating=${ratings//\'/\\\'}
+
     if [ ratings = "" ]; then
         exit
     else
