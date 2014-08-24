@@ -173,9 +173,8 @@ ratingPrompt () {
           "7  Maximum Albums Rating:  $(echo $maxratings)"
           "8  Maximum Tracks Rating:  $(echo $track_maxratings)"
           "9  Create/Update Database"
-          "0  Delete Database (Can be recreated)"
           "---"
-          "F  Love current Song on LastFM")
+          "0  Love current Song on LastFM")
 
     prompt() {
         printf "%s\n" "$@" | dmenu_t -p "Ratings > "
@@ -191,8 +190,7 @@ ratingPrompt () {
         7*) optionsRatingPrompt ;;
         8*) optionsTrackRatingPrompt ;;
         9*) updateDB;;
-        0*) killDB ;;
-        F*) lastfm-mpd-cli love > /dev/null && notify-send "MPD" "Loved $(mpc current -f '%title%') on LastFM" ;;
+        0*) lastfm-mpd-cli love > /dev/null && notify-send "MPD" "Loved $(mpc current -f '%title%') on LastFM" ;;
         Q*) dplayPrompt ;;
           *) exit
     esac
@@ -200,11 +198,7 @@ ratingPrompt () {
 
 updateDB () {
     cd $HOME/.config/clerk/ratings
-    if [[ -a ratings.db ]]; then
-        echo "using existing database"
-    else
-        sqlite3 ../ratings.db < /usr/share/doc/clerk/create_rating.sql
-    fi
+    rm -f ../ratings.db
     for line in *.ratings; do
         artist=$(grep "^artist=" "$line" | cut -d '=' -f2- )
         date=$(grep "^date=" "$line" | cut -d '=' -f2-)
