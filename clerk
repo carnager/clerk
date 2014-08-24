@@ -622,11 +622,11 @@ rateAlbum () {
             cd ..
         else echo " "
         fi
-        rm -f rating.txt
-        echo "$ratings/$maxratings" > rating.txt
-        echo "$(mpc current -f "%$mpd_artist%")" >> rating.txt
-        echo "$(mpc current -f '%album%')" >> rating.txt
-        echo "$(mpc current -f '%date%')" >> rating.txt
+        rm -f "$(mpc current -f %artist%--%date%--%album%).albumrating"
+        echo "$ratings/$maxratings" > "$(mpc current -f %artist%--%date%--%album%).albumrating"
+        echo "$(mpc current -f "%$mpd_artist%")" >> "$(mpc current -f %artist%--%date%--%album%).albumrating"
+        echo "$(mpc current -f '%album%')" >> "$(mpc current -f %artist%--%date%--%album%).albumrating"
+        echo "$(mpc current -f '%date%')" >> "$(mpc current -f %artist%--%date%--%album%).albumrating"
         notify-send "clerk" "Rated $(mpc current -f "%$mpd_artist% - %album%") with $ratings"
     fi
 }
@@ -636,14 +636,23 @@ rateTrack () {
     if [ ratings = "" ]; then
         exit
     else
-        cd "$music_path"
-        cd "$(dirname "$(mpc current -f %file%)")"
+        cur_artist="$(mpc current -f %artist%)"
         cur_file="$(basename "$(mpc current -f %file%)")"
-        if grep "$cur_file" track_ratings.txt > /dev/null; then
-            sed -i "/$cur_file/d" track_ratings.txt
+        if [[ "$music_dir_access" == "yes" ]]; then
+            cd "$music_path"
+            cd "$(dirname "$(mpc current -f %file%)")"
+            if grep "$cur_file" "$(mpc current -f %artist%--%date%--%album%).trackratings" > /dev/null; then
+                sed -i "/$cur_file/d" "$(mpc current -f %artist%--%date%--%album%).trackratings"
+                echo "File already rated. Changing Rating..."
+            fi
+            echo "$ratings/$track_maxratings $(echo "$cur_file")" >> "$(mpc current -f %artist%--%date%--%album%).trackratings"
+        fi
+        cd $HOME/.config/clerk/ratings/flat/tracks
+        if grep "$cur_file" "$(mpc current -f %artist%--%date%--%album%).trackratings" > /dev/null; then
+            sed -i "/$cur_file/d" "$(mpc current -f %artist%--%date%--%album%).trackratings"
             echo "File already rated. Changing Rating..."
         fi
-        echo "$ratings/$track_maxratings $(echo "$cur_file")" >> track_ratings.txt
+        echo "$ratings/$track_maxratings $(echo "$cur_file")" >> "$(mpc current -f %artist%--%date%--%album%).trackratings"
         notify-send "clerk" "Rated $(mpc current -f "%$mpd_artist% - %title%") with $ratings"
     fi
 }
