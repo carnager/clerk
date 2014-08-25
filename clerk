@@ -773,8 +773,8 @@ rateTrack () {
 
 loadRatedAlbums () {
     cd "$HOME/.config/clerk"
-    ratings="$(seq $maxratings | dmenu_t -p "Rating > ")"
-    album=$(echo -e ".separator \" $seperator \"\nselect artist, album, date from albums where rating >= "$ratings";" | sqlite3 ratings.db)
+    rating="$(seq $maxratings | dmenu_t -p "Rating > ")"
+    album=$(echo -e ".separator \" $seperator \"\nselect artist, album, date from albums where rating >= "$rating";" | sqlite3 ratings.db)
     menu=$(echo -e "0  Return to Rating Prompt\n---\nAdd All\nReplace All\n---\n$(echo "$album")" | rofi -dmenu -p "Select Album > ")
     artist=$(echo "$menu" | awk -F " $seperator " '{ print $1 }')
     album=$(echo "$menu" | awk -F " $seperator " '{ print $2 }')
@@ -785,12 +785,12 @@ loadRatedAlbums () {
         ratingPrompt
     elif [[ "$menu" == "Replace All" ]]; then
         mpc clear
-        for albums in "$(sqlite3 ratings.db "select directory from albums where rating >= "$ratings";")"; do
+        for albums in "$(sqlite3 ratings.db "select directory from albums where rating >= "$rating";")"; do
             echo "$albums"
         done | mpc add
         mpc play
     elif [ "$menu" = "Add All" ]; then
-        for albums in "$(sqlite3 ratings.db "select directory from albums where rating >= "$ratings";")"; do
+        for albums in "$(sqlite3 ratings.db "select directory from albums where rating >= "$rating";")"; do
             echo "$albums"
         done | mpc add
     else mpc findadd artist "$artist" album "$album" date "$date"
@@ -798,11 +798,14 @@ loadRatedAlbums () {
 }
 
 loadRatedTracks () {
-    ratings="$(echo " " | dmenu_t -p "Rating > " | xargs echo)"
-    if [ ratings = "" ]; then
+    rating="$(seq "$track_maxratings" | dmenu_t -p "Rating > ")"
+    if [ rating = "" ]; then
         exit
     else
-        for i in "$ratings"; do mpc find comment "$i" | mpc add; done
+        cd $HOME/.config/clerk
+        for tracks in "$(sqlite3 ratings.db "select directory from tracks where rating = "$rating";")"; do
+            echo "$tracks"
+        done | mpc add
     fi
 }
 
