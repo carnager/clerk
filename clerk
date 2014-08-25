@@ -78,8 +78,8 @@ dplayPrompt () {
     }
 
     case "$(prompt "${menu[@]}")" in
-        1*) playRandomAlbum ;;
-        2*) playRandomTracks ;;
+        1*) playRandomAlbum && dplayPrompt ;;
+        2*) playRandomTracks && dplayPrompt ;;
         3*) currentPrompt ;;
         4*) dplayQueue ;;
         5*) browseLibPrompt ;;
