@@ -786,7 +786,7 @@ rateTrack () {
 loadRatedAlbums () {
     cd "$HOME/.config/clerk"
     rating="$(seq $maxratings | dmenu_t -p "Rating > ")"
-    album=$(echo -e ".separator \" $seperator \"\nselect artist, album, date from albums where rating = "$rating";" | sqlite3 ratings.db)
+    album=$(echo -e ".separator \" $seperator \"\nselect artist, album, date from albums where rating = "$rating" order by directory;" | sqlite3 ratings.db)
     menu=$(echo -e "0  Return to Rating Prompt\n---\nAdd All\nReplace All\n---\n$(echo "$album")" | rofi -dmenu -p "Select Album > ")
     artist=$(echo "$menu" | awk -F " $seperator " '{ print $1 }')
     album=$(echo "$menu" | awk -F " $seperator " '{ print $2 }')
