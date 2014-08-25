@@ -675,20 +675,23 @@ currentTracksInsert () {
     done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Insert\n---\n$(mppc search artist "$(mpc current -f %artist%)" --format "{album} $seperator {track} $seperator {title}")" | dmenu_t -p "Tracks by $(mpc current --format '%artist%') > ")
 }
 
+escapeSql() {
+    echo ${1//\'/\'\'}
+}
 
 rateAlbum () {
     artist="$(mpc current -f %artist%)"
     album="$(mpc current -f %album%)"
     date="$(mpc current -f %date%)"
-    directory="$(dirname $(mpc current -f %file%))"
-    ratings="$(seq $maxratings | dmenu_t -p "Select Rating: > ")"
-    date=${date//\'/\\\'}
-    artist=${artist//\'/\\\'}
-    album=${album//\'/\\\'}
-    directory=${directory//\'/\\\'}
-    rating=${ratings//\'/\\\'}
+    directory="$(dirname "$(mpc current -f %file%)")"
+    rating="$(seq $maxratings | dmenu_t -p "Select Rating: > ")"
+    date=$(escapeSql "$date")
+    artist=$(escapeSql "$artist")
+    album=$(escapeSql "$album")
+    directory=$(escapeSql "$directory")
+    rating=$(escapeSql "$rating")
 
-    if [ ratings = "" ]; then
+    if [ rating = "" ]; then
         exit
     else
         cd $HOME/.config/clerk/ratings
@@ -713,8 +716,8 @@ rateAlbum () {
             fi
             cp $HOME/.config/clerk/ratings/"$(mpc current -f %artist%--%date%--%album%).ratings" .
         fi
-        notify-send "clerk" "Rated $(mpc current -f "%$mpd_artist% - %album%") with $ratings"
         cd $HOME/.config/clerk/ratings
+        notify-send "clerk" "Rated $(mpc current -f "%$mpd_artist% - %album%") with $ratings"
         sqlite3 ../ratings.db "insert or replace into albums (date, artist, album, directory, rating) values ('$date', '$artist', '$album', '$directory', '$rating')"
     fi
     ratingPrompt
@@ -811,12 +814,11 @@ loadRandomRatedTracks () {
 
 
 loadRandomRating () {
-    cd "$music_path"
-    ratings_min="$(echo " " | dmenu_t -p "Minimum Rating > " | xargs echo)"
-    ratings_max="$(echo " " | dmenu_t -p "Maximum Rating > " | xargs echo)"
+    cd $HOME/.config/clerk
+    rating="$(seq $maxratings | dmenu_t -p "Minimum Rating > " | xargs echo)"
     mpc clear
-    grep -lF "$(seq $ratings_min $ratings_max)" **/rating.txt | sed -e 's/\/rating.txt.*//g' | shuf -n 1 | while read line; do
-    mpc add "$line" && mpc play; done
+    for albums in "$(sqlite3 ratings.db "select directory from albums where rating >= $rating;")"; do echo "$albums"; done| shuf -n 1| mpc add
+    mpc play
 }
 
 playRandomAlbum () {
