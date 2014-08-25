@@ -222,24 +222,26 @@ updateDB () {
         done
     done
         for line in *.ratings; do
-        artist=$(grep "^artist=" "$line" | cut -d '=' -f2- )
-        date=$(grep "^date=" "$line" | cut -d '=' -f2-)
-        album=$(grep "^album=" "$line" | cut -d '=' -f2-)
-        rating_split=$(grep "^rating=" "$line" | cut -d "=" -f2-)
-        directory=$(grep "^directory=" "$line" | cut -d '=' -f2-)
-        echo "$rating_split" | while read ratings; do
-            rating=$(echo "$ratings" | cut -d '/' -f1)
-            rating_max=$(echo "$ratings" | cut -d '/' -f2)
-            file=$(echo "$ratings" | cut -d ' ' -f2-)
-            date=${date//\'/\\\'}
-            artist=${artist//\'/\\\'}
-            album=${album//\'/\\\'}
-            directory=${directory//\'/\\\'}
-            title=${title//\'\\\'}
-            rating=${rating//\'/\\\'}
-            sqlite3 ../ratings.db "insert or replace into tracks (date, artist, album, directory, rating) values ('$date', '$artist', '$album', '$directory/$file', '$rating')"
+            if grep "^rating=" "$line" > /dev/null; then
+                artist=$(grep "^artist=" "$line" | cut -d '=' -f2- )
+                date=$(grep "^date=" "$line" | cut -d '=' -f2-)
+                album=$(grep "^album=" "$line" | cut -d '=' -f2-)
+                rating_split=$(grep "^rating=" "$line" | cut -d "=" -f2-)
+                directory=$(grep "^directory=" "$line" | cut -d '=' -f2-)
+                echo "$rating_split" | while read ratings; do
+                    rating=$(echo "$ratings" | cut -d '/' -f1)
+                    rating_max=$(echo "$ratings" | cut -d '/' -f2)
+                    file=$(echo "$ratings" | cut -d ' ' -f2-)
+                    date=${date//\'/\\\'}
+                    artist=${artist//\'/\\\'}
+                    album=${album//\'/\\\'}
+                    directory=${directory//\'/\\\'}
+                    title=${title//\'\\\'}
+                    rating=${rating//\'/\\\'}
+                    sqlite3 ../ratings.db "insert or replace into tracks (date, artist, album, directory, rating) values ('$date', '$artist', '$album', '$directory/$file', '$rating')"
+                done
+            fi
         done
-    done
     ratingPrompt
 }
 
@@ -803,7 +805,7 @@ loadRatedTracks () {
         exit
     else
         cd $HOME/.config/clerk
-        for tracks in "$(sqlite3 ratings.db "select directory from tracks where rating = "$rating";")"; do
+        for tracks in "$(sqlite3 ratings.db "select directory from tracks where rating >= "$rating";")"; do
             echo "$tracks"
         done | mpc add
     fi
@@ -811,20 +813,12 @@ loadRatedTracks () {
 
 loadRandomRatedTracks () {
     number="$(echo " " | dmenu_t -p "Number of Songs > " | xargs echo)"
-    ratings_min="$(echo " " | dmenu_t -p "Minimum Rating > " | xargs echo)"
-    ratings_max="$(echo " " | dmenu_t -p "Maximum Rating > " | xargs echo)"
+    rating="$(seq "$track_maxratings" | dmenu_t -p "Minimum Rating > ")"
     mpc clear
-    n=0; while (( n++ < $number ));
-    do
-        comment=$(for ((i="$ratings_min"; i<="$ratings_max"; i++)); do echo "$i"; done | shuf -n1)
-        artist=$(mpc list artist comment "$comment" | shuf -n1)
-        title=$(mpc list title artist "$artist" comment "$comment" | shuf -n1)
-        mpc findadd artist "$artist" comment "$comment" title "$title"
-    done
+    for tracks in "$(sqlite3 ratings.db "select directory from tracks where rating >= "$rating";")"; do
+        echo "$tracks"
+    done | shuf -n "$number" | mpc add
     mpc play
-#        rating=$(for ((i="$ratings_min"; i<="$ratings_max"; i++)); do mpc find comment "$i" | shuf -n 1)
-#        title=$(for ((i="$ratings_min"; i<="$ratings_max"; i++)); do mpc list title comment "$i" | shuf -n 1)
-#        mpc find
 }
 
 
