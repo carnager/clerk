@@ -34,9 +34,8 @@ seperator=•
 # use artist or albumartist for album ratings
 mpd_artist=albumartist
 
-# if you have missing tags and experience non-adding albums, set this
+# if you have missing tags and experience non-adding albums, set these
 # to "Flat", otherwise leave the default of "Tags"
-# Same thing goes for AddTrack value.
 quirkAlbum="Tags"
 quirkTrack="Tags"
 
