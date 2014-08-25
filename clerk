@@ -797,12 +797,12 @@ loadRatedAlbums () {
         ratingPrompt
     elif [[ "$menu" == "Replace All" ]]; then
         mpc clear
-        for albums in "$(sqlite3 ratings.db "select directory from albums where rating >= "$rating";")"; do
+        for albums in "$(sqlite3 ratings.db "select directory from albums where rating = "$rating";")"; do
             echo "$albums"
         done | mpc add
         mpc play
     elif [ "$menu" = "Add All" ]; then
-        for albums in "$(sqlite3 ratings.db "select directory from albums where rating >= "$rating";")"; do
+        for albums in "$(sqlite3 ratings.db "select directory from albums where rating = "$rating";")"; do
             echo "$albums"
         done | mpc add
     else mpc findadd artist "$artist" album "$album" date "$date"
