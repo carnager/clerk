@@ -230,14 +230,14 @@ updateDB () {
         echo "$rating_split" | while read ratings; do
             rating=$(echo "$ratings" | cut -d '/' -f1)
             rating_max=$(echo "$ratings" | cut -d '/' -f2)
-            title=$(echo "$ratings" | cut -d ' ' -f2-)
+            file=$(echo "$ratings" | cut -d ' ' -f2-)
             date=${date//\'/\\\'}
             artist=${artist//\'/\\\'}
             album=${album//\'/\\\'}
             directory=${directory//\'/\\\'}
             title=${title//\'\\\'}
             rating=${rating//\'/\\\'}
-            sqlite3 ../ratings.db "insert or replace into tracks (date, artist, album, directory, rating) values ('$date', '$artist', '$album', '$directory/$title', '$rating')"
+            sqlite3 ../ratings.db "insert or replace into tracks (date, artist, album, directory, rating) values ('$date', '$artist', '$album', '$directory/$file', '$rating')"
         done
     done
     ratingPrompt
@@ -717,14 +717,25 @@ rateAlbum () {
             cp $HOME/.config/clerk/ratings/"$(mpc current -f %artist%--%date%--%album%).ratings" .
         fi
         cd $HOME/.config/clerk/ratings
-        notify-send "clerk" "Rated $(mpc current -f "%$mpd_artist% - %album%") with $ratings"
+        notify-send "clerk" "Rated $(mpc current -f "%$mpd_artist% - %album%") with $rating"
         sqlite3 ../ratings.db "insert or replace into albums (date, artist, album, directory, rating) values ('$date', '$artist', '$album', '$directory', '$rating')"
     fi
     ratingPrompt
 }
 
 rateTrack () {
-    ratings="$(seq $track_maxratings | rofi -dmenu -p "Select Rating: > ")"
+    artist="$(mpc current -f %artist%)"
+    album="$(mpc current -f %album%)"
+    date="$(mpc current -f %date%)"
+    directory="$(dirname "$(mpc current -f %file%)")"
+    file="$(mpc current -f %file% | awk -F '/' '{ print $NF }')"
+    rating="$(seq $track_maxratings | dmenu_t -p "Select Rating: > ")"
+    date=$(escapeSql "$date")
+    artist=$(escapeSql "$artist")
+    album=$(escapeSql "$album")
+    directory=$(escapeSql "$directory")
+    rating=$(escapeSql "$rating")
+
     if [ ratings = "" ]; then
         exit
     else
@@ -743,7 +754,7 @@ rateTrack () {
             sed -i "/$cur_file/d" "$(mpc current -f %artist%--%date%--%album%).ratings"
             echo "File already rated. Changing Rating..."
         fi
-        echo "rating=$ratings/$track_maxratings $(echo "$cur_file")" >> "$(mpc current -f %artist%--%date%--%album%).ratings"
+        echo "rating=$rating/$track_maxratings $(echo "$cur_file")" >> "$(mpc current -f %artist%--%date%--%album%).ratings"
     fi
     if [[ "$music_dir_access" == "yes" ]]; then
         cd "$music_path"
@@ -753,8 +764,9 @@ rateTrack () {
         fi
         cp $HOME/.config/clerk/ratings/"$(mpc current -f %artist%--%date%--%album%).ratings" .
     fi
-        notify-send "clerk" "Rated $(mpc current -f "%$mpd_artist% - %title%") with $ratings"
-        updateDB
+        cd $HOME/.config/clerk/ratings
+        notify-send "clerk" "Rated $(mpc current -f "%$mpd_artist% - %title%") with $rating"
+        sqlite3 ../ratings.db "insert or replace into tracks (date, artist, album, directory, rating) values ('$date', '$artist', '$album', '$directory/$file', '$rating')"
         ratingPrompt
 }
 
