@@ -707,7 +707,7 @@ rateAlbum () {
         else
             echo "artist="$(mpc current --format %artist%)"" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
             echo "album="$(mpc current --format %album%)"" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
-            echo "date="$(mpc current --format %date%)"" >> "$(mpc current -f $albumartist--%date%--%album%).ratings"
+            echo "date="$(mpc current --format %date%)"" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
             echo "directory="$(dirname "$(mpc current --format %file%)")"" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
         fi
         if grep "album_rating=" "$(mpc current -f %artist%--%date%--%album%).ratings" > /dev/null; then
