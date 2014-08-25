@@ -814,6 +814,7 @@ loadRatedTracks () {
 loadRandomRatedTracks () {
     number="$(echo " " | dmenu_t -p "Number of Songs > " | xargs echo)"
     rating="$(seq "$track_maxratings" | dmenu_t -p "Minimum Rating > ")"
+    cd $HOME/.config/clerk
     mpc clear
     for tracks in "$(sqlite3 ratings.db "select directory from tracks where rating >= "$rating";")"; do
         echo "$tracks"
