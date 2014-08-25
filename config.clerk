@@ -6,7 +6,8 @@ backend=rofi
 # rofiopts="-width 35 -padding 12 -lines 40"
 
 # If you don't have physical access to your music_dir
-# set this to no
+# set this to no. This setting will make sure that ratings files
+# will be copied to their associated album
 music_dir_access=yes
 
 # maximum rating for album ratings
