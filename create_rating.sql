@@ -1,6 +1,7 @@
 create table if not exists tracks(
     date varchar(12) not null,
     artist varchar(255) not null,
+    title varchar(255) not null,
     album varchar(255) not null,
     directory varchar(500) not null,
     rating smallint not null
