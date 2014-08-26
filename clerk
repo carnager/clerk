@@ -826,20 +826,23 @@ loadRatedTracks () {
 loadRandomRatedTracks () {
     number="$(echo " " | dmenu_t -p "Number of Songs > " | xargs echo)"
     rating="$(seq "$track_maxratings" | dmenu_t -p "Minimum Rating > ")"
-    tracks="$(echo -e ".separator \" $seperator \"\nselect artist, album, date, title from tracks where rating >= "$rating" order by artist;" | sqlite3 ratings.db)"
     if [ rating = "" ]; then
         exit
     else
         cd $HOME/.config/clerk
         mpc clear
+        tracks="$(echo -e ".separator \" $seperator \"\nselect artist, album, date, title from tracks where rating >= "$rating";" | sqlite3 ratings.db)"
         echo "$tracks" | while read tracks; do
+            touch /tmp/clerk_tracklist
             artist=$(echo "$tracks" | awk -F " $seperator " '{ print $1 }')
             album=$(echo "$tracks" | awk -F " $seperator " '{ print $2 }')
             date=$(echo "$tracks" | awk -F " $seperator " '{ print $3 }')
             title=$(echo "$tracks" | awk -F " $seperator " '{ print $4 }')
-            mpc find artist "$artist" album "$album" title "$title" date "$date" | shuf -n $value | mpc add
+            mppc find artist "$artist" album "$album" date "$date" title "$title" --format '{file}' >> /tmp/clerk_tracklist
         done
+        cat /tmp/clerk_tracklist | shuf -n $number | mpc add
         mpc play
+        rm -f /tmp/clerk_tracklist
     fi
 }
 
