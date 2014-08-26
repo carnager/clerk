@@ -714,7 +714,7 @@ rateAlbum () {
             sed -i "/album_rating/d" "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
             echo "Album already rated. Changing Rating"
         fi
-        echo "album_rating=$ratings/$maxratings" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
+        echo "album_rating=$rating/$maxratings" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
         if [[ "$music_dir_access" == "yes" ]]; then
             cd "$music_path"
             cd "$(dirname "$(mpc current -f %file%)")"
