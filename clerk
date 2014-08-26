@@ -687,10 +687,10 @@ rateAlbum () {
     elif [[ "$mpd_artist" == "artist" ]]; then
         albumartist="$(mpc current -f %artist%)"
     fi
-    artist="$(mpc format -f %artist%)"
+    artist="$(mpc current -f %artist%)"
     album="$(mpc current -f %album%)"
     date="$(mpc current -f %date%)"
-    directory="$(dirname "$(mpc current -f %file%)")"
+    directory="$(dirname "$(mpc current -f %file%)" | sed -e "s/\/"$cd_divider".*$//g")"
     rating="$(seq $maxratings | dmenu_t -p "Select Rating: > ")"
     date=$(escapeSql "$date")
     artist=$(escapeSql "$artist")
@@ -708,7 +708,7 @@ rateAlbum () {
             echo "artist="$(mpc current --format %artist%)"" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
             echo "album="$(mpc current --format %album%)"" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
             echo "date="$(mpc current --format %date%)"" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
-            echo "directory="$(dirname "$(mpc current --format %file%)")"" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
+            echo "directory="$(echo "$directory")"" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
         fi
         if grep "album_rating=" "$(mpc current -f %artist%--%date%--%album%).ratings" > /dev/null; then
             sed -i "/album_rating/d" "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
@@ -724,7 +724,7 @@ rateAlbum () {
             cp $HOME/.config/clerk/ratings/"$(mpc current -f %$mpd_artist%--%date%--%album%).ratings" .
         fi
         cd $HOME/.config/clerk/ratings
-        notify-send "clerk" "Rated $(mpc current -f "%$mpd_artist% - %album%") with $rating"
+        notify-send "clerk" "Rated $(mpc current -f %$mpd_artist% - %album%) with $rating"
         sqlite3 ../ratings.db "insert or replace into albums (date, artist, album, directory, rating) values ('$date', '$albumartist', '$album', '$directory', '$rating')"
     fi
     ratingPrompt
