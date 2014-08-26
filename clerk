@@ -208,16 +208,14 @@ updateDB () {
         date=$(grep "^date=" "$line" | cut -d '=' -f2-)
         album=$(grep "^album=" "$line" | cut -d '=' -f2-)
         rating_split=$(grep "album_rating=" "$line" | cut -d "=" -f2)
-        directory=$(grep "^directory=" "$line" | cut -d '=' -f2-)
         echo "$rating_split" | while read ratings; do
             rating=$(echo "$ratings" | cut -d '/' -f1)
             rating_max=$(echo "$ratings" | cut -d '/' -f2)
             date=${date//\'/\\\'}
             artist=${artist//\'/\\\'}
             album=${album//\'/\\\'}
-            directory=${directory//\'/\\\'}
             rating=${rating//\'/\\\'}
-            sqlite3 ../ratings.db "insert or replace into albums (date, artist, album, directory, rating) values ('$date', '$artist', '$album', '$directory', '$rating')"
+            sqlite3 ../ratings.db "insert or replace into albums (date, artist, album, rating) values ('$date', '$artist', '$album', '$rating')"
             #sqlite3 ../ratings.db "insert into albums (date, artist, album, directory, rating) values ('$date', '$artist', '$album', '$directory', '$rating')"
         done
     done
@@ -227,18 +225,18 @@ updateDB () {
                 date=$(grep "^date=" "$line" | cut -d '=' -f2-)
                 album=$(grep "^album=" "$line" | cut -d '=' -f2-)
                 rating_split=$(grep "^rating=" "$line" | cut -d "=" -f2-)
-                directory=$(grep "^directory=" "$line" | cut -d '=' -f2-)
                 echo "$rating_split" | while read ratings; do
                     rating=$(echo "$ratings" | cut -d '/' -f1)
                     rating_max=$(echo "$ratings" | cut -d '/' -f2)
-                    file=$(echo "$ratings" | cut -d ' ' -f2-)
+                    title_split="$(echo "$ratings" | cut -d ' ' -f2-)"
+                    title="$(echo "$title_split" | cut -d '-' -f2-)"
+                    tracknumber="$(echo "$title_split" | cut -d '-' -f1)"
                     date=${date//\'/\\\'}
                     artist=${artist//\'/\\\'}
                     album=${album//\'/\\\'}
-                    directory=${directory//\'/\\\'}
                     title=${title//\'\\\'}
                     rating=${rating//\'/\\\'}
-                    sqlite3 ../ratings.db "insert or replace into tracks (date, artist, album, directory, rating) values ('$date', '$artist', '$album', '$file', '$rating')"
+                    sqlite3 ../ratings.db "insert or replace into tracks (date, artist, album, title, tracknumber, rating) values ('$date', '$artist', '$album', '$title', '$trackbumber', '$rating')"
                 done
             fi
         done
@@ -691,42 +689,39 @@ rateAlbum () {
     artist="$(mpc current -f %artist%)"
     album="$(mpc current -f %album%)"
     date="$(mpc current -f %date%)"
-    directory="$(dirname "$(mpc current -f %file%)" | sed -e "s/\/"$cd_divider".*$//g")"
     rating="$(seq $maxratings | dmenu_t -p "Select Rating: > ")"
     date=$(escapeSql "$date")
     artist=$(escapeSql "$artist")
     album=$(escapeSql "$album")
-    directory=$(escapeSql "$directory")
     rating=$(escapeSql "$rating")
 
     if [ rating = "" ]; then
         exit
     else
         cd $HOME/.config/clerk/ratings
-        if [[ -a "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings" ]]; then
+        if [[ -a "$(mpc current -f "%$mpd_artist%--%date%--%album%").ratings" ]]; then
             echo "Ratings file present, using it"
         else
-            echo "artist="$(mpc current --format %artist%)"" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
-            echo "album="$(mpc current --format %album%)"" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
-            echo "date="$(mpc current --format %date%)"" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
-            echo "directory="$(echo "$directory")"" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
+            echo "artist="$(mpc current --format %artist%)"" >> "$(mpc current -f "%$mpd_artist%--%date%--%album%").ratings"
+            echo "album="$(mpc current --format %album%)"" >> "$(mpc current -f "%$mpd_artist%--%date%--%album%").ratings"
+            echo "date="$(mpc current --format %date%)"" >> "$(mpc current -f "%$mpd_artist%--%date%--%album%").ratings"
         fi
-        if grep "album_rating=" "$(mpc current -f %artist%--%date%--%album%).ratings" > /dev/null; then
-            sed -i "/album_rating/d" "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
+        if grep "album_rating=" "$(mpc current -f "%artist%--%date%--%album%").ratings" > /dev/null; then
+            sed -i "/album_rating/d" "$(mpc current -f "%$mpd_artist%--%date%--%album%").ratings"
             echo "Album already rated. Changing Rating"
         fi
-        echo "album_rating=$rating/$maxratings" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
+        echo "album_rating=$rating/$maxratings" >> "$(mpc current -f "%$mpd_artist%--%date%--%album%").ratings"
         if [[ "$music_dir_access" == "yes" ]]; then
             cd "$music_path"
             cd "$(dirname "$(mpc current -f %file%)")"
             if [[ "$(pwd)" == */"$cd_divider"* ]]; then
                 cd ..
             fi
-            cp $HOME/.config/clerk/ratings/"$(mpc current -f %$mpd_artist%--%date%--%album%).ratings" .
+            cp $HOME/.config/clerk/ratings/"$(mpc current -f "%$mpd_artist%--%date%--%album%").ratings" rating.txt
         fi
         cd $HOME/.config/clerk/ratings
-        notify-send "clerk" "Rated $(mpc current -f %$mpd_artist% - %album%) with $rating"
-        sqlite3 ../ratings.db "insert or replace into albums (date, artist, album, directory, rating) values ('$date', '$albumartist', '$album', '$directory', '$rating')"
+        notify-send "clerk" "Rated $(mpc current -f "%$mpd_artist% - %album%") with $rating"
+        sqlite3 ../ratings.db "insert or replace into albums (date, artist, album, rating) values ('$date', '$albumartist', '$album', '$rating')"
     fi
     ratingPrompt
 }
@@ -740,35 +735,33 @@ rateTrack () {
         albumartist="$(mpc current -f %artist%)"
     fi
     date="$(mpc current -f %date%)"
-    album_directory="$(dirname "$(mpc current -f %file%)" | sed -e "s/\/"$cd_divider".*$//g")"
-    directory="$(mpc current -f %file%)"
-    file="$(mpc current -f %file% | awk -F '/' '{ print $NF }')"
+    title="$(mpc current -f %title%)"
+    tracknumber="$(mpc current -f %track%)"
     rating="$(seq $track_maxratings | dmenu_t -p "Select Rating: > ")"
     date=$(escapeSql "$date")
     artist=$(escapeSql "$artist")
     album=$(escapeSql "$album")
     directory=$(escapeSql "$directory")
     rating=$(escapeSql "$rating")
+    title=$(escapeSql "$title")
 
     if [ ratings = "" ]; then
         exit
     else
-        cur_artist="$(mpc current -f %artist%)"
-        cur_file="$(basename "$(mpc current -f %file%)")"
+        cur_file="$(basename "$(mpc current -f %track%-%title%)")"
         cd $HOME/.config/clerk/ratings
         if [[ -a "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings" ]]; then
             echo "Ratings file present, using it"
         else
-            echo "artist="$(mpc current --format %artist%)"" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
-            echo "album="$(mpc current --format %album%)"" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
-            echo "date="$(mpc current --format %date%)"" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
-            echo "directory="$album_directory"" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
+            echo "artist="$artist"" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
+            echo "album="$album"" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
+            echo "date="$date"" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
         fi
         if grep "$cur_file" "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings" > /dev/null; then
             sed -i "/$cur_file/d" "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
             echo "File already rated. Changing Rating..."
         fi
-        echo "rating=$rating/$track_maxratings "$(mpc current -f %file%)"" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
+        echo "rating=$rating/$track_maxratings "$tracknumber"-"$title"" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
     fi
     if [[ "$music_dir_access" == "yes" ]]; then
         cd "$music_path"
@@ -776,11 +769,11 @@ rateTrack () {
         if [[ "$(pwd)" == */"$cd_divider"* ]]; then
             cd ..
         fi
-        cp $HOME/.config/clerk/ratings/"$(mpc current -f %$mpd_artist%--%date%--%album%).ratings" .
+        cp $HOME/.config/clerk/ratings/"$(mpc current -f %$mpd_artist%--%date%--%album%).ratings" rating.txt
     fi
         cd $HOME/.config/clerk/ratings
         notify-send "clerk" "Rated $(mpc current -f "%artist% - %title%") with $rating"
-        sqlite3 ../ratings.db "insert or replace into tracks (date, artist, album, directory, rating) values ('$date', '$artist', '$album', '$directory', '$rating')"
+        sqlite3 ../ratings.db "insert or replace into tracks (date, artist, album, title, tracknumber, rating) values ('$date', '$artist', '$album', '$title', '$tracknumber', '$rating')"
         ratingPrompt
 }
 
@@ -788,7 +781,7 @@ rateTrack () {
 loadRatedAlbums () {
     cd "$HOME/.config/clerk"
     rating="$(seq $maxratings | dmenu_t -p "Rating > ")"
-    album=$(echo -e ".separator \" $seperator \"\nselect artist, album, date from albums where rating = "$rating" order by directory;" | sqlite3 ratings.db)
+    album=$(echo -e ".separator \" $seperator \"\nselect artist, album, date from albums where rating = "$rating" order by artist;" | sqlite3 ratings.db)
     menu=$(echo -e "0  Return to Rating Prompt\n---\nAdd All\nReplace All\n---\n$(echo "$album")" | rofi -dmenu -p "Select Album > ")
     artist=$(echo "$menu" | awk -F " $seperator " '{ print $1 }')
     album=$(echo "$menu" | awk -F " $seperator " '{ print $2 }')
@@ -812,34 +805,54 @@ loadRatedAlbums () {
 }
 
 loadRatedTracks () {
-    rating="$(seq "$track_maxratings" | dmenu_t -p "Rating > ")"
+    rating="$(seq $track_maxratings | dmenu_t -p "Rating > ")"
     if [ rating = "" ]; then
         exit
     else
         cd $HOME/.config/clerk
-        for tracks in "$(sqlite3 ratings.db "select directory from tracks where rating >= "$rating";")"; do
-            echo "$tracks"
-        done | mpc add
+        mpc clear
+        tracks="$(echo -e ".separator \" $seperator \"\nselect artist, album, date, title from tracks where rating = "$rating" order by artist;" | sqlite3 ratings.db)"
+        echo "$tracks" | while read tracks; do
+            artist=$(echo "$tracks" | awk -F " $seperator " '{ print $1 }')
+            album=$(echo "$tracks" | awk -F " $seperator " '{ print $2 }')
+            date=$(echo "$tracks" | awk -F " $seperator " '{ print $3 }')
+            title=$(echo "$tracks" | awk -F " $seperator " '{ print $4 }')
+            mpc find artist "$artist" album "$album" title "$title" date "$date" | shuf -n $value | mpc add
+        done
+        mpc play
     fi
 }
 
 loadRandomRatedTracks () {
     number="$(echo " " | dmenu_t -p "Number of Songs > " | xargs echo)"
     rating="$(seq "$track_maxratings" | dmenu_t -p "Minimum Rating > ")"
-    cd $HOME/.config/clerk
-    mpc clear
-    for tracks in "$(sqlite3 ratings.db "select directory from tracks where rating >= "$rating";")"; do
-        echo "$tracks"
-    done | shuf -n "$number" | mpc add
-    mpc play
+    tracks="$(echo -e ".separator \" $seperator \"\nselect artist, album, date, title from tracks where rating >= "$rating" order by artist;" | sqlite3 ratings.db)"
+    if [ rating = "" ]; then
+        exit
+    else
+        cd $HOME/.config/clerk
+        mpc clear
+        echo "$tracks" | while read tracks; do
+            artist=$(echo "$tracks" | awk -F " $seperator " '{ print $1 }')
+            album=$(echo "$tracks" | awk -F " $seperator " '{ print $2 }')
+            date=$(echo "$tracks" | awk -F " $seperator " '{ print $3 }')
+            title=$(echo "$tracks" | awk -F " $seperator " '{ print $4 }')
+            mpc find artist "$artist" album "$album" title "$title" date "$date" | shuf -n $value | mpc add
+        done
+        mpc play
+    fi
 }
 
 
 loadRandomRating () {
     cd $HOME/.config/clerk
-    rating="$(seq $maxratings | dmenu_t -p "Minimum Rating > " | xargs echo)"
+    rating="$(seq $maxratings | dmenu_t -p "Minimum Rating > ")"
     mpc clear
-    for albums in "$(sqlite3 ratings.db "select directory from albums where rating >= $rating;")"; do echo "$albums"; done| shuf -n 1| mpc add
+    albums=$(echo -e ".separator \" $seperator \"\nselect artist, album, date from albums where rating = "$rating" order by artist;" | sqlite3 ratings.db | shuf -n 1)
+    artist=$(echo "$albums" | awk -F " $seperator " '{ print $1 }')
+    album=$(echo "$albums" | awk -F " $seperator " '{ print $2 }')
+    date=$(echo "$albums" | awk -F " $seperator " '{ print $3 }')
+    mpc findadd artist "$artist" date "$date" album "$album"
     mpc play
 }
 
