@@ -695,7 +695,7 @@ rateAlbum () {
     album=$(escapeSql "$album")
     rating=$(escapeSql "$rating")
 
-    if [ rating = "" ]; then
+    if [[ $rating == "" ]]; then
         exit
     else
         cd $HOME/.config/clerk/ratings
@@ -745,7 +745,7 @@ rateTrack () {
     rating=$(escapeSql "$rating")
     title=$(escapeSql "$title")
 
-    if [ ratings = "" ]; then
+    if [[ $rating == "" ]]; then
         exit
     else
         cur_file="$(basename "$(mpc current -f %track%-%title%)")"
