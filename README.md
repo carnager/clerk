@@ -31,7 +31,7 @@ see `clerk -h` for all default arguments.
 * rofi (https://github.com/DaveDavenport/rofi)
 * mpc (will get completely replaced with mppc, once its finished)
 * mppc (https://github.com/carnager/mppc)
-* sqlite for ratings
+* sqlite for ratings (thanks to rafi)
 
 
 # Optional Dependencies
