@@ -717,7 +717,7 @@ rateAlbum () {
             if [[ "$(pwd)" == */"$cd_divider"* ]]; then
                 cd ..
             fi
-            cp $HOME/.config/clerk/ratings/"$(mpc current -f "%$mpd_artist%--%date%--%album%").ratings" rating.txt
+            cp $HOME/.config/clerk/ratings/"$(mpc current -f "%$mpd_artist%--%date%--%album%").ratings" .
         fi
         cd $HOME/.config/clerk/ratings
         notify-send "clerk" "Rated $(mpc current -f "%$mpd_artist% - %album%") with $rating"
@@ -769,7 +769,7 @@ rateTrack () {
         if [[ "$(pwd)" == */"$cd_divider"* ]]; then
             cd ..
         fi
-        cp $HOME/.config/clerk/ratings/"$(mpc current -f %$mpd_artist%--%date%--%album%).ratings" rating.txt
+        cp $HOME/.config/clerk/ratings/"$(mpc current -f %$mpd_artist%--%date%--%album%).ratings" .
     fi
         cd $HOME/.config/clerk/ratings
         notify-send "clerk" "Rated $(mpc current -f "%artist% - %title%") with $rating"
