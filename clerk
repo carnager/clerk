@@ -230,13 +230,13 @@ updateDB () {
                     rating_max=$(echo "$ratings" | cut -d '/' -f2)
                     title_split="$(echo "$ratings" | cut -d ' ' -f2-)"
                     title="$(echo "$title_split" | cut -d '-' -f2-)"
-                    tracknumber="$(echo "$title_split" | cut -d '-' -f1)"
                     date=${date//\'/\\\'}
                     artist=${artist//\'/\\\'}
                     album=${album//\'/\\\'}
                     title=${title//\'\\\'}
                     rating=${rating//\'/\\\'}
-                    sqlite3 ../ratings.db "insert or replace into tracks (date, artist, album, title, tracknumber, rating) values ('$date', '$artist', '$album', '$title', '$trackbumber', '$rating')"
+                    echo "$title"
+                    sqlite3 ../ratings.db "insert or replace into tracks (date, artist, album, title, rating) values ('$date', '$artist', '$album', '$title', '$rating')"
                 done
             fi
         done
@@ -773,7 +773,7 @@ rateTrack () {
     fi
         cd $HOME/.config/clerk/ratings
         notify-send "clerk" "Rated $(mpc current -f "%artist% - %title%") with $rating"
-        sqlite3 ../ratings.db "insert or replace into tracks (date, artist, album, title, tracknumber, rating) values ('$date', '$artist', '$album', '$title', '$tracknumber', '$rating')"
+        sqlite3 ../ratings.db "insert or replace into tracks (date, artist, album, title, rating) values ('$date', '$artist', '$album', '$title', '$rating')"
         ratingPrompt
 }
 
@@ -811,7 +811,7 @@ loadRatedTracks () {
     else
         cd $HOME/.config/clerk
         mpc clear
-        tracks="$(echo -e ".separator \" $seperator \"\nselect artist, album, date, title from tracks where rating = "$rating" order by artist;" | sqlite3 ratings.db)"
+        tracks="$(echo -e ".separator \" $seperator \"\nselect artist, album, date, \"title\" from tracks where rating = "$rating" order by artist;" | sqlite3 ratings.db)"
         echo "$tracks" | while read tracks; do
             artist=$(echo "$tracks" | awk -F " $seperator " '{ print $1 }')
             album=$(echo "$tracks" | awk -F " $seperator " '{ print $2 }')
