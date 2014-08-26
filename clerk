@@ -740,7 +740,8 @@ rateTrack () {
         albumartist="$(mpc current -f %artist%)"
     fi
     date="$(mpc current -f %date%)"
-    directory="$(dirname "$(mpc current -f %file%)")"
+    album_directory="$(dirname "$(mpc current -f %file%)" | sed -e "s/\/"$cd_divider".*$//g")"
+    directory="$(mpc current -f %file%)"
     file="$(mpc current -f %file% | awk -F '/' '{ print $NF }')"
     rating="$(seq $track_maxratings | dmenu_t -p "Select Rating: > ")"
     date=$(escapeSql "$date")
@@ -761,13 +762,13 @@ rateTrack () {
             echo "artist="$(mpc current --format %artist%)"" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
             echo "album="$(mpc current --format %album%)"" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
             echo "date="$(mpc current --format %date%)"" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
-            echo "directory="$(dirname "$(mpc current --format %file%)")"" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
+            echo "directory="$album_directory"" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
         fi
         if grep "$cur_file" "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings" > /dev/null; then
             sed -i "/$cur_file/d" "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
             echo "File already rated. Changing Rating..."
         fi
-        echo "rating=$rating/$track_maxratings $(echo "$cur_file")" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
+        echo "rating=$rating/$track_maxratings "$(mpc current -f %file%)"" >> "$(mpc current -f %$mpd_artist%--%date%--%album%).ratings"
     fi
     if [[ "$music_dir_access" == "yes" ]]; then
         cd "$music_path"
@@ -779,7 +780,7 @@ rateTrack () {
     fi
         cd $HOME/.config/clerk/ratings
         notify-send "clerk" "Rated $(mpc current -f "%artist% - %title%") with $rating"
-        sqlite3 ../ratings.db "insert or replace into tracks (date, artist, album, directory, rating) values ('$date', '$artist', '$album', '$directory/$file', '$rating')"
+        sqlite3 ../ratings.db "insert or replace into tracks (date, artist, album, directory, rating) values ('$date', '$artist', '$album', '$directory', '$rating')"
         ratingPrompt
 }
 
