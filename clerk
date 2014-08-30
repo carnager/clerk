@@ -720,7 +720,7 @@ rateAlbum () {
             cp $HOME/.config/clerk/ratings/"$(mpc current -f "%$mpd_artist%--%date%--%album%").ratings" .
         fi
         cd $HOME/.config/clerk/ratings
-        notify-send "clerk" "Rated $(mpc current -f "%$mpd_artist% - %album%") with $rating"
+        notify-send "clerk" "Rated $(mpc current -f "%$mpd_artist% - %album%") with $rating/$maxratings"
         sqlite3 ../ratings.db "insert or replace into albums (date, artist, album, rating) values ('$date', '$albumartist', '$album', '$rating')"
     fi
     ratingPrompt
@@ -772,7 +772,7 @@ rateTrack () {
         cp $HOME/.config/clerk/ratings/"$(mpc current -f %$mpd_artist%--%date%--%album%).ratings" .
     fi
         cd $HOME/.config/clerk/ratings
-        notify-send "clerk" "Rated $(mpc current -f "%artist% - %title%") with $rating"
+        notify-send "clerk" "Rated $(mpc current -f "%artist% - %title%") with $rating/$track_maxratings"
         sqlite3 ../ratings.db "insert or replace into tracks (date, artist, album, title, rating) values ('$date', '$artist', '$album', '$title', '$rating')"
         ratingPrompt
 }
