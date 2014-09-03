@@ -17,6 +17,7 @@ if [[ "$change_db" == "$new_db" ]]; then
         last_temp=$(cat $HOME/.config/clerk/last.cache)
         echo "album/track cache up to date"
     else
+        notify-send "clerk" "Updating caches"
         album_temp_cur=$(mppc listall --format "{$mpd_artist} $seperator {album} $seperator {date}" | uniq)
         echo "$album_temp_cur" > $HOME/.config/clerk/album.cache
         album_temp=$(cat $HOME/.config/clerk/album.cache)
