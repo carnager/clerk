@@ -1400,8 +1400,8 @@ browseGenre2() {
     do
         seen=1
         export GENRE="$ARTIST"
-        if [[ "$GENRE" == "0  Return to Main Menu" ]]
-            then dplayPrompt
+        if [[ "$GENRE" == "0  Return to Genre Menu" ]]
+            then browseGenre
         elif [[ "$ARTIST" == "Replace All" ]]
             then mpc clear && mpc add / && mpc play
         elif [[ "$ARTIST" == "Add All" ]]
