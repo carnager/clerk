@@ -1383,16 +1383,10 @@ browseGenre() {
         export GENRE="$GENRE"
         if [[ "$GENRE" == "0  Return to Main Menu" ]]
             then dplayPrompt
-        elif [[ "$GENRE" == "Replace All" ]]
-            then mpc clear && mpc add / && mpc play
-        elif [[ "$GENRE" == "Add All" ]]
-            then mpc add /
-        elif [[ "$GENRE" == "Insert All" ]]
-            then mpc insert /
         else
             browseGenre2
         fi
-    done < <(echo -e "0  Return to Main Menu\n---\nAdd All\nInsert all\nReplace all\n---\n$(mppc list genre)" | dmenu_t -dmenu -p "Choose Genre > ")
+    done < <(echo -e "0  Return to Main Menu\n---\n$(mppc list genre)" | dmenu_t -dmenu -p "Choose Genre > ")
 
     if [[  $seen = 0 ]]
     then
