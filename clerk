@@ -1268,12 +1268,13 @@ browseLibPrompt() {
           "---"
           "1  Browse by Artist"
           "2  Browse by Date"
-          "x  Browse newest"
+          "3  Browse by Genre"
+          "4  Browse latest additions"
           "---"
-          "3  Choose Albums"
-          "4  Choose Track"
+          "5  Choose Albums"
+          "6  Choose Track"
           "---"
-          "5  Update Album/Track Cache")
+          "7  Update Album/Track Cache")
 
     prompt() {
         printf "%s\n" "$@" | dmenu_t -p "Library Menu > "
@@ -1282,11 +1283,12 @@ browseLibPrompt() {
     case "$(prompt "${menu[@]}")" in
         1*) browseArtist ;;
         2*) browseDate ;;
-        3*) AddAlbum$quirkAlbum ;;
-        4*) AddTrack$quirkTrack ;;
-        5*) updateCache && browseLibPrompt ;;
+        3*) browseGenre ;;
+        5*) AddAlbum$quirkAlbum ;;
+        6*) AddTrack$quirkTrack ;;
+        7*) updateCache && browseLibPrompt ;;
         0*) dplayPrompt ;;
-        x*)  addLastMod ;;
+        4*) addLastMod ;;
         *) exit
     esac
 }
@@ -1371,6 +1373,58 @@ browseArtist() {
         exit
     fi
 }
+
+
+browseGenre() {
+    declare -i seen=0
+    while read GENRE
+    do
+        seen=1
+        export GENRE="$GENRE"
+        if [[ "$GENRE" == "0  Return to Main Menu" ]]
+            then dplayPrompt
+        elif [[ "$GENRE" == "Replace All" ]]
+            then mpc clear && mpc add / && mpc play
+        elif [[ "$GENRE" == "Add All" ]]
+            then mpc add /
+        elif [[ "$GENRE" == "Insert All" ]]
+            then mpc insert /
+        else
+            browseGenre2
+        fi
+    done < <(echo -e "0  Return to Main Menu\n---\nAdd All\nInsert all\nReplace all\n---\n$(mppc list genre)" | dmenu_t -dmenu -p "Choose Genre > ")
+
+    if [[  $seen = 0 ]]
+    then
+        exit
+    fi
+}
+
+browseGenre2() {
+    declare -i seen=0
+    while read ARTIST
+    do
+        seen=1
+        export GENRE="$ARTIST"
+        if [[ "$GENRE" == "0  Return to Main Menu" ]]
+            then dplayPrompt
+        elif [[ "$ARTIST" == "Replace All" ]]
+            then mpc clear && mpc add / && mpc play
+        elif [[ "$ARTIST" == "Add All" ]]
+            then mpc add /
+        elif [[ "$ARTIST" == "Insert All" ]]
+            then mpc insert /
+        else
+            browseAlbum
+        fi
+    done < <(echo -e "0  Return to Main Menu\n---\nAdd All\nInsert all\nReplace all\n---\n$(mpc list artist genre "$GENRE")" | dmenu_t -dmenu -p "Choose Genre > ")
+
+    if [[  $seen = 0 ]]
+    then
+        exit
+    fi
+}
+
 
 ################################################################################
 
