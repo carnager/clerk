@@ -1399,8 +1399,8 @@ browseGenre2() {
     while read ARTIST
     do
         seen=1
-        export GENRE="$ARTIST"
-        if [[ "$GENRE" == "0  Return to Genre Menu" ]]
+        export ARTIST="$ARTIST"
+        if [[ "$ARTIST" == "0  Return to Genre Menu" ]]
             then browseGenre
         elif [[ "$ARTIST" == "Replace All" ]]
             then mpc clear && mpc add / && mpc play
@@ -1409,13 +1409,68 @@ browseGenre2() {
         elif [[ "$ARTIST" == "Insert All" ]]
             then mpc insert /
         else
-            browseAlbum
+            browseGenre3
         fi
-    done < <(echo -e "0  Return to Main Menu\n---\nAdd All\nInsert all\nReplace all\n---\n$(mpc list artist genre "$GENRE")" | dmenu_t -dmenu -p "Choose Genre > ")
+    done < <(echo -e "0  Return to Main Menu\n---\nAdd All\nInsert all\nReplace all\n---\n$(mppc list $mpd_artist genre "$GENRE" )" | dmenu_t -dmenu -p "Choose Genre > ")
 
     if [[  $seen = 0 ]]
     then
         exit
+    fi
+}
+
+browseGenre3() {
+    ALBUMS=$(mppc list album "$ARTIST")
+    declare -i seen=0
+    while read ALBUM
+    do
+        seen=1
+        ALBUM_FINAL=$(echo "$ALBUM" | awk -F " $seperator " '{ print $2 }')
+        DATE=$(echo "$ALBUM" | awk -F " $seperator " '{ print $1 }')
+        if [[ "$ALBUM" == "0  Return to Artist Menu" ]]
+            then browseGenre2
+        elif [[ "$ALBUM" == "Replace All" ]]
+            then mpc clear && mppc findadd artist "$ARTIST" && mpc play
+        elif [[ "$ALBUM" == "Add All" ]]
+            then mppc findadd artist "$ARTIST"
+        elif [[ "$ALBUM" == "Insert All" ]]
+            then mppc find artist "$ARTIST" --format '{file}'| mpc insert
+        else
+            browseGenre4
+        fi
+    done < <(echo -e "0  Return to Artist Menu\n---\nReplace All\nAdd All\nInsert All\n---\n$(mppc find $mpd_artist "$ARTIST" genre "$GENRE" --format "{date} $seperator {album}" | sort | uniq)" | dmenu_t -dmenu -p "Choose Album > ")
+
+    if [[  $seen = 0 ]]
+    then
+        exit
+    fi
+}
+
+browseGenre4() {
+    declare -i seen=0
+    while read TRACK
+    do
+        seen=1
+        TRACKFINAL=$(echo "$TRACK" | awk -F " $seperator " '{ print $2 }')
+        if [[ "$TRACK" = "0  Return to Album Menu" ]]
+            then browseGenre3
+        elif [[ "$TRACK" == "Replace All" ]]
+            then mpc clear && mppc findadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" && mpc play
+        elif [[ "$TRACK" == "Add All" ]]
+            then mppc findadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE"
+        elif [[ "$TRACK" == "Insert All" ]]
+            then mppc find artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" --format '{file}' | mpc insert
+        else
+            if [[ $(mpc playlist) == "" ]]; then
+                mppc findadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL" && mpc play
+            else
+                mppc findadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL"
+            fi
+        fi
+    done < <(echo -e "0  Return to Album Menu\n---\nReplace All\nAdd All\nInsert All\n---\n$(mppc find $mpd_artist "$ARTIST" album "$ALBUM_FINAL" --format "{track} $seperator {title}")" | dmenu_t -dmenu -p "Chose Track > ")
+
+    if [[  $seen = 0 ]]; then
+            exit
     fi
 }
 
