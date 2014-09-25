@@ -1,4 +1,4 @@
-#!/bin/bash
+/!/bin/bash
 
 shopt -s globstar
 source $HOME/.config/clerk/config
@@ -1354,17 +1354,17 @@ browseGenre() {
 
 browseGenre2() {
     declare -i seen=0
-    while read ARTIST
+    while read GENRE
     do
         seen=1
-        export GENRE="$ARTIST"
+        export GENRE="$GENRE"
         if [[ "$GENRE" == "0  Return to Genre Menu" ]]
             then browseGenre
-        elif [[ "$ARTIST" == "Replace All" ]]
+        elif [[ "$GENRE" == "Replace All" ]]
             then mpc clear && mpc add / && mpc play
-        elif [[ "$ARTIST" == "Add All" ]]
+        elif [[ "$GENRE" == "Add All" ]]
             then mpc add /
-        elif [[ "$ARTIST" == "Insert All" ]]
+        elif [[ "$GENRE" == "Insert All" ]]
             then mpc insert /
         else
             browseAlbum
