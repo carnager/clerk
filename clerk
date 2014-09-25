@@ -1369,7 +1369,7 @@ browseGenre2() {
         else
             browseAlbum
         fi
-    done < <(echo -e "0  Return to Genre Menu\n---\nAdd All\nInsert all\nReplace all\n---\n$(mpc list artist genre "$GENRE")" | dmenu_t -dmenu -p "Choose Genre > ")
+    done < <(echo -e "0  Return to Genre Menu\n---\nAdd All\nInsert all\nReplace all\n---\n$(mpc list artist genre "$GENRE")" | dmenu_t -dmenu -p "Choose Artist > ")
 
     if [[  $seen = 0 ]]
     then
