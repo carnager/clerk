@@ -171,7 +171,7 @@ updateDB () {
             artist=${artist//\'/\\\'}
             album=${album//\'/\\\'}
             rating=${rating//\'/\\\'}
-            sqlite3 ../ratings.db "insert or replace into albums (date, artist, album, rating) values ('$date', '$albumartist', '$album', '$rating')"
+            sqlite3 ../ratings.db "insert or replace into albums (date, artist, album, rating) values ('$date', '$artist', '$album', '$rating')"
         done
     done
     ratingPrompt
