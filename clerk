@@ -168,7 +168,7 @@ updateDB () {
             rating=$(echo "$ratings" | cut -d '/' -f1)
             rating_max=$(echo "$ratings" | cut -d '/' -f2)
             date=${date//\'/\\\'}
-            albumartist=${albumartist//\'/\\\'}
+            artist=${artist//\'/\\\'}
             album=${album//\'/\\\'}
             rating=${rating//\'/\\\'}
             sqlite3 ../ratings.db "insert or replace into albums (date, artist, album, rating) values ('$date', '$albumartist', '$album', '$rating')"
