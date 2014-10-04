@@ -130,7 +130,8 @@ ratingPrompt () {
           "5  Load Rated Tracks"
           "6  Load Random Rated Tracks"
           "---"
-          "   Create/Update Album Ratings"
+          "7  Create/Update Album Ratings"
+          "---"
           "0  Love current Song on LastFM")
 
     prompt() {
@@ -144,7 +145,7 @@ ratingPrompt () {
         4*) rateTrack ;;
         5*) loadRatedTracks ;;
         6*) loadRandomRatedTracks ;;
-        9*) updateDB;;
+        7*) updateDB;;
         0*) lastfm-mpd-cli love > /dev/null && notify-send "MPD" "Loved $(mpc current -f '%title%') on LastFM" ;;
         Q*) dplayPrompt ;;
           *) exit
