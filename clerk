@@ -869,7 +869,7 @@ ReplaceAlbumTags() {
             then dplayPrompt
         else
             if [[ "$TRACK" == "Adding Mode: Replace" ]]
-                then AddAlbumFlat
+                then AddAlbumTags
             else
                 artist=$(echo "$TRACK" | awk -F " $seperator " '{print $1}')
                 date=$(echo "$TRACK" | awk -F " $seperator " '{print $3}')
@@ -936,7 +936,7 @@ ReplaceAlbumFlat () {
             dplayPrompt
         else
             if [[ "$TRACK" == "Adding Mode: Flat Replace" ]]; then
-                AddAlbumTags
+                AddAlbumFlat
             else
                 mpc clear && mpc findadd album "$TRACK" && mpc play
             fi
