@@ -160,7 +160,7 @@ updateDB () {
         sqlite3 ../ratings.db < /usr/share/doc/clerk/create_rating.sql
     fi
     for line in *.ratings; do
-        albumartist=$(grep "^albumartist=" "$line" | cut -d '=' -f2-)
+        artist=$(grep "^artist=" "$line" | cut -d '=' -f2-)
         date=$(grep "^date=" "$line" | cut -d '=' -f2-)
         album=$(grep "^album=" "$line" | cut -d '=' -f2-)
         rating_split=$(grep "album_rating=" "$line" | cut -d "=" -f2)
@@ -602,11 +602,11 @@ escapeSql() {
 
 rateAlbum () {
     if [[ "$mpd_artist" == "albumartist" ]]; then
-        albumartist="$(mpc current -f %albumartist%)"
+        artist="$(mpc current -f %albumartist%)"
     elif [[ "$mpd_artist" == "artist" ]]; then
-        albumartist="$(mpc current -f %artist%)"
+        artist="$(mpc current -f %artist%)"
     fi
-    albumartist="$(mpc current -f %artist%)"
+    artist="$(mpc current -f %artist%)"
     album="$(mpc current -f %album%)"
     date="$(mpc current -f %date%)"
     rating="$(seq $maxratings | dmenu_t -p "Select Rating: > ")"
