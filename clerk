@@ -198,6 +198,10 @@ updateDB () {
                     title=${title//\'\\\'}
                     rating=${rating//\'/\\\'}
                     echo "$title"
+                    echo "artist=${artist}"
+                    echo "title=${title}"
+                    echo "date=${date}"
+                    echo "rating=${rating}"
                     sqlite3 ../ratings.db "insert or replace into tracks (date, artist, album, title, tracknumber, rating) values ('$date', '$artist', '$album', '$title', '$tracknumber', '$rating')"
                 done
             fi

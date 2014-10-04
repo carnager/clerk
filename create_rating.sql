@@ -3,7 +3,7 @@ create table if not exists tracks(
     artist varchar(255) not null,
     album varchar(255) not null,
     title varchar(255) not null,
-    trackbumber smallint not null,
+    tracknumber smallint not null,
     rating smallint not null
 );
 create index if not exists track_ratings_idx ON tracks (rating);
