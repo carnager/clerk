@@ -164,7 +164,7 @@ updateDB () {
         sqlite3 ../ratings.db < /usr/share/doc/clerk/create_rating.sql
     fi
     for line in *.ratings; do
-        albumartist=$(grep "^albumartist=" "$line" | cut -d '=' -f2- )
+        artist=$(grep "^albumartist=" "$line" | cut -d '=' -f2- )
         date=$(grep "^date=" "$line" | cut -d '=' -f2-)
         album=$(grep "^album=" "$line" | cut -d '=' -f2-)
         rating_split=$(grep "album_rating=" "$line" | cut -d "=" -f2)
