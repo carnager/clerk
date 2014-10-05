@@ -633,7 +633,7 @@ rateTrack () {
 
 loadRatedAlbums () {
     rating="$(seq 10 | rofi -dmenu -p "Minimum Rating > ")"
-    if [ rating = "" ]; then
+    if [[ $rating == "" ]]; then
             exit
     else
         songs="$(mpc sticker / find albumrating | grep -E "albumrating=$rating" | awk -F ':' '{print $1}')"
