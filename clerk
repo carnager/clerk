@@ -2,11 +2,6 @@
 
 shopt -s globstar
 source $HOME/.config/clerk/config
-if [[ -a "$HOME/.config/clerk/ratings" ]]; then
-    echo "ratings folder exists. using"
-else
-    mkdir "$HOME/.config/clerk/ratings"
-fi
 
 clerk_updater &
 album_temp=$(cat $HOME/.config/clerk/album.cache)
