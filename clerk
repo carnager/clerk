@@ -661,7 +661,7 @@ loadRatedTracks () {
 
 loadRandomRatedTracks () {
     number="$(echo " " | dmenu_t -p "Number of Songs > " | xargs echo)"
-    rating="$(seq "$track_maxratings" | dmenu_t -p "Minimum Rating > ")"
+    rating="$(seq 10 | dmenu_t -p "Minimum Rating > ")"
     if [ rating = "" ]; then
         exit
     else

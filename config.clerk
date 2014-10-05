@@ -10,12 +10,6 @@ backend=rofi
 # will be copied to their associated album
 music_dir_access=yes
 
-# maximum rating for album ratings
-maxratings=10
-
-# maximum ratings for track ratings
-track_maxratings=5
-
 # path to your music
 music_path="/path/to/music_directory"
 
