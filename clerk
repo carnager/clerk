@@ -633,17 +633,21 @@ rateTrack () {
 
 loadRatedAlbums () {
     rating="$(seq 10 | rofi -dmenu -p "Minimum Rating > ")"
-    songs="$(mpc sticker / find albumrating | grep -E "albumrating=$rating" | awk -F ':' '{print $1}')"
-    rm -f /tmp/templist
-    echo "$songs" | while read line; do
-        touch templist
-        mppc find file "$line" --format "{artist} $seperator {album} $seperator {date}" >> /tmp/templist
-    done
-    albums="$(cat /tmp/templist | rofi -dmenu -p "Choose Album >")"
-    artist="$(echo "$albums" | awk -F " $seperator " '{ print $1 }')"
-    album="$(echo "$albums" | awk -F " $seperator " '{ print $2 }')"
-    date="$(echo "$albums" | awk -F " $seperator " '{ print $3 }')"
-    mpc clear && mpc find artist "$artist" album "$album" date "$date" | mpc add && mpc play
+    if [ rating = "" ]; then
+            exit
+    else
+        songs="$(mpc sticker / find albumrating | grep -E "albumrating=$rating" | awk -F ':' '{print $1}')"
+        rm -f /tmp/templist
+        echo "$songs" | while read line; do
+            touch templist
+            mppc find file "$line" --format "{artist} $seperator {album} $seperator {date}" >> /tmp/templist
+        done
+        albums="$(cat /tmp/templist | rofi -dmenu -p "Choose Album >")"
+        artist="$(echo "$albums" | awk -F " $seperator " '{ print $1 }')"
+        album="$(echo "$albums" | awk -F " $seperator " '{ print $2 }')"
+        date="$(echo "$albums" | awk -F " $seperator " '{ print $3 }')"
+        mpc clear && mpc find artist "$artist" album "$album" date "$date" | mpc add && mpc play
+    fi
 }
 
 
