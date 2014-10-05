@@ -633,7 +633,7 @@ loadRatedAlbums () {
     else
         albums="$(while read -a line; do
             dirname "${line[*]}";
-        done <<< "$(mpc sticker / find albumrating | grep -E "rating=$rating")" | sed 's/\/\CD.*//g' | sort | uniq | rofi -dmenu -p "Choose Album")"
+        done <<< "$(mpc sticker / find albumrating | grep -E "albumrating=$rating")" | sed 's/\/\CD.*//g' | sort | uniq | rofi -dmenu -p "Choose Album")"
         if [[ $albums == "" ]]; then
             exit
         else
@@ -675,13 +675,14 @@ loadRandomRatedTracks () {
 
 loadRandomRating () {
     rating="$(seq 10 | dmenu_t -p "Minimum Rating > ")"
-    songs=$(mpc sticker / find albumrating | grep -E "albumrating=$rating" | awk -F ':' '{print $1}')
-    echo "$songs" | shuf -n 1| while read line; do
-        artist="$(mppc find file "$line" --format '{artist}')"
-        album="$(mppc find file "$line" --format '{album}')"
-        date="$(mppc find file "$line" --format '{date}')"
-        mpc clear && mpc find artist "$artist" album "$album" date "$date" | mpc add && mpc play
-    done
+    if [ rating = "" ]; then
+            exit
+    else
+        album="$(while read -a line; do
+            dirname "${line[*]}";
+        done <<< "$(mpc sticker / find albumrating | grep -E "albumrating=$rating|albumrating=$(echo $(( $rating+1 )))|albumrating=$(echo $(( $rating+2 )))|albumrating=$(echo $(( $rating+3 )))|albumrating=$(echo $(( $rating+4 )))|albumrating=$(echo $(( $rating+5 )))|albumrating=$(echo $(( $rating+6 )))")" | sed 's/\/\CD.*//g' | shuf -n1)"
+        mpc clear && mpc add "$album" && mpc play
+    fi
 }
 
 playRandomAlbum () {
