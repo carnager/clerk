@@ -595,11 +595,11 @@ rateAlbum () {
             if [[ "$(pwd)" == */"$cd_divider"* ]]; then
                 cd ..
             fi
-            rm -f "$(mpc current -f "%$mpd_artist%--%date%--%album%").ratings"
-            echo "artist=${artist}" >> "$(mpc current -f "%$mpd_artist%--%date%--%album%").ratings"
-            echo "album=${album}" >> "$(mpc current -f "%$mpd_artist%--%date%--%album%").ratings"
-            echo "date=${date}" >> "$(mpc current -f "%$mpd_artist%--%date%--%album%").ratings"
-            echo "albumrating=$rating" >> "$(mpc current -f "%$mpd_artist%--%date%--%album%").ratings"
+            rm -f "$(mpc current -f "%$mpd_artist%--%date%--%album%").albumrating"
+            echo "artist=${artist}" >> "$(mpc current -f "%$mpd_artist%--%date%--%album%").albumrating"
+            echo "album=${album}" >> "$(mpc current -f "%$mpd_artist%--%date%--%album%").albumrating"
+            echo "date=${date}" >> "$(mpc current -f "%$mpd_artist%--%date%--%album%").albumrating"
+            echo "albumrating=$rating" >> "$(mpc current -f "%$mpd_artist%--%date%--%album%").albumrating"
         fi
     fi
 }
@@ -1327,7 +1327,7 @@ elif [[ "$1" == "-rs" ]]; then
 elif [[ "$1" == "-show" ]]; then
    currentTag
 elif [[ "$1" == "-lrated" ]]; then
-    mpc clear && mpc sticker / find rating | grep -E "rating=3|rating=4|rating=5" | awk -F ':' '{print $1}' | shuf -n $value | mpc add && mpc play
+    mpc clear && mpc sticker / find rating | grep -E "rating=6|rating=7|rating=8|rating=9|rating=10" | awk -F ':' '{print $1}' | shuf -n $value | mpc add && mpc play
 elif [[ "$1" == "-library" ]]; then
     browseArtist
 elif [[ "$1" == "-update" ]]; then
