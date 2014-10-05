@@ -631,9 +631,9 @@ loadRatedAlbums () {
     if [[ $rating == "" ]]; then
             exit
     else
-        albums="$(while IFS=':' read -a line; do
-            dirname "${line[@]}" | cut -d ' ' -f3-;
-        done <<< $(mpc sticker / find albumrating | grep -E "rating=$rating")| sed 's/\/\CD.*//g' | sort | uniq | rofi -dmenu -p "Choose Album")"
+        albums="$(while read -a line; do
+            dirname "${line[*]}";
+        done <<< "$(mpc sticker / find albumrating | grep -E "rating=$rating")" | sed 's/\/\CD.*//g' | sort | uniq | rofi -dmenu -p "Choose Album")"
         if [[ $albums == "" ]]; then
             exit
         else
