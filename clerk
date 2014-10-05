@@ -631,17 +631,15 @@ loadRatedAlbums () {
     if [[ $rating == "" ]]; then
             exit
     else
-        songs="$(mpc sticker / find albumrating | grep -E "albumrating=$rating" | awk -F ':' '{print $1}')"
-        rm -f /tmp/templist
-        echo "$songs" | while read line; do
-            touch templist
-            mppc find file "$line" --format "{artist} $seperator {album} $seperator {date}" >> /tmp/templist
-        done
-        albums="$(cat /tmp/templist | rofi -dmenu -p "Choose Album >")"
-        artist="$(echo "$albums" | awk -F " $seperator " '{ print $1 }')"
-        album="$(echo "$albums" | awk -F " $seperator " '{ print $2 }')"
-        date="$(echo "$albums" | awk -F " $seperator " '{ print $3 }')"
-        mpc clear && mpc find artist "$artist" album "$album" date "$date" | mpc add && mpc play
+        albums="$(while IFS=':' read -a line; do
+            dirname "${line[@]}" | cut -d ' ' -f3-;
+        done <<< $(mpc sticker / find albumrating | grep -E "rating=$rating")| sed 's/\/\CD.*//g' | sort | uniq | rofi -dmenu -p "Choose Album")"
+        if [[ $albums == "" ]]; then
+            exit
+        else
+        mpc clear && mpc add "$albums" && mpc play
+
+        fi
     fi
 }
 
