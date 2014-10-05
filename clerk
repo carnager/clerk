@@ -619,7 +619,7 @@ rateTrack () {
             fi
             touch track.ratings
             sed -i "/$(mpc current -f '%title%')/d" track.ratings
-            echo "${rating}\\$(mpc current -f "%artist%\%track%\%title%")" >> track.ratings
+            echo "${rating}\\$(mpc current -f "%artist%\%track%\%title%\%date%\%album%")" >> track.ratings
         fi
         ratingPrompt
     fi
