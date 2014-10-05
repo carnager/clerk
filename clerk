@@ -599,7 +599,7 @@ rateAlbum () {
             echo "artist=${artist}" >> "$(mpc current -f "%$mpd_artist%--%date%--%album%").albumrating"
             echo "album=${album}" >> "$(mpc current -f "%$mpd_artist%--%date%--%album%").albumrating"
             echo "date=${date}" >> "$(mpc current -f "%$mpd_artist%--%date%--%album%").albumrating"
-            echo "albumrating=$rating" >> "$(mpc current -f "%$mpd_artist%--%date%--%album%").albumrating"
+            echo "albumrating=$rating/10" >> "$(mpc current -f "%$mpd_artist%--%date%--%album%").albumrating"
         fi
     fi
 }
