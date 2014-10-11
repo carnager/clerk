@@ -1285,6 +1285,7 @@ if [[ "$1" == "-h" ]]; then
     echo "  -rs        play random songs"
     echo "  -t         add track"
     echo "  -ti        insert track"
+    echo "  -latest    show latest additions"
     echo ""
     echo "Playlist"
     echo "  -queue     show current queue"
@@ -1321,6 +1322,8 @@ elif [[ "$1" == "-rtrack" ]]; then
     rateTrack
 elif [[ "$1" == "-ra" ]]; then
     playRandomAlbum
+elif [[ "$1 == "-latest" ]]; then
+    addLastMod
 elif [[ "$1" == "-rs" ]]; then
     playRandomTracks
 elif [[ "$1" == "-show" ]]; then
