@@ -1302,6 +1302,7 @@ if [[ "$1" == "-h" ]]; then
     echo "  -ralbum    rate current album"
     echo "  -rtrack    rate current track"
     echo "  -lrated    add x random tracks with rating >=4"
+    echo "  -rcurrent  rate current track with 10"
 
 
 elif [[ "$1" == "-a" ]]; then
@@ -1322,7 +1323,7 @@ elif [[ "$1" == "-rtrack" ]]; then
     rateTrack
 elif [[ "$1" == "-ra" ]]; then
     playRandomAlbum
-elif [[ "$1 == "-latest" ]]; then
+elif [[ "$1" == "-latest" ]]; then
     addLastMod
 elif [[ "$1" == "-rs" ]]; then
     playRandomTracks
@@ -1344,8 +1345,10 @@ elif [[ "$1" == "-suspend" ]]; then
     suspendPlaylist
 elif [[ "$1" == "-resume" ]]; then
     resumePlaylist
-elif [[ "$1" == "playlists" ]]; then
+elif [[ "$1" == "-playlists" ]]; then
     managePlaylists
+elif [[ "$1" == "-rcurrent" ]]; then
+    mpc sticker "$(mpc current -f '%file%')" set rating 10
 else
 dplayPrompt
 fi
