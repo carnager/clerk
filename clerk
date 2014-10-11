@@ -625,6 +625,20 @@ rateTrack () {
     fi
 }
 
+ instantRateTrack () {
+         mpc sticker "$(mpc current -f '%file%')" set rating "$rating"
+         if [[ "$music_dir_access" == "yes" ]]; then
+             cd "$music_path"
+             cd "$(dirname "$(mpc current -f %file%)")"
+             if [[ "$(pwd)" == */"$cd_divider"* ]]; then
+                 cd ..
+             fi
+             touch track.ratings
+             sed -i "/$(mpc current -f '%title%')/d" track.ratings
+             echo "$rating\\$(mpc current -f "%artist%\%track%\%title%\%date%\%album%")" >> track.ratings
+         fi
+ }
+
 
 loadRatedAlbums () {
     rating="$(seq 10 | rofi -dmenu -p "Minimum Rating > ")"
@@ -1348,7 +1362,8 @@ elif [[ "$1" == "-resume" ]]; then
 elif [[ "$1" == "-playlists" ]]; then
     managePlaylists
 elif [[ "$1" == "-rcurrent" ]]; then
-    mpc sticker "$(mpc current -f '%file%')" set rating $2
+    export rating="$2"
+    instantRateTrack
 else
 dplayPrompt
 fi
