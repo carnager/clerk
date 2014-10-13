@@ -29,8 +29,8 @@ see `clerk -h` for all default arguments.
 
 * dmenu2 (https://bitbucket.org/melek/dmenu2) OR
 * rofi (https://github.com/DaveDavenport/rofi)
-* mpc (will get completely replaced with mppc, once its finished)
-* mppc (https://github.com/carnager/mppc)
+* mpc
+* mppc (https://github.com/carnager/mppc) (for features, mpc does not provide)
 
 
 # Optional Dependencies
