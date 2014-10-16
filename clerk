@@ -33,8 +33,8 @@ dplayPrompt () {
     }
 
     case "$(prompt "${menu[@]}")" in
-        1*) playRandomAlbum && dplayPrompt ;;
-        2*) playRandomTracks && dplayPrompt ;;
+        1*) playRandomAlbum ;;
+        2*) playRandomTracks ;;
         3*) currentPrompt ;;
         4*) dplayQueue ;;
         5*) browseLibPrompt ;;
@@ -927,6 +927,7 @@ AddTrackTags() {
                 track=$(echo "$TRACK" | awk -F " $seperator " '{print $2}')
                 title=$(echo "$TRACK" | awk -F " $seperator " '{print $3}')
                 mpc findadd artist "$artist" album "$album" title "$title"
+                mpc play $(mpc playlist | wc -l)
             fi
         fi
     done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Add\n---\n$(echo "$tracks_temp")"| dmenu_t -dmenu -p "Choose Track > ")
