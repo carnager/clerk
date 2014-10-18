@@ -76,9 +76,9 @@ playbackPrompt () {
 
 lastFM () {
 # Some Variables to clean up the code
-mpds_check="$(ssh $ssh_host -q -t 'bash -c "pgrep mpdscribble"')"
 
-        if ((ssh_lastfm)); then
+        if [[ $ssh_lastfm == 1 ]]; then
+            mpds_check="$(ssh $ssh_host -q -t 'bash -c "pgrep mpdscribble"')"
             if [ -n "$mpds_check" ];
                 then
                 ssh $ssh_host -q -t 'bash -c "killall mpdscribble"' && notify-send "MPD" "LastFM Scrobbling Disabled"
@@ -91,6 +91,26 @@ mpds_check="$(ssh $ssh_host -q -t 'bash -c "pgrep mpdscribble"')"
                 killall mpdscribble && notify-send "MPD" "LastFM Scrobbling Disabled"
             else
                 mpdscribble && notify-send "MPD" "LastFM Scrobbling Enabled"
+            fi
+       fi
+}
+
+lastFMCheck () {
+# Some Variables to clean up the code
+
+        if ((ssh_lastfm)); then
+            mpds_check="$(ssh $ssh_host -q -t 'bash -c "pgrep mpdscribble"')"
+            if [ -n "$mpds_check" ]; then
+                echo "lastfm: off"
+            else
+                echo "lastfm: on"
+            fi
+        else
+            if pgrep mpdscribble
+                then
+                echo "lastfm: on"
+            else
+                echo "lastfm: off"
             fi
        fi
 }
@@ -621,7 +641,6 @@ rateTrack () {
             sed -i "/$(mpc current -f '%title%')/d" track.ratings
             echo "${rating}\\$(mpc current -f "%artist%\%track%\%title%\%date%\%album%")" >> track.ratings
         fi
-        ratingPrompt
     fi
 }
 
@@ -1365,6 +1384,10 @@ elif [[ "$1" == "-playlists" ]]; then
 elif [[ "$1" == "-rcurrent" ]]; then
     export rating="$2"
     instantRateTrack
+elif [[ "$1" == "-scrobbling" ]]; then
+    lastFM
+elif [[ "$1" == "-checklfm" ]]; then
+    lastFMCheck
 else
 dplayPrompt
 fi
