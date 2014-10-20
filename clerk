@@ -1254,22 +1254,23 @@ browseGenre() {
 
 browseGenre2() {
     declare -i seen=0
-    while read ARTIST
+    while read ALBUM
     do
         seen=1
         export GENRE="$GENRE"
-        if [[ "$ARTIST" == "0  Return to Genre Menu" ]]
+        if [[ "$ALBUM" == "0  Return to Genre Menu" ]]
             then browseGenre
-        elif [[ "$ARTIST" == "Replace All" ]]
-            then mpc clear && mpc add / && mpc play
-        elif [[ "$ARTIST" == "Add All" ]]
-            then mpc add /
-        elif [[ "$ARTIST" == "Insert All" ]]
-            then mpc insert /
+        elif [[ "$ALBUM" == "Replace All" ]]
+            then mpc clear && mpc findadd genre "$GENRE" && mpc play
+        elif [[ "$ALBUM" == "Add All" ]]
+            then mpc findadd genre "$GENRE"
+        elif [[ "$ALBUM" == "Insert All" ]]
+            then mpc find genre "$GENRE" | mpc insert
         else
-            browseAlbum
+            ALBUM=$(echo "$ALBUM" | awk -F " $seperator " '{ print $2 }')
+            mpc findadd album "$ALBUM" genre "$GENRE" && mpc play
         fi
-    done < <(echo -e "0  Return to Genre Menu\n---\nAdd All\nInsert all\nReplace all\n---\n$(mppc list album genre "$GENRE")" | dmenu_t -dmenu -p "Choose Album > ")
+    done < <(echo -e "0  Return to Genre Menu\n---\nAdd All\nInsert all\nReplace all\n---\n$(mppc search genre "$GENRE" --format "{$mpd_artist} $seperator {album} $seperator ({date})" | sort | uniq)" | dmenu_t -dmenu -p "Choose Album > ")
 
     if [[  $seen = 0 ]]
     then
