@@ -738,7 +738,7 @@ playRandomTracks () {
 
     nThreads=4
 
-    for (( i=0, j=1; i<value; i++, j++ )); do
+    for (( i=0, j=1; i<value - 1; i++, j++ )); do
         {
             addRandomT
         } &
