@@ -726,31 +726,19 @@ playRandomAlbum () {
 }
 
 playRandomTracks () {
-    addRandomT () {
+    mpc clear
+    artist="$(mpc list "$mpd_artist" | shuf -n 1)"
+    album="$(mpc list album "$mpd_artist" "$artist" | shuf -n 1)"
+    title="$(mpc list title album "$album" "$mpd_artist" "$artist" | shuf -n 1)"
+    mpc find album "$album" "$mpd_artist" "$artist" title "$title" | mpc add
+    mpc play
+    n=0; while (( n++ < $value -1 ));
+    do
         artist="$(mpc list "$mpd_artist" | shuf -n 1)"
         album="$(mpc list album "$mpd_artist" "$artist" | shuf -n 1)"
         title="$(mpc list title album "$album" "$mpd_artist" "$artist" | shuf -n 1)"
         mpc find album "$album" "$mpd_artist" "$artist" title "$title" | mpc add
-    }
-    mpc clear
-    addRandomT
-    mpc play
-
-    nThreads=4
-
-    for (( i=0, j=1; i<value - 1; i++, j++ )); do
-        {
-            addRandomT
-        } &
-
-        if [ $j -eq $nThreads ]; then
-            j=0
-            wait
-            #sleep 1
-        fi
     done
-
-    wait
     mpc play
 }
 
