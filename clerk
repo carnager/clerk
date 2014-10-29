@@ -666,7 +666,7 @@ loadRatedAlbums () {
     else
         albums="$(while read -a line; do
             dirname "${line[*]}";
-        done <<< "$(mpc sticker / find albumrating | grep -E "albumrating=$rating")" | sed 's/\/\CD.*//g' | sort | uniq | rofi -dmenu -p "Choose Album")"
+        done <<< "$(mpc sticker "" find albumrating | grep -E "albumrating=$rating")" | sed 's/\/\CD.*//g' | sort | uniq | rofi -dmenu -p "Choose Album")"
         if [[ $albums == "" ]]; then
             exit
         else
@@ -684,7 +684,7 @@ loadRatedTracks () {
     else
         cd $HOME/.config/clerk
         mpc clear
-        songs="$(mpc sticker / find rating | grep -E "rating=$rating" | awk -F ':' '{ print $1 }')"
+        songs="$(mpc sticker "" find rating | grep -E "rating=$rating" | awk -F ':' '{ print $1 }')"
         echo "$songs" | mpc add
         mpc play
     fi
@@ -698,7 +698,7 @@ loadRandomRatedTracks () {
     else
         cd $HOME/.config/clerk
         mpc clear
-        songs="$(mpc sticker / find rating | grep -E "rating=$rating|rating=$(echo $(( $rating + 1 )))|rating=$(echo $(( $rating + 2 )))|rating=$(echo $(( $rating + 3 )))|rating=$(echo $(( $rating + 4 )))" | awk -F ':' '{ print $1 }')"
+        songs="$(mpc sticker "" find rating | grep -E "rating=$rating|rating=$(echo $(( $rating + 1 )))|rating=$(echo $(( $rating + 2 )))|rating=$(echo $(( $rating + 3 )))|rating=$(echo $(( $rating + 4 )))" | awk -F ':' '{ print $1 }')"
         echo "$songs" | shuf -n $number | mpc add
         mpc play
         rm -f /tmp/clerk_tracklist
@@ -713,7 +713,7 @@ loadRandomRating () {
     else
         album="$(while read -a line; do
             dirname "${line[*]}";
-        done <<< "$(mpc sticker / find albumrating | grep -E "albumrating=$rating|albumrating=$(echo $(( $rating+1 )))|albumrating=$(echo $(( $rating+2 )))|albumrating=$(echo $(( $rating+3 )))|albumrating=$(echo $(( $rating+4 )))|albumrating=$(echo $(( $rating+5 )))|albumrating=$(echo $(( $rating+6 )))")" | sed 's/\/\CD.*//g' | shuf -n1)"
+        done <<< "$(mpc sticker "" find albumrating | grep -E "albumrating=$rating|albumrating=$(echo $(( $rating+1 )))|albumrating=$(echo $(( $rating+2 )))|albumrating=$(echo $(( $rating+3 )))|albumrating=$(echo $(( $rating+4 )))|albumrating=$(echo $(( $rating+5 )))|albumrating=$(echo $(( $rating+6 )))")" | sed 's/\/\CD.*//g' | shuf -n1)"
         mpc clear && mpc add "$album" && mpc play
     fi
 }
