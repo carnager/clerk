@@ -129,7 +129,7 @@ browseFilesystem () {
     }
 
     chose() {
-        if [[ "$(file "$selection")" == ""$selection": directory" ]]; then
+        if [[ -d "$selection" ]]; then
             cd "$selection"
             selection="$(echo -e "Add all music files\n---\n$(ls)" | rofi -dmenu -p "Chose Directory/Files > ")"
             chose
@@ -803,6 +803,7 @@ insertLastMod() {
             if [[ "$ALBUM" == "Adding Mode: Insert" ]]
                 then replaceLastMod
             else
+export MPD_HOST=127.0.0.1
                 artist=$(echo "$ALBUM" | awk -F " $seperator " '{print $2}')
                 date=$(echo "$ALBUM" | awk -F " $seperator " '{print $1}')
                 album=$(echo "$ALBUM" | awk -F " $seperator " '{print $3}')
