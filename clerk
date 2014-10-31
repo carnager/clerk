@@ -588,7 +588,7 @@ escapeSql() {
 }
 
 rateAlbum () {
-    rating="$(seq 10 | dmenu_t -p "Select Rating: > ")"
+    rating="$(seq 10 | dmenu_t -p "Select Album Rating: > ")"
 
     if [[ $rating == "" ]]; then
         exit
@@ -625,7 +625,7 @@ rateAlbum () {
 }
 
 rateTrack () {
-    rating="$(seq 10 | dmenu_t -p "Select Rating: > ")"
+    rating="$(seq 10 | dmenu_t -p "Select Track Rating: > ")"
 
     if [[ $rating == "" ]]; then
         exit
@@ -759,7 +759,7 @@ addLastMod() {
                 mppc searchadd date "$date" album "$album" $mpd_artist "$artist"
             fi
         fi
-    done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Add\n---\n$(echo "$last_temp")" | dmenu_t -dmenu -p "Choose Album > ")
+    done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Add\n---\n$(echo "$last_temp")" | dmenu_t -dmenu -p "Choose recent album > ")
 }
 
 insertLastMod() {
