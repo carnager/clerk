@@ -1350,6 +1350,7 @@ if [[ "$1" == "-h" ]]; then
     echo ""
     echo "Library"
     echo "  -library        browse library"
+    echo "  -browse         browse local filesystem"
     echo "  -a              add album"
     echo "  -ai             insert album"
     echo "  -ar             replace album"
@@ -1387,6 +1388,8 @@ elif [[ "$1" == "-t" ]]; then
     AddTrack$quirkTrack
 elif [[ "$1" == "-ti" ]]; then
     InsertTrack$quirkTrack
+elif [[ "$1" == "-browse" ]]; then
+    browseFilesystem
 elif [[ "$1" == "-ralbum" ]]; then
     rateAlbum
 elif [[ "$1" == "-rate" ]]; then
