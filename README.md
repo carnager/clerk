@@ -8,6 +8,7 @@ manage your mpd server.
 * Play random album
 * Play x random tracks
 * Browse Library (Artist > Album > Tracks)
+* Browse local filesystem (needs unix socket in mpd.conf)
 * Show current Playback Queue
 * Show Albums/Tracks by currently playing Artist
 * Enable or disable scrobbling (with support for remote mpdscribble)
