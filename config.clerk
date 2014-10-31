@@ -13,6 +13,9 @@ music_dir_access=yes
 # path to your music
 music_path="/path/to/music_directory"
 
+# mpd socket file (for local filebrowser)
+mpd_socket=/path/to/mpd/socket
+
 # Number of Songs to be added for "Random Tracks"
 value=20
 

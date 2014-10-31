@@ -115,6 +115,36 @@ lastFMCheck () {
        fi
 }
 
+browseFilesystem () {
+    usefile() {
+    realpath="$(realpath "$selection")"
+    MPD_HOST="$mpd_socket" mpc add ""file://"$realpath"""
+    }
+
+    comboadd() {
+        for i in *.{mp3,ogg,flac,wma,mp4,aac,mpc}; do
+            realpath="$(realpath "$i")"
+            MPD_HOST="$mpd_socket" mpc add ""file://"$realpath"""
+        done
+    }
+
+    chose() {
+        if [[ "$(file "$selection")" == ""$selection": directory" ]]; then
+            cd "$selection"
+            selection="$(echo -e "Add all music files\n---\n$(ls)" | rofi -dmenu "Chose Directory/Files > ")"
+            chose
+        elif [[ "$selection" == "Add all music files" ]]; then
+            comboadd
+        elif [[ "$selection" == "" ]]; then
+            browseLibPrompt
+        else usefile
+        fi
+    }
+
+    cd ~
+    selection="$(echo -e "Add all music files\n---\n$(ls)" | rofi -dmenu "Chose Directory/Files > ")"
+    chose
+}
 
 currentPrompt () {
     menu=("0  Return to Main Menu"
@@ -1133,11 +1163,12 @@ browseLibPrompt() {
           "2  Browse by Date"
           "3  Browse by Genre"
           "4  Browse latest additions"
+          "5  Browse local Filesystem"
           "---"
-          "5  Choose Albums"
-          "6  Choose Track"
+          "6  Choose Albums"
+          "7  Choose Track"
           "---"
-          "7  Update Album/Track Cache")
+          "8  Update Album/Track Cache")
 
     prompt() {
         printf "%s\n" "$@" | dmenu_t -p "Library Menu > "
@@ -1147,9 +1178,10 @@ browseLibPrompt() {
         1*) browseArtist ;;
         2*) browseDate ;;
         3*) browseGenre ;;
-        5*) AddAlbum$quirkAlbum ;;
-        6*) AddTrack$quirkTrack ;;
-        7*) updateCache && browseLibPrompt ;;
+        5*) browseFilesystem ;;
+        6*) AddAlbum$quirkAlbum ;;
+        7*) AddTrack$quirkTrack ;;
+        8*) updateCache && browseLibPrompt ;;
         0*) dplayPrompt ;;
         4*) addLastMod ;;
         *) exit
