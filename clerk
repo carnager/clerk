@@ -131,7 +131,7 @@ browseFilesystem () {
     chose() {
         if [[ "$(file "$selection")" == ""$selection": directory" ]]; then
             cd "$selection"
-            selection="$(echo -e "Add all music files\n---\n$(ls)" | rofi -dmenu "Chose Directory/Files > ")"
+            selection="$(echo -e "Add all music files\n---\n$(ls)" | rofi -dmenu -p "Chose Directory/Files > ")"
             chose
         elif [[ "$selection" == "Add all music files" ]]; then
             comboadd
@@ -142,7 +142,7 @@ browseFilesystem () {
     }
 
     cd ~
-    selection="$(echo -e "Add all music files\n---\n$(ls)" | rofi -dmenu "Chose Directory/Files > ")"
+    selection="$(echo -e "Add all music files\n---\n$(ls)" | rofi -dmenu -p "Chose Directory/Files > ")"
     chose
 }
 
