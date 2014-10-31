@@ -131,12 +131,14 @@ browseFilesystem () {
     chose() {
         if [[ -d "$selection" ]]; then
             cd "$selection"
-            selection="$(echo -e "Add all music files\n---\n$(ls)" | rofi -dmenu -p "Chose Directory/Files > ")"
+            selection="$(echo -e "0 Return to Library Menu\n1 Add all music files\n---\n$(ls)" | rofi -dmenu -p "Chose Directory/Files > ")"
             chose
-        elif [[ "$selection" == "Add all music files" ]]; then
+        elif [[ "$selection" == "1 Add all music files" ]]; then
             comboadd
-        elif [[ "$selection" == "" ]]; then
+        elif [[ "$selection" == "0 Return to Library Menu" ]]; then
             browseLibPrompt
+        elif [[ "$selection" == "" ]]; then
+            exit
         else usefile
         fi
     }
