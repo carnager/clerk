@@ -270,6 +270,12 @@ export status="$(mpc status)"
     consume=$(echo "$status" | tail -1 | awk -F ':' '{ print $6 }' | cut -d ' ' -f 2)
     repeat=$(echo "$status" | tail -1 | awk -F ':' '{ print $3 }' | cut -d ' ' -f 2)
 
+    if pgrep -lf mpd_sima; then
+        export sima=on
+    else
+        export sima=off
+    fi
+
 
 
     if [[ "$ssh_lastfm" == "1" ]]; then
@@ -299,7 +305,7 @@ export status="$(mpc status)"
     fi
     }
 
-    menu=("0  Return to Main Menu"
+    menu=("Q  Return to Main Menu"
           "---"
           "1  Random:                 $(echo $random)"
           "2  Repeat:                 $(echo $repeat)"
@@ -307,10 +313,11 @@ export status="$(mpc status)"
           "4  Consume Mode:           $(echo $consume)"
           "5  Replaygain:             $(echo $rgain)"
           "6  Scrobbling:             $(echo $scrobble)"
+          "7  Similar Artists Mode:   $(echo $sima)"
           "---"
-          "7  Set Crossfade          $(mpc crossfade | cut -d ':' -f2)"
-          "8  Manage Outputs"
-          "9  Number of Random Songs: $(echo $value)")
+          "8  Set Crossfade          $(mpc crossfade | cut -d ':' -f2)"
+          "9  Manage Outputs"
+          "0  Number of Random Songs: $(echo $value)")
 
      prompt() {
          printf "%s\n" "$@" | dmenu_t -p "MPD Options > "
@@ -323,12 +330,21 @@ export status="$(mpc status)"
          4*) mpc consume && dplayOptionsPrompt ;;
          5*) replayGain && dplayOptionsPrompt ;;
          6*) lastFM && dplayOptionsPrompt ;;
-         7*) crossfadePrompt ;;
-         8*) outputPrompt ;;
-         9*) optionRandomPrompt ;;
-         0*) dplayPrompt ;;
+         7*) mpdSima && dplayOptionsPrompt ;;
+         8*) crossfadePrompt ;;
+         9*) outputPrompt ;;
+         0*) optionRandomPrompt ;;
+         Q*) dplayPrompt ;;
            *) exit
     esac
+}
+
+mpdSima () {
+    if pgrep -lf mpd_sima; then
+        kill $(pgrep -lf mpd_sima | awk '{ print $1 }')
+    else
+        mpd-sima -d
+    fi
 }
 
 optionRandomPrompt() {
