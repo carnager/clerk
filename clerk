@@ -131,8 +131,8 @@ browseFilesystem () {
     chose() {
         if [[ -d "$selection" ]]; then
             cd "$selection"
-            dirs="$(find . -maxdepth 1 \( ! -regex '.*/\..*' \) -type d | cut -c 3-)"
-            files="$(find -maxdepth 1 -type f -regex ".*/.*\.\(flac\|mp3\|ogg\|m4a\|wav\|wv\|mpc\|wma\|aac\)" | cut -c 3-)"
+            dirs="$(find . -maxdepth 1 \( ! -regex '.*/\..*' \) -type d | cut -c 3- | sort -u)"
+            files="$(find -maxdepth 1 -type f -regex ".*/.*\.\(flac\|mp3\|ogg\|m4a\|wav\|wv\|mpc\|wma\|aac\)" | cut -c 3- | sort -u)"
             selection="$(echo -e "0  Return to Library Menu\n---\n1  Add all music files\n---\n..$(echo "$dirs")\n$(echo "$files")" | dmenu_t -p "$(realpath .) > ")"
             chose
         elif [[ "$selection" == "1  Add all music files" ]]; then
@@ -146,8 +146,8 @@ browseFilesystem () {
     }
 
     cd ~
-    dirs="$(find . -maxdepth 1 \( ! -regex '.*/\..*' \) -type d | cut -c 3-)"
-    files="$(find -maxdepth 1 -type f -regex ".*/.*\.\(flac\|mp3\|ogg\|m4a\|wav\|wv\|mpc\|wma\|aac\)" | cut -c 3-)"
+    dirs="$(find . -maxdepth 1 \( ! -regex '.*/\..*' \) -type d | cut -c 3- | sort -u)"
+    files="$(find -maxdepth 1 -type f -regex ".*/.*\.\(flac\|mp3\|ogg\|m4a\|wav\|wv\|mpc\|wma\|aac\)" | cut -c 3- | sort -u)"
     selection="$(echo -e "0  Return to Library Menu\n---\n1  Add all music files\n---\n..$(echo "$dirs")\n$(echo "$files")" | dmenu_t -p "$(realpath .) > ")"
     chose
 }
