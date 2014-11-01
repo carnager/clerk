@@ -342,8 +342,10 @@ export status="$(mpc status)"
 mpdSima () {
     if pgrep -lf mpd_sima; then
         kill $(pgrep -lf mpd_sima | awk '{ print $1 }')
+        sleep 1
     else
         mpd-sima -d
+        sleep 1
     fi
 }
 
