@@ -344,11 +344,11 @@ export status="$(mpc status)"
 }
 
 mpdSima () {
-    if pgrep -lf mpd_sima; then
-        kill $(pgrep -lf mpd_sima | awk '{ print $1 }')
+    if [[ -a /tmp/mpd-sima.pid ]]; then
+        kill $(cat /tmp/mpd_sima.pid)
         sleep 1
     else
-        mpd-sima -d
+        mpd-sima -d -p /tmp/mpd-sima.pid
         sleep 1
     fi
 }
