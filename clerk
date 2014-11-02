@@ -675,6 +675,7 @@ rateAlbum () {
             echo "date=${date}" >> "$(mpc current -f "%$mpd_artist%--%date%--%album%").albumrating"
             echo "albumrating=$rating/10" >> "$(mpc current -f "%$mpd_artist%--%date%--%album%").albumrating"
         fi
+        notify-send "clerk" "rated $(echo ${artist} - ${album}) with $(echo ${rating})"
     fi
 }
 
@@ -695,6 +696,7 @@ rateTrack () {
             sed -i "/$(mpc current -f '%title%')/d" track.ratings
             echo "${rating}\\$(mpc current -f "%artist%\%track%\%title%\%date%\%album%")" >> track.ratings
         fi
+        notify-send "clerk" "rated $(mpc current) with $(echo ${rating})"
     fi
 }
 
