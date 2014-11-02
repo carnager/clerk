@@ -274,7 +274,7 @@ export status="$(mpc status)"
     consume=$(echo "$status" | tail -1 | awk -F ':' '{ print $6 }' | cut -d ' ' -f 2)
     repeat=$(echo "$status" | tail -1 | awk -F ':' '{ print $3 }' | cut -d ' ' -f 2)
 
-    if pgrep -lf mpd_sima; then
+    if [[ -a /tmp/mpd-sima.pid ]]; then
         export sima=on
     else
         export sima=off
