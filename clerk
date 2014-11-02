@@ -345,7 +345,7 @@ export status="$(mpc status)"
 
 mpdSima () {
     if [[ -a /tmp/mpd-sima.pid ]]; then
-        kill $(cat /tmp/mpd_sima.pid)
+        kill $(cat /tmp/mpd-sima.pid)
         sleep 1
     else
         mpd-sima -d -p /tmp/mpd-sima.pid
