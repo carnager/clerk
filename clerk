@@ -427,7 +427,7 @@ suspendPlaylist () {
     time=$(mpc status | sed '2!d' | sed 's;/.:.*;;;s;.* ;;')
     position=$(mpc current --format '%position%')
     if [[ -z "$playing" ]]; then
-        echo "mpd is not playing"
+        notify-send "clerk" "mpd is not playing, no state to suspend"
     else
         mpc rm suspended
         mpc save suspended
@@ -437,9 +437,10 @@ suspendPlaylist () {
         if [[ "$stop_after_suspend" == yes ]]; then
             mpc stop
         else
+            echo " "
+        fi
             notify-send "Clerk" "Playlist suspended"
             managePlaylists
-        fi
     fi
 }
 
