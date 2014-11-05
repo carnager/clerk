@@ -19,6 +19,9 @@ mpd_socket=/path/to/mpd/socket
 # Number of Songs to be added for "Random Tracks"
 value=20
 
+# stop on suspend?
+stop_after_suspend=no
+
 # Change this, if you have subfolders for multi-disc albums.
 # This should match the name of your subfolders, exluding the number
 cd_divider=CD
