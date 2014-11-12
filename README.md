@@ -1,7 +1,4 @@
-# clerk - the only mpd client UI that needs typing
-
-clerk uses dmenu (or rofi) to draw a menu which lets you
-manage your mpd server.
+# clerk - mpd client, based on rofi (or dmenu)
 
 # Functions:
 
