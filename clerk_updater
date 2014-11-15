@@ -9,7 +9,7 @@ if [[ "$change_db" == "$new_db" ]]; then
         echo "album/track cache up to date"
     else
         notify-send "clerk" "Creating caches"
-        album_temp_cur=$(mppc listall --format "{$mpd_artist} $seperator {album} $seperator {date}" | uniq &)
+        album_temp_cur=$(mppc listall --format "{$mpd_artist} $seperator {album} $seperator {date}" | sort | uniq &)
         tracks_temp_cur=$(mppc listall --format "{artist} $seperator {track} $seperator {title} $seperator {album}" &)
         last_temp_cur=$(export seperator="$seperator"; mppc listall --format "{last-modified}$seperator{date}$seperator{$mpd_artist}$seperator{album}" | sort -r | awk -F "$seperator" '{ print $2,ENVIRON["seperator"],$3,ENVIRON["seperator"],$4 }' | awk '!x[$0]++' &)
         echo "$album_temp_cur" > $HOME/.config/clerk/album.cache
@@ -19,7 +19,7 @@ if [[ "$change_db" == "$new_db" ]]; then
 else
     notify-send "clerk" "Updating caches"
     sed -i "s/change_db=".*"/change_db=""$new_db""/" $HOME/.config/clerk/config
-    album_temp_cur=$(mppc listall --format "{$mpd_artist} $seperator {album} $seperator {date}" | uniq &)
+    album_temp_cur=$(mppc listall --format "{$mpd_artist} $seperator {album} $seperator {date}" | sort | uniq &)
     tracks_temp_cur=$(mppc listall --format "{artist} $seperator {track} $seperator {title} $seperator {album}" &)
     last_temp_cur=$(export seperator="$seperator"; mppc listall --format "{last-modified}$seperator{date}$seperator{$mpd_artist}$seperator{album}" | sort -r | awk -F "$seperator" '{ print $2,ENVIRON["seperator"],$3,ENVIRON["seperator"],$4 }' | awk '!x[$0]++' &)
     rm -f $HOME/.config/clerk/album_cache
