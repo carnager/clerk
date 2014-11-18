@@ -219,11 +219,17 @@ infoPrompt () {
     case "$(prompt "${menu[@]}")" in
         1*) surfraw yubnub allmusic $(mpc current -f %artist%) ;;
         2*) surfraw yubnub allmusic $(mpc current -f %album%) ;;
-        3*) surfraw yubnub google $(mpc current -f %title%) $(mpc current -f %artist%) lyrics ;;
+#        3*) surfraw yubnub google $(mpc current -f %title%) $(mpc current -f %artist%) lyrics ;;
+        3*) lyrics ;;
         4*) currentTag ;;
         0*) dplayPrompt ;;
           *) exit
     esac
+}
+
+lyrics () {
+    glyrc lyrics -a "$(mpc current --format '%artist%')" -t "$(mpc current --format '%title%')" -w "$HOME/.config/clerk/current.txt"
+    cat "$HOME/.config/clerk/current.txt" | rofi -dmenu -p "$(mpc current --format '%artist% - %title%') Lyrics >"
 }
 
 currentTag () {
@@ -1449,8 +1455,12 @@ if [[ "$1" == "-h" ]]; then
     echo "  -rate           show rating prompt"
     echo "  -ralbum         rate current album"
     echo "  -rtrack         rate current track"
-    echo "  -lrated         add x random tracks with rating >=4"
+    echo "  -lrated         add x random tracks with rating >=6"
     echo "  -rcurrent XX    rate current track with 10"
+    echo "LastFM"
+    echo "  -scrobbling     enable/disable scrobbling"
+    echo "  -checklfm       show lastfm status"
+    echo "  -love           love current track"
 
 
 elif [[ "$1" == "-a" ]]; then
@@ -1506,6 +1516,8 @@ elif [[ "$1" == "-scrobbling" ]]; then
     lastFM
 elif [[ "$1" == "-checklfm" ]]; then
     lastFMCheck
+elif [[ "$1" == "-love" ]]; then
+    lastfm-mpd-cli love > /dev/null && notify-send "MPD" "Loved $(mpc current -f '%title%') on LastFM"
 else
 dplayPrompt
 fi
