@@ -1297,7 +1297,7 @@ browseFolders () {
 
     while true; do
     current="$folder"
-    folder=$(echo -e "0  Return to Folders Menu\n---\nAdd current\nInsert current\nReplace current\n---\n$(mpc ls "$folder")" | rofi -dmenu -p "Choose folder")
+    folder=$(echo -e "0  Return to Folders Menu\n---\nAdd current\nInsert current\nReplace current\n---\n$(mpc ls "$folder")" | rofi -dmenu -p "Choose folder > ")
     if [[ "$folder" == "Add current" ]]; then
         mpc add "$current"
         exit
