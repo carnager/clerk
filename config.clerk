@@ -41,8 +41,8 @@ quirkTrack="Tags"
 
 # Fill these if mpdscribble runs on a different host
 # set to 0 if mpdscribble runs locally
-ssh_lastfm=1
-ssh_host=picon
+ssh_lastfm=
+ssh_host=
 
 ##### DO NOT EDIT #####
 change_db=xxxxx
