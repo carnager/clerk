@@ -13,6 +13,7 @@
 * Rate albums (Stored in flat files for portability & mpds sticker database)
 * Load rated album
 * Rate tracks (Stored in flat files for portability & mpds sticker database)
+* Play Similar Songs (based on lastfm)
 * Control mpd options (modes, replaygain, crossfade)
 * Lookup artist/album/lyrics in webbrowser
 
@@ -35,3 +36,4 @@ see `clerk -h` for all default arguments.
 
 * surfraw (for lookup)
 * lastfm-mpd-cli for loving tracks (https://github.com/morendi/lastfm-mpd-cli)
+* mpd-sima (for Similar Artists playback)
