@@ -31,7 +31,7 @@ cd_divider=CD
 # If you change seperator, update caches with clerk -update
 seperator=•
 
-# use artist or albumartist for album ratings
+# use artist or albumartist for general artist of an album.
 mpd_artist=albumartist
 
 # if you have missing tags and experience non-adding albums, set these
