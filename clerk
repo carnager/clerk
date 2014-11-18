@@ -217,7 +217,8 @@ infoPrompt () {
     }
 
     case "$(prompt "${menu[@]}")" in
-        1*) surfraw yubnub allmusic $(mpc current -f %artist%) ;;
+#        1*) surfraw yubnub allmusic $(mpc current -f %artist%) ;;
+        1*) artistinfo ;;
         2*) surfraw yubnub allmusic $(mpc current -f %album%) ;;
 #        3*) surfraw yubnub google $(mpc current -f %title%) $(mpc current -f %artist%) lyrics ;;
         3*) lyrics ;;
@@ -228,8 +229,15 @@ infoPrompt () {
 }
 
 lyrics () {
+    rm -f $HOME/.config/clerk/current.txt
     glyrc lyrics -a "$(mpc current --format '%artist%')" -t "$(mpc current --format '%title%')" -w "$HOME/.config/clerk/current.txt"
-    cat "$HOME/.config/clerk/current.txt" | rofi -dmenu -p "$(mpc current --format '%artist% - %title%') Lyrics >"
+    fold "$HOME/.config/clerk/current.txt" -w 50 -s | rofi -dmenu -p "$(mpc current --format '%artist% - %title%') Lyrics >"
+}
+
+artistinfo () {
+    rm -f $HOME/.config/clerk/artist.txt
+    glyrc artistbio -a "$(mpc current --format '%artist%')" -w "$HOME/.config/clerk/artist.txt"
+    fold "$HOME/.config/clerk/artist.txt" -s -w 50 | rofi -dmenu -p "$(mpc current --format '%artist% - %title%') Lyrics >"
 }
 
 currentTag () {
@@ -1496,6 +1504,7 @@ elif [[ "$1" == "-lrated" ]]; then
 elif [[ "$1" == "-library" ]]; then
     browseArtist
 elif [[ "$1" == "-update" ]]; then
+    rm -f $HOME/.config/clerk/*.cache
     updateCache
 elif [[ "$1" == "-queue" ]]; then
     dplayQueue
