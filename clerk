@@ -1250,13 +1250,14 @@ browseLibPrompt() {
           "1  Browse by Artist"
           "2  Browse by Date"
           "3  Browse by Genre"
-          "4  Browse latest additions"
-          "5  Browse local Filesystem"
+          "4  Browse by Folders"
+          "5  Browse latest additions"
+          "6  Browse local Filesystem"
           "---"
-          "6  Choose Albums"
-          "7  Choose Track"
+          "7  Choose Albums"
+          "8  Choose Track"
           "---"
-          "8  Update Album/Track Cache")
+          "9  Update Album/Track Cache")
 
     prompt() {
         printf "%s\n" "$@" | dmenu_t -p "Library Menu > "
@@ -1266,16 +1267,53 @@ browseLibPrompt() {
         1*) browseArtist ;;
         2*) browseDate ;;
         3*) browseGenre ;;
-        5*) browseFilesystem ;;
-        6*) AddAlbum$quirkAlbum ;;
-        7*) AddTrack$quirkTrack ;;
-        8*) updateCache && browseLibPrompt ;;
+        4*) browseFolders ;;
+        6*) browseFilesystem ;;
+        7*) AddAlbum$quirkAlbum ;;
+        8*) AddTrack$quirkTrack ;;
+        9*) updateCache && browseLibPrompt ;;
         0*) dplayPrompt ;;
-        4*) addLastMod ;;
+        5*) addLastMod ;;
         *) exit
     esac
 }
 
+browseFolders () {
+    folder=$(echo -e "0  Return to Browse Menu\n---\nAdd current\nInsert current\nReplace current\n---\n$(mpc ls "")" | rofi -dmenu -p "Choose Folder > ")
+    if [[ "$folder" == "" ]]; then
+        exit
+    elif [[ "$folder" == "0  Return to Date Menu" ]]; then
+        browseLibPrompt
+    elif [[ "$folder" == "Add current" ]]; then
+        mpc add "$current"
+        exit
+    elif [[ "$folder" == "Insert current" ]]; then
+        mpc insert "$current"
+        exit
+    elif [[ "$folder" == "Replace current" ]]; then
+        mpc clear && mpc add "$current" && mpc play
+        exit
+    fi
+
+    while true; do
+    current="$folder"
+    folder=$(echo -e "0  Return to Folders Menu\n---\nAdd current\nInsert current\nReplace current\n---\n$(mpc ls "$folder")" | rofi -dmenu -p "Choose folder")
+    if [[ "$folder" == "Add current" ]]; then
+        mpc add "$current"
+        exit
+    elif [[ "$folder" == "Insert current" ]]; then
+        mpc insert "$current"
+        exit
+    elif [[ "$folder" == "Replace current" ]]; then
+        mpc clear && mpc add "$current" && mpc play
+        exit
+    elif [[ "$folder" == "0  Return to Folders Menu" ]]; then
+        browseFolders
+    elif [[ "$folder" == "" ]]; then
+        exit
+    fi
+done
+}
 
 browseAlbum() {
     ALBUMS=$(mppc list album "$ARTIST")
