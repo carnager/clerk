@@ -1475,6 +1475,7 @@ while :; do
             elif [[ $2 == latest ]]; then
                 addLaastMod
             fi
+            break
             ;;
         --insert)
             if [[ ! $2 ]]; then
@@ -1487,6 +1488,7 @@ while :; do
             elif [[ $2 == latest ]]; then
                 insertLastMod
             fi
+            break
             ;;
         --replace)
             if [[ ! $2 ]]; then
@@ -1499,6 +1501,7 @@ while :; do
             elif [[ $2 == latest ]]; then
                 replaceLastMod
             fi
+            break
             ;;
         --rate)
             if [[ ! $2 ]]; then
@@ -1521,6 +1524,7 @@ while :; do
             elif [[ $2 == load ]]; then
                 mpc clear && mpc sticker "" find rating | grep -E "rating=6|rating=7|rating=8|rating=9|rating=10" | awk -F ':' '{print $1}' | shuf -n $value | mpc add && mpc play
             fi
+            break
             ;;
         --random)
             if [[ ! $2 ]]; then
@@ -1531,9 +1535,11 @@ while :; do
             elif [[ $2 == album ]]; then
                 playRandomAlbum
             fi
+            break
             ;;
         --current)
             currentTag
+            break
             ;;
         --browse)
             if [[ ! $2 ]]; then
@@ -1550,9 +1556,11 @@ while :; do
             elif [[ $2 == folder ]]; then
                 browseFolders
             fi
+            break
             ;;
         --update)
             updateCache
+            break
             ;;
         --queue)
             if [[ ! $2 ]]; then
@@ -1567,12 +1575,15 @@ while :; do
             elif [[ $2 == resume ]]; then
                 resumePlaylist
             fi
+            break
             ;;
         --rss)
             loadRSS
+            break
             ;;
         --playlist)
             managePlaylists
+            break
             ;;
         --lastfm)
             if [[ ! $2 ]]; then
@@ -1585,6 +1596,7 @@ while :; do
             elif [[ $2 == love ]]; then
                 lastfm-mpd-cli love > /dev/null && notify-send "MPD" "Loved $(mpc current -f '%title%') on LastFM"
             fi
+            break
             ;;
         --help|-h)
             echo "---"
@@ -1593,7 +1605,6 @@ while :; do
             echo "---"
             echo "General"
             echo "  --help, -h                                      this help message"
-            echo "  --main                                          run main UI"
             echo "  --current                                       show currently playing track"
             echo "  --update                                        update album/track caches"
             echo ""
@@ -1616,9 +1627,7 @@ while :; do
             echo "                                                 "load" adds random rated tracks to queue"
             echo "LastFM"
             echo "  --lastfm <toggle, check, love>                 toggle or check last.fm status, love current track"
-            ;;
-        --main)
-            dplayPrompt
+            break
             ;;
         *)
             dplayPrompt
