@@ -1614,7 +1614,7 @@ while :; do
             echo "  --rate <menu, track, album, load, instant ##>  rate albums or tracks"
             echo "                                                 "load" adds random rated tracks to queue"
             echo "LastFM"
-            echo "  --lastfm <toggle, check, love                  toggle or check last.fm status, love current track"
+            echo "  --lastfm <toggle, check, love>                 toggle or check last.fm status, love current track"
             ;;
         --main)
             dplayPrompt
