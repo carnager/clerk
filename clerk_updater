@@ -6,6 +6,7 @@ source $HOME/.config/clerk/config
 new_db="$(mpc stats | grep Updated | sed 's/ //g')"
 if [[ "$change_db" == "$new_db" ]]; then
     if [[ -f $HOME/.config/clerk/album.cache && -f $HOME/.config/clerk/tracks.cache && -f $HOME/.config/clerk/last.cache ]]; then
+        :
     else
         notify-send "clerk" "Creating caches"
         album_temp_cur=$(mppc listall --format "{$mpd_artist} $seperator {album} $seperator {date}" | sort | uniq &)
