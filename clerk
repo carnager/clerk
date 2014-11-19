@@ -1593,6 +1593,7 @@ while :; do
             echo "---"
             echo "General"
             echo "  --help, -h                                      this help message"
+            echo "  --main                                          run main UI"
             echo "  --current                                       show currently playing track"
             echo "  --update                                        update album/track caches"
             echo ""
@@ -1620,7 +1621,7 @@ while :; do
             dplayPrompt
             ;;
         *)
-            break
+            dplayPrompt
     esac
     shift
 done
