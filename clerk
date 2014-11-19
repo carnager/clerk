@@ -1462,109 +1462,165 @@ elif [[ "$backend" == "slmenu" ]]
 fi
 
 
-if [[ "$1" == "-h" ]]; then
-    echo "---"
-    echo "clerk: the mpd UI that needs typing"
-    echo "Copyright © 2013 - 2014 Rasmus Steinke"
-    echo "---"
-    echo "Options"
-    echo ""
-    echo "General"
-    echo "  -h              this help message"
-    echo "  -show           show currently playing track"
-    echo "  -update         update album/track caches"
-    echo ""
-    echo "Library"
-    echo "  -library        browse library"
-    echo "  -browse         browse local filesystem"
-    echo "  -a              add album"
-    echo "  -ai             insert album"
-    echo "  -ar             replace album"
-    echo "  -ra             play random album"
-    echo "  -rs             play random songs"
-    echo "  -t              add track"
-    echo "  -ti             insert track"
-    echo "  -tr             replace track"
-    echo "  -latest         show latest additions"
-    echo ""
-    echo "Playlist"
-    echo "  -queue          show current queue"
-    echo "  -queuedl        delete items from current queue"
-    echo "  -playlists      manage playlists"
-    echo "  -suspend        suspend current queue"
-    echo "  -resume         resume suspended queue"
-    echo "  -rss            load podcast"
-    echo "  (podcast should be placed in ~/.config/clerk/podcasts"
-    echo "  with format NAME \ URL)"
-    echo ""
-    echo "Ratings"
-    echo "  -rate           show rating prompt"
-    echo "  -ralbum         rate current album"
-    echo "  -rtrack         rate current track"
-    echo "  -lrated         add x random tracks with rating >=6"
-    echo "  -rcurrent XX    rate current track with 10"
-    echo "LastFM"
-    echo "  -scrobbling     enable/disable scrobbling"
-    echo "  -checklfm       show lastfm status"
-    echo "  -love           love current track"
-
-
-elif [[ "$1" == "-a" ]]; then
-    AddAlbum$quirkAlbum
-elif [[ "$1" == "-ai" ]]; then
-    InsertAlbum$quirkAlbum
-elif [[ "$1" == "-ar" ]]; then
-    ReplaceAlbum$quirkAlbum
-elif [[ "$1" == "-t" ]]; then
-    AddTrack$quirkTrack
-elif [[ "$1" == "-ti" ]]; then
-    InsertTrack$quirkTrack
-elif [[ "$1" == "tr" ]]; then
-    ReplaceTrack$quirkTreack
-elif [[ "$1" == "-browse" ]]; then
-    browseFilesystem
-elif [[ "$1" == "-ralbum" ]]; then
-    rateAlbum
-elif [[ "$1" == "-rate" ]]; then
-    ratingPrompt
-elif [[ "$1" == "-rtrack" ]]; then
-    rateTrack
-elif [[ "$1" == "-ra" ]]; then
-    playRandomAlbum
-elif [[ "$1" == "-latest" ]]; then
-    addLastMod
-elif [[ "$1" == "-rs" ]]; then
-    playRandomTracks
-elif [[ "$1" == "-show" ]]; then
-   currentTag
-elif [[ "$1" == "-lrated" ]]; then
-    mpc clear && mpc sticker "" find rating | grep -E "rating=6|rating=7|rating=8|rating=9|rating=10" | awk -F ':' '{print $1}' | shuf -n $value | mpc add && mpc play
-elif [[ "$1" == "-library" ]]; then
-    browseArtist
-elif [[ "$1" == "-update" ]]; then
-    rm -f $HOME/.config/clerk/*.cache
-    updateCache
-elif [[ "$1" == "-queue" ]]; then
-    dplayQueue
-elif [[ "$1" == "-queuedl" ]]; then
-    dplayQueueDelete
-elif [[ "$1" == "-rss" ]]; then
-    loadRSS
-elif [[ "$1" == "-suspend" ]]; then
-    suspendPlaylist
-elif [[ "$1" == "-resume" ]]; then
-    resumePlaylist
-elif [[ "$1" == "-playlists" ]]; then
-    managePlaylists
-elif [[ "$1" == "-rcurrent" ]]; then
-    export rating="$2"
-    instantRateTrack
-elif [[ "$1" == "-scrobbling" ]]; then
-    lastFM
-elif [[ "$1" == "-checklfm" ]]; then
-    lastFMCheck
-elif [[ "$1" == "-love" ]]; then
-    lastfm-mpd-cli love > /dev/null && notify-send "MPD" "Loved $(mpc current -f '%title%') on LastFM"
-else
-dplayPrompt
-fi
+while :; do
+    case $1 in
+        --add)
+            if [[ ! $2 ]]; then
+                echo "Missing argument for --add"
+                echo "Possible values: track, album, latest"
+            elif [[ $2 == track ]]; then
+                AddTrack$quirkTrack
+            elif [[ $2 == album ]]; then
+                AddAlbum$quirkAlbum
+            elif [[ $2 == latest ]]; then
+                addLaastMod
+            fi
+            ;;
+        --insert)
+            if [[ ! $2 ]]; then
+                echo "Missing argument for --insert"
+                echo "Possible values: track, album, latest"
+            elif [[ $2 == track ]]; then
+                InsertTrack$quirkTrack
+            elif [[ $2 == album ]]; then
+                InsertAlbum$quirkAlbum
+            elif [[ $2 == latest ]]; then
+                insertLastMod
+            fi
+            ;;
+        --replace)
+            if [[ ! $2 ]]; then
+                echo "Missing argument for --replace"
+                echo "Possible values: track, album, latest"
+            elif [[ $2 == track ]]; then
+                ReplaceTrack$quirkTrack
+            elif [[ $2 == album ]]; then
+                ReplaceAlbum$quirkAlbum
+            elif [[ $2 == latest ]]; then
+                replaceLastMod
+            fi
+            ;;
+        --rate)
+            if [[ ! $2 ]]; then
+                echo "Missing arguemtn for --rate"
+                echo "Possible values: track, album, instant"
+                echo "Launching rating menu"
+                ratingPrompt
+            elif [[ $2 == track ]]; then
+                rateTrack
+            elif [[ $2 == album ]]; then
+                rateAlbum
+            elif [[ $2 == instant ]]; then
+                if [[ ! $3 ]]; then
+                    echo "Missing argument for --rate instant"
+                    echo "Please define rating between 1-10"
+                else
+                    export rating="$3"
+                    instantRateTrack
+                fi
+            elif [[ $2 == load ]]; then
+                mpc clear && mpc sticker "" find rating | grep -E "rating=6|rating=7|rating=8|rating=9|rating=10" | awk -F ':' '{print $1}' | shuf -n $value | mpc add && mpc play
+            fi
+            ;;
+        --random)
+            if [[ ! $2 ]]; then
+                echo "Missing argument for --random"
+                echo "Possible values: track, album"
+            elif [[ $2 == track ]]; then
+                playRandomTracks
+            elif [[ $2 == album ]]; then
+                playRandomAlbum
+            fi
+            ;;
+        --current)
+            currentTag
+            ;;
+        --browse)
+            if [[ ! $2 ]]; then
+                echo "Missing argument for --browse"
+                echo "Possible values: artist, date, genre, folder, system"
+            elif [[ $2 == artist ]]; then
+                browseArtist
+            elif [[ $2 == date ]]; then
+                browseDate
+            elif [[ $2 == genre ]]; then
+                browseGenre
+            elif [[ $2 == system ]]; then
+                browseFilesystem
+            elif [[ $2 == folder ]]; then
+                browseFolders
+            fi
+            ;;
+        --update)
+            updateCache
+            ;;
+        --queue)
+            if [[ ! $2 ]]; then
+                echo "Missing argument for --queue"
+                echo "Possible values: show, delete, suspend, resume"
+            elif [[ $2 == show ]]; then
+                dplayQueue
+            elif [[ $2 == delete ]]; then
+                dplayQueueDelete
+            elif [[ $2 == suspend ]]; then
+                suspendPlaylist
+            elif [[ $2 == resume ]]; then
+                resumePlaylist
+            fi
+            ;;
+        --rss)
+            loadRSS
+            ;;
+        --playlist)
+            managePlaylists
+            ;;
+        --lastfm)
+            if [[ ! $2 ]]; then
+                echo "Missing argument for --lastfm"
+                echo "Possible values: toggle, check, love"
+            elif [[ $2 == toggle ]]; then
+                lastFM
+            elif [[ $2 == check ]]; then
+                lastFMCheck
+            elif [[ $2 == love ]]; then
+                lastfm-mpd-cli love > /dev/null && notify-send "MPD" "Loved $(mpc current -f '%title%') on LastFM"
+            fi
+            ;;
+        --help|-h)
+            echo "---"
+            echo "clerk: the mpd UI that needs typing"
+            echo "Copyright © 2013 - 2014 Rasmus Steinke"
+            echo "---"
+            echo "General"
+            echo "  --help, -h                                      this help message"
+            echo "  --current                                       show currently playing track"
+            echo "  --update                                        update album/track caches"
+            echo ""
+            echo "Library"
+            echo "  --add <track, album, latest>                    adds selection at the end of the queue"
+            echo "  --insert <track, album, latest>                 inserts selection after playing song"
+            echo "  --replace <track, album, latest>                replaces queue with selection"
+            echo "  --browse <artist, date, genre, folder, system>  browse library"
+            echo "  --random <track, album>                         play random track or album"
+            echo ""
+            echo "Playlist"
+            echo "  --queue <show, delete, suspend, resume>         manage current queue"
+            echo "  --playlist                                      manage playlists"
+            echo "  --rss                                           load podcast"
+            echo "    (podcast should be placed in ~/.config/clerk/podcasts"
+            echo "     with format NAME \ URL)"
+            echo ""
+            echo "Ratings"
+            echo "  --rate <menu, track, album, load, instant ##>  rate albums or tracks"
+            echo "                                                 "load" adds random rated tracks to queue"
+            echo "LastFM"
+            echo "  --lastfm <toggle, check, love                  toggle or check last.fm status, love current track"
+            ;;
+        --main)
+            dplayPrompt
+            ;;
+        *)
+            break
+    esac
+    shift
+done
