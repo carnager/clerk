@@ -424,6 +424,7 @@ done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\n1  L
 }
 
 loadRSS () {
+    mpc clear
     podcast=$(echo -e "0  Return to Playlist Menu\n---\n$(cat $HOME/.config/clerk/podcasts | cut -d '\' -f1)" | rofi -dmenu "Choose Podcast > ")
     if [[ $podcast == "0  Return to Playlist Menu" ]]; then
         managePlaylists
