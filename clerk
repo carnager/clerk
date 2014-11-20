@@ -424,15 +424,15 @@ done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\n1  L
 }
 
 loadRSS () {
-    while read PODCAST
-    do
-        if [[ "$PODCAST" == "0  Return to Playlist Menu" ]]; then
-            managePlaylists
-        else
-            mpc clear
-            mpc load $(cat $HOME/.config/clerk/podcasts | cut -d '\' -f 2)
-        fi
-done < <(echo -e "0  Return to Playlist Menu\n---\n$(cat $HOME/.config/clerk/podcasts | cut -d '\' -f 1)" | dmenu_t -p "Load RSS Feed > ")
+    podcast=$(echo -e "0  Return to Playlist Menu\n---\n$(cat $HOME/.config/clerk/podcasts | cut -d '\' -f1)" | rofi -dmenu "Choose Podcast > ")
+    if [[ $podcast == "0  Return to Playlist Menu" ]]; then
+        managePlaylists
+    else
+        mpc load $(grep "$podcast" $HOME/.config/clerk/podcasts | cut -d '\' -f2)
+        episode=$(mpc playlist --format "%position% $seperator %artist% $seperator %title%" | rofi -dmenu -p "Choose Episode > ")
+        POS=$(echo "$episode" | awk -F " $seperator " '{ print $1 }')
+        mpc play "$POS"
+    fi
 }
 
 suspendPlaylist () {
