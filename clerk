@@ -431,7 +431,6 @@ loadRSS () {
         else
             mpc clear
             mpc load $(cat $HOME/.config/clerk/podcasts | cut -d '\' -f 2)
-            dplayQueue
         fi
 done < <(echo -e "0  Return to Playlist Menu\n---\n$(cat $HOME/.config/clerk/podcasts | cut -d '\' -f 1)" | dmenu_t -p "Load RSS Feed > ")
 }
