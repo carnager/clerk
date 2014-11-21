@@ -22,6 +22,9 @@ value=20
 # stop on suspend?
 stop_after_suspend=no
 
+# instantly play newly added tracks
+add_auto_play = yes
+
 # Change this, if you have subfolders for multi-disc albums.
 # This should match the name of your subfolders, exluding the number
 cd_divider=CD

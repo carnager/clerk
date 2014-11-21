@@ -1027,7 +1027,9 @@ AddTrackTags() {
                 track=$(echo "$TRACK" | awk -F " $seperator " '{print $2}')
                 title=$(echo "$TRACK" | awk -F " $seperator " '{print $3}')
                 mpc findadd artist "$artist" album "$album" title "$title"
-                mpc play $(mpc playlist | wc -l)
+                if [[ "$add_auto_play" ]]; then
+                    mpc play $(mpc playlist | wc -l)
+                fi
             fi
         fi
     done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Add\n---\n$(echo "$tracks_temp")"| dmenu_t -dmenu -p "Choose Track > ")
