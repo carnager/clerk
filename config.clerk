@@ -23,7 +23,7 @@ value=20
 stop_after_suspend=no
 
 # instantly play newly added tracks
-add_auto_play = yes
+add_auto_play=yes
 
 # Change this, if you have subfolders for multi-disc albums.
 # This should match the name of your subfolders, exluding the number
@@ -36,6 +36,9 @@ seperator=•
 
 # use artist or albumartist for general artist of an album.
 mpd_artist=albumartist
+
+# use artist or albumartist for random tracks
+random_artist=artist
 
 # if you have missing tags and experience non-adding albums, set these
 # to "Flat", otherwise leave the default of "Tags"
