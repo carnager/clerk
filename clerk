@@ -12,10 +12,6 @@ updateCache() {
     clerk_updater &
 }
 dplayPrompt () {
-    if [[ "$custom_menu" == yes ]]; then
-        menu=$(cat $HOME/.config/clerk/custom_menu)
-    else
-
     menu=("Q  Exit Clerk"
           "---"
           "1  Play random Album"
@@ -30,7 +26,6 @@ dplayPrompt () {
           "8  Ratings"
           "9  Lookup"
           "0  Playback")
-      fi
 
     prompt() {
         printf "%s\n" "$@" | dmenu_t -p "MPD Menu > "
