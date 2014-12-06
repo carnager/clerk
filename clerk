@@ -11,8 +11,11 @@ last_temp=$(cat $HOME/.config/clerk/last.cache)
 updateCache() {
     clerk_updater &
 }
-
 dplayPrompt () {
+    if [[ "$custom_menu" == yes ]]; then
+        menu=$(cat $HOME/.config/clerk/custom_menu)
+    else
+
     menu=("Q  Exit Clerk"
           "---"
           "1  Play random Album"
@@ -27,6 +30,7 @@ dplayPrompt () {
           "8  Ratings"
           "9  Lookup"
           "0  Playback")
+      fi
 
     prompt() {
         printf "%s\n" "$@" | dmenu_t -p "MPD Menu > "
@@ -401,29 +405,35 @@ crossfadePrompt () {
 }
 
 managePlaylists () {
-    while read TRACKDISPLAY
-    do
-        if [[ "$TRACKDISPLAY" == "0  Return to Main Menu" ]]; then
-            dplayPrompt
-        elif [[ "$TRACKDISPLAY" == "1  Load Playlist" ]]; then
-            dplayQueueLoad
-        elif [[ "$TRACKDISPLAY" == "2  Save Playlist" ]]; then
-            dplayQueueSave
-        elif [[ "$TRACKDISPLAY" == "3  Load RSS Feed" ]]; then
-            loadRSS
-        elif [[ "$TRACKDISPLAY" == "4  Crop Playlist" ]]; then
-            mpc crop && dplayQueue
-        elif [[ "$TRACKDISPLAY" == "5  Suspend Playlist" ]]; then
-            suspendPlaylist
-        elif [[ "$TRACKDISPLAY" == "6  Resume Playlist" ]]; then
-            resumePlaylist
-        elif [[ "$TRACKDISPLAY" == "7  Clear Playlist" ]]; then
-            mpc clear && dplayQueue
-        elif [[ "$TRACKDISPLAY" == "" ]]; then
-            exit
-        fi
-done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\n1  Load Playlist\n2  Save Playlist\n3  Load RSS Feed\n4  Crop Playlist\n---\n5  Suspend Playlist\n6  Resume Playlist\n---\n7  Clear Playlist" | dmenu_t -p "Queue > ")
+    menu=("0  Return to Main Menu"
+          "---"
+          "1  Load Playlist"
+          "2  Save Playlist"
+          "3  Load RSS Feed"
+          "4  Crop Playlist"
+          "---"
+          "5  Suspend Playlist"
+          "6  Resume Playlist"
+          "---"
+          "7  Clear Playlist")
+
+    prompt() {
+        printf "%s\n" "$@" | dmenu_t -p "Crossfade > "
+    }
+
+    case "$(prompt "${menu[@]}")" in
+        0*) dplayPrompt ;;
+        1*) dplayQueueLoad ;;
+        2*) dplayQueueSave ;;
+        3*) loadRSS ;;
+        4*) mpc crop && dplayQueue ;;
+        5*) suspendPlaylist ;;
+        6*) resumePlaylist ;;
+        7*) mpc clear ;;
+        *) exit
+    esac
 }
+
 
 loadRSS () {
     mpc clear
@@ -485,6 +495,7 @@ dplayQueue () {
         elif [[ "$TRACKDISPLAY" == "Mode: Play" ]]; then
             dplayQueueDelete
         elif [[ "$TRACKDISPLAY" == "" ]]; then
+            break
             exit
         else
             mpc play $POS;
@@ -1638,5 +1649,5 @@ while :; do
         *)
             dplayPrompt
     esac
-    shift
+#    shift
 done
