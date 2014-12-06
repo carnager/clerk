@@ -1642,7 +1642,7 @@ while :; do
             break
             ;;
         *)
-            dplayPrompt
+            dplayPrompt ;;
     esac
-#    shift
+    shift
 done
