@@ -419,7 +419,7 @@ managePlaylists () {
             resumePlaylist
         elif [[ "$TRACKDISPLAY" == "7  Clear Playlist" ]]; then
             mpc clear && dplayQueue
-        elif [[ -z "$TRACKDISPLAY" ]]; then
+        elif [[ "$TRACKDISPLAY" == "" ]]; then
             exit
         fi
 done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\n1  Load Playlist\n2  Save Playlist\n3  Load RSS Feed\n4  Crop Playlist\n---\n5  Suspend Playlist\n6  Resume Playlist\n---\n7  Clear Playlist" | dmenu_t -p "Queue > ")
@@ -484,7 +484,7 @@ dplayQueue () {
             dplayPrompt
         elif [[ "$TRACKDISPLAY" == "Mode: Play" ]]; then
             dplayQueueDelete
-        elif [[ -z "$TRACKDISPLAY" ]]; then
+        elif [[ "$TRACKDISPLAY" == "" ]]; then
             exit
         else
             mpc play $POS;
