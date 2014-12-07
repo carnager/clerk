@@ -38,6 +38,14 @@ see `clerk -h` for all default arguments.
 * lastfm-mpd-cli for loving tracks (https://github.com/morendi/lastfm-mpd-cli)
 * mpd-sima (for Similar Artists playback)
 
+# Installation
+
+1. Install dependecies (each binary needs to be in your $PATH)
+2. copy config.example to $HOME/.config/clerk/config and edit it.
+3. run rofi.
+
+For arch linux there is a package in [AUR](https://aur.archlinux.org/packages/clerk-git/)
+
 #### A word on album ratings
 mpd's sticker database is very limited and only allows stickers to be associated
 with files. Originally it was planned to extend stickers for other types too
@@ -50,3 +58,6 @@ Also mpd deletes stickers instantly, when files move or get renamed.
 For this reason I keep flat files in directory of the album for both track and
 album ratings. With those files and a tiny bash script it's possible to rebuild
 the sticker database in very little time.
+
+So if you plan to use ratings, it's a good idea to have music_path option
+in config file. If your music is on a different machine just mount it locally.
