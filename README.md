@@ -41,8 +41,9 @@ see `clerk -h` for all default arguments.
 # Installation
 
 1. Install dependecies (each binary needs to be in your $PATH)
-2. copy config.example to $HOME/.config/clerk/config and edit it.
-3. run rofi.
+2. Copy config.example to $HOME/.config/clerk/config and edit it.
+3. Copy clerk and clerk_updater to $PATH
+4. Run clerk
 
 For arch linux there is a package in [AUR](https://aur.archlinux.org/packages/clerk-git/)
 
