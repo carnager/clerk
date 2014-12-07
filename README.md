@@ -17,9 +17,9 @@
 * Control mpd options (modes, replaygain, crossfade)
 * Lookup artist/album/lyrics in webbrowser
 
-Being written completely functional means, every option is accessible
-Some example arguments have been added. e.g:
-`clerk --random track` will play random songs.
+Being written completely functional means, nearly every option is accessible
+from command line.
+For example `clerk --random track` will play random songs.
 
 see `clerk -h` for all default arguments.
 
