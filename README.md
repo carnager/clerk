@@ -11,8 +11,8 @@
 * Enable or disable scrobbling (with support for remote mpdscribble)
 * Love current song on lastfm (Using lastfm-mpd-cli)
 * Rate albums (Stored in flat files for portability & mpds sticker database)
-* Load rated album
 * Rate tracks (Stored in flat files for portability & mpds sticker database)
+* Load rated albums/tracks
 * Play Similar Songs (based on lastfm)
 * Control mpd options (modes, replaygain, crossfade)
 * Lookup artist/album/lyrics in webbrowser
