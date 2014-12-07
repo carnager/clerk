@@ -17,7 +17,7 @@
 * Control mpd options (modes, replaygain, crossfade)
 * Lookup artist/album/lyrics in webbrowser
 
-Being written completely functional means, nearly every option is accessible
+Written completely functional, nearly every option is accessible
 from command line.
 For example `clerk --random track` will play random songs.
 
