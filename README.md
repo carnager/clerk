@@ -31,6 +31,8 @@ see `clerk -h` for all default arguments.
 * mpc
 * mppc (https://github.com/carnager/mppc) (for features, mpc does not provide)
 
+Hint: When using rofi, you can use Shift+Enter to execute several commands
+e.g. adding more than one song.
 
 # Optional Dependencies
 
