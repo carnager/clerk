@@ -19,7 +19,7 @@
 
 Being written completely functional means, every option is accessible
 Some example arguments have been added. e.g:
-`clerk -rs` will play random songs.
+`clerk --random track` will play random songs.
 
 see `clerk -h` for all default arguments.
 
