@@ -230,13 +230,13 @@ infoPrompt () {
 lyrics () {
     rm -f $HOME/.config/clerk/current.txt
     glyrc lyrics -a "$(mpc current --format '%artist%')" -t "$(mpc current --format '%title%')" -w "$HOME/.config/clerk/current.txt"
-    fold "$HOME/.config/clerk/current.txt" -w 50 -s | rofi -dmenu -p "$(mpc current --format '%artist% - %title%') Lyrics >"
+    fold "$HOME/.config/clerk/current.txt" -w 50 -s | dmenu_t -p "$(mpc current --format '%artist% - %title%') Lyrics >"
 }
 
 artistinfo () {
     rm -f $HOME/.config/clerk/artist.txt
     glyrc artistbio -a "$(mpc current --format '%artist%')" -w "$HOME/.config/clerk/artist.txt"
-    fold "$HOME/.config/clerk/artist.txt" -s -w 50 | rofi -dmenu -p "$(mpc current --format '%artist% - %title%') Lyrics >"
+    fold "$HOME/.config/clerk/artist.txt" -s -w 50 | dmenu_t -p "$(mpc current --format '%artist% - %title%') Lyrics >"
 }
 
 currentTag () {
@@ -432,12 +432,12 @@ managePlaylists () {
 
 loadRSS () {
     mpc clear
-    podcast=$(echo -e "0  Return to Playlist Menu\n---\n$(cat $HOME/.config/clerk/podcasts | cut -d '\' -f1)" | rofi -dmenu "Choose Podcast > ")
+    podcast=$(echo -e "0  Return to Playlist Menu\n---\n$(cat $HOME/.config/clerk/podcasts | cut -d '\' -f1)" | dmenu_t -p "Choose Podcast > ")
     if [[ $podcast == "0  Return to Playlist Menu" ]]; then
         managePlaylists
     else
         mpc load $(grep "$podcast" $HOME/.config/clerk/podcasts | cut -d '\' -f2)
-        episode=$(mpc playlist --format "%position% $seperator %artist% $seperator %title%" | rofi -dmenu -p "Choose Episode > ")
+        episode=$(mpc playlist --format "%position% $seperator %artist% $seperator %title%" | dmenu_t -p "Choose Episode > ")
         POS=$(echo "$episode" | awk -F " $seperator " '{ print $1 }')
         mpc play "$POS"
     fi
@@ -745,13 +745,13 @@ rateTrack () {
 
 
 loadRatedAlbums () {
-    rating="$(seq 10 | rofi -dmenu -p "Minimum Rating > ")"
+    rating="$(seq 10 | dmenu_t -p "Minimum Rating > ")"
     if [[ $rating == "" ]]; then
             exit
     else
         albums="$(while read -a line; do
             dirname "${line[*]}";
-        done <<< "$(mpc sticker "" find albumrating | grep -E "albumrating=$rating")" | sed 's/\/\CD.*//g' | sort | uniq | rofi -dmenu -p "Choose Album")"
+        done <<< "$(mpc sticker "" find albumrating | grep -E "albumrating=$rating")" | sed 's/\/\CD.*//g' | sort | uniq | dmenu_t -p "Choose Album")"
         if [[ $albums == "" ]]; then
             exit
         else
@@ -1291,10 +1291,10 @@ browseLibPrompt() {
 }
 
 browseFolders () {
-    folder=$(echo -e "0  Return to Browse Menu\n---\nAdd current\nInsert current\nReplace current\n---\n$(mpc ls "")" | rofi -dmenu -p "Choose Folder > ")
+    folder=$(echo -e "0  Return to Browse Menu\n---\nAdd current\nInsert current\nReplace current\n---\n$(mpc ls "")" | dmenu_t -p "Choose Folder > ")
     if [[ "$folder" == "" ]]; then
         exit
-    elif [[ "$folder" == "0  Return to Date Menu" ]]; then
+    elif [[ "$folder" == "0  Return to Browse Menu" ]]; then
         browseLibPrompt
     elif [[ "$folder" == "Add current" ]]; then
         mpc add "$current"
@@ -1309,7 +1309,7 @@ browseFolders () {
 
     while true; do
     current="$folder"
-    folder=$(echo -e "0  Return to Folders Menu\n---\nAdd current\nInsert current\nReplace current\n---\n$(mpc ls "$folder")" | rofi -dmenu -p "Choose folder > ")
+    folder=$(echo -e "0  Return to Folders Menu\n---\nAdd current\nInsert current\nReplace current\n---\n$(mpc ls "$folder")" | dmenu_t -p "Choose folder > ")
     if [[ "$folder" == "Add current" ]]; then
         mpc add "$current"
         exit
