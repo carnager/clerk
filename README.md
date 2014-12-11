@@ -64,15 +64,3 @@ the sticker database in very little time.
 
 So if you plan to use ratings, it's a good idea to have music_path option
 in config file. If your music is on a different machine just mount it locally.
-
-#### Finally a word on cached database
-clerk highly depends on the ability to show albums/tracks in a formatted way.
-Artist, album, track and date info must all be visible in a single line, otherwise
-the filtering wouldn't work.
-The only way to archive this is by using mpd's listallinfo command.
-That command is evil and should not be used. Sadly there is no alternative.
-The only issue that could arise in clerk is that it simply does not work.
-If this happens to you, make sure to increase the command buffer size in
-mpd config.
-Hopefully someday mpd will offer an alternative for this, but I can't see
-this happening anytime soon
