@@ -845,6 +845,7 @@ addLastMod() {
             fi
         fi
     done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Add\n---\n$(echo "$last_temp")" | dmenu_t -dmenu -p "Choose recent album > ")
+    exit
 }
 
 insertLastMod() {
@@ -866,6 +867,7 @@ export MPD_HOST=127.0.0.1
             fi
         fi
     done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Insert\n---\n$(echo "$last_temp")" | dmenu_t -dmenu -p "Choose Album > ")
+    exit
 }
 
 replaceLastMod() {
@@ -886,6 +888,7 @@ replaceLastMod() {
             fi
         fi
     done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Replace\n---\n$(echo "$last_temp")" | dmenu_t -dmenu -p "Choose Album > ")
+    exit
 }
 
 
