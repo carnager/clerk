@@ -11,7 +11,7 @@ if [[ "$change_db" == "$new_db" ]]; then
         notify-send "clerk" "Creating caches"
         album_temp_cur=$(mppc albumcache &)
         tracks_temp_cur=$(mppc trackcache &)
-        last_temp_cur=$(mppc lastcache | awk -F ' • ' '{print $2,"•",$3,"•",$4}' | uniq &)
+        last_temp_cur=$(export seperator="$seperator"; mppc lastcache | awk -F " $seperator " '{print $2,ENVIRON["seperator"],$3,ENVIRON["seperator"],$4}'| uniq &)
         echo "$album_temp_cur" > $HOME/.config/clerk/album.cache
         echo "$tracks_temp_cur" > $HOME/.config/clerk/tracks.cache
         echo "$last_temp_cur" > $HOME/.config/clerk/last.cache
@@ -21,7 +21,7 @@ else
     sed -i "s/change_db=".*"/change_db=""$new_db""/" $HOME/.config/clerk/config
     album_temp_cur=$(mppc listall --format "{$mpd_artist} $seperator {album} $seperator {date}" | sort | uniq &)
     tracks_temp_cur=$(mppc listall --format "{artist} $seperator {track} $seperator {title} $seperator {album}" &)
-    last_temp_cur=$(mppc lastcache | awk -F " $seperator " "{print $2,"$seperator",$3,"$seperator",$4}" | uniq &)
+    last_temp_cur=$(export seperator="$seperator"; mppc lastcache | awk -F " $seperator " '{print $2,ENVIRON["seperator"],$3,ENVIRON["seperator"],$4}'| uniq &)
     rm -f $HOME/.config/clerk/album_cache
     rm -f $HOME/.config/clerk/tracks.cache
     rm -f $HOME/.config/clerk/last.cache
