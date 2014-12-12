@@ -1424,7 +1424,7 @@ while :; do
             elif [[ $2 == album ]]; then
                 AddAlbumTags
             elif [[ $2 == latest ]]; then
-                addLaastMod
+                addLastMod
             fi
             break
             ;;
