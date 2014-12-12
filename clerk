@@ -3,6 +3,7 @@
 shopt -s globstar
 source $HOME/.config/clerk/config
 
+export mpd_artist=albumartist
 clerk_updater &
 album_temp=$(cat $HOME/.config/clerk/album.cache)
 tracks_temp=$(cat $HOME/.config/clerk/tracks.cache)
@@ -961,71 +962,6 @@ ReplaceAlbumTags() {
     fi
 }
 
-AddAlbumFlat () {
-    declare -i seen=0
-    while read TRACK
-    do
-        seen=1
-        if [[ "$TRACK" == "0  Return to Main Menu" ]]; then
-            dplayPrompt
-        else
-            if [[ "$TRACK" == "Adding Mode: Flat Add" ]]; then
-                InsertAlbumFlat
-            else
-                mpc findadd album "$TRACK"
-            fi
-        fi
-    done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Flat Add\n---\n$(mpc list album)" | dmenu_t -dmenu -p "Choose Album > ")
-
-    if [[ $seen = 0 ]]; then
-        exit
-    fi
-}
-
-InsertAlbumFlat () {
-    declare -i seen=0
-    while read TRACK
-    do
-        seen=1
-        if [[ "$TRACK" == "0  Return to Main Menu" ]]; then
-            dplayPrompt
-        else
-            if [[ "$TRACK" == "Adding Mode: Flat Insert" ]]; then
-                ReplaceAlbumFlat
-            else
-                mpc find album "$TRACK" | mpc insert
-            fi
-        fi
-    done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Flat Insert\n---\n$(mpc list album)" | dmenu_t -dmenu -p "Choose Album > ")
-
-    if [[ $seen = 0 ]]; then
-        exit
-    fi
-}
-
-ReplaceAlbumFlat () {
-    declare -i seen=0
-    while read TRACK
-    do
-        seen=1
-        if [[ "$TRACK" == "0  Return to Main Menu" ]]; then
-            dplayPrompt
-        else
-            if [[ "$TRACK" == "Adding Mode: Flat Replace" ]]; then
-                AddAlbumFlat
-            else
-                mpc clear && mpc findadd album "$TRACK" && mpc play
-            fi
-        fi
-    done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Flat Replace\n---\n$(mpc list album)" | dmenu_t -dmenu -p "Choose Album > ")
-
-    if [[ $seen = 0 ]]; then
-        exit
-    fi
-}
-
-
-
 AddTrackTags() {
     while read TRACK
     do
@@ -1284,8 +1220,8 @@ browseLibPrompt() {
         3*) browseGenre ;;
         4*) browseFolders ;;
         6*) browseFilesystem ;;
-        7*) AddAlbum$quirkAlbum ;;
-        8*) AddTrack$quirkTrack ;;
+        7*) AddAlbumTags ;;
+        8*) AddTrackTags ;;
         9*) updateCache && browseLibPrompt ;;
         0*) dplayPrompt ;;
         5*) addLastMod ;;
@@ -1484,9 +1420,9 @@ while :; do
                 echo "Missing argument for --add"
                 echo "Possible values: track, album, latest"
             elif [[ $2 == track ]]; then
-                AddTrack$quirkTrack
+                AddTrackTags
             elif [[ $2 == album ]]; then
-                AddAlbum$quirkAlbum
+                AddAlbumTags
             elif [[ $2 == latest ]]; then
                 addLaastMod
             fi
@@ -1497,9 +1433,9 @@ while :; do
                 echo "Missing argument for --insert"
                 echo "Possible values: track, album, latest"
             elif [[ $2 == track ]]; then
-                InsertTrack$quirkTrack
+                InsertTrackTags
             elif [[ $2 == album ]]; then
-                InsertAlbum$quirkAlbum
+                InsertAlbumTags
             elif [[ $2 == latest ]]; then
                 insertLastMod
             fi
@@ -1510,9 +1446,9 @@ while :; do
                 echo "Missing argument for --replace"
                 echo "Possible values: track, album, latest"
             elif [[ $2 == track ]]; then
-                ReplaceTrack$quirkTrack
+                ReplaceTrackTags
             elif [[ $2 == album ]]; then
-                ReplaceAlbum$quirkAlbum
+                ReplaceAlbumTags
             elif [[ $2 == latest ]]; then
                 replaceLastMod
             fi
