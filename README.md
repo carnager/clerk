@@ -60,6 +60,11 @@ All your files need these tags in order for clerk to work as intended:
 * tracknumber
 * title
 
+Some software (beets, I look at you!) loves to add duplicate tags.
+For example beets adds track and tracknumber tags, no matter what file format
+is handled. MPD will return tracknumber twice for such files.
+Make sure to clean your tags, if you used beets to tag them.
+
 #### A word on album ratings
 mpd's sticker database is very limited and only allows stickers to be associated
 with files. Originally it was planned to extend stickers for other types too
