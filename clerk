@@ -481,6 +481,14 @@ resumePlaylist () {
 }
 
 dplayQueue () {
+    displayRofi () {
+        if [[ $backend == "rofi" ]]; then
+            dmenu_t -dmenu -p "Queue > " -l $(calc $(mpc current -f %position%) + 3)
+        elif [[ $backend == "dmenu" ]]; then
+            dmenu_t -p "Queue > "
+        fi
+    }
+
     while read TRACKDISPLAY
     do
         TITLE=$(echo "$TRACKDISPLAY" | awk -F "$seperator" '{ print $3 }')
@@ -493,7 +501,7 @@ dplayQueue () {
         else
             mpc play $POS;
         fi
-    done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\nMode: Play\n---\n$(mpc playlist --format "%position%$seperator%artist%$seperator%title%")" | dmenu_t -p "Queue > ")
+    done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\nMode: Play\n---\n$(mpc playlist --format "%position%$seperator%artist%$seperator%title%")" | displayRofi)
     exit
 }
 
