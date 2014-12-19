@@ -7,7 +7,7 @@ export mpd_artist=albumartist
 clerk_updater &
 album_temp=$(cat $HOME/.config/clerk/album.cache)
 tracks_temp=$(cat $HOME/.config/clerk/tracks.cache)
-last_temp=$(cat $HOME/.config/clerk/last.cache | awk '{for (i=2; i<=NF; i++) print $i}')
+last_temp=$(cat $HOME/.config/clerk/last.cache)
 
 updateCache() {
     clerk_updater &
