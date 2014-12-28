@@ -219,7 +219,7 @@ infoPrompt () {
     case "$(prompt "${menu[@]}")" in
 #        1*) surfraw yubnub allmusic $(mpc current -f %artist%) ;;
         1*) artistinfo ;;
-        2*) surfraw yubnub allmusic $(mpc current -f %album%) ;;
+        2*) surfraw yubnub allmusic $(mpc current -f %album%) && exit;;
 #        3*) surfraw yubnub google $(mpc current -f %title%) $(mpc current -f %artist%) lyrics ;;
         3*) lyrics ;;
         4*) currentTag ;;
