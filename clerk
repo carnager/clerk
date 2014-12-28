@@ -834,6 +834,7 @@ playRandomTracks () {
         mpc find album "$album" "$random_artist" "$artist" title "$title" | mpc add
     done
     mpc play
+    exit
 }
 
 addLastMod() {
