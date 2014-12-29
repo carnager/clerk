@@ -1143,7 +1143,7 @@ browseDateAdd() {
                 mpc findadd artist "$artist" album "$album"
             fi
         fi
-    done < <(echo -e "0  Return to Date Menu\n---\nAdding Mode: Add\n---\nAdd All\nReplace All\n---\n$(mppc find date "$date" --format "{$mpd_artist}$seperator{album}" | uniq)" | dmenu_t -dmenu -p "Select Album > ")
+    done < <(echo -e "0  Return to Date Menu\n---\nAdding Mode: Add\n---\nAdd All\nReplace All\n---\n$(mpc --format "%$mpd_artist%$seperator%album%" find date "$date" | uniq)" | dmenu_t -dmenu -p "Select Album > ")
 
     if [[  $seen = 0 ]]
     then
@@ -1171,7 +1171,7 @@ browseDateInsert() {
                 mpc find artist "$artist" album "$album" | mpc insert
             fi
         fi
-    done < <(echo -e "0  Return to Date Menu\n---\nAdding Mode: Insert\n---\nAdd All\nReplace All\n---\n$(mppc find date "$date" --format "{$mpd_artist}$seperator{album}" | uniq)" | dmenu_t -dmenu -p "Select Album > ")
+    done < <(echo -e "0  Return to Date Menu\n---\nAdding Mode: Insert\n---\nAdd All\nReplace All\n---\n$(mpc --format "%$mpd_artist%$seperator%album%" find date "$date" | uniq)" | dmenu_t -dmenu -p "Select Album > ")
 
     if [[  $seen = 0 ]]
     then
@@ -1199,7 +1199,7 @@ browseDateReplace() {
                 mpc clear && mpc findadd artist "$artist" album "$album" && mpc play
             fi
         fi
-    done < <(echo -e "0  Return to Date Menu\n---\nAdding Mode: Replace\n---\nAdd All\nReplace All\n---\n$(mppc find date "$date" --format "{$mpd_artist}$seperator{album}" | uniq)" | dmenu_t -dmenu -p "Select Album > ")
+    done < <(echo -e "0  Return to Date Menu\n---\nAdding Mode: Replace\n---\nAdd All\nReplace All\n---\n$(mpc --format "%$mpd_artist%$seperator%album%" find date "$date" | uniq)" | dmenu_t -dmenu -p "Select Album > ")
 }
 
 
@@ -1290,11 +1290,11 @@ browseAlbum() {
         elif [[ "$ALBUM" == "Add All" ]]
             then mppc findadd artist "$ARTIST"
         elif [[ "$ALBUM" == "Insert All" ]]
-            then mppc find artist "$ARTIST" --format '{file}'| mpc insert
+            then mpc find artist "$ARTIST" | mpc insert
         else
             browseTrack
         fi
-    done < <(echo -e "0  Return to Artist Menu\n---\nReplace All\nAdd All\nInsert All\n---\n$(mppc find artist "$ARTIST" --format "{date}$seperator{album}" | sort | uniq)" | dmenu_t -dmenu -p "Choose Album > ")
+    done < <(echo -e "0  Return to Artist Menu\n---\nReplace All\nAdd All\nInsert All\n---\n$(mpc --format "%date%$seperator%album%" find artist "$ARTIST" | sort | uniq)" | dmenu_t -dmenu -p "Choose Album > ")
 
     if [[  $seen = 0 ]]
     then
@@ -1315,7 +1315,7 @@ browseTrack() {
         elif [[ "$TRACK" == "Add All" ]]
             then mppc findadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE"
         elif [[ "$TRACK" == "Insert All" ]]
-            then mppc find artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" --format '{file}' | mpc insert
+            then mpc find artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" | mpc insert
         else
             if [[ $(mpc playlist) == "" ]]; then
                 mppc findadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL" && mpc play
@@ -1323,11 +1323,12 @@ browseTrack() {
                 mppc findadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL"
             fi
         fi
-    done < <(echo -e "0  Return to Album Menu\n---\nReplace All\nAdd All\nInsert All\n---\n$(mppc find artist "$ARTIST" album "$ALBUM_FINAL" --format "{track}$seperator{title}")" | dmenu_t -dmenu -p "Chose Track > ")
+    done < <(echo -e "0  Return to Album Menu\n---\nReplace All\nAdd All\nInsert All\n---\n$(mpc --format "%track%$seperator%title%" find artist "$ARTIST" album "$ALBUM_FINAL")" | dmenu_t -dmenu -p "Chose Track > ")
 
     if [[  $seen = 0 ]]; then
             exit
     fi
+exit
 }
 
 browseArtist() {
