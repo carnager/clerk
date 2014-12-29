@@ -593,7 +593,7 @@ currentAlbums () {
                 mpc search "$mpd_artist" "$ARTIST" album "$ALBUM_FINAL" date "$DATE" | mpc add
             fi
        fi
-    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Add\n---\n$(mppc search artist "$ARTIST" --format "{date}$seperator{album}" | sort | uniq)" | dmenu_t -p "Albums by $(mpc current --format '%artist%') > ")
+    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Add\n---\n$(mpc --format "%date%$seperator%album%" search artist "$ARTIST" | sort | uniq)" | dmenu_t -p "Albums by $(mpc current --format '%artist%') > ")
 }
 
 currentAlbumsInsert () {
@@ -611,7 +611,7 @@ currentAlbumsInsert () {
                 mpc search "$mpd_artist" "$ARTIST" album "$ALBUM_FINAL" date "$DATE" | mpc insert
             fi
         fi
-    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Insert\n---\n$(mppc search artist "$ARTIST" --format "{date}$seperator{album}" | sort | uniq)" | dmenu_t -p "Albums by $(mpc current --format '%artist%') > ")
+    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Insert\n---\n$(mpc --format "%date%$seperator%album%" search artist "$ARTIST" | sort | uniq)" | dmenu_t -p "Albums by $(mpc current --format '%artist%') > ")
 }
 
 currentAlbumsReplace () {
@@ -629,7 +629,7 @@ currentAlbumsReplace () {
                 mpc clear && mpc search "$mpd_artist" "$ARTIST" album "$ALBUM_FINAL" date "$DATE" | mpc add && mpc play
             fi
         fi
-    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Replace\n---\n$(mppc search artist "$ARTIST" --format "{date}$seperator{album}" | sort | uniq)" | dmenu_t -p "Albums by $(mpc current --format '%artist%') > ")
+    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Replace\n---\n$(mpc --format "%date%$seperator%album%" search artist "$ARTIST" | sort | uniq)" | dmenu_t -p "Albums by $(mpc current --format '%artist%') > ")
 }
 
 currentTracks () {
@@ -647,7 +647,7 @@ currentTracks () {
                mpc findadd album "$ALBUM" title "$TITLE" track "$TRACKNUMBER"
             fi
         fi
-    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Add\n---\n$(mppc search artist "$(mpc current -f %artist%)" --format "{album}$seperator{track}$seperator{title}")" | dmenu_t -p "Tracks by $(mpc current --format '%artist%') > ")
+    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Add\n---\n$(mpc --format "%album%$seperator%track%$seperator%title%" search artist "$(mpc current -f %artist%)")" | dmenu_t -p "Tracks by $(mpc current --format '%artist%') > ")
 }
 
 currentTracksInsert () {
@@ -672,7 +672,7 @@ currentTracksInsert () {
                 fi
             fi
         fi
-    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Insert\n---\n$(mppc search artist "$(mpc current -f %artist%)" --format "{album}$seperator{track}$seperator{title}")" | dmenu_t -p "Tracks by $(mpc current --format '%artist%') > ")
+    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Insert\n---\n$(mpc --format "%album%$seperator%track%$seperator%title%" search artist "$(mpc current -f %artist%)")" | dmenu_t -p "Tracks by $(mpc current --format '%artist%') > ")
 }
 
 escapeSql() {
@@ -873,7 +873,7 @@ export MPD_HOST=127.0.0.1
                 artist=$(echo "$ALBUM" | awk -F "$seperator" '{print $2}')
                 date=$(echo "$ALBUM" | awk -F "$seperator" '{print $1}')
                 album=$(echo "$ALBUM" | awk -F "$seperator" '{print $3}')
-                mppc search date "$date" album "$album" $mpd_artist "$artist" | mpc insert
+                mpc search date "$date" album "$album" $mpd_artist "$artist" | mpc insert
             fi
         fi
     done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Insert\n---\n$(echo "$last_temp")" | dmenu_t -dmenu -p "Choose Album > ")
