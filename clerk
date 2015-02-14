@@ -3,6 +3,14 @@
 shopt -s globstar
 source $HOME/.config/clerk/config
 
+
+if [[ $scrobbler == mpdas ]]; then
+    export scrobbler="mpdas -d"
+    export scrobbler_kill="mpdas"
+elif [[ $scrobbler == mpdscribble ]]; then
+    export scrobbler_kill="mpdscribble"
+fi
+
 export mpd_artist=albumartist
 clerk_updater &
 album_temp=$(cat $HOME/.config/clerk/album.cache)
@@ -78,19 +86,19 @@ lastFM () {
 # Some Variables to clean up the code
 
         if [[ $ssh_lastfm == 1 ]]; then
-            mpds_check="$(ssh $ssh_host -q -t 'bash -c "pgrep mpdscribble"')"
+            mpds_check="$(ssh $ssh_host -q -t "pgrep $scrobbler_kill")"
             if [ -n "$mpds_check" ];
                 then
-                ssh $ssh_host -q -t 'bash -c "killall mpdscribble"' && notify-send "MPD" "LastFM Scrobbling Disabled"
+                ssh $ssh_host -q -t "killall $scrobbler_kill" && notify-send "MPD" "LastFM Scrobbling Disabled"
             else
-                ssh $ssh_host -q 'mpdscribble' && notify-send "MPD" "LastFM Scrobbling Enabled"
+                ssh $ssh_host -q "$scrobbler" && notify-send "MPD" "LastFM Scrobbling Enabled"
             fi
         else
-            if pgrep mpdscribble
+            if pgrep $scrobbler_kill
                 then
-                killall mpdscribble && notify-send "MPD" "LastFM Scrobbling Disabled"
+                killall $scrobbler_kill && notify-send "MPD" "LastFM Scrobbling Disabled"
             else
-                mpdscribble && notify-send "MPD" "LastFM Scrobbling Enabled"
+                $scrobbler && notify-send "MPD" "LastFM Scrobbling Enabled"
             fi
        fi
 }
@@ -99,14 +107,14 @@ lastFMCheck () {
 # Some Variables to clean up the code
 
         if ((ssh_lastfm)); then
-            mpds_check="$(ssh $ssh_host -q -t 'bash -c "pgrep mpdscribble"')"
+            mpds_check="$(ssh $ssh_host -q -t "pgrep $scrobbler_kill")"
             if [ -n "$mpds_check" ]; then
                 echo "lastfm: off"
             else
                 echo "lastfm: on"
             fi
         else
-            if pgrep mpdscribble
+            if pgrep $scrobbler_kill
                 then
                 echo "lastfm: on"
             else
@@ -297,13 +305,13 @@ export status="$(mpc status)"
 
 
     if [[ "$ssh_lastfm" == "1" ]]; then
-        mpds_check="$(ssh $ssh_host -q -t 'bash -c "pgrep mpdscribble"')"
+        mpds_check="$(ssh $ssh_host -q -t "pgrep $scrobbler_kill")"
         if [ -n "$mpds_check" ];
             then export scrobble=on
         else export scrobble=off
         fi
     else
-        if pgrep mpdscribble
+        if pgrep $scrobbler_kill
             then
             export scrobble=on
         else
@@ -1555,7 +1563,11 @@ while :; do
             elif [[ $2 == check ]]; then
                 lastFMCheck
             elif [[ $2 == love ]]; then
-                lastfm-mpd-cli love > /dev/null && notify-send "MPD" "Loved $(mpc current -f '%title%') on LastFM"
+                if [[ scrobbler=mpdscribble ]]; then
+                    lastfm-mpd-cli love > /dev/null && notify-send "MPD" "Loved $(mpc current -f '%title%') on LastFM"
+                elif [[ scrobbler=mpdas ]]; then
+                    mpc sendmessage mpdas love
+                fi
             fi
             break
             ;;

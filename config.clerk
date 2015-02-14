@@ -34,18 +34,13 @@ cd_divider=CD
 # If you change seperator, update caches with clerk -update
 seperator=" • "
 
-# use artist or albumartist for general artist of an album.
-mpd_artist=albumartist
-
 # use artist or albumartist for random tracks
 random_artist=artist
 
-# if you have missing tags and experience non-adding albums, set these
-# to "Flat", otherwise leave the default of "Tags"
-quirkAlbum="Tags"
-quirkTrack="Tags"
+# scrobbler to use. possible values: mpdscribble, mpdas
+scrobbler=mpdas
 
-# Fill these if mpdscribble runs on a different host
+# Fill these if scrobbler runs on a different host
 # set to 0 if mpdscribble runs locally
 ssh_lastfm=
 ssh_host=
