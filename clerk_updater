@@ -45,7 +45,7 @@ force() {
     export separator="$separator"; mppc lastcache
 }
 
-if [[ $1 == --force ]]; then
+if [[ $1 == "--force" ]]; then
     force
 else
     update
