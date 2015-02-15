@@ -37,6 +37,7 @@ update() {
 }
 
 force() {
+    notify
     new_db="$(mpc stats | grep Updated | $sed 's/ //g')"
     $sed -i "s/change_db=".*"/change_db=""$new_db""/" $HOME/.config/clerk/config
     export seperator="$seperator"; mppc albumcache
