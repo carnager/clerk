@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 shopt -s globstar
 source $HOME/.config/clerk/config
@@ -16,6 +16,11 @@ clerk_updater &
 album_temp=$(cat $HOME/.config/clerk/album.cache)
 tracks_temp=$(cat $HOME/.config/clerk/tracks.cache)
 last_temp=$(cat $HOME/.config/clerk/last.cache)
+
+# Use GNU coreutils on OSX
+sed=$([[ "$OSTYPE" == "darwin"* ]] && echo 'gsed' || echo 'sed')
+shuf=$([[ "$OSTYPE" == "darwin"* ]] && echo 'gshuf' || echo 'shuf')
+tac=$([[ "$OSTYPE" == "darwin"* ]] && echo 'gtac' || echo 'tac')
 
 updateCache() {
     clerk_updater &
@@ -377,7 +382,7 @@ mpdSima () {
 
 optionRandomPrompt() {
     number="$(echo " " | dmenu_t -p 'Set No. of Songs for random Songs > ')"
-    sed -i "s/value=.*/value="$number"/" $HOME/.config/clerk/config
+    $sed -i "s/value=.*/value="$number"/" $HOME/.config/clerk/config
     export value="$number"
     dplayOptionsPrompt
 }
@@ -454,7 +459,7 @@ loadRSS () {
 
 suspendPlaylist () {
     playing=$(! mpc status | grep 'playing\|paused')
-    time=$(mpc status | sed '2!d' | sed 's;/.:.*;;;s;.* ;;')
+    time=$(mpc status | $sed '2!d' | $sed 's;/.:.*;;;s;.* ;;')
     position=$(mpc current --format '%position%')
     if [[ -z "$playing" ]]; then
         notify-send "clerk" "mpd is not playing, no state to suspend"
@@ -582,7 +587,7 @@ outputPrompt () {
         then dplayOptionsPrompt;
     else
         mpc toggleoutput $(echo "$menu" | awk '{print $2}');
-        notify-send "MPD" "$(echo "$menu" | sed -e 's/enabled$/disabled/;ta;s/disabled$/enabled/;:a;')";
+        notify-send "MPD" "$(echo "$menu" | $sed -e 's/enabled$/disabled/;ta;s/disabled$/enabled/;:a;')";
     fi
 }
 
@@ -739,7 +744,7 @@ rateTrack () {
                 cd ..
             fi
             touch track.ratings
-            sed -i "/$(mpc current -f '%title%')/d" track.ratings
+            $sed -i "/$(mpc current -f '%title%')/d" track.ratings
             echo "${rating}\\$(mpc current -f "%artist%\%track%\%title%\%date%\%album%")" >> track.ratings
         fi
         notify-send "clerk" "rated $(mpc current) with $(echo ${rating})"
@@ -755,7 +760,7 @@ rateTrack () {
                  cd ..
              fi
              touch track.ratings
-             sed -i "/$(mpc current -f '%title%')/d" track.ratings
+             $sed -i "/$(mpc current -f '%title%')/d" track.ratings
              echo "$rating\\$(mpc current -f "%artist%\%track%\%title%\%date%\%album%")" >> track.ratings
          fi
  }
@@ -768,7 +773,7 @@ loadRatedAlbums () {
     else
         albums="$(while read -a line; do
             dirname "${line[*]}";
-        done <<< "$(mpc sticker "" find albumrating | grep -E "albumrating=$rating")" | sed 's/\/\CD.*//g' | sort | uniq | dmenu_t -p "Choose Album")"
+        done <<< "$(mpc sticker "" find albumrating | grep -E "albumrating=$rating")" | $sed 's/\/\CD.*//g' | sort | uniq | dmenu_t -p "Choose Album")"
         if [[ $albums == "" ]]; then
             exit
         else
@@ -801,7 +806,7 @@ loadRandomRatedTracks () {
         cd $HOME/.config/clerk
         mpc clear
         songs="$(mpc sticker "" find rating | grep -E "rating=$rating|rating=$(echo $(( $rating + 1 )))|rating=$(echo $(( $rating + 2 )))|rating=$(echo $(( $rating + 3 )))|rating=$(echo $(( $rating + 4 )))" | awk -F ':' '{ print $1 }')"
-        echo "$songs" | shuf -n $number | mpc add
+        echo "$songs" | $shuf -n $number | mpc add
         mpc play
         rm -f /tmp/clerk_tracklist
     fi
@@ -815,30 +820,30 @@ loadRandomRating () {
     else
         album="$(while read -a line; do
             dirname "${line[*]}";
-        done <<< "$(mpc sticker "" find albumrating | grep -E "albumrating=$rating|albumrating=$(echo $(( $rating+1 )))|albumrating=$(echo $(( $rating+2 )))|albumrating=$(echo $(( $rating+3 )))|albumrating=$(echo $(( $rating+4 )))|albumrating=$(echo $(( $rating+5 )))|albumrating=$(echo $(( $rating+6 )))")" | sed 's/\/\CD.*//g' | shuf -n1)"
+        done <<< "$(mpc sticker "" find albumrating | grep -E "albumrating=$rating|albumrating=$(echo $(( $rating+1 )))|albumrating=$(echo $(( $rating+2 )))|albumrating=$(echo $(( $rating+3 )))|albumrating=$(echo $(( $rating+4 )))|albumrating=$(echo $(( $rating+5 )))|albumrating=$(echo $(( $rating+6 )))")" | $sed 's/\/\CD.*//g' | $shuf -n1)"
         mpc clear && mpc add "$album" && mpc play
     fi
 }
 
 playRandomAlbum () {
     mpc clear
-    artist="$(mpc list "$mpd_artist" | shuf -n 1)"
-    album="$(mpc list album "$mpd_artist" "$artist" | shuf -n 1)"
+    artist="$(mpc list "$mpd_artist" | $shuf -n 1)"
+    album="$(mpc list album "$mpd_artist" "$artist" | $shuf -n 1)"
     mpc find album "$album" "$mpd_artist" "$artist" | mpc add && mpc play
 }
 
 playRandomTracks () {
     mpc clear
-    artist="$(mpc list "$random_artist" | shuf -n 1)"
-    album="$(mpc list album "$random_artist" "$artist" | shuf -n 1)"
-    title="$(mpc list title album "$album" "$random_artist" "$artist" | shuf -n 1)"
+    artist="$(mpc list "$random_artist" | $shuf -n 1)"
+    album="$(mpc list album "$random_artist" "$artist" | $shuf -n 1)"
+    title="$(mpc list title album "$album" "$random_artist" "$artist" | $shuf -n 1)"
     mpc find album "$album" "$random_artist" "$artist" title "$title" | mpc add
     mpc play
     n=0; while (( n++ < $value -1 ));
     do
-        artist="$(mpc list "$random_artist" | shuf -n 1)"
-        album="$(mpc list album "$random_artist" "$artist" | shuf -n 1)"
-        title="$(mpc list title album "$album" "$random_artist" "$artist" | shuf -n 1)"
+        artist="$(mpc list "$random_artist" | $shuf -n 1)"
+        album="$(mpc list album "$random_artist" "$artist" | $shuf -n 1)"
+        title="$(mpc list title album "$album" "$random_artist" "$artist" | $shuf -n 1)"
         mpc find album "$album" "$random_artist" "$artist" title "$title" | mpc add
     done
     mpc play
@@ -1123,7 +1128,7 @@ ReplaceTrackFlat() {
 
 
 browseDate() {
-    date=$(echo -e "0  Return to Main Menu\n---\n$(mpc list date | tac)" | dmenu_t -dmenu -p "Choose Date > ")
+    date=$(echo -e "0  Return to Main Menu\n---\n$(mpc list date | $tac)" | dmenu_t -dmenu -p "Choose Date > ")
     if [[ "$date" == "0  Return to Main Menu" ]]
         then dplayPrompt
     else
@@ -1491,7 +1496,7 @@ while :; do
                     instantRateTrack
                 fi
             elif [[ $2 == load ]]; then
-                mpc clear && mpc sticker "" find rating | grep -E "rating=6|rating=7|rating=8|rating=9|rating=10" | awk -F ':' '{print $1}' | shuf -n $value | mpc add && mpc play
+                mpc clear && mpc sticker "" find rating | grep -E "rating=6|rating=7|rating=8|rating=9|rating=10" | awk -F ':' '{print $1}' | $shuf -n $value | mpc add && mpc play
             fi
             break
             ;;

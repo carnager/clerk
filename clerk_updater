@@ -3,22 +3,32 @@
 # create cached album list
 source $HOME/.config/clerk/config
 
-new_db="$(mpc stats | grep Updated | sed 's/ //g')"
+# Use GNU coreutils on OSX
+sed=$([[ "$OSTYPE" == "darwin"* ]] && echo 'gsed' || echo 'sed')
+
+notify()
+{
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+      say "Updating clerk caches"
+    else
+      notify-send "clerk" "Creating caches"
+    fi
+}
+
+new_db="$(mpc stats | grep Updated | $sed 's/ //g')"
 if [[ "$change_db" == "$new_db" ]]; then
     if [[ -f $HOME/.config/clerk/album.cache && -f $HOME/.config/clerk/tracks.cache && -f $HOME/.config/clerk/last.cache ]]; then
         :
     else
-        notify-send "clerk" "Creating caches"
+        notify
         export seperator="$seperator"; mppc albumcache
         export seperator="$seperator"; mppc trackcache
         export seperator="$seperator"; mppc lastcache
     fi
 else
-    notify-send "clerk" "Updating caches"
-    sed -i "s/change_db=".*"/change_db=""$new_db""/" $HOME/.config/clerk/config
+    notify
+    $sed -i "s/change_db=".*"/change_db=""$new_db""/" $HOME/.config/clerk/config
     export seperator="$seperator"; mppc albumcache
     export seperator="$seperator"; mppc trackcache
     export seperator="$seperator"; mppc lastcache
-
 fi
-
