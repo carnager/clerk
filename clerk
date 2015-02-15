@@ -1043,7 +1043,7 @@ ReplaceTrackTags() {
         if [[ "$TRACK" == "0  Return to Main Menu" ]]
             then dplayPrompt
         else
-            if [[ "$TRACK" == "Adding Mode: Add" ]]
+            if [[ "$TRACK" == "Adding Mode: Replace" ]]
                 then AddTrackTags
             else
                 artist=$(echo "$TRACK" | awk -F "$seperator" '{print $1}')
@@ -1054,7 +1054,7 @@ ReplaceTrackTags() {
                 mpc play
             fi
         fi
-    done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Add\n---\n$(echo "$tracks_temp")"| dmenu_t -dmenu -p "Choose Track > ")
+    done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Replace\n---\n$(echo "$tracks_temp")"| dmenu_t -dmenu -p "Choose Track > ")
 }
 
 
