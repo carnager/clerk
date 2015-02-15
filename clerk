@@ -23,8 +23,9 @@ shuf=$([[ "$OSTYPE" == "darwin"* ]] && echo 'gshuf' || echo 'shuf')
 tac=$([[ "$OSTYPE" == "darwin"* ]] && echo 'gtac' || echo 'tac')
 
 updateCache() {
-    clerk_updater &
+    clerk_updater --force &
 }
+
 dplayPrompt () {
     menu=("Q  Exit Clerk"
           "---"
@@ -927,8 +928,8 @@ AddAlbumTags() {
                 then InsertAlbumTags
             else
                 artist=$(echo "$TRACK" | awk -F "$seperator" '{print $1}')
-                date=$(echo "$TRACK" | awk -F "$seperator" '{print $3}')
-                album=$(echo "$TRACK" | awk -F "$seperator" '{print $2}')
+                date=$(echo "$TRACK" | awk -F "$seperator" '{print $2}')
+                album=$(echo "$TRACK" | awk -F "$seperator" '{print $3}')
                 mppc searchadd date "$date" album "$album" $mpd_artist "$artist"
             fi
         fi
@@ -951,8 +952,8 @@ InsertAlbumTags() {
                 then ReplaceAlbumTags
             else
                 artist=$(echo "$TRACK" | awk -F "$seperator" '{print $1}')
-                date=$(echo "$TRACK" | awk -F "$seperator" '{print $3}')
-                album=$(echo "$TRACK" | awk -F "$seperator" '{print $2}')
+                date=$(echo "$TRACK" | awk -F "$seperator" '{print $2}')
+                album=$(echo "$TRACK" | awk -F "$seperator" '{print $3}')
                 mpc search date "$date" album "$album" $mpd_artist "$artist" | mpc insert
             fi
         fi
@@ -971,8 +972,8 @@ ReplaceAlbumTags() {
                 then AddAlbumTags
             else
                 artist=$(echo "$TRACK" | awk -F "$seperator" '{print $1}')
-                date=$(echo "$TRACK" | awk -F "$seperator" '{print $3}')
-                album=$(echo "$TRACK" | awk -F "$seperator" '{print $2}')
+                date=$(echo "$TRACK" | awk -F "$seperator" '{print $2}')
+                album=$(echo "$TRACK" | awk -F "$seperator" '{print $3}')
                 mpc clear && mpc findadd date "$date" album "$album" $mpd_artist "$artist" && mpc play
             fi
         fi
