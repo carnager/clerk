@@ -23,16 +23,16 @@ update() {
             :
         else
             notify
-            export seperator="$seperator"; mppc albumcache
-            export seperator="$seperator"; mppc trackcache
-            export seperator="$seperator"; mppc lastcache
+            export separator="$separator"; mppc albumcache
+            export separator="$separator"; mppc trackcache
+            export separator="$separator"; mppc lastcache
         fi
     else
         notify
         $sed -i "s/change_db=".*"/change_db=""$new_db""/" $HOME/.config/clerk/config
-        export seperator="$seperator"; mppc albumcache
-        export seperator="$seperator"; mppc trackcache
-        export seperator="$seperator"; mppc lastcache
+        export separator="$separator"; mppc albumcache
+        export separator="$separator"; mppc trackcache
+        export separator="$separator"; mppc lastcache
     fi
 }
 
@@ -40,9 +40,9 @@ force() {
     notify
     new_db="$(mpc stats | grep Updated | $sed 's/ //g')"
     $sed -i "s/change_db=".*"/change_db=""$new_db""/" $HOME/.config/clerk/config
-    export seperator="$seperator"; mppc albumcache
-    export seperator="$seperator"; mppc trackcache
-    export seperator="$seperator"; mppc lastcache
+    export separator="$separator"; mppc albumcache
+    export separator="$separator"; mppc trackcache
+    export separator="$separator"; mppc lastcache
 }
 
 if [[ $1 == --force ]]; then
