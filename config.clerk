@@ -29,10 +29,10 @@ add_auto_play=yes
 # This should match the name of your subfolders, exluding the number
 cd_divider=CD
 
-# Seperator used for splitting tags - Make sure this is something most
+# Separator used for splitting tags - Make sure this is something most
 # likely not used in tags itself. Can be multiple characters
-# If you change seperator, update caches with clerk -update
-seperator=" • "
+# If you change separator, update caches with clerk -update
+separator=" • "
 
 # use artist or albumartist for random tracks
 random_artist=artist

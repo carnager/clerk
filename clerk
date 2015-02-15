@@ -452,8 +452,8 @@ loadRSS () {
         managePlaylists
     else
         mpc load $(grep "$podcast" $HOME/.config/clerk/podcasts | cut -d '\' -f2)
-        episode=$(mpc playlist --format "%position%$seperator%artist%$seperator%title%" | dmenu_t -p "Choose Episode > ")
-        POS=$(echo "$episode" | awk -F "$seperator" '{ print $1 }')
+        episode=$(mpc playlist --format "%position%$separator%artist%$separator%title%" | dmenu_t -p "Choose Episode > ")
+        POS=$(echo "$episode" | awk -F "$separator" '{ print $1 }')
         mpc play "$POS"
     fi
 }
@@ -505,9 +505,9 @@ dplayQueue () {
 
     while read TRACKDISPLAY
     do
-        TITLE=$(echo "$TRACKDISPLAY" | awk -F "$seperator" '{ print $3 }')
-        ARTIST=$(echo "$TRACKDISPLAY" | awk -F "$seperator" '{ print $2 }')
-        POS=$(echo "$TRACKDISPLAY" | awk -F "$seperator" '{ print $1 }')
+        TITLE=$(echo "$TRACKDISPLAY" | awk -F "$separator" '{ print $3 }')
+        ARTIST=$(echo "$TRACKDISPLAY" | awk -F "$separator" '{ print $2 }')
+        POS=$(echo "$TRACKDISPLAY" | awk -F "$separator" '{ print $1 }')
         if [[ "$TRACKDISPLAY" == "0  Return to Main Menu" ]]; then
             dplayPrompt
         elif [[ "$TRACKDISPLAY" == "Mode: Play" ]]; then
@@ -515,7 +515,7 @@ dplayQueue () {
         else
             mpc play $POS;
         fi
-    done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\nMode: Play\n---\n$(mpc playlist --format "%position%$seperator%artist%$seperator%title%")" | displayRofi)
+    done < <(export separator=$separator; echo -e "0  Return to Main Menu\n---\nMode: Play\n---\n$(mpc playlist --format "%position%$separator%artist%$separator%title%")" | displayRofi)
     exit
 }
 
@@ -523,9 +523,9 @@ dplayQueue () {
 dplayQueueDelete () {
     while read TRACKDISPLAY
     do
-        TITLE=$(echo "$TRACKDISPLAY" | awk -F "$seperator" '{ print $3 }')
-        ARTIST=$(echo "$TRACKDISPLAY" | awk -F "$seperator" '{ print $2 }')
-        POS=$(echo "$TRACKDISPLAY" | awk -F "$seperator" '{ print $1 }')
+        TITLE=$(echo "$TRACKDISPLAY" | awk -F "$separator" '{ print $3 }')
+        ARTIST=$(echo "$TRACKDISPLAY" | awk -F "$separator" '{ print $2 }')
+        POS=$(echo "$TRACKDISPLAY" | awk -F "$separator" '{ print $1 }')
         if [[ "$TRACKDISPLAY" == "0  Return to Main Menu" ]]; then
             dplayPrompt
         elif [[ "$TRACKDISPLAY" == "Mode: Delete" ]]; then
@@ -536,7 +536,7 @@ dplayQueueDelete () {
             mpc del $POS;
             dplayQueueDelete
         fi
-    done < <(export seperator=$seperator; echo -e "0  Return to Main Menu\n---\nMode: Delete\n---\nManage Playlists\n---\n$(mpc playlist --format "%position%$seperator%artist%$seperator%title%")" | dmenu_t -p "Queue > ")
+    done < <(export separator=$separator; echo -e "0  Return to Main Menu\n---\nMode: Delete\n---\nManage Playlists\n---\n$(mpc playlist --format "%position%$separator%artist%$separator%title%")" | dmenu_t -p "Queue > ")
     exit
 }
 
@@ -596,8 +596,8 @@ currentAlbums () {
     ARTIST=$(mpc current -f %artist%)
     while read ALBUM
     do
-        ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$seperator" '{print $2}')
-        DATE=$(echo "$ALBUM" | awk -F "$seperator" '{print $1}')
+        ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{print $2}')
+        DATE=$(echo "$ALBUM" | awk -F "$separator" '{print $1}')
         if [[ "$ALBUM" == "0  Return to current Artist Menu" ]]; then
             currentPrompt;
         else
@@ -607,15 +607,15 @@ currentAlbums () {
                 mpc search "$mpd_artist" "$ARTIST" album "$ALBUM_FINAL" date "$DATE" | mpc add
             fi
        fi
-    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Add\n---\n$(mpc --format "%date%$seperator%album%" search artist "$ARTIST" | sort | uniq)" | dmenu_t -p "Albums by $(mpc current --format '%artist%') > ")
+    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Add\n---\n$(mpc --format "%date%$separator%album%" search artist "$ARTIST" | sort | uniq)" | dmenu_t -p "Albums by $(mpc current --format '%artist%') > ")
 }
 
 currentAlbumsInsert () {
     ARTIST=$(mpc current -f %artist%)
     while read ALBUM
     do
-        ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$seperator" '{print $2}')
-        DATE=$(echo "$ALBUM" | awk -F "$seperator" '{print $1}')
+        ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{print $2}')
+        DATE=$(echo "$ALBUM" | awk -F "$separator" '{print $1}')
         if [[ "$ALBUM" == "0  Return to current Artist Menu" ]]; then
             currentPrompt;
         else
@@ -625,15 +625,15 @@ currentAlbumsInsert () {
                 mpc search "$mpd_artist" "$ARTIST" album "$ALBUM_FINAL" date "$DATE" | mpc insert
             fi
         fi
-    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Insert\n---\n$(mpc --format "%date%$seperator%album%" search artist "$ARTIST" | sort | uniq)" | dmenu_t -p "Albums by $(mpc current --format '%artist%') > ")
+    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Insert\n---\n$(mpc --format "%date%$separator%album%" search artist "$ARTIST" | sort | uniq)" | dmenu_t -p "Albums by $(mpc current --format '%artist%') > ")
 }
 
 currentAlbumsReplace () {
     ARTIST=$(mpc current -f %artist%)
     while read ALBUM
     do
-        ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$seperator" '{print $2}')
-        DATE=$(echo "$ALBUM" | awk -F "$seperator" '{print $1}')
+        ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{print $2}')
+        DATE=$(echo "$ALBUM" | awk -F "$separator" '{print $1}')
         if [[ "$ALBUM" == "0  Return to current Artist Menu" ]]; then
             currentPrompt;
         else
@@ -643,15 +643,15 @@ currentAlbumsReplace () {
                 mpc clear && mpc search "$mpd_artist" "$ARTIST" album "$ALBUM_FINAL" date "$DATE" | mpc add && mpc play
             fi
         fi
-    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Replace\n---\n$(mpc --format "%date%$seperator%album%" search artist "$ARTIST" | sort | uniq)" | dmenu_t -p "Albums by $(mpc current --format '%artist%') > ")
+    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Replace\n---\n$(mpc --format "%date%$separator%album%" search artist "$ARTIST" | sort | uniq)" | dmenu_t -p "Albums by $(mpc current --format '%artist%') > ")
 }
 
 currentTracks () {
     while read TRACK
     do
-       TITLE=$(echo "$TRACK" | awk -F "$seperator" '{print $3}')
-       ALBUM=$(echo "$TRACK" | awk -F "$seperator" '{print $1}')
-       TRACKNUMBER=$(echo "$TRACK" | awk -F "$seperator" '{print $2}')
+       TITLE=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
+       ALBUM=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
+       TRACKNUMBER=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
        if [ "$TRACK" = "0  Return to current Artist Menu" ]; then
            currentPrompt;
        else
@@ -661,7 +661,7 @@ currentTracks () {
                mpc findadd album "$ALBUM" title "$TITLE" track "$TRACKNUMBER"
             fi
         fi
-    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Add\n---\n$(mpc --format "%album%$seperator%track%$seperator%title%" search artist "$(mpc current -f %artist%)")" | dmenu_t -p "Tracks by $(mpc current --format '%artist%') > ")
+    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Add\n---\n$(mpc --format "%album%$separator%track%$separator%title%" search artist "$(mpc current -f %artist%)")" | dmenu_t -p "Tracks by $(mpc current --format '%artist%') > ")
 }
 
 currentTracksInsert () {
@@ -669,9 +669,9 @@ currentTracksInsert () {
     random=$(echo "$status" | tail -1 | awk -F ':' '{ print $4 }' | cut -d ' ' -f 2)
     while read TRACK
     do
-        TITLE=$(echo "$TRACK" | awk -F "$seperator" '{print $3}')
-        ALBUM=$(echo "$TRACK" | awk -F "$seperator" '{print $1}')
-        TRACKNUMBER=$(echo "$TRACK" | awk -F "$seperator" '{print $2}')
+        TITLE=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
+        ALBUM=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
+        TRACKNUMBER=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
         if [ "$TRACK" = "0  Return to current Artist Menu" ]; then
             currentPrompt;
         else
@@ -686,7 +686,7 @@ currentTracksInsert () {
                 fi
             fi
         fi
-    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Insert\n---\n$(mpc --format "%album%$seperator%track%$seperator%title%" search artist "$(mpc current -f %artist%)")" | dmenu_t -p "Tracks by $(mpc current --format '%artist%') > ")
+    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Insert\n---\n$(mpc --format "%album%$separator%track%$separator%title%" search artist "$(mpc current -f %artist%)")" | dmenu_t -p "Tracks by $(mpc current --format '%artist%') > ")
 }
 
 escapeSql() {
@@ -862,9 +862,9 @@ addLastMod() {
             if [[ "$ALBUM" == "Adding Mode: Add" ]]
                 then insertLastMod
             else
-                artist=$(echo "$ALBUM" | awk -F "$seperator" '{print $2}')
-                date=$(echo "$ALBUM" | awk -F "$seperator" '{print $1}')
-                album=$(echo "$ALBUM" | awk -F "$seperator" '{print $3}')
+                artist=$(echo "$ALBUM" | awk -F "$separator" '{print $2}')
+                date=$(echo "$ALBUM" | awk -F "$separator" '{print $1}')
+                album=$(echo "$ALBUM" | awk -F "$separator" '{print $3}')
                 mppc searchadd date "$date" album "$album" $mpd_artist "$artist"
             fi
         fi
@@ -884,9 +884,9 @@ insertLastMod() {
                 then replaceLastMod
             else
 export MPD_HOST=127.0.0.1
-                artist=$(echo "$ALBUM" | awk -F "$seperator" '{print $2}')
-                date=$(echo "$ALBUM" | awk -F "$seperator" '{print $1}')
-                album=$(echo "$ALBUM" | awk -F "$seperator" '{print $3}')
+                artist=$(echo "$ALBUM" | awk -F "$separator" '{print $2}')
+                date=$(echo "$ALBUM" | awk -F "$separator" '{print $1}')
+                album=$(echo "$ALBUM" | awk -F "$separator" '{print $3}')
                 mpc search date "$date" album "$album" $mpd_artist "$artist" | mpc insert
             fi
         fi
@@ -905,9 +905,9 @@ replaceLastMod() {
             if [[ "$ALBUM" == "Adding Mode: Replace" ]]
                 then addLastMod
             else
-                artist=$(echo "$ALBUM" | awk -F "$seperator" '{print $2}')
-                date=$(echo "$ALBUM" | awk -F "$seperator" '{print $1}')
-                album=$(echo "$ALBUM" | awk -F "$seperator" '{print $3}')
+                artist=$(echo "$ALBUM" | awk -F "$separator" '{print $2}')
+                date=$(echo "$ALBUM" | awk -F "$separator" '{print $1}')
+                album=$(echo "$ALBUM" | awk -F "$separator" '{print $3}')
                 mpc clear && mppc searchadd date "$date" album "$album" $mpd_artist "$artist" && mpc play
             fi
         fi
@@ -927,9 +927,9 @@ AddAlbumTags() {
             if [[ "$TRACK" == "Adding Mode: Add" ]]
                 then InsertAlbumTags
             else
-                artist=$(echo "$TRACK" | awk -F "$seperator" '{print $1}')
-                date=$(echo "$TRACK" | awk -F "$seperator" '{print $2}')
-                album=$(echo "$TRACK" | awk -F "$seperator" '{print $3}')
+                artist=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
+                date=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
+                album=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
                 mppc searchadd date "$date" album "$album" $mpd_artist "$artist"
             fi
         fi
@@ -951,9 +951,9 @@ InsertAlbumTags() {
             if [[ "$TRACK" == "Adding Mode: Insert" ]]
                 then ReplaceAlbumTags
             else
-                artist=$(echo "$TRACK" | awk -F "$seperator" '{print $1}')
-                date=$(echo "$TRACK" | awk -F "$seperator" '{print $2}')
-                album=$(echo "$TRACK" | awk -F "$seperator" '{print $3}')
+                artist=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
+                date=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
+                album=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
                 mpc search date "$date" album "$album" $mpd_artist "$artist" | mpc insert
             fi
         fi
@@ -971,9 +971,9 @@ ReplaceAlbumTags() {
             if [[ "$TRACK" == "Adding Mode: Replace" ]]
                 then AddAlbumTags
             else
-                artist=$(echo "$TRACK" | awk -F "$seperator" '{print $1}')
-                date=$(echo "$TRACK" | awk -F "$seperator" '{print $2}')
-                album=$(echo "$TRACK" | awk -F "$seperator" '{print $3}')
+                artist=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
+                date=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
+                album=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
                 mpc clear && mpc findadd date "$date" album "$album" $mpd_artist "$artist" && mpc play
             fi
         fi
@@ -994,10 +994,10 @@ AddTrackTags() {
             if [[ "$TRACK" == "Adding Mode: Add" ]]
                 then InsertTrackTags
             else
-                artist=$(echo "$TRACK" | awk -F "$seperator" '{print $1}')
-                album=$(echo "$TRACK" | awk -F "$seperator" '{print $4}')
-                track=$(echo "$TRACK" | awk -F "$seperator" '{print $2}')
-                title=$(echo "$TRACK" | awk -F "$seperator" '{print $3}')
+                artist=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
+                album=$(echo "$TRACK" | awk -F "$separator" '{print $4}')
+                track=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
+                title=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
                 mpc findadd artist "$artist" album "$album" title "$title"
                 if [[ "$add_auto_play" ]]; then
                     mpc play $(mpc playlist | wc -l)
@@ -1019,17 +1019,17 @@ InsertTrackTags() {
                 then ReplaceTrackTags
             else
                 if [[ "$random" == "off" ]]; then
-                    artist=$(echo "$TRACK" | awk -F "$seperator" '{print $1}')
-                    album=$(echo "$TRACK" | awk -F "$seperator" '{print $4}')
-                    track=$(echo "$TRACK" | awk -F "$seperator" '{print $2}')
-                    title=$(echo "$TRACK" | awk -F "$seperator" '{print $3}')
+                    artist=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
+                    album=$(echo "$TRACK" | awk -F "$separator" '{print $4}')
+                    track=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
+                    title=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
                     mpc find artist "$artist" album "$album" title "$title" | mpc insert
 
                 else
-                    artist=$(echo "$TRACK" | awk -F "$seperator" '{print $1}')
-                    album=$(echo "$TRACK" | awk -F "$seperator" '{print $4}')
-                    track=$(echo "$TRACK" | awk -F "$seperator" '{print $2}')
-                    title=$(echo "$TRACK" | awk -F "$seperator" '{print $3}')
+                    artist=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
+                    album=$(echo "$TRACK" | awk -F "$separator" '{print $4}')
+                    track=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
+                    title=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
                     mpc findadd artist "$artist" album "$album" title "$title"
                     echo $(( $(mpc playlist|wc -l) - 1 )) | mppc prio
                 fi
@@ -1047,10 +1047,10 @@ ReplaceTrackTags() {
             if [[ "$TRACK" == "Adding Mode: Replace" ]]
                 then AddTrackTags
             else
-                artist=$(echo "$TRACK" | awk -F "$seperator" '{print $1}')
-                album=$(echo "$TRACK" | awk -F "$seperator" '{print $4}')
-                track=$(echo "$TRACK" | awk -F "$seperator" '{print $2}')
-                title=$(echo "$TRACK" | awk -F "$seperator" '{print $3}')
+                artist=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
+                album=$(echo "$TRACK" | awk -F "$separator" '{print $4}')
+                track=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
+                title=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
                 mpc clear && mpc findadd artist "$artist" album "$album" title "$title"
                 mpc play
             fi
@@ -1145,8 +1145,8 @@ browseDateAdd() {
         if [[ "$select" == "0  Return to Date Menu" ]]
             then browseDate
         else
-            artist=$(echo "$select" | awk -F "$seperator" '{print $1}')
-            album=$(echo "$select" | awk -F "$seperator" '{print $2}')
+            artist=$(echo "$select" | awk -F "$separator" '{print $1}')
+            album=$(echo "$select" | awk -F "$separator" '{print $2}')
             if [[ "$select" == "Add All" ]]; then
                 mpc findadd date "$date"
             elif [[ "$select" == "Replace All" ]]; then
@@ -1157,7 +1157,7 @@ browseDateAdd() {
                 mpc findadd artist "$artist" album "$album"
             fi
         fi
-    done < <(echo -e "0  Return to Date Menu\n---\nAdding Mode: Add\n---\nAdd All\nReplace All\n---\n$(mpc --format "%$mpd_artist%$seperator%album%" find date "$date" | uniq)" | dmenu_t -dmenu -p "Select Album > ")
+    done < <(echo -e "0  Return to Date Menu\n---\nAdding Mode: Add\n---\nAdd All\nReplace All\n---\n$(mpc --format "%$mpd_artist%$separator%album%" find date "$date" | uniq)" | dmenu_t -dmenu -p "Select Album > ")
 
     if [[  $seen = 0 ]]
     then
@@ -1173,8 +1173,8 @@ browseDateInsert() {
         if [[ "$select" == "0  Return to Date Menu" ]]
             then browseDate
         else
-            artist=$(echo "$select" | awk -F "$seperator" '{print $1}')
-            album=$(echo "$select" | awk -F "$seperator" '{print $2}')
+            artist=$(echo "$select" | awk -F "$separator" '{print $1}')
+            album=$(echo "$select" | awk -F "$separator" '{print $2}')
             if [[ "$select" == "Add All" ]]; then
                 mpc findadd date "$date"
             elif [[ "$select" == "Replace All" ]]; then
@@ -1185,7 +1185,7 @@ browseDateInsert() {
                 mpc find artist "$artist" album "$album" | mpc insert
             fi
         fi
-    done < <(echo -e "0  Return to Date Menu\n---\nAdding Mode: Insert\n---\nAdd All\nReplace All\n---\n$(mpc --format "%$mpd_artist%$seperator%album%" find date "$date" | uniq)" | dmenu_t -dmenu -p "Select Album > ")
+    done < <(echo -e "0  Return to Date Menu\n---\nAdding Mode: Insert\n---\nAdd All\nReplace All\n---\n$(mpc --format "%$mpd_artist%$separator%album%" find date "$date" | uniq)" | dmenu_t -dmenu -p "Select Album > ")
 
     if [[  $seen = 0 ]]
     then
@@ -1201,8 +1201,8 @@ browseDateReplace() {
         if [[ "$select" == "0  Return to Date Menu" ]]
             then browseDate
         else
-            artist=$(echo "$select" | awk -F "$seperator" '{print $1}')
-            album=$(echo "$select" | awk -F "$seperator" '{print $2}')
+            artist=$(echo "$select" | awk -F "$separator" '{print $1}')
+            album=$(echo "$select" | awk -F "$separator" '{print $2}')
             if [[ "$select" == "Add All" ]]; then
                 mpc findadd date "$date"
             elif [[ "$select" == "Replace All" ]]; then
@@ -1213,7 +1213,7 @@ browseDateReplace() {
                 mpc clear && mpc findadd artist "$artist" album "$album" && mpc play
             fi
         fi
-    done < <(echo -e "0  Return to Date Menu\n---\nAdding Mode: Replace\n---\nAdd All\nReplace All\n---\n$(mpc --format "%$mpd_artist%$seperator%album%" find date "$date" | uniq)" | dmenu_t -dmenu -p "Select Album > ")
+    done < <(echo -e "0  Return to Date Menu\n---\nAdding Mode: Replace\n---\nAdd All\nReplace All\n---\n$(mpc --format "%$mpd_artist%$separator%album%" find date "$date" | uniq)" | dmenu_t -dmenu -p "Select Album > ")
 }
 
 
@@ -1295,8 +1295,8 @@ browseAlbum() {
     while read ALBUM
     do
         seen=1
-        ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$seperator" '{ print $2 }')
-        DATE=$(echo "$ALBUM" | awk -F "$seperator" '{ print $1 }')
+        ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
+        DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
         if [[ "$ALBUM" == "0  Return to Artist Menu" ]]
             then browseArtist
         elif [[ "$ALBUM" == "Replace All" ]]
@@ -1308,7 +1308,7 @@ browseAlbum() {
         else
             browseTrack
         fi
-    done < <(echo -e "0  Return to Artist Menu\n---\nReplace All\nAdd All\nInsert All\n---\n$(mpc --format "%date%$seperator%album%" find artist "$ARTIST" | sort | uniq)" | dmenu_t -dmenu -p "Choose Album > ")
+    done < <(echo -e "0  Return to Artist Menu\n---\nReplace All\nAdd All\nInsert All\n---\n$(mpc --format "%date%$separator%album%" find artist "$ARTIST" | sort | uniq)" | dmenu_t -dmenu -p "Choose Album > ")
 
     if [[  $seen = 0 ]]
     then
@@ -1321,7 +1321,7 @@ browseTrack() {
     while read TRACK
     do
         seen=1
-        TRACKFINAL=$(echo "$TRACK" | awk -F "$seperator" '{ print $2 }')
+        TRACKFINAL=$(echo "$TRACK" | awk -F "$separator" '{ print $2 }')
         if [[ "$TRACK" = "0  Return to Album Menu" ]]
             then browseAlbum
         elif [[ "$TRACK" == "Replace All" ]]
@@ -1337,7 +1337,7 @@ browseTrack() {
                 mppc findadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL"
             fi
         fi
-    done < <(echo -e "0  Return to Album Menu\n---\nReplace All\nAdd All\nInsert All\n---\n$(mpc --format "%track%$seperator%title%" find artist "$ARTIST" album "$ALBUM_FINAL")" | dmenu_t -dmenu -p "Chose Track > ")
+    done < <(echo -e "0  Return to Album Menu\n---\nReplace All\nAdd All\nInsert All\n---\n$(mpc --format "%track%$separator%title%" find artist "$ARTIST" album "$ALBUM_FINAL")" | dmenu_t -dmenu -p "Chose Track > ")
 
     if [[  $seen = 0 ]]; then
             exit
@@ -1405,10 +1405,10 @@ browseGenre2() {
         elif [[ "$ALBUM" == "Insert All" ]]
             then mpc find genre "$GENRE" | mpc insert
         else
-            ALBUM=$(echo "$ALBUM" | awk -F "$seperator" '{ print $2 }')
+            ALBUM=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
             mpc findadd album "$ALBUM" genre "$GENRE" && mpc play
         fi
-    done < <(echo -e "0  Return to Genre Menu\n---\nAdd All\nInsert all\nReplace all\n---\n$(mppc search genre "$GENRE" --format "{$mpd_artist}$seperator{album}$seperator({date})" | sort | uniq)" | dmenu_t -dmenu -p "Choose Album > ")
+    done < <(echo -e "0  Return to Genre Menu\n---\nAdd All\nInsert all\nReplace all\n---\n$(mppc search genre "$GENRE" --format "{$mpd_artist}$separator{album}$separator({date})" | sort | uniq)" | dmenu_t -dmenu -p "Choose Album > ")
 
     if [[  $seen = 0 ]]
     then
