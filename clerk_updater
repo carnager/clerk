@@ -8,10 +8,10 @@ sed=$([[ "$OSTYPE" == "darwin"* ]] && echo 'gsed' || echo 'sed')
 
 notify()
 {
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-      say "Updating clerk caches"
-    else
+    if hash notify-send 2>/dev/null; then
       notify-send "clerk" "Creating caches"
+    elif hash say 2>/dev/null; then
+      say "Updating clerk caches"
     fi
 }
 
