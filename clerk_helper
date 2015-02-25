@@ -1,0 +1,126 @@
+#!/usr/bin/env python3
+
+from __future__ import print_function
+import sys
+import os
+import datetime
+import argparse
+import types
+from mpd import MPDClient
+import time
+client = MPDClient()
+
+mpd_host = 'localhost'
+mpd_port = '6600'
+mpd_pass = ''
+
+if 'MPD_HOST' in os.environ:
+    mpd_connection = os.environ['MPD_HOST'].split('@')
+    if len(mpd_connection) == 1:
+        mpd_host = mpd_connection[0]
+    elif len(mpd_connection) == 2:
+        mpd_host = mpd_connection[1]
+        mpd_pass = mpd_connection[0]
+    else:
+        print('Unable to parse MPD_HOST, using defaults')
+
+if 'MPD_PORT' in os.environ:
+    mpd_port = os.environ['MPD_PORT']
+
+client.connect(mpd_host, mpd_port)
+if mpd_pass:
+    client.password(mpd_pass)
+
+
+def lookup(key, fields):
+    artistlist = client.list(key)
+    content = set()
+    for artist in artistlist:
+        for element in client.find(key, artist):
+            elementvalues = []
+            for field in fields:
+                if field in element:
+                    fieldvalue = element[field]
+                else:
+                    fieldvalue = ''
+                if isinstance(fieldvalue, list):
+                    elementvalues.append(fieldvalue[0])
+                else:
+                    elementvalues.append(fieldvalue)
+            content.add(tuple(elementvalues))
+    return content
+
+def trackCache(args):
+    key = 'artist'
+    fields = ('artist', 'track', 'title', 'album')
+    content = lookup(key, fields)
+    fh = open(os.getenv('HOME')+'/.config/clerk/tracks.cache', "w")
+    entries = [os.getenv('separator').join(entry) for entry in content]
+    for entry in sorted(entries, key=str.lower):
+        fh.write(entry+"\n")
+    fh.close()
+
+def albumCache(args):
+    key = 'albumartist'
+    fields = ('albumartist', 'date', 'album')
+    content = lookup(key, fields)
+    fh = open(os.getenv('HOME')+'/.config/clerk/album.cache', "w")
+    entries = [os.getenv('separator').join(entry) for entry in content]
+    for entry in sorted(entries, key=str.lower):
+        fh.write(entry+"\n")
+    fh.close()
+
+def lastCache(args):
+    key = 'albumartist'
+    fields = ('last-modified', 'date', 'albumartist', 'album')
+    content = lookup(key, fields)
+    seen = set()
+    fh = open(os.getenv('HOME')+'/.config/clerk/last.cache', "w")
+    for element in sorted(content, key=lambda elem: elem[0], reverse=True):
+        if element[1:] not in seen:
+            line = element[1:]
+            fh.write(os.getenv('separator').join(line)+"\n")
+            seen.add(line)
+    fh.close()
+
+def readComments(args):
+    args=vars(args)
+
+    comments = (client.readcomments(sys.stdin.read()[:-1]))
+    for key, value in sorted(comments.items()):
+        print('%s : %s' % (key, value))
+
+def prioSong(args):
+    for line in sys.stdin.read().splitlines():
+        client.prio(255, line)
+
+
+#create commandline arguments
+parser = argparse.ArgumentParser(prog='mppc', description='A mpc clone in python')
+subparsers = parser.add_subparsers()
+
+parser_prio = subparsers.add_parser('prio', help="prioritize song")
+parser_prio.set_defaults(call=prioSong)
+
+parser_readcomments = subparsers.add_parser('readcomments', help="show all tags of current song")
+parser_readcomments.set_defaults(call=readComments)
+
+parser_albumcache = subparsers.add_parser('albumcache', help="create album cache for clerk")
+parser_albumcache.set_defaults(call=albumCache)
+
+parser_trackcache = subparsers.add_parser('trackcache', help="create track cache for clerk")
+parser_trackcache.set_defaults(call=trackCache)
+
+parser_lastcache = subparsers.add_parser('lastcache', help="create album cache sorted by addition for clerk")
+parser_lastcache.set_defaults(call=lastCache)
+
+#parse arguments (thanks jat)
+args = parser.parse_args()
+
+if "filter" in args and len(args.filter) % 2 != 0:
+    parser.error("filter args not a multiple of 2")
+
+try:
+    args.call(args)
+except AttributeError:
+    print("No arguments given. Try mppc -h")
