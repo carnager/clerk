@@ -29,7 +29,7 @@ see `clerk -h` for all default arguments.
 * dmenu2 (https://bitbucket.org/melek/dmenu2) OR
 * rofi (https://github.com/DaveDavenport/rofi)
 * mpc
-* mppc (https://github.com/carnager/mppc) (for features, mpc does not provide)
+* python-mpd2 (https://github.com/Mic92/python-mpd2)
 
 Hint: When using rofi, you can use Shift+Enter to execute several commands
 e.g. adding more than one song.
