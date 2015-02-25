@@ -1579,8 +1579,8 @@ while :; do
             ;;
         --help|-h)
             echo "---"
-            echo "clerk: the mpd UI that needs typing"
-            echo "Copyright © 2013 - 2014 Rasmus Steinke"
+            echo "clerk: rofi/dmenu based MPD Interface"
+            echo "Copyright © 2013 - 2015 Rasmus Steinke"
             echo "---"
             echo "General"
             echo "  --help, -h                                      this help message"
