@@ -865,7 +865,7 @@ addLastMod() {
                 artist=$(echo "$ALBUM" | awk -F "$separator" '{print $2}')
                 date=$(echo "$ALBUM" | awk -F "$separator" '{print $1}')
                 album=$(echo "$ALBUM" | awk -F "$separator" '{print $3}')
-                mpc search date "$date" album "$album" $mpd_artist "$artist" | mpc add
+                mpc find date "$date" album "$album" $mpd_artist "$artist" | mpc add
             fi
         fi
     done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Add\n---\n$(echo "$last_temp")" | dmenu_t -dmenu -p "Choose recent album > ")
