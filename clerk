@@ -887,7 +887,7 @@ export MPD_HOST=127.0.0.1
                 artist=$(echo "$ALBUM" | awk -F "$separator" '{print $2}')
                 date=$(echo "$ALBUM" | awk -F "$separator" '{print $1}')
                 album=$(echo "$ALBUM" | awk -F "$separator" '{print $3}')
-                mpc search date "$date" album "$album" $mpd_artist "$artist" | mpc insert
+                mpc find date "$date" album "$album" $mpd_artist "$artist" | mpc insert
             fi
         fi
     done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Insert\n---\n$(echo "$last_temp")" | dmenu_t -dmenu -p "Choose Album > ")
@@ -908,7 +908,7 @@ replaceLastMod() {
                 artist=$(echo "$ALBUM" | awk -F "$separator" '{print $2}')
                 date=$(echo "$ALBUM" | awk -F "$separator" '{print $1}')
                 album=$(echo "$ALBUM" | awk -F "$separator" '{print $3}')
-                mpc clear && mpc search date "$date" album "$album" $mpd_artist "$artist" | mpc add && mpc play
+                mpc clear && mpc find date "$date" album "$album" $mpd_artist "$artist" | mpc add && mpc play
             fi
         fi
     done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Replace\n---\n$(echo "$last_temp")" | dmenu_t -dmenu -p "Choose Album > ")
