@@ -23,7 +23,12 @@ elif [[ $scrobbler == mpdscribble ]]; then
 fi
 
 export mpd_artist=albumartist
-clerk_helper update &
+if [[ $(ps x| grep clerk_helper | head -1) ]]; then
+    :
+else
+    clerk_helper update &
+fi
+
 album_temp=$(cat $HOME/.config/clerk/album.cache)
 tracks_temp=$(cat $HOME/.config/clerk/tracks.cache)
 last_temp=$(cat $HOME/.config/clerk/last.cache)
