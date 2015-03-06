@@ -23,7 +23,7 @@ elif [[ $scrobbler == mpdscribble ]]; then
 fi
 
 export mpd_artist=albumartist
-if [[ $(ps x| grep clerk_helper | head -1) ]]; then
+if [[ $(ps x| grep clerk_helper | head -1 | grep -v 'grep') ]]; then
     :
 else
     clerk_helper update &
