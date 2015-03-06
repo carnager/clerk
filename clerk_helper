@@ -3,12 +3,20 @@
 from __future__ import print_function
 import sys
 import os
-import datetime
+import notify2
 import argparse
 import types
 from mpd import MPDClient
 import time
+import configparser
 client = MPDClient()
+
+config = configparser.ConfigParser()
+config.sections()
+config.read(os.getenv('HOME')+'/.config/clerk/helper_config')
+change_db=(config['updater']['change_db'])
+separator=(config['global']['separator'])
+os.environ['separator'] = str(" "+separator+" ")
 
 mpd_host = 'localhost'
 mpd_port = '6600'
@@ -30,6 +38,35 @@ if 'MPD_PORT' in os.environ:
 client.connect(mpd_host, mpd_port)
 if mpd_pass:
     client.password(mpd_pass)
+
+
+def update(args):
+    db=(client.stats())
+    new_db=db.get('db_update')
+    if change_db == new_db:
+        if (os.path.isfile(os.getenv('HOME')+'/.config/clerk/tracks.cache')):
+            notify2.init('Clerk')
+            n = notify2.Notification("Clerk", "Cache Files Up to Date")
+            n.show()
+            quit()
+        else:
+            notify2.init('Clerk')
+            n = notify2.Notification("Clerk", "Updating Cache Files")
+            n.show()
+            albumCache(args)
+            trackCache(args)
+            lastCache(args)
+    else:
+        notify2.init('Clerk')
+        n = notify2.Notification("Clerk", "Updating Cache Files")
+        n.show()
+        albumCache(args)
+        trackCache(args)
+        lastCache(args)
+        config['updater']['change_db'] = str(new_db)
+        with open('/home/carnager/.config/clerk/helper_config', 'w') as configfile:
+            config.write(configfile)
+
 
 
 def lookup(key, fields):
@@ -101,6 +138,9 @@ subparsers = parser.add_subparsers()
 
 parser_prio = subparsers.add_parser('prio', help="prioritize song")
 parser_prio.set_defaults(call=prioSong)
+
+parser_update = subparsers.add_parser('update', help="update cache files")
+parser_update.set_defaults(call=update)
 
 parser_readcomments = subparsers.add_parser('readcomments', help="show all tags of current song")
 parser_readcomments.set_defaults(call=readComments)

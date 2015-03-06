@@ -1,8 +1,19 @@
 #!/usr/bin/env bash
 
 shopt -s globstar
-source $HOME/.config/clerk/config
 
+source $HOME/.config/clerk/config
+if [[ -f $HOME/.config/clerk/helper_config ]]; then
+    :
+else
+    echo "[global]" > $HOME/.config/clerk/helper_config
+	echo "separator = \"$separator\"" >> $HOME/.config/clerk/helper_config
+    echo " " >> $HOME/.config/clerk/helper_config
+    echo "[updater]" >> $HOME/.config/clerk/helper_config
+    echo "changedb = xxx" >> $HOME/.config/clerk/helper_config
+fi
+
+echo "$backend"
 
 if [[ $scrobbler == mpdas ]]; then
     export scrobbler="mpdas -d"
@@ -12,7 +23,7 @@ elif [[ $scrobbler == mpdscribble ]]; then
 fi
 
 export mpd_artist=albumartist
-clerk_updater &
+clerk_helper update
 album_temp=$(cat $HOME/.config/clerk/album.cache)
 tracks_temp=$(cat $HOME/.config/clerk/tracks.cache)
 last_temp=$(cat $HOME/.config/clerk/last.cache)
