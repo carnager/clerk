@@ -38,13 +38,14 @@ e.g. adding more than one song.
 
 * surfraw (for lookup)
 * lastfm-mpd-cli for loving tracks (https://github.com/morendi/lastfm-mpd-cli)
+  (Not needed when using mpdas instead of mpdscribble)
 * mpd-sima (for Similar Artists playback)
 
 # Installation
 
 1. Install dependecies (each binary needs to be in your $PATH)
 2. Copy config.example to $HOME/.config/clerk/config and edit it.
-3. Copy clerk and clerk_updater to $PATH
+3. Copy clerk and clerk_helper to $PATH
 4. Run clerk
 
 For arch linux there is a package in [AUR](https://aur.archlinux.org/packages/clerk-git/)
