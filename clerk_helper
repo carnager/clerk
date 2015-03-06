@@ -61,7 +61,7 @@ def update(args):
         trackCache(args)
         lastCache(args)
     config['updater']['change_db'] = str(new_db)
-    with open('/home/carnager/.config/clerk/helper_config', 'w') as configfile:
+    with open(os.getenv('HOME')+'/.config/clerk/helper_config', 'w') as configfile:
         config.write(configfile)
 
 
