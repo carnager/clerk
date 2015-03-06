@@ -23,7 +23,7 @@ elif [[ $scrobbler == mpdscribble ]]; then
 fi
 
 export mpd_artist=albumartist
-clerk_helper update
+clerk_helper update &
 album_temp=$(cat $HOME/.config/clerk/album.cache)
 tracks_temp=$(cat $HOME/.config/clerk/tracks.cache)
 last_temp=$(cat $HOME/.config/clerk/last.cache)
@@ -34,7 +34,8 @@ shuf=$([[ "$OSTYPE" == "darwin"* ]] && echo 'gshuf' || echo 'shuf')
 tac=$([[ "$OSTYPE" == "darwin"* ]] && echo 'gtac' || echo 'tac')
 
 updateCache() {
-    clerk_updater --force &
+    rm -f $HOME/.config/clerk/*.cache
+    clerk_helper update &
 }
 
 dplayPrompt () {
