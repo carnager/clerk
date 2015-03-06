@@ -3,7 +3,6 @@
 from __future__ import print_function
 import sys
 import os
-import notify2
 import argparse
 import types
 from mpd import MPDClient
@@ -45,21 +44,12 @@ def update(args):
     new_db=db.get('db_update')
     if change_db == new_db:
         if (os.path.isfile(os.getenv('HOME')+'/.config/clerk/tracks.cache')):
-            notify2.init('Clerk')
-            n = notify2.Notification("Clerk", "Cache Files Up to Date")
-            n.show()
             quit()
         else:
-            notify2.init('Clerk')
-            n = notify2.Notification("Clerk", "Updating Cache Files")
-            n.show()
             albumCache(args)
             trackCache(args)
             lastCache(args)
     else:
-        notify2.init('Clerk')
-        n = notify2.Notification("Clerk", "Updating Cache Files")
-        n.show()
         albumCache(args)
         trackCache(args)
         lastCache(args)

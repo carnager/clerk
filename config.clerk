@@ -44,7 +44,3 @@ scrobbler=mpdas
 # set to 0 if mpdscribble runs locally
 ssh_lastfm=
 ssh_host=
-
-
-##### DO NOT EDIT #####
-change_db=xxxxx
