@@ -248,10 +248,10 @@ backupPrompt () {
     }
 
     case "$(prompt "${menu[@]}")" in
-        1*) backupTrackRatings ;;
-        2*) backupAlbumRatings ;;
-        3*) restoreTrackRatings ;;
-        4*) restoreAlbumRatings ;;
+        1*) backupAlbumRatings ;;
+        2*) backupTrackRatings ;;
+        3*) restoreAlbumRatings ;;
+        4*) restoreTrackRatings ;;
         0*) ratingPrompt ;;
           *) exit
     esac
