@@ -212,9 +212,9 @@ ratingPrompt () {
           "5  Load Rated Tracks"
           "6  Load Random Rated Tracks"
           "---"
-          "7  Love current Song on LastFM")
+          "7  Love current Song on LastFM"
           "---"
-          "0  Backup/Restore"
+          "0  Backup/Restore")
 
     prompt() {
         printf "%s\n" "$@" | dmenu_t -p "Ratings > "
@@ -241,7 +241,7 @@ backupPrompt () {
           "2  Backup Track Ratings to Files"
           "---"
           "3  Restore Album Ratings from Files"
-          "4  Restore Track Ratings from Files"
+          "4  Restore Track Ratings from Files")
 
     prompt() {
         printf "%s\n" "$@" | dmenu_t -p "Backup/Restore > "
