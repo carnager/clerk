@@ -719,6 +719,7 @@ rateAlbum () {
         artist="$(mpc current -f '%artist%')"
         album="$(mpc current -f '%album%')"
         date="$(mpc current -f '%date%')"
+        file="$(mpc current -f '%file%')"
 
         mpc find artist "$artist" album "$album" date "$date" track "01" | while read line; do
         mpc sticker "$(echo ${line})" set albumrating ${rating}
@@ -738,11 +739,12 @@ rateAlbum () {
             if [[ "$(pwd)" == */"$cd_divider"* ]]; then
                 cd ..
             fi
-            rm -f "$(mpc current -f "%$mpd_artist%--%date%--%album%").albumrating"
-            echo "artist=${artist}" >> "$(mpc current -f "%$mpd_artist%--%date%--%album%").albumrating"
-            echo "album=${album}" >> "$(mpc current -f "%$mpd_artist%--%date%--%album%").albumrating"
-            echo "date=${date}" >> "$(mpc current -f "%$mpd_artist%--%date%--%album%").albumrating"
-            echo "albumrating=$rating/10" >> "$(mpc current -f "%$mpd_artist%--%date%--%album%").albumrating"
+            rm -f album.rating
+            echo "artist=${artist}" >> album.rating
+            echo "album=${album}" >> album.rating
+            echo "date=${date}" >> album.rating
+            echo "albumrating=$rating" >> album.rating
+            echo "file=${file}" >> album.rating
         fi
         notify-send "clerk" "rated $(echo ${artist} - ${album}) with $(echo ${rating})"
     fi
@@ -763,7 +765,7 @@ rateTrack () {
             fi
             touch track.ratings
             $sed -i "/$(mpc current -f '%title%')/d" track.ratings
-            echo "${rating}\\$(mpc current -f "%artist%\%track%\%title%\%date%\%album%")" >> track.ratings
+            echo "${rating}${separator}$(mpc current -f "%artist%${separator}%track%${separator}%title%${separator}%date%${separator}%album%")" >> track.ratings
         fi
         notify-send "clerk" "rated $(mpc current) with $(echo ${rating})"
     fi
@@ -779,7 +781,7 @@ rateTrack () {
              fi
              touch track.ratings
              $sed -i "/$(mpc current -f '%title%')/d" track.ratings
-             echo "$rating\\$(mpc current -f "%artist%\%track%\%title%\%date%\%album%")" >> track.ratings
+             echo "${rating}${separator}$(mpc current -f "%artist%${separator}%track%${separator}%title%${separator}%date%${separator}%album%")" >> track.ratings
          fi
  }
 
@@ -809,7 +811,7 @@ loadRatedTracks () {
     else
         cd $HOME/.config/clerk
         mpc clear
-        songs="$(mpc sticker "" find rating | grep -E "rating=$rating" | awk -F ':' '{ print $1 }')"
+        songs="$(mpc sticker "" find rating | awk -F 'rating=' '{ print $2 }')"
         echo "$songs" | mpc add
         mpc play
     fi
