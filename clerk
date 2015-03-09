@@ -212,7 +212,9 @@ ratingPrompt () {
           "5  Load Rated Tracks"
           "6  Load Random Rated Tracks"
           "---"
-          "0  Love current Song on LastFM")
+          "7  Love current Song on LastFM")
+          "---"
+          "0  Backup/Restore"
 
     prompt() {
         printf "%s\n" "$@" | dmenu_t -p "Ratings > "
@@ -225,10 +227,133 @@ ratingPrompt () {
         4*) rateTrack ;;
         5*) loadRatedTracks ;;
         6*) loadRandomRatedTracks ;;
-        0*) lastfm-mpd-cli love > /dev/null && notify-send "MPD" "Loved $(mpc current -f '%title%') on LastFM" && exit;;
+        7*) loveLast ;;
+        0*) backupPrompt ;;
         Q*) dplayPrompt ;;
           *) exit
     esac
+}
+
+backupPrompt () {
+    menu=("0  Return to Ratings Menu"
+          "---"
+          "1  Backup Album Ratings to Files"
+          "2  Backup Track Ratings to Files"
+          "---"
+          "3  Restore Album Ratings from Files"
+          "4  Restore Track Ratings from Files"
+
+    prompt() {
+        printf "%s\n" "$@" | dmenu_t -p "Backup/Restore > "
+    }
+
+    case "$(prompt "${menu[@]}")" in
+        1*) backupTrackRatings ;;
+        2*) backupAlbumRatings ;;
+        3*) restoreTrackRatings ;;
+        4*) restoreAlbumRatings ;;
+        0*) ratingPrompt ;;
+          *) exit
+    esac
+}
+
+backupTrackRatings () {
+cd ${music_path}
+rm -f **/track.ratings
+mpc clear
+mpc sticker "" find rating | awk -F ': rating=' '{ print $1 }' | while read line; do
+    mpc add "$line"
+done
+
+mpc playlist -f "%artist%${separator}%track%${separator}%title%${separator}%date%${separator}%album%${separator}%file%" | while read line; do
+    artist=$(echo ${line} | awk -F "${separator}" '{ print $1 }')
+    track=$(echo ${line} | awk -F "${separator}" '{ print $2 }')
+    title=$(echo ${line} | awk -F "${separator}" '{ print $3 }')
+    date=$(echo ${line} | awk -F "${separator}" '{ print $4 }')
+    album=$(echo ${line} | awk -F "${separator}" '{ print $5 }')
+    file=$(echo ${line} | awk -F "${separator}" '{ print $6 }')
+    rating=$(mpc sticker "$file" get rating | awk -F 'rating=??' '{ print $2 }')
+
+    cd "$music_path"
+    cd "$(dirname "$(echo "$file")")"
+    if [[ "$(pwd)" == */"$cd_divider"* ]]; then
+        cd ..
+    fi
+    touch track.ratings
+    echo "${rating}${separator}${artist}${separator}${track}${separator}${title}${separator}${date}${separator}${album}${separator}${file}" >> track.ratings
+done
+}
+
+backupAlbumRatings () {
+cd ${music_path}
+rm -f **/album.rating
+mpc clear
+mpc sticker "" find albumrating | awk -F ': albumrating=' '{ print $1 }' | while read line; do
+    mpc add "$line"
+done
+
+mpc playlist -f "%artist%${separator}%album%${separator}%date%${separator}%file%" | while read line; do
+    artist=$(echo ${line} | awk -F "${separator}" '{ print $1 }')
+    album=$(echo ${line} | awk -F "${separator}" '{ print $2 }')
+    date=$(echo ${line} | awk -F "${separator}" '{ print $3 }')
+    file=$(echo ${line} | awk -F "${separator}" '{ print $4 }')
+    rating=$(mpc sticker "$file" get albumrating | awk -F 'rating=??' '{ print $2 }')
+
+    cd "$music_path"
+    cd "$(dirname "$(echo "$file")")"
+    if [[ "$(pwd)" == */"$cd_divider"* ]]; then
+        cd ..
+    fi
+    touch album.rating
+    echo "artist=${artist}" >> album.rating
+    echo "album=${album}" >> album.rating
+    echo "date=${date}" >> album.rating
+    echo "albumrating=${rating}" >> album.rating
+    echo "file=${file}" >> album.rating
+done
+}
+
+restoreTrackRatings () {
+mpc clear
+
+cd "${music_path}"
+awk -F "${separator}" '{ print $7 }' **/track.ratings | while read line; do
+    mpc add "${line}"
+done
+
+mpc playlist -f "%file%" | while read line; do
+    file=$(echo ${line})
+    cd "${music_path}"/"$(dirname "$(echo "${file}")")"
+    rating=$(awk -F "${separator}" '{ print $1 }' track.ratings)
+    mpc sticker "${file}" set rating "${rating}"
+done
+}
+
+restoreAlbumRatings () {
+mpc clear
+cd "${music_path}"
+
+grep -R "file=" **/album.rating | awk -F 'album.rating:file=' '{ print $2 }' | while read line; do
+    mpc add "${line}"
+done
+
+mpc playlist -f "%file%" | while read line; do
+    file=$(echo ${line})
+    cd "${music_path}"/"$(dirname "$(echo "${file}")")"
+    if [[ "$(pwd)" == */"$cd_divider"* ]]; then
+        cd ..
+    fi
+    rating=$(grep "albumrating=" album.rating)
+    mpc sticker "${file}" set albumrating "${rating}"
+done
+}
+
+loveLast () {
+    if [[ "$scrobbler" == "mpdscribble" ]]; then
+        lastfm-mpd-cli love > /dev/null && notify-send "MPD" "Loved $(mpc current -f '%title%') on LastFM" && exit
+    elif [[ "$scrobbler" == "mpdas" ]]; then
+        mpc sendmessage mpdas love
+    fi
 }
 
 killDB () {
@@ -1552,6 +1677,28 @@ while :; do
             fi
             break
             ;;
+        --backup)
+            if [[ ! $2 ]]; then
+                echo "Missing argument for --backup"
+                echo "Possible values: track, album"
+            elif [[ $2 == track ]]; then
+                backupTrackRatings
+            elif [[ $2 == album ]]; then
+                backupAlbumRatings
+            fi
+            break
+            ;;
+        --restore)
+            if [[ ! $2 ]]; then
+                echo "Missing argument for --restore"
+                echo "Possible values: track, album"
+            elif [[ $2 == track ]]; then
+                restoreTrackRatings
+            elif [[ $2 == album ]]; then
+                restoreAlbumRatings
+            fi
+            break
+            ;;
         --update)
             updateCache
             break
@@ -1623,6 +1770,14 @@ while :; do
             echo "Ratings"
             echo "  --rate <menu, track, album, load, instant ##>  rate albums or tracks"
             echo "                                                 "load" adds random rated tracks to queue"
+            echo ""
+            echo "  --backup <track, album>                        backup album or track ratings."
+            echo "    make sure that music_path is set and that it's accessible by clerk"
+            echo ""
+            echo "  --backup <track, album>                        restore album or track ratings."
+            echo "    make sure that music_path is set and that it's accessible by clerk"
+            echo "    ONLY USE, WHEN YOUR RATINGS FILES ARE 100% valid!"
+            echo ""
             echo "LastFM"
             echo "  --lastfm <toggle, check, love>                 toggle or check last.fm status, love current track"
             break
