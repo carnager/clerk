@@ -343,7 +343,7 @@ mpc playlist -f "%file%" | while read line; do
     if [[ "$(pwd)" == */"$cd_divider"* ]]; then
         cd ..
     fi
-    rating=$(grep "albumrating=" album.rating)
+    rating=$(grep "albumrating=" album.rating | awk -F '=' '{ print $2 }')
     mpc sticker "${file}" set albumrating "${rating}"
 done
 }
