@@ -610,7 +610,7 @@ loadRSS () {
 
 suspendPlaylist () {
     playing=$(! mpc status | grep 'playing\|paused')
-    time=$(mpc status | $sed '2!d' | $sed 's;/.:.*;;;s;.* ;;')
+    time=$(mpc status | $sed '2!d;s;/.:.*;;;s;.* ;;')
     position=$(mpc current --format '%position%')
     if [[ -z "$playing" ]]; then
         notify-send "clerk" "mpd is not playing, no state to suspend"
