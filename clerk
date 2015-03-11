@@ -334,7 +334,6 @@ done
     cd "${music_path}"/"$(dirname "$(echo "${file}")")"
     rating=$(grep "${title}" track.ratings | grep "${album}" | grep "${track}" | awk -F "${separator}" '{ print $1 }')
     mpc sticker "${file}" set rating "${rating}"
-    mpc clear
 done
 }
 
