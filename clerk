@@ -276,11 +276,8 @@ mpc playlist -f "%artist%${separator}%track%${separator}%title%${separator}%date
 
     cd "$music_path"
     cd "$(dirname "$(echo "$file")")"
-    if [[ "$(pwd)" == */"$cd_divider"* ]]; then
-        cd ..
-    fi
     touch track.ratings
-    echo "${rating}${separator}${artist}${separator}${track}${separator}${title}${separator}${date}${separator}${album}${separator}${file}" >> track.ratings
+    echo "${rating}${separator}${artist}${separator}${track}${separator}${title}${separator}${date}${separator}${album}${separator}" >> track.ratings
 done
 }
 
@@ -292,11 +289,13 @@ mpc sticker "" find albumrating | awk -F ': albumrating=' '{ print $1 }' | while
     mpc add "$line"
 done
 
-mpc playlist -f "%artist%${separator}%album%${separator}%date%${separator}%file%" | while read line; do
+mpc playlist -f "%artist%${separator}%track%${separator}%title%${separator}%date%${separator}%album%${separator}%file%" | while read line; do
     artist=$(echo ${line} | awk -F "${separator}" '{ print $1 }')
-    album=$(echo ${line} | awk -F "${separator}" '{ print $2 }')
-    date=$(echo ${line} | awk -F "${separator}" '{ print $3 }')
-    file=$(echo ${line} | awk -F "${separator}" '{ print $4 }')
+    track=$(echo ${line} | awk -F "${separator}" '{ print $2 }')
+    title=$(echo ${line} | awk -F "${separator}" '{ print $3 }')
+    date=$(echo ${line} | awk -F "${separator}" '{ print $4 }')
+    album=$(echo ${line} | awk -F "${separator}" '{ print $5 }')
+    file=$(echo ${line} | awk -F "${separator}" '{ print $6 }')
     rating=$(mpc sticker "$file" get albumrating | awk -F 'rating=??' '{ print $2 }')
 
     cd "$music_path"
@@ -305,11 +304,7 @@ mpc playlist -f "%artist%${separator}%album%${separator}%date%${separator}%file%
         cd ..
     fi
     touch album.rating
-    echo "artist=${artist}" >> album.rating
-    echo "album=${album}" >> album.rating
-    echo "date=${date}" >> album.rating
-    echo "albumrating=${rating}" >> album.rating
-    echo "file=${file}" >> album.rating
+    echo "${rating}${separator}${artist}${separator}${track}${separator}${title}${separator}${date}${separator}${album}" >> album.rating
 done
 }
 
@@ -339,22 +334,31 @@ done
 
 restoreAlbumRatings () {
 mpc clear
+
 cd "${music_path}"
-
-grep -R "file=" **/album.rating | awk -F 'album.rating:file=' '{ print $2 }' | while read line; do
-    mpc add "${line}"
+cat **/album.rating | while read line; do
+    artist=$(echo "${line}" | awk -F "${separator}" '{ print $2 }')
+    album=$(echo "${line}" | awk -F "${separator}" '{ print $6 }')
+    track=$(echo "${line}" | awk -F "${separator}" '{ print $3 }')
+    title=$(echo "${line}" | awk -F "${separator}" '{ print $4 }')
+    date=$(echo "${line}" | awk -F "${separator}" '{ print $5 }')
+    mpc search artist "${artist}" album "${album}" track "${track}" title "${title}" date "${date}" | mpc add
 done
-
-mpc playlist -f "%file%" | while read line; do
-    file=$(echo ${line})
+    mpc playlist -f "%artist%${separator}%album%${separator}%track%${separator}%title%${separator}%file%" | while read line; do
+    artist=$(echo "${line}" | awk -F "${separator}" '{ print $1 }')
+    album=$(echo "${line}" | awk -F "${separator}" '{ print $2 }')
+    track=$(echo "${line}" | awk -F "${separator}" '{ print $3 }')
+    title=$(echo "${line}" | awk -F "${separator}" '{ print $4 }')
+    file=$(echo "${line}" | awk -F "${separator}" '{ print $5 }')
     cd "${music_path}"/"$(dirname "$(echo "${file}")")"
     if [[ "$(pwd)" == */"$cd_divider"* ]]; then
         cd ..
     fi
-    rating=$(grep "albumrating=" album.rating | awk -F '=' '{ print $2 }')
+    rating=$(grep "${title}" album.rating | grep "${album}" | grep "${track}" | awk -F "${separator}" '{ print $1 }')
     mpc sticker "${file}" set albumrating "${rating}"
 done
 }
+
 
 loveLast () {
     if [[ "$scrobbler" == "mpdscribble" ]]; then
@@ -852,6 +856,7 @@ rateAlbum () {
         artist="$(mpc current -f '%artist%')"
         album="$(mpc current -f '%album%')"
         date="$(mpc current -f '%date%')"
+        tutke="$(mpc current -f '%title')"
         file="$(mpc current -f '%file%')"
 
         mpc find artist "$artist" album "$album" date "$date" track "01" | while read line; do
@@ -873,11 +878,7 @@ rateAlbum () {
                 cd ..
             fi
             rm -f album.rating
-            echo "artist=${artist}" >> album.rating
-            echo "album=${album}" >> album.rating
-            echo "date=${date}" >> album.rating
-            echo "albumrating=$rating" >> album.rating
-            echo "file=${file}" >> album.rating
+            echo "${rating}${separator}$(mpc current -f "%artist%${separator}%track%${separator}%title%${separator}%date%${separator}%album%")" >> album.rating
         fi
         notify-send "clerk" "rated $(echo ${artist} - ${album}) with $(echo ${rating})"
     fi
