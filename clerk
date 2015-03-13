@@ -310,17 +310,6 @@ done
 }
 
 restoreTrackRatings () {
-mpc clear
-
-cd "${music_path}"
-cat **/track.ratings | while read line; do
-    artist=$(echo "${line}" | awk -F "${separator}" '{ print $2 }')
-    album=$(echo "${line}" | awk -F "${separator}" '{ print $6 }')
-    track=$(echo "${line}" | awk -F "${separator}" '{ print $3 }')
-    title=$(echo "${line}" | awk -F "${separator}" '{ print $4 }')
-    date=$(echo "${line}" | awk -F "${separator}" '{ print $5 }')
-    mpc search artist "${artist}" album "${album}" track "${track}" title "${title}" date "${date}" | mpc add
-done
 clerk_helper --restoretracks
 }
 

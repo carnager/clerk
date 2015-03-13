@@ -7,6 +7,7 @@ import os
 import notify2
 import argparse
 import types
+import fnmatch
 from mpd import MPDClient
 import time
 import configparser
@@ -131,10 +132,22 @@ def prioSong(args):
 
 
 def restoreTrackRating(args):
+    client.clear()
+    matches = []
+    for root, dirnames, filenames in os.walk(config['global']['music_path']):
+        for filename in fnmatch.filter(filenames, 'track.ratings'):
+            matches.append(os.path.join(root, filename))
+    for song in matches:
+        ratingfile = open(song, 'r')
+        for line in ratingfile:
+            tags = line.split(os.getenv('separator'))
+            album = tags[5].rstrip('\n')
+            client.searchadd('artist', tags[1], 'album', album, 'track', tags[2], 'title', tags[3], 'date', tags[4])
+
     for song in client.playlistinfo():
         ratingfile = open(config['global']['music_path']+"/"+os.path.dirname(song['file'])+'/track.ratings', 'r')
         for line in ratingfile:
-            columns = line.split('•')
+            columns = line.split(os.getenv('separator'))
             if song['title'] in line and song['date'] in line and song['album'] in line and song['track'] in line:
                 client.sticker_set('song', song['file'], 'rating', columns[0])
 
