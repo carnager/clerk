@@ -1,5 +1,18 @@
 # clerk - mpd client, based on rofi (or dmenu)
 
+# CHANGES IN RATINGS!
+If you used ratings in clerk, be aware that the way they are handled
+changed in recent commits. To be able to properly use them, make sure
+to delete $HOME/.config/clerk/helper_config and then re-create it
+by running clerk. Then Chose the Backup function from the Ratings menu.
+
+This will write the new ratings files.
+
+What has changed? Ratings are no longer bound to file names. Instead
+a search is executed on the tags mentioned in ratings files. All matches
+will then be rated by the filename from mpd library.
+
+
 # Functions:
 
 * Play random album
