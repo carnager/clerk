@@ -1,10 +1,10 @@
 # clerk - mpd client, based on rofi (or dmenu)
 
 # CHANGES IN RATINGS!
-If you used ratings in clerk, be aware that the way they are handled
-changed in recent commits. To be able to properly use them, make sure
-to delete $HOME/.config/clerk/helper_config and then re-create it
-by running clerk. Then Chose the Backup function from the Ratings menu.
+If you used ratings in clerk, be aware that the way the backup files are
+handled has changed. If you use those, make sure to delete $HOME/.config/clerk/helper_config
+and recreate it by running clerk once.
+Then chose the Backup entry from Ratings menu.
 
 This will write the new ratings files.
 
