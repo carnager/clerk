@@ -140,7 +140,7 @@ def restoreTrackRating(args):
     for song in matches:
         ratingfile = open(song, 'r')
         for line in ratingfile:
-            tags = line.split(os.getenv('separator'))
+            tags = line.split(" "+config['global']['separator']+" ")
             album = tags[5].rstrip('\n')
             client.searchadd('artist', tags[1], 'album', album, 'track', tags[2], 'title', tags[3], 'date', tags[4])
 
