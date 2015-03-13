@@ -142,7 +142,7 @@ def restoreTrackRating(args):
         for line in ratingfile:
             tags = line.split(" "+config['global']['separator']+" ")
             album = tags[5].rstrip('\n')
-            client.searchadd('artist', tags[1], 'album', album, 'track', tags[2], 'title', tags[3], 'date', tags[4])
+            client.findadd('artist', tags[1], 'album', album, 'track', tags[2], 'title', tags[3], 'date', tags[4])
 
     for song in client.playlistinfo():
         ratingfile = open(config['global']['music_path']+"/"+os.path.dirname(song['file'])+'/track.ratings', 'r')
