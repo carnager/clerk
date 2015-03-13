@@ -150,6 +150,7 @@ def restoreTrackRating(args):
             columns = line.split(" "+config['global']['separator']+" ")
             if song['title'] in line and song['date'] in line and song['album'] in line and song['track'] in line:
                 client.sticker_set('song', song['file'], 'rating', columns[0])
+                print("Imported song "+song['title']+" with rating of "+columns[0])
 
 #create commandline arguments
 parser = argparse.ArgumentParser(prog='mppc', description='A mpc clone in python')
