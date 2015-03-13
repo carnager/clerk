@@ -156,10 +156,11 @@ def restoreTrackRating(args):
             client.findadd('artist', artist, 'album', album, 'track', track, 'title', title, 'date', date)
 
     for song in client.playlistinfo():
+
         ratingfile = open(config['global']['music_path']+"/"+os.path.dirname(song['file'])+'/track.ratings', 'r')
         for line in ratingfile:
             columns = line.split(os.environ['separator'])
-            if song['title'] in line and song['date'] in line and song['album'] in line and song['track'] in line:
+            if song['title'] in line and song['date'] in line and song['album'] in line:
                 client.sticker_set('song', song['file'], 'rating', columns[0])
                 print("Imported song "+song['title']+" with rating of "+columns[0])
 
@@ -191,7 +192,8 @@ def restoreAlbumRating(args):
         ratingfile = open(config['global']['music_path']+"/"+os.path.dirname(song['file'])+'/album.rating', 'r')
         for line in ratingfile:
             columns = line.split(os.environ['separator'])
-            if song['title'] in line and song['date'] in line and song['album'] in line and song['track'] in line:
+            print(song['track']
+            if song['title'] in line and song['date'] in line and song['album'] in line:
                 client.sticker_set('song', song['file'], 'albumrating', columns[0])
                 print("Imported album "+song['album']+" with rating of "+columns[0])
 
