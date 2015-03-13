@@ -307,11 +307,11 @@ done
 }
 
 restoreTrackRatings () {
-clerk_helper --restoretracks
+clerk_helper restoretracks
 }
 
 restoreAlbumRatings () {
-clerk_helper --restorealbums
+clerk_helper restorealbums
 }
 
 
