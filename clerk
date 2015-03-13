@@ -846,9 +846,6 @@ rateTrack () {
         if [[ "$music_dir_access" == "yes" ]]; then
             cd "$music_path"
             cd "$(dirname "$(mpc current -f %file%)")"
-            if [[ "$(pwd)" == */"$cd_divider"* ]]; then
-                cd ..
-            fi
             touch track.ratings
             $sed -i "/$(mpc current -f '%title%')/d" track.ratings
             echo "${rating}${separator}$(mpc current -f "%artist%${separator}%track%${separator}%title%${separator}%date%${separator}%album%")" >> track.ratings
@@ -862,9 +859,6 @@ rateTrack () {
          if [[ "$music_dir_access" == "yes" ]]; then
              cd "$music_path"
              cd "$(dirname "$(mpc current -f %file%)")"
-             if [[ "$(pwd)" == */"$cd_divider"* ]]; then
-                 cd ..
-             fi
              touch track.ratings
              $sed -i "/$(mpc current -f '%title%')/d" track.ratings
              echo "${rating}${separator}$(mpc current -f "%artist%${separator}%track%${separator}%title%${separator}%date%${separator}%album%")" >> track.ratings
