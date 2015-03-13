@@ -140,14 +140,14 @@ def restoreTrackRating(args):
     for song in matches:
         ratingfile = open(song, 'r')
         for line in ratingfile:
-            tags = line.split(" "+config['global']['separator']+" ")
+            tags = line.split(os.environ['separator'])
             album = tags[5].rstrip('\n')
             client.findadd('artist', tags[1], 'album', album, 'track', tags[2], 'title', tags[3], 'date', tags[4])
 
     for song in client.playlistinfo():
         ratingfile = open(config['global']['music_path']+"/"+os.path.dirname(song['file'])+'/track.ratings', 'r')
         for line in ratingfile:
-            columns = line.split(" "+config['global']['separator']+" ")
+            columns = line.split(os.environ['separator'])
             if song['title'] in line and song['date'] in line and song['album'] in line and song['track'] in line:
                 client.sticker_set('song', song['file'], 'rating', columns[0])
                 print("Imported song "+song['title']+" with rating of "+columns[0])
@@ -161,14 +161,14 @@ def restoreAlbumRating(args):
     for song in matches:
         ratingfile = open(song, 'r')
         for line in ratingfile:
-            tags = line.split(" "+config['global']['separator']+" ")
+            tags = line.split(os.environ['separator'])
             album = tags[5].rstrip('\n')
             client.findadd('artist', tags[1], 'album', album, 'track', tags[2], 'title', tags[3], 'date', tags[4])
 
     for song in client.playlistinfo():
         ratingfile = open(config['global']['music_path']+"/"+os.path.dirname(song['file'])+'/album.rating', 'r')
         for line in ratingfile:
-            columns = line.split(" "+config['global']['separator']+" ")
+            columns = line.split(os.environ['separator'])
             if song['title'] in line and song['date'] in line and song['album'] in line and song['track'] in line:
                 client.sticker_set('song', song['file'], 'albumrating', columns[0])
                 print("Imported album "+song['album']+" with rating of "+columns[0])
