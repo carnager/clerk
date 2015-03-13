@@ -8,6 +8,7 @@ if [[ -f $HOME/.config/clerk/helper_config ]]; then
 else
     echo "[global]" > $HOME/.config/clerk/helper_config
 	echo "separator = " $separator "" >> $HOME/.config/clerk/helper_config
+    echo "music_path = "$music_path"" >> $HOME/.config/clerk/helper_config
     echo " " >> $HOME/.config/clerk/helper_config
     echo "[updater]" >> $HOME/.config/clerk/helper_config
     echo "change_db = xxx" >> $HOME/.config/clerk/helper_config
