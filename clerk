@@ -301,9 +301,6 @@ mpc playlist -f "%artist%${separator}%track%${separator}%title%${separator}%date
 
     cd "$music_path"
     cd "$(dirname "$(echo "$file")")"
-    if [[ "$(pwd)" == */"$cd_divider"* ]]; then
-        cd ..
-    fi
     touch album.rating
     echo "${rating}${separator}${artist}${separator}${track}${separator}${title}${separator}${date}${separator}${album}" >> album.rating
 done
@@ -855,9 +852,6 @@ rateAlbum () {
         if [[ "$music_dir_access" == "yes" ]]; then
             cd "$music_path"
             cd "$(dirname "$(mpc current -f %file%)")"
-            if [[ "$(pwd)" == */"$cd_divider"* ]]; then
-                cd ..
-            fi
             rm -f album.rating
             echo "${rating}${separator}$(mpc current -f "%artist%${separator}%track%${separator}%title%${separator}%date%${separator}%album%")" >> album.rating
         fi
