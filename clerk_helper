@@ -147,7 +147,7 @@ def restoreTrackRating(args):
     for song in client.playlistinfo():
         ratingfile = open(config['global']['music_path']+"/"+os.path.dirname(song['file'])+'/track.ratings', 'r')
         for line in ratingfile:
-            columns = line.split(os.getenv('separator'))
+            columns = line.split(" "+config['global']['separator']+" ")
             if song['title'] in line and song['date'] in line and song['album'] in line and song['track'] in line:
                 client.sticker_set('song', song['file'], 'rating', columns[0])
 
