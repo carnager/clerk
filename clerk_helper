@@ -182,16 +182,16 @@ def restoreAlbumRating(args):
             title = tag[3]
             date = tag[4]
             album = tag[5].rstrip('\n')
-            client.findadd('artist', artist, 'album', album, 'track', track, 'title', title, 'date', date)
+            client.findadd('albumartist', artist, 'album', album, 'track', track, 'title', title, 'date', date)
 
         for song in client.playlistinfo():
             if song['title'] in line and song['date'] in line and song['album'] in line:
-                client.sticker_set('song', song['file'], 'albumrating', columns[0])
-                print("Imported album "+song['album']+" with rating of "+columns[0])
+                client.sticker_set('song', song['file'], 'albumrating', rating)
+                print("Imported album "+song['album']+" with rating of "+rating)
 
 
 #create commandline arguments
-parser = argparse.ArgumentParser(prog='mppc', description='A mpc clone in python')
+parser = argparse.ArgumentParser(prog='clerk_helper', description='Companion script for clerk')
 subparsers = parser.add_subparsers()
 
 parser_prio = subparsers.add_parser('prio', help="prioritize song")
