@@ -172,9 +172,20 @@ def restoreAlbumRating(args):
     for song in matches:
         ratingfile = open(song, 'r')
         for line in ratingfile:
+            tag = []
             tags = line.split(os.environ['separator'])
-            album = tags[5].rstrip('\n')
-            client.findadd('artist', tags[1], 'album', album, 'track', tags[2], 'title', tags[3], 'date', tags[4])
+            for x in tags:
+                if isinstance(x, list):
+                    tag.append(x[0].rstrip('\n'))
+                else:
+                    tag.append(x)
+            rating = tag[0]
+            artist = tag[1]
+            track = tag[2]
+            title = tag[3]
+            date = tag[4]
+            album = tag[5].rstrip('\n')
+            client.findadd('artist', artist, 'album', album, 'track', track, 'title', title, 'date', date)
 
     for song in client.playlistinfo():
         ratingfile = open(config['global']['music_path']+"/"+os.path.dirname(song['file'])+'/album.rating', 'r')
