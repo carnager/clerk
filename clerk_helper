@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 import sys
+import re
 import os
 import notify2
 import argparse
@@ -131,7 +132,11 @@ def prioSong(args):
 
 def restoreTrackRating(args):
     for song in client.playlistinfo():
-        client.sticker_get('song', song['file'], 'rating')
+        ratingfile = open(config['global']['music_path']+"/"+os.path.dirname(song['file'])+'/track.ratings', 'r')
+        for line in ratingfile:
+            columns = line.split('•')
+            if song['title'] in line and song['date'] in line and song['album'] in line and song['track'] in line:
+                client.sticker_set('song', song['file'], 'rating', columns[0])
 
 #create commandline arguments
 parser = argparse.ArgumentParser(prog='mppc', description='A mpc clone in python')
@@ -149,14 +154,14 @@ parser_readcomments.set_defaults(call=readComments)
 parser_albumcache = subparsers.add_parser('albumcache', help="create album cache for clerk")
 parser_albumcache.set_defaults(call=albumCache)
 
-parser_restoretracks = subparsers.add_parser('restoretracks', help="restore sticker database from rating files")
-parser_restoretracks.set_defaults(call=restoreTrackRating)
-
 parser_trackcache = subparsers.add_parser('trackcache', help="create track cache for clerk")
 parser_trackcache.set_defaults(call=trackCache)
 
 parser_lastcache = subparsers.add_parser('lastcache', help="create album cache sorted by addition for clerk")
 parser_lastcache.set_defaults(call=lastCache)
+
+parser_restoretracks = subparsers.add_parser('restoretracks', help="restore sticker database from rating files")
+parser_restoretracks.set_defaults(call=restoreTrackRating)
 
 #parse arguments (thanks jat)
 args = parser.parse_args()
@@ -164,4 +169,4 @@ args = parser.parse_args()
 try:
     args.call(args)
 except AttributeError:
-    print("No arguments given. Try mppc -h")
+    print("No arguments given. Try clerk_helper -h")
