@@ -129,7 +129,7 @@ def prioSong(args):
         client.prio(255, line)
 
 
-def restoreTrackRating(args)
+def restoreTrackRating(args):
     for song in client.playlistinfo():
         client.sticker_get('song', song['file'], 'rating')
 
