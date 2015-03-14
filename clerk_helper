@@ -155,17 +155,16 @@ def restoreTrackRating(args):
             album = tag[5].rstrip('\n')
             filename = tag[6].rstrip('\n')
             if os.path.isfile(config['global']['music_path']+"/"+filename):
-                client.add(filename)
+                client.sticker_set('song', filename, 'rating', rating)
+                print("Imported song "+title+" with rating of "+rating)
             else:
                 client.searchadd('artist', artist, 'album', album, 'title', title, 'date', date)
-
-        for song in client.playlistinfo():
-            if song['title'] in line and song['date'] in line and song['album'] in line:
-                client.sticker_set('song', song['file'], 'rating', rating)
-                print("Imported song "+song['title']+" with rating of "+rating)
+                for song in client.playlistinfo():
+                    if song['title'] in line and song['date'] in line and song['album'] in line:
+                        client.sticker_set('song', song['file'], 'rating', rating)
+                        print("Imported song "+song['title']+" with rating of "+rating)
 
 def restoreAlbumRating(args):
-    client.clear()
     matches = []
     for root, dirnames, filenames in os.walk(config['global']['music_path']):
         for filename in fnmatch.filter(filenames, 'album.rating'):
@@ -188,14 +187,14 @@ def restoreAlbumRating(args):
             album = tag[5].rstrip('\n')
             filename = tag[6].rstrip('\n')
             if os.path.isfile(config['global']['music_path']+"/"+filename):
-                client.add(filename)
+                client.sticker_set('song', filename, 'albumrating', rating)
+                print("Imported album "+album+" with rating of "+rating)
             else:
                 client.searchadd('albumartist', artist, 'album', album, 'title', title, 'date', date)
-
-        for song in client.playlistinfo():
-            if song['title'] in line and song['date'] in line and song['album'] in line:
-                client.sticker_set('song', song['file'], 'albumrating', rating)
-                print("Imported album "+song['album']+" with rating of "+rating)
+                for song in client.playlistinfo():
+                    if song['title'] in line and song['date'] in line and song['album'] in line:
+                        client.sticker_set('song', song['file'], 'albumrating', rating)
+                        print("Imported album "+song['album']+" with rating of "+rating)
 
 
 #create commandline arguments
