@@ -278,7 +278,7 @@ mpc playlist -f "%artist%${separator}%track%${separator}%title%${separator}%date
     cd "$music_path"
     cd "$(dirname "$(echo "$file")")"
     touch track.ratings
-    echo "${rating}${separator}${artist}${separator}${track}${separator}${title}${separator}${date}${separator}${album}" >> track.ratings
+    echo "${rating}${separator}${artist}${separator}${track}${separator}${title}${separator}${date}${separator}${album}${separator}${file}" >> track.ratings
 done
 }
 
@@ -302,7 +302,7 @@ mpc playlist -f "%artist%${separator}%track%${separator}%title%${separator}%date
     cd "$music_path"
     cd "$(dirname "$(echo "$file")")"
     touch album.rating
-    echo "${rating}${separator}${artist}${separator}${track}${separator}${title}${separator}${date}${separator}${album}" >> album.rating
+    echo "${rating}${separator}${artist}${separator}${track}${separator}${title}${separator}${date}${separator}${album}${separator}${file}" >> album.rating
 done
 }
 

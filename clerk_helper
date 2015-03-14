@@ -153,7 +153,11 @@ def restoreTrackRating(args):
             title = tag[3]
             date = tag[4]
             album = tag[5].rstrip('\n')
-            client.findadd('artist', artist, 'album', album, 'track', track, 'title', title, 'date', date)
+            filename = tag[6].rstrip('\n')
+            if os.path.isfile(config['global']['music_path']+"/"+filename):
+                client.add(filename)
+            else:
+                client.searchadd('artist', artist, 'album', album, 'title', title, 'date', date)
 
         for song in client.playlistinfo():
             if song['title'] in line and song['date'] in line and song['album'] in line:
@@ -182,7 +186,11 @@ def restoreAlbumRating(args):
             title = tag[3]
             date = tag[4]
             album = tag[5].rstrip('\n')
-            client.findadd('albumartist', artist, 'album', album, 'track', track, 'title', title, 'date', date)
+            filename = tag[6].rstrip('\n')
+            if os.path.isfile(config['global']['music_path']+"/"+filename):
+                client.add(filename)
+            else:
+                client.searchadd('albumartist', artist, 'album', album, 'title', title, 'date', date)
 
         for song in client.playlistinfo():
             if song['title'] in line and song['date'] in line and song['album'] in line:
