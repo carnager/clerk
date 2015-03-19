@@ -30,9 +30,15 @@ else
     clerk_helper update &
 fi
 
-album_temp=$(cat $HOME/.config/clerk/album.cache)
-tracks_temp=$(cat $HOME/.config/clerk/tracks.cache)
-last_temp=$(cat $HOME/.config/clerk/last.cache)
+if [[ -f $HOME/.config/clerk/album.cache ]]; then
+    album_temp=$(cat $HOME/.config/clerk/album.cache)
+fi
+if [[ -f $HOME/.config/clerk/tracks.cache ]]; then
+    tracks_temp=$(cat $HOME/.config/clerk/tracks.cache)
+fi
+if [[ -f $HOME/.config/clerk/last.cache ]]; then
+    last_temp=$(cat $HOME/.config/clerk/last.cache)
+fi
 
 # Use GNU coreutils on OSX
 sed=$([[ "$OSTYPE" == "darwin"* ]] && echo 'gsed' || echo 'sed')
