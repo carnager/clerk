@@ -926,19 +926,19 @@ loadRandomRating () {
 }
 
 playRandomAlbum () {
-    mpc clear
+    mpc clear > /dev/null
     artist="$(mpc list "$mpd_artist" | $shuf -n 1)"
     album="$(mpc list album "$mpd_artist" "$artist" | $shuf -n 1)"
-    mpc find album "$album" "$mpd_artist" "$artist" | mpc add && mpc play
+    mpc find album "$album" "$mpd_artist" "$artist" | mpc add && mpc play > /dev/null
 }
 
 playRandomTracks () {
-    mpc clear
+    mpc clear > /dev/null
     artist="$(mpc list "$random_artist" | $shuf -n 1)"
     album="$(mpc list album "$random_artist" "$artist" | $shuf -n 1)"
     title="$(mpc list title album "$album" "$random_artist" "$artist" | $shuf -n 1)"
     mpc find album "$album" "$random_artist" "$artist" title "$title" | mpc add
-    mpc play
+    mpc play > /dev/null
     n=0; while (( n++ < $value -1 ));
     do
         artist="$(mpc list "$random_artist" | $shuf -n 1)"
@@ -946,7 +946,7 @@ playRandomTracks () {
         title="$(mpc list title album "$album" "$random_artist" "$artist" | $shuf -n 1)"
         mpc find album "$album" "$random_artist" "$artist" title "$title" | mpc add
     done
-    mpc play
+    mpc play > /dev/null
     exit
 }
 
