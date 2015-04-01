@@ -1800,7 +1800,7 @@ while :; do
             echo "Playlist"
             echo "  --queue <show, delete, suspend, resume>         manage current queue"
             echo "  --manage                                        manage playlists"
-            echo "  --playlist <savealbum, savelast, savetrack> save selection to playlist \"clerk\""
+            echo "  --playlist <savealbum, savelast, savetrack>     save selection to playlist \"clerk\""
             echo "  --rss                                           load podcast"
             echo "    (podcast should be placed in ~/.config/clerk/podcasts"
             echo "     with format NAME \ URL)"
