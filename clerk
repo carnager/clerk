@@ -1523,7 +1523,7 @@ browseGenre2() {
     fi
 }
 
-savetoPlaylist() {
+saveAlbumToPlaylist() {
     declare -i seen=0
     while read TRACK
     do
@@ -1537,6 +1537,50 @@ savetoPlaylist() {
             mpc search date "$date" album "$album" $mpd_artist "$artist" | clerk_helper saveto
         fi
     done < <(echo -e "0  Return to Main Menu\n---\n$(echo "$album_temp")" | dmenu_t -dmenu -p "Save Album to Playlist > ")
+
+    if [[  $seen = 0 ]]
+    then
+        exit
+    fi
+}
+
+
+saveLatestToPlaylist() {
+    declare -i seen=0
+    while read TRACK
+    do
+        seen=1
+        if [[ "$TRACK" == "0  Return to Main Menu" ]]
+            then dplayPrompt
+        else
+            artist=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
+            date=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
+            album=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
+            mpc search date "$date" album "$album" $mpd_artist "$artist" | clerk_helper saveto
+        fi
+    done < <(echo -e "0  Return to Main Menu\n---\n$(echo "$last_temp")" | dmenu_t -dmenu -p "Save Album to Playlist > ")
+
+    if [[  $seen = 0 ]]
+    then
+        exit
+    fi
+}
+
+saveTrackToPlaylist() {
+    declare -i seen=0
+    while read TRACK
+    do
+        seen=1
+        if [[ "$TRACK" == "0  Return to Main Menu" ]]
+            then dplayPrompt
+        else
+            artist=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
+            track=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
+            album=$(echo "$TRACK" | awk -F "$separator" '{print $4}')
+            title=$(echo "$TRACK" | awk -F "$separator" '{print $5}')
+            mpc search track "$track" album "$album" title "$title" $mpd_artist "$artist" | clerk_helper saveto
+        fi
+    done < <(echo -e "0  Return to Main Menu\n---\n$(echo "$tracks_temp")" | dmenu_t -dmenu -p "Save Track to Playlist > ")
 
     if [[  $seen = 0 ]]
     then
@@ -1578,7 +1622,11 @@ while :; do
             elif [[ $2 == latest ]]; then
                 addLastMod
             elif [[ $2 == savealbum ]]; then
-                savetoPlaylist
+                saveAlbumToPlaylist
+            elif [[ $2 == savelast ]]; then
+                saveLatestToPlaylist
+            elif [[ $2 == savetrack ]]; then
+                saveTrackToPlaylist
             fi
             break
             ;;
@@ -1741,6 +1789,7 @@ while :; do
             echo ""
             echo "Library"
             echo "  --add <track, album, latest>                    adds selection at the end of the queue"
+            echo "  --add <savealbum, savelatest, savetrack>        adds selection to a playlist called \"clerk\""
             echo "  --insert <track, album, latest>                 inserts selection after playing song"
             echo "  --replace <track, album, latest>                replaces queue with selection"
             echo "  --browse <artist, date, genre, folder, system>  browse library"
