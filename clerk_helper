@@ -196,6 +196,11 @@ def restoreAlbumRating(args):
                         client.sticker_set('song', song['file'], 'albumrating', rating)
                         print("Imported album "+song['album']+" with rating of "+rating)
 
+def savetoPlaylist(args):
+    for line in sys.stdin:
+        if line.strip():
+            line=line.strip(); client.playlistadd("clerk", line)
+#            print(line, end="")
 
 #create commandline arguments
 parser = argparse.ArgumentParser(prog='clerk_helper', description='Companion script for clerk')
@@ -212,6 +217,9 @@ parser_readcomments.set_defaults(call=readComments)
 
 parser_albumcache = subparsers.add_parser('albumcache', help="create album cache for clerk")
 parser_albumcache.set_defaults(call=albumCache)
+
+parser_saveto = subparsers.add_parser('saveto', help="save stdin to playlist \"clerk\"")
+parser_saveto.set_defaults(call=savetoPlaylist)
 
 parser_trackcache = subparsers.add_parser('trackcache', help="create track cache for clerk")
 parser_trackcache.set_defaults(call=trackCache)
@@ -232,3 +240,4 @@ try:
     args.call(args)
 except AttributeError:
     print("No arguments given. Try clerk_helper -h")
+

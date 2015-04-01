@@ -1047,6 +1047,8 @@ AddAlbumTags() {
 }
 
 
+
+
 InsertAlbumTags() {
     while read TRACK
     do
@@ -1521,6 +1523,27 @@ browseGenre2() {
     fi
 }
 
+savetoPlaylist() {
+    declare -i seen=0
+    while read TRACK
+    do
+        seen=1
+        if [[ "$TRACK" == "0  Return to Main Menu" ]]
+            then dplayPrompt
+        else
+            artist=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
+            date=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
+            album=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
+            mpc search date "$date" album "$album" $mpd_artist "$artist" | clerk_helper saveto
+        fi
+    done < <(echo -e "0  Return to Main Menu\n---\n$(echo "$album_temp")" | dmenu_t -dmenu -p "Save Album to Playlist > ")
+
+    if [[  $seen = 0 ]]
+    then
+        exit
+    fi
+}
+
 
 ################################################################################
 
@@ -1554,6 +1577,8 @@ while :; do
                 AddAlbumTags
             elif [[ $2 == latest ]]; then
                 addLastMod
+            elif [[ $2 == savealbum ]]; then
+                savetoPlaylist
             fi
             break
             ;;
