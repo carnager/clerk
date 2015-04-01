@@ -1621,12 +1621,6 @@ while :; do
                 AddAlbumTags
             elif [[ $2 == latest ]]; then
                 addLastMod
-            elif [[ $2 == savealbum ]]; then
-                saveAlbumToPlaylist
-            elif [[ $2 == savelast ]]; then
-                saveLatestToPlaylist
-            elif [[ $2 == savetrack ]]; then
-                saveTrackToPlaylist
             fi
             break
             ;;
@@ -1756,8 +1750,17 @@ while :; do
             loadRSS
             break
             ;;
-        --playlist)
+        --manage)
             managePlaylists
+            ;;
+        --playlist)
+            if [[ $2 == savealbum ]]; then
+                saveAlbumToPlaylist
+            elif [[ $2 == savelast ]]; then
+                saveLatestToPlaylist
+            elif [[ $2 == savetrack ]]; then
+                saveTrackToPlaylist
+            fi
             break
             ;;
         --lastfm)
@@ -1789,7 +1792,6 @@ while :; do
             echo ""
             echo "Library"
             echo "  --add <track, album, latest>                    adds selection at the end of the queue"
-            echo "  --add <savealbum, savelatest, savetrack>        adds selection to a playlist called \"clerk\""
             echo "  --insert <track, album, latest>                 inserts selection after playing song"
             echo "  --replace <track, album, latest>                replaces queue with selection"
             echo "  --browse <artist, date, genre, folder, system>  browse library"
@@ -1797,7 +1799,8 @@ while :; do
             echo ""
             echo "Playlist"
             echo "  --queue <show, delete, suspend, resume>         manage current queue"
-            echo "  --playlist                                      manage playlists"
+            echo "  --manage                                        manage playlists"
+            echo "  --playlist <savealbum, savelast, savetrack> save selection to playlist \"clerk\""
             echo "  --rss                                           load podcast"
             echo "    (podcast should be placed in ~/.config/clerk/podcasts"
             echo "     with format NAME \ URL)"
