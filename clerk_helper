@@ -2,14 +2,12 @@
 
 from __future__ import print_function
 import sys
-import re
 import os
 import notify2
 import argparse
 import types
 import fnmatch
 from mpd import MPDClient
-import time
 import configparser
 client = MPDClient()
 
