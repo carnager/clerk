@@ -43,6 +43,7 @@ see `clerk -h` for all default arguments.
 * rofi (https://github.com/DaveDavenport/rofi)
 * mpc
 * python-mpd2 (https://github.com/Mic92/python-mpd2)
+* python-notify2
 
 Hint: When using rofi, you can use Shift+Enter to execute several commands
 e.g. adding more than one song.
