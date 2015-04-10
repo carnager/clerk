@@ -2,6 +2,12 @@
 
 shopt -s globstar
 
+if [[ ! -f $HOME/.config/clerk/config ]]; then
+	echo "Error: could not find configuration file \"$HOME/.config/clerk/config\""
+	echo "You can use the provided example configuration file (config.clerk), copy it to the above location and edit it to your needs."
+	exit
+fi
+
 source $HOME/.config/clerk/config
 if [[ -f $HOME/.config/clerk/helper_config ]]; then
     :

@@ -56,8 +56,8 @@ e.g. adding more than one song.
 
 # Installation
 
-1. Install dependecies (each binary needs to be in your $PATH)
-2. Copy config.example to $HOME/.config/clerk/config and edit it.
+1. Install dependencies (each binary needs to be in your $PATH)
+2. Copy config.clerk to $HOME/.config/clerk/config and edit it.
 3. Copy clerk and clerk_helper to $PATH
 4. Run clerk
 
