@@ -6,7 +6,6 @@ import os
 import notify2
 import json
 import argparse
-import types
 import fnmatch
 from mpd import MPDClient
 import configparser
@@ -15,8 +14,8 @@ client = MPDClient()
 config = configparser.ConfigParser()
 config.sections()
 config.read(os.getenv('HOME')+'/.config/clerk/helper_config')
-change_db=(config['updater']['change_db'])
-separator=(config['global']['separator'])
+change_db = (config['updater']['change_db'])
+separator = (config['global']['separator'])
 os.environ['separator'] = str(" "+separator+" ")
 
 mpd_host = 'localhost'
@@ -42,8 +41,8 @@ if mpd_pass:
 
 
 def update(args):
-    db=(client.stats())
-    new_db=db.get('db_update')
+    db = (client.stats())
+    new_db = db.get('db_update')
     if change_db == new_db:
         if (os.path.isfile(os.getenv('HOME')+'/.config/clerk/tracks.cache.json')):
             quit()
@@ -51,93 +50,92 @@ def update(args):
             notify2.init('Clerk')
             n = notify2.Notification("Clerk", "Updating Cache Files")
             n.show()
-            trackCache(args)
-            albumCache(args)
+            createCache(args)
     else:
         notify2.init('Clerk')
         n = notify2.Notification("Clerk", "Updating Cache Files")
         n.show()
-        trackCache(args)
-        albumCache(args)
+        createCache(args)
     config['updater']['change_db'] = str(new_db)
     with open(os.getenv('HOME')+'/.config/clerk/helper_config', 'w') as configfile:
         config.write(configfile)
 
 
-
 def lookup(key, fields):
     artistlist = client.list(key)
-    content = set()
     for artist in artistlist:
         for element in client.find(key, artist):
-            elementvalues = []
+            entry = {}
             for field in fields:
                 if field in element:
-                    fieldvalue = element[field]
+                    if isinstance(element[field], list):
+                        entry[field] = element[field][0]
+                    else:
+                        entry[field] = element[field]
                 else:
-                    fieldvalue = ''
+                    entry[field] = ''
+            yield entry
 
 
-                # mpd treats some tags alike. e.g. "trackc" and "tracknumber"
-                # in that case it returns a list of tracks, which can be
-                # troublesome. Make sure to only take first item of such lists.
-
-                if isinstance(fieldvalue, list):
-                    elementvalues.append(fieldvalue[0])
-                else:
-                    elementvalues.append(fieldvalue)
-            content.add(tuple(elementvalues))
-    return content
-
-def trackCache(args):
+def createCache(args):
+    # track cache creation
     key = 'artist'
     fields = ('artist', 'track', 'title', 'album')
-    content = lookup(key, fields)
+    all_tracks = list({repr(t): t for t in lookup(key, fields)}.values())
     with open(os.getenv('HOME')+'/.config/clerk/tracks.cache.json', "w") as cache_file:
-        json.dump(list(content), cache_file)
+        json.dump(all_tracks, cache_file)
 
-
-# album cache will be used for getAlbums and getLatest, so last-modified needs to be included
-# is it possible to only write one item for each album? (the youngest)
-
-def albumCache(args):
+    # album cache creation with only the youngest track modified
     key = 'albumartist'
     fields = ('albumartist', 'date', 'album', 'last-modified')
-    content = lookup(key, fields)
+    album_cache = {}
+    for entry in lookup(key, fields):
+        # key = repr(entry)
+        # cant use repr in this case because last-modified could differ for
+        # songs from the same album and we want these to clash.
+        key = entry['albumartist'] + entry['album']
+        if key not in album_cache:
+            album_cache[key] = entry
+        else:
+            if entry['last-modified'] > album_cache[key]['last-modified']:
+                album_cache[key] = entry
     with open(os.getenv('HOME')+'/.config/clerk/albums.cache.json', "w") as cache_file:
-        json.dump(list(content), cache_file)
+        json.dump([entry for entry in album_cache.values()], cache_file)
 
 
 def getTracks(args):
     with open(os.getenv('HOME')+'/.config/clerk/tracks.cache.json') as cache_file:
         content = json.load(cache_file)
-    sorted_content = sorted(content)
-    print('\n'.join([os.getenv('separator').join(entry) for entry in sorted_content]))
+    sorted_content = sorted(content, key=lambda x: (x['artist'], x['album'], x['track']))
+    print('\n'.join([os.getenv('separator').join([entry['artist'],
+                                                  entry['track'],
+                                                  entry['title'],
+                                                  entry['album']])
+                     for entry in sorted_content]))
 
-
-# how to make this a unique list of albums? right now it has lots of duplicates, because each
-# album has several tracks with different mtime (last-modified)
-# if albumCache creation could filter out these (see above) this wouldnt even be an issue.
 
 def getAlbums(args):
     with open(os.getenv('HOME')+'/.config/clerk/albums.cache.json') as cache_file:
         content = json.load(cache_file)
-    sorted_content = list(sorted(content))
-    for entry in sorted_content:
-        print(entry[0]+" "+separator+" "+entry[1]+" "+separator+" "+entry[2])
+    sorted_content = sorted(content, key=lambda x: (x['albumartist'], x['date'], x['album']))
+    print('\n'.join([os.getenv('separator').join([entry['albumartist'],
+                                                  entry['date'],
+                                                  entry['album']])
+                     for entry in sorted_content]))
 
-
-# same issue as above, but even worse: we need to sort by mtime, then make the list uniq without breaking sort-order.
 
 def getLatest(args):
     with open(os.getenv('HOME')+'/.config/clerk/albums.cache.json') as cache_file:
         content = json.load(cache_file)
-    sorted_content = sorted(content, key=lambda elem: elem[3], reverse=True)
-    for entry in sorted_content:
-        print(entry[1]+" "+separator+" "+entry[0]+" "+separator+" "+entry[2])
+    sorted_content = sorted(content, key=lambda x: (x['last-modified']), reverse=True)
+    print('\n'.join([os.getenv('separator').join([entry['albumartist'],
+                                                  entry['date'],
+                                                  entry['last-modified'],
+                                                  entry['album']])
+                     for entry in sorted_content]))
 
 def readComments(args):
-    args=vars(args)
+    args = vars(args)
 
     comments = (client.readcomments(sys.stdin.read()[:-1]))
     for key, value in sorted(comments.items()):
@@ -166,7 +164,7 @@ def restoreTrackRating(args):
                     tag.append(x)
             rating = tag[0]
             artist = tag[1]
-            track = tag[2]
+            # track = tag[2]
             title = tag[3]
             date = tag[4]
             album = tag[5].rstrip('\n')
@@ -198,7 +196,7 @@ def restoreAlbumRating(args):
                     tag.append(x)
             rating = tag[0]
             artist = tag[1]
-            track = tag[2]
+            # track = tag[2]
             title = tag[3]
             date = tag[4]
             album = tag[5].rstrip('\n')
@@ -216,10 +214,11 @@ def restoreAlbumRating(args):
 def savetoPlaylist(args):
     for line in sys.stdin:
         if line.strip():
-            line=line.strip(); client.playlistadd("clerk", line)
+            line = line.strip()
+            client.playlistadd("clerk", line)
 #            print(line, end="")
 
-#create commandline arguments
+# create commandline arguments
 parser = argparse.ArgumentParser(prog='clerk_helper', description='Companion script for clerk')
 subparsers = parser.add_subparsers()
 
@@ -232,14 +231,11 @@ parser_update.set_defaults(call=update)
 parser_readcomments = subparsers.add_parser('readcomments', help="show all tags of current song")
 parser_readcomments.set_defaults(call=readComments)
 
-parser_albumcache = subparsers.add_parser('albumcache', help="create album cache for clerk")
-parser_albumcache.set_defaults(call=albumCache)
-
 parser_saveto = subparsers.add_parser('saveto', help="save stdin to playlist \"clerk\"")
 parser_saveto.set_defaults(call=savetoPlaylist)
 
-parser_trackcache = subparsers.add_parser('trackcache', help="create track cache for clerk")
-parser_trackcache.set_defaults(call=trackCache)
+parser_createcache = subparsers.add_parser('createcache', help="create track cache for clerk")
+parser_createcache.set_defaults(call=createCache)
 
 parser_gettracks = subparsers.add_parser('getTracks', help="get all tracks from track cache for clerk")
 parser_gettracks.set_defaults(call=getTracks)
@@ -256,11 +252,10 @@ parser_restoretracks.set_defaults(call=restoreTrackRating)
 parser_restorealbums = subparsers.add_parser('restorealbums', help="restore sticker database from rating files")
 parser_restorealbums.set_defaults(call=restoreAlbumRating)
 
-#parse arguments (thanks jat)
+# parse arguments (thanks jat)
 args = parser.parse_args()
 
 try:
     args.call(args)
 except AttributeError:
     print("No arguments given. Try clerk_helper -h")
-
