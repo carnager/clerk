@@ -43,13 +43,13 @@ else
     clerk_helper update &
 fi
 
+export separator="$separator"
 if [[ -f $HOME/.config/clerk/albums.cache.json ]]; then
-    #album_temp=$(cat $HOME/.config/clerk/albums.cache.json)
-    album_temp=$(clerk_helper getAlbums | uniq)
-	last_temp=$(clerk_helper getLatest | uniq)
+    album_temp=$(clerk_helper getAlbums)
+    last_temp=$(clerk_helper getLatest | awk -F "${separator}" '{ print $1 ENVIRON["separator"] $2 ENVIRON["separator"] $3 }')
 fi
 if [[ -f $HOME/.config/clerk/tracks.cache.json ]]; then
-    # tracks_temp=$(cat $HOME/.config/clerk/tracks.cache.json)
+    #tracks_temp=$(cat $HOME/.config/clerk/tracks.cache)
     tracks_temp=$(clerk_helper getTracks)
 fi
 
@@ -60,7 +60,7 @@ tac=$([[ "$OSTYPE" == "darwin"* ]] && echo 'gtac' || echo 'tac')
 
 updateCache() {
     rm -f $HOME/.config/clerk/*.cache
-    clerk_helper update &
+    clerk_helper createcache
 }
 
 dplayPrompt () {
