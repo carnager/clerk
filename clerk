@@ -36,14 +36,14 @@ else
     clerk_helper update &
 fi
 
-if [[ -f $HOME/.config/clerk/album.cache ]]; then
-    album_temp=$(cat $HOME/.config/clerk/album.cache)
+if [[ -f $HOME/.config/clerk/albums.cache.json ]]; then
+    #album_temp=$(cat $HOME/.config/clerk/albums.cache.json)
+    album_temp=$(clerk_helper getAlbums | uniq)
+	last_temp=$(clerk_helper getLatest | uniq)
 fi
-if [[ -f $HOME/.config/clerk/tracks.cache ]]; then
-    tracks_temp=$(cat $HOME/.config/clerk/tracks.cache)
-fi
-if [[ -f $HOME/.config/clerk/last.cache ]]; then
-    last_temp=$(cat $HOME/.config/clerk/last.cache)
+if [[ -f $HOME/.config/clerk/tracks.cache.json ]]; then
+    # tracks_temp=$(cat $HOME/.config/clerk/tracks.cache.json)
+    tracks_temp=$(clerk_helper getTracks)
 fi
 
 # Use GNU coreutils on OSX

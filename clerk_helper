@@ -4,6 +4,7 @@ from __future__ import print_function
 import sys
 import os
 import notify2
+import json
 import argparse
 import types
 import fnmatch
@@ -44,22 +45,20 @@ def update(args):
     db=(client.stats())
     new_db=db.get('db_update')
     if change_db == new_db:
-        if (os.path.isfile(os.getenv('HOME')+'/.config/clerk/tracks.cache')):
+        if (os.path.isfile(os.getenv('HOME')+'/.config/clerk/tracks.cache.json')):
             quit()
         else:
             notify2.init('Clerk')
             n = notify2.Notification("Clerk", "Updating Cache Files")
             n.show()
-            albumCache(args)
             trackCache(args)
-            lastCache(args)
+            albumCache(args)
     else:
         notify2.init('Clerk')
         n = notify2.Notification("Clerk", "Updating Cache Files")
         n.show()
-        albumCache(args)
         trackCache(args)
-        lastCache(args)
+        albumCache(args)
     config['updater']['change_db'] = str(new_db)
     with open(os.getenv('HOME')+'/.config/clerk/helper_config', 'w') as configfile:
         config.write(configfile)
@@ -88,40 +87,54 @@ def trackCache(args):
     key = 'artist'
     fields = ('artist', 'track', 'title', 'album')
     content = lookup(key, fields)
-    fh = open(os.getenv('HOME')+'/.config/clerk/tracks.cache', "w")
-    entries = [os.getenv('separator').join(entry) for entry in content]
-    for entry in sorted(entries, key=str.lower):
-        fh.write(entry+"\n")
-    fh.close()
+    with open(os.getenv('HOME')+'/.config/clerk/tracks.cache.json', "w") as cache_file:
+        json.dump(list(content), cache_file)
+
+
+# album cache will be used for getAlbums and getLatest, so last-modified needs to be included
+# is it possible to only write one item for each album? (the youngest)
 
 def albumCache(args):
     key = 'albumartist'
-    fields = ('albumartist', 'date', 'album')
+    fields = ('albumartist', 'date', 'album', 'last-modified')
     content = lookup(key, fields)
-    fh = open(os.getenv('HOME')+'/.config/clerk/album.cache', "w")
-    entries = [os.getenv('separator').join(entry) for entry in content]
-    for entry in sorted(entries, key=str.lower):
-        fh.write(entry+"\n")
-    fh.close()
+    with open(os.getenv('HOME')+'/.config/clerk/albums.cache.json', "w") as cache_file:
+        json.dump(list(content), cache_file)
 
-def lastCache(args):
-    key = 'albumartist'
-    fields = ('last-modified', 'date', 'albumartist', 'album')
-    content = lookup(key, fields)
-    seen = set()
-    fh = open(os.getenv('HOME')+'/.config/clerk/last.cache', "w")
-    for element in sorted(content, key=lambda elem: elem[0], reverse=True):
-        if element[1:] not in seen:
-            line = element[1:]
-            fh.write(os.getenv('separator').join(line)+"\n")
-            seen.add(line)
-    fh.close()
+
+def getTracks(args):
+    with open(os.getenv('HOME')+'/.config/clerk/tracks.cache.json') as cache_file:
+        content = json.load(cache_file)
+    sorted_content = sorted(content)
+    print('\n'.join([seprator.join(entry) for entry in sorted_content]))
+
+
+# how to make this a unique list of albums? right now it has lots of duplicates, because each
+# album has several tracks with different mtime (last-modified)
+# if albumCache creation could filter out these (see above) this wouldnt even be an issue.
+
+def getAlbums(args):
+    with open(os.getenv('HOME')+'/.config/clerk/albums.cache.json') as cache_file:
+        content = json.load(cache_file)
+    sorted_content = list(sorted(content))
+    for entry in sorted_content:
+        print(entry[0]+" "+separator+" "+entry[1]+" "+separator+" "+entry[2])
+
+
+# same issue as above, but even worse: we need to sort by mtime, then make the list uniq without breaking sort-order.
+
+def getLatest(args):
+    with open(os.getenv('HOME')+'/.config/clerk/albums.cache.json') as cache_file:
+        content = json.load(cache_file)
+    sorted_content = sorted(content, key=lambda elem: elem[3], reverse=True)
+    for entry in sorted_content:
+        print(entry[1]+" "+separator+" "+entry[0]+" "+separator+" "+entry[2])
 
 def readComments(args):
     args=vars(args)
 
     comments = (client.readcomments(sys.stdin.read()[:-1]))
-    for key, value in sorted(comments.items()):
+    for key, value in sorted(comments.items()): 
         print('%s : %s' % (key, value))
 
 def prioSong(args):
@@ -222,8 +235,14 @@ parser_saveto.set_defaults(call=savetoPlaylist)
 parser_trackcache = subparsers.add_parser('trackcache', help="create track cache for clerk")
 parser_trackcache.set_defaults(call=trackCache)
 
-parser_lastcache = subparsers.add_parser('lastcache', help="create album cache sorted by addition for clerk")
-parser_lastcache.set_defaults(call=lastCache)
+parser_gettracks = subparsers.add_parser('getTracks', help="get all tracks from track cache for clerk")
+parser_gettracks.set_defaults(call=getTracks)
+
+parser_getalbums = subparsers.add_parser('getAlbums', help="get all albums from album cache for clerk")
+parser_getalbums.set_defaults(call=getAlbums)
+
+parser_getlatest = subparsers.add_parser('getLatest', help="get all albums from album cache for clerk, sorted by mtime")
+parser_getlatest.set_defaults(call=getLatest)
 
 parser_restoretracks = subparsers.add_parser('restoretracks', help="restore sticker database from rating files")
 parser_restoretracks.set_defaults(call=restoreTrackRating)
