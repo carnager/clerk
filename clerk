@@ -2,13 +2,20 @@
 
 shopt -s globstar
 
-if [[ ! -f $HOME/.config/clerk/config ]]; then
-	echo "Error: could not find configuration file \"$HOME/.config/clerk/config\""
-	echo "You can use the provided example configuration file (config.clerk), copy it to the above location and edit it to your needs."
+if [[ ! -f $HOME/.config/clerk/config ]] && [[ ! -f /etc/clerk ]]; then
+    echo "Error: could not find configuration file \"$HOME/.config/clerk/config\""
+    echo "You can use the provided example configuration file (config.clerk), copy it to the above location and edit it to your needs."
 	exit
 fi
 
-source $HOME/.config/clerk/config
+if [[ -f /etc/clerk ]]; then
+    source /etc/clerk
+fi
+
+if [[ -f $HOME/.config/clerk/config ]]; then
+    source $HOME/.config/clerk/config
+fi
+
 if [[ -f $HOME/.config/clerk/helper_config ]]; then
     :
 else
