@@ -112,7 +112,7 @@ def getTracks(args):
     with open(os.getenv('HOME')+'/.config/clerk/tracks.cache.json') as cache_file:
         content = json.load(cache_file)
     sorted_content = sorted(content)
-    print('\n'.join([seprator.join(entry) for entry in sorted_content]))
+    print('\n'.join([separator.join(entry) for entry in sorted_content]))
 
 
 # how to make this a unique list of albums? right now it has lots of duplicates, because each
