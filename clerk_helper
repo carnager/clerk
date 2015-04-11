@@ -128,10 +128,10 @@ def getLatest(args):
     with open(os.getenv('HOME')+'/.config/clerk/albums.cache.json') as cache_file:
         content = json.load(cache_file)
     sorted_content = sorted(content, key=lambda x: (x['last-modified']), reverse=True)
-    print('\n'.join([os.getenv('separator').join([entry['albumartist'],
+    print('\n'.join([os.getenv('separator').join([entry['date'],
+                                                  entry['albumartist'],
                                                   entry['date'],
-                                                  entry['last-modified'],
-                                                  entry['album']])
+                                                  entry['last-modified']])
                      for entry in sorted_content]))
 
 def readComments(args):
