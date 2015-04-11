@@ -76,6 +76,12 @@ def lookup(key, fields):
                     fieldvalue = element[field]
                 else:
                     fieldvalue = ''
+
+
+                # mpd treats some tags alike. e.g. "trackc" and "tracknumber"
+                # in that case it returns a list of tracks, which can be
+                # troublesome. Make sure to only take first item of such lists.
+
                 if isinstance(fieldvalue, list):
                     elementvalues.append(fieldvalue[0])
                 else:
@@ -134,7 +140,7 @@ def readComments(args):
     args=vars(args)
 
     comments = (client.readcomments(sys.stdin.read()[:-1]))
-    for key, value in sorted(comments.items()): 
+    for key, value in sorted(comments.items()):
         print('%s : %s' % (key, value))
 
 def prioSong(args):
