@@ -130,7 +130,7 @@ def getLatest(args):
     sorted_content = sorted(content, key=lambda x: (x['last-modified']), reverse=True)
     print('\n'.join([os.getenv('separator').join([entry['date'],
                                                   entry['albumartist'],
-                                                  entry['date'],
+                                                  entry['album'],
                                                   entry['last-modified']])
                      for entry in sorted_content]))
 
