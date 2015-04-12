@@ -44,14 +44,26 @@ else
 fi
 
 export separator="$separator"
+
+loadCacheAlbums () {
 if [[ -f $HOME/.config/clerk/albums.cache.json ]]; then
     album_temp=$(clerk_helper getAlbums)
+fi
+}
+
+loadCacheLatest () {
+if [[ -f $HOME/.config/clerk/albums.cache.json ]]; then
     last_temp=$(clerk_helper getLatest | awk -F "${separator}" '{ print $1 ENVIRON["separator"] $2 ENVIRON["separator"] $3 }')
 fi
+}
+
+
+loadCacheTracks () {
 if [[ -f $HOME/.config/clerk/tracks.cache.json ]]; then
     #tracks_temp=$(cat $HOME/.config/clerk/tracks.cache)
     tracks_temp=$(clerk_helper getTracks)
 fi
+}
 
 # Use GNU coreutils on OSX
 sed=$([[ "$OSTYPE" == "darwin"* ]] && echo 'gsed' || echo 'sed')
@@ -970,6 +982,7 @@ playRandomTracks () {
 }
 
 addLastMod() {
+    loadCacheLatest
     declare -i seen=0
     while read ALBUM
     do
@@ -991,6 +1004,7 @@ addLastMod() {
 }
 
 insertLastMod() {
+    loadCacheLatest
     declare -i seen=0
     while read ALBUM
     do
@@ -1013,6 +1027,7 @@ export MPD_HOST=127.0.0.1
 }
 
 replaceLastMod() {
+    loadCacheLatest
     declare -i seen=0
     while read ALBUM
     do
@@ -1035,6 +1050,7 @@ replaceLastMod() {
 
 
 AddAlbumTags() {
+    loadCacheAlbums
     declare -i seen=0
     while read TRACK
     do
@@ -1063,6 +1079,7 @@ AddAlbumTags() {
 
 
 InsertAlbumTags() {
+    loadCacheAlbums
     while read TRACK
     do
         if [[ "$TRACK" = "0  Return to Main Menu" ]]
@@ -1081,6 +1098,7 @@ InsertAlbumTags() {
 }
 
 ReplaceAlbumTags() {
+    loadCacheAlbums
     declare -i seen=0
     while read TRACK
     do
@@ -1106,6 +1124,7 @@ ReplaceAlbumTags() {
 }
 
 AddTrackTags() {
+    loadCacheTracks
     while read TRACK
     do
         if [[ "$TRACK" == "0  Return to Main Menu" ]]
@@ -1128,6 +1147,7 @@ AddTrackTags() {
 }
 
 InsertTrackTags() {
+    loadCacheTracks
     random="$(mpc status | tail -1 | awk -F ':' '{ print $4 }' | cut -d ' ' -f 2)"
     while read TRACK
     do
@@ -1159,6 +1179,7 @@ InsertTrackTags() {
 }
 
 ReplaceTrackTags() {
+    loadCacheTracks
     while read TRACK
     do
         if [[ "$TRACK" == "0  Return to Main Menu" ]]
