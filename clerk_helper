@@ -80,7 +80,7 @@ def lookup(key, fields):
 def createCache(args):
     # track cache creation
     key = 'artist'
-    fields = ('artist', 'track', 'title', 'album')
+    fields = ('artist', 'track', 'title', 'album', 'disc')
     all_tracks = list({repr(t): t for t in lookup(key, fields)}.values())
     with open(os.getenv('HOME')+'/.config/clerk/tracks.cache.json', "w") as cache_file:
         json.dump(all_tracks, cache_file)
@@ -103,10 +103,20 @@ def createCache(args):
         json.dump([entry for entry in album_cache.values()], cache_file)
 
 
+def track_sort(track_num):
+    if track_num == '':
+        return 0
+    else:
+        return int(track_num.split('/')[0])
+
+
 def getTracks(args):
     with open(os.getenv('HOME')+'/.config/clerk/tracks.cache.json') as cache_file:
         content = json.load(cache_file)
-    sorted_content = sorted(content, key=lambda x: (x['artist'], x['album'], x['track']))
+    sorted_content = sorted(content, key=lambda x: (x['artist'],
+                                                    x['album'],
+                                                    x['disc'],
+                                                    track_sort(x['track'])))
     print('\n'.join([os.getenv('separator').join([entry['artist'],
                                                   entry['track'],
                                                   entry['title'],
