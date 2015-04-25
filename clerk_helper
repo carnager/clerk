@@ -186,7 +186,7 @@ def append_entry(fastlist, entry):
     fastlist[1][extract_key(entry)] = index
 
 
-def rateTrack(args):
+def rateAlbum(args):
     fastlist = load_fastlist(os.getenv('HOME')+'/.config/clerk/albumratings.json')
     try:
         entry = get_entry(fastlist, client.currentsong()['albumartist'], client.currentsong()['album'], client.currentsong()['date'])
@@ -318,8 +318,8 @@ parser_restoretracks.set_defaults(call=restoreTrackRating)
 parser_restorealbums = subparsers.add_parser('restorealbums', help="restore sticker database from rating files")
 parser_restorealbums.set_defaults(call=restoreAlbumRating)
 
-parser_ratetrack = subparsers.add_parser('ratetrack', help="rate current Track")
-parser_ratetrack.set_defaults(call=rateTrack)
+parser_ratealbum = subparsers.add_parser('ratealbum', help="rate current Track")
+parser_ratealbum.set_defaults(call=rateAlbum)
 
 # parse arguments (thanks jat)
 args = parser.parse_args()

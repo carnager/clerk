@@ -839,31 +839,8 @@ rateAlbum () {
     if [[ $rating == "" ]]; then
         exit
     else
-        artist="$(mpc current -f '%artist%')"
-        album="$(mpc current -f '%album%')"
-        date="$(mpc current -f '%date%')"
-        tutke="$(mpc current -f '%title')"
-        file="$(mpc current -f '%file%')"
-
-        mpc find artist "$artist" album "$album" date "$date" track "01" | while read line; do
-        mpc sticker "$(echo ${line})" set albumrating ${rating}
-        done
-        mpc find artist "$artist" album "$album" date "$date" track "1" | while read line; do
-        mpc sticker "$(echo ${line})" set albumrating ${rating}
-        done
-        mpc find artist "$artist" album "$album" date "$date" track "1" disc "2" | while read line; do
-        mpc sticker "$(echo ${line})" delete albumrating
-        done
-        mpc find artist "$artist" album "$album" date "$date" track "1" disc "02" | while read line; do
-        mpc sticker "$(echo ${line})" delete albumrating
-        done
-        if [[ "$music_dir_access" == "yes" ]]; then
-            cd "$music_path"
-            cd "$(dirname "$(mpc current -f %file%)")"
-            rm -f album.rating
-            echo "${rating}${separator}$(mpc current -f "%artist%${separator}%track%${separator}%title%${separator}%date%${separator}%album%")" >> album.rating
-        fi
-        notify-send "clerk" "rated $(echo ${artist} - ${album}) with $(echo ${rating})"
+        export rating=${rating}; clerk_helper ratealbum
+        notify-send "clerk" "rated $(mpc current -f '%artist% - %album%') with ${rating}"
     fi
 }
 
@@ -1115,7 +1092,7 @@ ReplaceAlbumTags() {
                 mpc clear && mpc findadd date "$date" album "$album" $mpd_artist "$artist" && mpc play
             fi
         fi
-    done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Replace\n---\n$(echo "$album_temp")" | dmenu_t -dmenu -p "Choose Album > ")
+    done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Replace\n---\n$(echo "$album_temp")" | sort | dmenu_t -dmenu -p "Choose Album > ")
 
     if [[  $seen = 0 ]]
     then
