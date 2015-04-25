@@ -7,6 +7,7 @@ import notify2
 import json
 import argparse
 import fnmatch
+from pprint import pprint
 from mpd import MPDClient
 import configparser
 client = MPDClient()
@@ -144,6 +145,61 @@ def getLatest(args):
                                                   entry['last-modified']])
                      for entry in sorted_content]))
 
+
+def loadjson(fname):
+    with open(fname) as data_file:
+        data = json.load(data_file)
+    return data
+
+def extract_key(entry):
+    return entry["albumartist"] + entry["album"] + entry["date"]
+
+def hashdata(jdata):
+    hashmap = {}
+    for i in range(len(jdata)):
+        key = extract_key(jdata[i])
+        hashmap[key] = i
+    return hashmap
+
+def has_entry(fastlist, albumartist, album, date):
+    key = albumartist+album+date
+    if key in fastlist[1]:
+        return True
+    else:
+        return False
+
+def get_entry(fastlist, albumartist, album, date):
+    return fastlist[0][fastlist[1][albumartist+album+date]]
+
+def load_fastlist(fname):
+    jdata = loadjson(fname)
+    hdata = hashdata(jdata)
+    return (jdata, hdata)
+
+def save_fastlist(fname, fastlist):
+    with open(fname, "w") as data_file:
+        json.dump(fastlist[0], data_file, ensure_ascii=False)
+
+def append_entry(fastlist, entry):
+    index = len(fastlist[0])
+    fastlist[0].append(entry)
+    fastlist[1][extract_key(entry)] = index
+
+
+def rateTrack(args):
+    fastlist = load_fastlist(os.getenv('HOME')+'/.config/clerk/albumratings.json')
+    try:
+        entry = get_entry(fastlist, client.currentsong()['albumartist'], client.currentsong()['album'], client.currentsong()['date'])
+        entry["rating"] = os.getenv('rating')
+        save_fastlist(os.getenv('HOME')+'/.config/clerk/albumratings.json', fastlist)
+        client.sticker_set("song", client.currentsong()['file'], "albumrating", os.getenv('rating'))
+    except KeyError:
+        entry = {'albumartist': client.currentsong()['albumartist'], 'album': client.currentsong()['album'], 'date': client.currentsong()['date'], 'albumrating': os.getenv('rating')}
+        append_entry(fastlist, entry)
+        save_fastlist(os.getenv('HOME')+'/.config/clerk/albumratings.json', fastlist)
+        client.sticker_set("song", client.currentsong()['file'], "albumrating", os.getenv('rating'))
+
+
 def readComments(args):
     args = vars(args)
 
@@ -261,6 +317,9 @@ parser_restoretracks.set_defaults(call=restoreTrackRating)
 
 parser_restorealbums = subparsers.add_parser('restorealbums', help="restore sticker database from rating files")
 parser_restorealbums.set_defaults(call=restoreAlbumRating)
+
+parser_ratetrack = subparsers.add_parser('ratetrack', help="rate current Track")
+parser_ratetrack.set_defaults(call=rateTrack)
 
 # parse arguments (thanks jat)
 args = parser.parse_args()
