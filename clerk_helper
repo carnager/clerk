@@ -185,6 +185,17 @@ def append_entry(fastlist, entry):
     fastlist[0].append(entry)
     fastlist[1][extract_key(entry)] = index
 
+def prune_fastlist(fastlist, mpdcachefile):
+    mpdlist = loadjson(mpdcachefile)
+    data = fastlist[0]
+    new = []
+    for e in mpdlist:
+        key = (e["albumartist"], e["album"], e["date"])
+        if has_entry(fastlist, *key):
+            entry = get_entry(fastlist, *key)
+            new.append(entry)
+    newhdata = hashdata(new)
+    return (new, newhdata)
 
 def rateAlbum(args):
     fastlist = load_fastlist(os.getenv('HOME')+'/.config/clerk/albumratings.json')
@@ -198,6 +209,11 @@ def rateAlbum(args):
         append_entry(fastlist, entry)
         save_fastlist(os.getenv('HOME')+'/.config/clerk/albumratings.json', fastlist)
         client.sticker_set("song", client.currentsong()['file'], "albumrating", os.getenv('rating'))
+
+def cleanRatings(args):
+    fastlist = load_fastlist(os.getenv('HOME')+'/.config/clerk/albumratings.json')
+    prunedlist = prune_fastlist(fastlist, os.getenv('HOME')+'/.config/clerk/albums.cache.json')
+    save_fastlist(os.getenv('HOME')+'/.config/clerk/albumratings.json', prunedlist)
 
 
 def readComments(args):
@@ -320,6 +336,9 @@ parser_restorealbums.set_defaults(call=restoreAlbumRating)
 
 parser_ratealbum = subparsers.add_parser('ratealbum', help="rate current Track")
 parser_ratealbum.set_defaults(call=rateAlbum)
+
+parser_cleanratings = subparsers.add_parser('cleanratings', help="Clean up Ratings file.")
+parser_cleanratings.set_defaults(call=cleanRatings)
 
 # parse arguments (thanks jat)
 args = parser.parse_args()
