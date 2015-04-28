@@ -850,27 +850,14 @@ rateTrack () {
     if [[ $rating == "" ]]; then
         exit
     else
-        mpc sticker "$(mpc current -f '%file%')" set rating "$rating"
-        if [[ "$music_dir_access" == "yes" ]]; then
-            cd "$music_path"
-            cd "$(dirname "$(mpc current -f %file%)")"
-            touch track.ratings
-            $sed -i "/$(mpc current -f '%title%')/d" track.ratings
-            echo "${rating}${separator}$(mpc current -f "%artist%${separator}%track%${separator}%title%${separator}%date%${separator}%album%")" >> track.ratings
-        fi
+        export rating=${rating}; clerk_helper ratetrack
         notify-send "clerk" "rated $(mpc current) with $(echo ${rating})"
     fi
 }
 
  instantRateTrack () {
-         mpc sticker "$(mpc current -f '%file%')" set rating "$rating"
-         if [[ "$music_dir_access" == "yes" ]]; then
-             cd "$music_path"
-             cd "$(dirname "$(mpc current -f %file%)")"
-             touch track.ratings
-             $sed -i "/$(mpc current -f '%title%')/d" track.ratings
-             echo "${rating}${separator}$(mpc current -f "%artist%${separator}%track%${separator}%title%${separator}%date%${separator}%album%")" >> track.ratings
-         fi
+     export rating=${rating}; clerk_helper ratetrack
+     notify-send "clerk" "rated $(mpc current) with $(echo ${rating})"
  }
 
 
