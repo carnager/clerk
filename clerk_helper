@@ -210,10 +210,81 @@ def rateAlbum(args):
         save_fastlist(os.getenv('HOME')+'/.config/clerk/albumratings.json', fastlist)
         client.sticker_set("song", client.currentsong()['file'], "albumrating", os.getenv('rating'))
 
+
+
+def loadjsonTrack(fname):
+    with open(fname) as data_file:
+        data = json.load(data_file)
+    return data
+
+def extract_keyTrack(entry):
+    return entry["artist"] + entry["album"] + entry["track"] + entry["title"]
+
+def hashdataTrack(jdata):
+    hashmap = {}
+    for i in range(len(jdata)):
+        key = extract_keyTrack(jdata[i])
+        hashmap[key] = i
+    return hashmap
+
+def has_entryTrack(fastlist, artist, album, track, title):
+    key = artist+album+track+title
+    if key in fastlist[1]:
+        return True
+    else:
+        return False
+
+def get_entryTrack(fastlist, artist, album, track, title):
+    return fastlist[0][fastlist[1][artist+album+track+title]]
+
+def load_fastlistTrack(fname):
+    jdata = loadjsonTrack(fname)
+    hdata = hashdataTrack(jdata)
+    return (jdata, hdata)
+
+def save_fastlistTrack(fname, fastlist):
+    with open(fname, "w") as data_file:
+        json.dump(fastlist[0], data_file, ensure_ascii=False)
+
+def append_entryTrack(fastlist, entry):
+    index = len(fastlist[0])
+    fastlist[0].append(entry)
+    fastlist[1][extract_keyTrack(entry)] = index
+
+def prune_fastlistTrack(fastlist, mpdcachefile):
+    mpdlist = loadjsonTrack(mpdcachefile)
+    data = fastlist[0]
+    new = []
+    for e in mpdlist:
+        key = (e["artist"], e["album"], e["track"], e["title"])
+        if has_entryTrack(fastlist, *key):
+            entry = get_entryTrack(fastlist, *key)
+            new.append(entry)
+    newhdata = hashdataTrack(new)
+    return (new, newhdata)
+
+def rateTrack(args):
+    fastlist = load_fastlistTrack(os.getenv('HOME')+'/.config/clerk/trackratings.json')
+    try:
+        entry = get_entryTrack(fastlist, client.currentsong()['artist'], client.currentsong()['album'], client.currentsong()['track'], client.currentsong()['title'])
+        entry["rating"] = os.getenv('rating')
+        save_fastlistTrack(os.getenv('HOME')+'/.config/clerk/trackratings.json', fastlist)
+        client.sticker_set("song", client.currentsong()['file'], "rating", os.getenv('rating'))
+    except KeyError:
+        entry = {'artist': client.currentsong()['artist'], 'album': client.currentsong()['album'], 'track': client.currentsong()['track'], 'title': client.currentsong()['title'], 'rating': os.getenv('rating')}
+        append_entryTrack(fastlist, entry)
+        save_fastlistTrack(os.getenv('HOME')+'/.config/clerk/trackratings.json', fastlist)
+        client.sticker_set("song", client.currentsong()['file'], "rating", os.getenv('rating'))
+
+
+
 def cleanRatings(args):
     fastlist = load_fastlist(os.getenv('HOME')+'/.config/clerk/albumratings.json')
     prunedlist = prune_fastlist(fastlist, os.getenv('HOME')+'/.config/clerk/albums.cache.json')
     save_fastlist(os.getenv('HOME')+'/.config/clerk/albumratings.json', prunedlist)
+    fastlist = load_fastlistTrack(os.getenv('HOME')+'/.config/clerk/trackratings.json')
+    prunedlist = prune_fastlistTrack(fastlist, os.getenv('HOME')+'/.config/clerk/tracks.cache.json')
+    save_fastlistTrack(os.getenv('HOME')+'/.config/clerk/trackratings.json', prunedlist)
 
 
 def readComments(args):
@@ -334,8 +405,11 @@ parser_restoretracks.set_defaults(call=restoreTrackRating)
 parser_restorealbums = subparsers.add_parser('restorealbums', help="restore sticker database from rating files")
 parser_restorealbums.set_defaults(call=restoreAlbumRating)
 
-parser_ratealbum = subparsers.add_parser('ratealbum', help="rate current Track")
+parser_ratealbum = subparsers.add_parser('ratealbum', help="rate current Album")
 parser_ratealbum.set_defaults(call=rateAlbum)
+
+parser_ratetrack = subparsers.add_parser('ratetrack', help="rate current Track")
+parser_ratetrack.set_defaults(call=rateTrack)
 
 parser_cleanratings = subparsers.add_parser('cleanratings', help="Clean up Ratings file.")
 parser_cleanratings.set_defaults(call=cleanRatings)
