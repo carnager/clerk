@@ -287,6 +287,41 @@ def cleanRatings(args):
     save_fastlistTrack(os.getenv('HOME')+'/.config/clerk/trackratings.json', prunedlist)
 
 
+def importTrackRatings(args):
+    client.clear()
+    list = client.sticker_find('song', "", 'rating')
+    rated_tracks = []
+    for i in list:
+        rating_temp = i['sticker']
+        rating = rating_temp.split('=')[1]
+        for x in client.find('file', i['file']):
+            artist = x['artist']
+            album = x['album']
+            track = x['track']
+            title = x['title']
+        entry = {'artist': artist, 'album': album, 'track': track, 'title': title, 'rating': rating}
+        rated_tracks.append(entry)
+    with open(os.getenv('HOME')+'/.config/clerk/trackratings.json', 'w') as ratingfile:
+        json.dump(rated_tracks, ratingfile)
+
+def importAlbumRatings(args):
+    client.clear()
+    list = client.sticker_find('song', "", 'albumrating')
+    rated_tracks = []
+    for i in list:
+        rating_temp = i['sticker']
+        rating = rating_temp.split('=')[1]
+        for x in client.find('file', i['file']):
+            artist = x['albumartist']
+            album = x['album']
+            date = x['date']
+        entry = {'albumartist': artist, 'album': album, 'date': date, 'rating': rating}
+        rated_tracks.append(entry)
+    with open(os.getenv('HOME')+'/.config/clerk/albumratings.json', 'w') as ratingfile:
+        json.dump(rated_tracks, ratingfile)
+
+
+
 def readComments(args):
     args = vars(args)
 
@@ -298,71 +333,6 @@ def prioSong(args):
     for line in sys.stdin.read().splitlines():
         client.prio(255, line)
 
-
-def restoreTrackRating(args):
-    client.clear()
-    matches = []
-    for root, dirnames, filenames in os.walk(config['global']['music_path']):
-        for filename in fnmatch.filter(filenames, 'track.ratings'):
-            matches.append(os.path.join(root, filename))
-    for song in matches:
-        ratingfile = open(song, 'r')
-        for line in ratingfile:
-            tag = []
-            tags = line.split(os.environ['separator'])
-            for x in tags:
-                if isinstance(x, list):
-                    tag.append(x[0].rstrip('\n'))
-                else:
-                    tag.append(x)
-            rating = tag[0]
-            artist = tag[1]
-            # track = tag[2]
-            title = tag[3]
-            date = tag[4]
-            album = tag[5].rstrip('\n')
-            filename = tag[6].rstrip('\n')
-            if os.path.isfile(config['global']['music_path']+"/"+filename):
-                client.sticker_set('song', filename, 'rating', rating)
-                print("Imported song "+title+" with rating of "+rating)
-            else:
-                client.searchadd('artist', artist, 'album', album, 'title', title, 'date', date)
-                for song in client.playlistinfo():
-                    if song['title'] in line and song['date'] in line and song['album'] in line:
-                        client.sticker_set('song', song['file'], 'rating', rating)
-                        print("Imported song "+song['title']+" with rating of "+rating)
-
-def restoreAlbumRating(args):
-    matches = []
-    for root, dirnames, filenames in os.walk(config['global']['music_path']):
-        for filename in fnmatch.filter(filenames, 'album.rating'):
-            matches.append(os.path.join(root, filename))
-    for song in matches:
-        ratingfile = open(song, 'r')
-        for line in ratingfile:
-            tag = []
-            tags = line.split(os.environ['separator'])
-            for x in tags:
-                if isinstance(x, list):
-                    tag.append(x[0].rstrip('\n'))
-                else:
-                    tag.append(x)
-            rating = tag[0]
-            artist = tag[1]
-            # track = tag[2]
-            title = tag[3]
-            date = tag[4]
-            album = tag[5].rstrip('\n')
-            filename = tag[6].rstrip('\n')
-            if os.path.isfile(config['global']['music_path']+"/"+filename):
-                client.sticker_set('song', filename, 'albumrating', rating)
-                print("Imported album "+album+" with rating of "+rating)
-            else:
-                client.searchadd('albumartist', artist, 'album', album, 'title', title, 'date', date)
-                for song in client.playlistinfo():
-                    if song['title'] in line and song['date'] in line and song['album'] in line:
-                        client.sticker_set('song', song['file'], 'albumrating', rating)
-                        print("Imported album "+song['album']+" with rating of "+rating)
 
 def savetoPlaylist(args):
     for line in sys.stdin:
@@ -413,6 +383,12 @@ parser_ratetrack.set_defaults(call=rateTrack)
 
 parser_cleanratings = subparsers.add_parser('cleanratings', help="Clean up Ratings file.")
 parser_cleanratings.set_defaults(call=cleanRatings)
+
+parser_importtrackratings = subparsers.add_parser('importtrackratings', help="Import track ratings from mpd stickers")
+parser_importtrackratings.set_defaults(call=importTrackRatings)
+
+parser_importalbumratings = subparsers.add_parser('importalbumratings', help="Import album ratings from mpd stickers")
+parser_importalbumratings.set_defaults(call=importAlbumRatings)
 
 # parse arguments (thanks jat)
 args = parser.parse_args()
