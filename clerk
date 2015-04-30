@@ -269,82 +269,23 @@ ratingPrompt () {
 backupPrompt () {
     menu=("0  Return to Ratings Menu"
           "---"
-          "1  Backup Album Ratings to Files"
-          "2  Backup Track Ratings to Files"
+          "1  Backup Album Ratings to File"
+          "2  Backup Track Ratings to File"
           "---"
-          "3  Restore Album Ratings from Files"
-          "4  Restore Track Ratings from Files")
+          "3  Restore Ratings from File")
 
     prompt() {
         printf "%s\n" "$@" | dmenu_t -p "Backup/Restore > "
     }
 
     case "$(prompt "${menu[@]}")" in
-        1*) backupAlbumRatings ;;
-        2*) backupTrackRatings ;;
-        3*) restoreAlbumRatings ;;
-        4*) restoreTrackRatings ;;
+        1*) clerk_helper importalbumratings & ;;
+        2*) clerk_helper importtrackratings & ;;
+        3*) clerk_helper sendstickers & ;;
         0*) ratingPrompt ;;
           *) exit
     esac
 }
-
-backupTrackRatings () {
-cd ${music_path}
-rm -f **/track.ratings
-mpc clear
-mpc sticker "" find rating | awk -F ': rating=' '{ print $1 }' | while read line; do
-    mpc add "$line"
-done
-
-mpc playlist -f "%artist%${separator}%track%${separator}%title%${separator}%date%${separator}%album%${separator}%file%" | while read line; do
-    artist=$(echo ${line} | awk -F "${separator}" '{ print $1 }')
-    track=$(echo ${line} | awk -F "${separator}" '{ print $2 }')
-    title=$(echo ${line} | awk -F "${separator}" '{ print $3 }')
-    date=$(echo ${line} | awk -F "${separator}" '{ print $4 }')
-    album=$(echo ${line} | awk -F "${separator}" '{ print $5 }')
-    file=$(echo ${line} | awk -F "${separator}" '{ print $6 }')
-    rating=$(mpc sticker "$file" get rating | awk -F 'rating=??' '{ print $2 }')
-
-    cd "$music_path"
-    cd "$(dirname "$(echo "$file")")"
-    touch track.ratings
-    echo "${rating}${separator}${artist}${separator}${track}${separator}${title}${separator}${date}${separator}${album}${separator}${file}" >> track.ratings
-done
-}
-
-backupAlbumRatings () {
-cd ${music_path}
-rm -f **/album.rating
-mpc clear
-mpc sticker "" find albumrating | awk -F ': albumrating=' '{ print $1 }' | while read line; do
-    mpc add "$line"
-done
-
-mpc playlist -f "%artist%${separator}%track%${separator}%title%${separator}%date%${separator}%album%${separator}%file%" | while read line; do
-    artist=$(echo ${line} | awk -F "${separator}" '{ print $1 }')
-    track=$(echo ${line} | awk -F "${separator}" '{ print $2 }')
-    title=$(echo ${line} | awk -F "${separator}" '{ print $3 }')
-    date=$(echo ${line} | awk -F "${separator}" '{ print $4 }')
-    album=$(echo ${line} | awk -F "${separator}" '{ print $5 }')
-    file=$(echo ${line} | awk -F "${separator}" '{ print $6 }')
-    rating=$(mpc sticker "$file" get albumrating | awk -F 'rating=??' '{ print $2 }')
-
-    cd "$music_path"
-    cd "$(dirname "$(echo "$file")")"
-    touch album.rating
-    echo "${rating}${separator}${artist}${separator}${track}${separator}${title}${separator}${date}${separator}${album}${separator}${file}" >> album.rating
-done
-}
-
-restoreTrackRatings () {
-clerk_helper restoretracks
-}
-
-restoreAlbumRatings () {
-clerk_helper restorealbums
-}
-
 
 loveLast () {
     if [[ "$scrobbler" == "mpdscribble" ]]; then

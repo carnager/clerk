@@ -1,17 +1,17 @@
 # clerk - mpd client, based on rofi (or dmenu)
 
 # CHANGES IN RATINGS!
-If you used ratings in clerk, be aware that the way the backup files are
-handled has changed. If you use those, make sure to delete $HOME/.config/clerk/helper_config
-and recreate it by running clerk once.
-Then chose the Backup entry from Ratings menu.
+From clerk 1.0 on ratings are stored in json format.
+If you still used old ratings use the following steps to
+create the new files:
 
-This will write the new ratings files.
+* make sure, mpds stickers are up to date. (they should, clerk sends ratings to mpd)
+* run `clerk_helper importtrackratings` and
+* `clerk_helper importalbumratings` to create new ratings files.
 
-What has changed? Ratings are no longer bound to file names. Instead
-a search is executed on the tags mentioned in ratings files. All matches
-will then be rated by the filename from mpd library.
-
+The new files are 100% tag based. Even if your files move within your collection,
+you can always re-import your ratings into mpd's sticker database with `clerk_helper sendstickers`,
+as long as the tags havent changed.
 
 # Functions:
 
@@ -78,20 +78,4 @@ All your files need these tags in order for clerk to work as intended:
 Some software (beets, I look at you!) loves to add duplicate tags.
 For example beets adds track and tracknumber tags, no matter what file format
 is handled. MPD will return tracknumber twice for such files.
-Make sure to clean your tags, if you used beets to tag them.
-
-#### A word on album ratings
-mpd's sticker database is very limited and only allows stickers to be associated
-with files. Originally it was planned to extend stickers for other types too
-(and documentation even claims it does), but this hasn't happened yet.
-So what clerk does is to associate an album rating with first file of an album,
-to keep the database clean and duplicate-free.
-It's a somewhat ugly workaround, but it works pretty good.
-
-Also mpd deletes stickers instantly, when files move or get renamed.
-For this reason I keep flat files in directory of the album for both track and
-album ratings. With those files and a tiny bash script it's possible to rebuild
-the sticker database in very little time.
-
-So if you plan to use ratings, it's a good idea to have music_path option
-in config file. If your music is on a different machine just mount it locally.
+I tried to work around most cases, but still. keep your tags clean!
