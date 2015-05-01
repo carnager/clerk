@@ -306,20 +306,24 @@ def importTrackRatings(args):
 
 def importAlbumRatings(args):
     client.clear()
-    list = client.sticker_find('song', "", 'albumrating')
+    ratelist = client.sticker_find('song', "", 'albumrating')
     rated_tracks = []
-    for i in list:
+    for i in ratelist:
         rating_temp = i['sticker']
         rating = rating_temp.split('=')[1]
         for x in client.find('file', i['file']):
             artist = x['albumartist']
             album = x['album']
             date = x['date']
+            if isinstance(x, list):
+                track = x['track'][0]
+            else:
+                track = x['track']
             if 'disc' in x:
                 disc = x['disc']
             else:
                 disc = ""
-        entry = {'albumartist': artist, 'album': album, 'date': date, 'disc': disc, 'rating': rating}
+        entry = {'albumartist': artist, 'track': track, 'album': album, 'date': date, 'disc': disc, 'rating': rating}
         rated_tracks.append(entry)
     with open(os.getenv('HOME')+'/.config/clerk/albumratings.json', 'w') as ratingfile:
         json.dump(rated_tracks, ratingfile)
@@ -337,7 +341,7 @@ def sendStickers(args):
     with open(os.getenv('HOME')+'/.config/clerk/albumratings.json') as cache_file:
         content = json.load(cache_file)
         for album in content:
-            uri = client.find('albumartist', album['albumartist'], 'album', album['album'], 'disc', album['disc'], 'date', album['date'], 'track', '1')
+            uri = client.find('albumartist', album['albumartist'], 'album', album['album'], 'disc', album['disc'], 'date', album['date'], 'track', album['track'])
             rating = album['rating']
             for x in uri:
                 client.sticker_set('song', x['file'], 'albumrating', rating)
