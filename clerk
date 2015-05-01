@@ -981,7 +981,7 @@ AddAlbumTags() {
                 mpc search date "$date" album "$album" $mpd_artist "$artist" | mpc add
             fi
         fi
-    done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Add\n---\n$(echo "$album_temp")" | dmenu_t -dmenu -p -u 2 "Choose Album > ")
+    done < <(echo -e "0  Return to Main Menu\n---\nAdding Mode: Add\n---\n$(echo "$album_temp")" | dmenu_t -dmenu -u 2 -p "Choose Album > ")
 
     if [[  $seen = 0 ]]
     then
