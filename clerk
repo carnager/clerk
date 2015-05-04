@@ -217,26 +217,43 @@ browseFilesystem () {
 
 currentMenu () {
     albums=$(mpc list album albumartist "$(mpc current -f '%artist%')"| awk '$0="(Album) "$0')
-    titles=$(mpc -f '%title%' find artist "$(mpc current -f '%albumartist%')"|awk '$0="(Song) "$0')
+    titles=$(mpc -f '%title%' find artist "$(mpc current -f '%artist%')"|awk '$0="(Song) "$0')
 
     if [[ -z $(mpc current) ]]; then
         menu=$(echo -e "0 Return to Main Menu" | rofi -dmenu -p "No Music is playing")
     else
-        declare -i seen=0
-        while read menu; do
-            seen=1
+        current=$(mpc current -f '%artist%')
+        menu=$(echo -e "0 Return to Main Menu\n---\nAlt-2: Add, Alt-3: Insert, Alt-4: Replace\n---\n$albums\n---\n$titles" | rofi -dmenu -u 2 -p "Other Music by ${current} > ")
+
+        tempval=$?
+        val=$tempval
+
+        albumartist=$(mpc current -f '%albumartist%')
+        artist=$(mpc current -f '%artist%')
+
             if [[ $menu == "(Album)"* ]]; then
-                mpc find album "$(echo ${menu} | awk -F ') ' '{ print $2 }')" albumartist "$(mpc current -f '%albumartist%')" | mpc add
+                if [[ $val -eq 3 ]]; then
+                    mpc find album "$(echo ${menu} | awk -F ') ' '{ print $2 }')" albumartist "${albumartist}" | mpc insert
+                elif [[ $val -eq 4 ]]; then
+                    mpc clear
+                    mpc find album "$(echo ${menu} | awk -F ') ' '{ print $2 }')" albumartist "${albumartist}" | mpc add
+                    mpc play
+                else
+                    mpc find album "$(echo ${menu} | awk -F ') ' '{ print $2 }')" albumartist "${albumartist}" | mpc add
+                fi
             elif [[ $menu == "(Song)"* ]]; then
-                mpc find title "$(echo ${menu} | awk -F ') ' '{ print $2 }')" artist "$(mpc current -f '%artist%')" | mpc add
+                if [[ $val -eq 3 ]]; then
+                    mpc find title "$(echo ${menu} | awk -F ') ' '{ print $2 }')" artist "${artist}" | mpc insert
+                elif [[ $val -eq 4 ]]; then
+                    mpc clear
+                    mpc find title "$(echo ${menu} | awk -F ') ' '{ print $2 }')" artist "${artist}" | mpc add
+                    mpc play
+                else
+                    mpc find title "$(echo ${menu} | awk -F ') ' '{ print $2 }')" artist "${artist}" | mpc add
+                fi
             elif [[ $menu == "No Music is playing" ]]; then
                 mainMenu
             fi
-        done < <(echo -e "0 Return to Main Menu\n---\n$albums\n---\n$titles" | rofi -dmenu -p "Other Music by $(mpc current -f '%artist%') > ")
-
-        if [[ $seen = 0 ]]; then
-            exit
-        fi
     fi
 }
 
@@ -682,103 +699,6 @@ outputPrompt () {
     fi
 }
 
-currentAlbums () {
-    ARTIST=$(mpc current -f %artist%)
-    while read ALBUM
-    do
-        ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{print $2}')
-        DATE=$(echo "$ALBUM" | awk -F "$separator" '{print $1}')
-        if [[ "$ALBUM" == "0  Return to current Artist Menu" ]]; then
-            currentPrompt;
-        else
-            if [[ "$ALBUM" == "Adding Mode: Add" ]]; then
-                currentAlbumsInsert
-            else
-                mpc search "$mpd_artist" "$ARTIST" album "$ALBUM_FINAL" date "$DATE" | mpc add
-            fi
-       fi
-    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Add\n---\n$(mpc --format "%date%$separator%album%" search artist "$ARTIST" | sort | uniq)" | dmenu_t -p "Albums by $(mpc current --format '%artist%') > ")
-}
-
-currentAlbumsInsert () {
-    ARTIST=$(mpc current -f %artist%)
-    while read ALBUM
-    do
-        ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{print $2}')
-        DATE=$(echo "$ALBUM" | awk -F "$separator" '{print $1}')
-        if [[ "$ALBUM" == "0  Return to current Artist Menu" ]]; then
-            currentPrompt;
-        else
-            if [[ "$ALBUM" == "Adding Mode: Insert" ]]; then
-                currentAlbumsReplace
-            else
-                mpc search "$mpd_artist" "$ARTIST" album "$ALBUM_FINAL" date "$DATE" | mpc insert
-            fi
-        fi
-    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Insert\n---\n$(mpc --format "%date%$separator%album%" search artist "$ARTIST" | sort | uniq)" | dmenu_t -p "Albums by $(mpc current --format '%artist%') > ")
-}
-
-currentAlbumsReplace () {
-    ARTIST=$(mpc current -f %artist%)
-    while read ALBUM
-    do
-        ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{print $2}')
-        DATE=$(echo "$ALBUM" | awk -F "$separator" '{print $1}')
-        if [[ "$ALBUM" == "0  Return to current Artist Menu" ]]; then
-            currentPrompt;
-        else
-            if [[ "$ALBUM" == "Adding Mode: Replace" ]]; then
-                currentAlbums
-            else
-                mpc clear && mpc search "$mpd_artist" "$ARTIST" album "$ALBUM_FINAL" date "$DATE" | mpc add && mpc play
-            fi
-        fi
-    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Replace\n---\n$(mpc --format "%date%$separator%album%" search artist "$ARTIST" | sort | uniq)" | dmenu_t -p "Albums by $(mpc current --format '%artist%') > ")
-}
-
-currentTracks () {
-    while read TRACK
-    do
-       TITLE=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
-       ALBUM=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
-       TRACKNUMBER=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
-       if [ "$TRACK" = "0  Return to current Artist Menu" ]; then
-           currentPrompt;
-       else
-           if [[ "$TRACK" == "Adding Mode: Add" ]]; then
-               currentTracksInsert
-           else
-               mpc findadd album "$ALBUM" title "$TITLE" track "$TRACKNUMBER"
-            fi
-        fi
-    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Add\n---\n$(mpc --format "%album%$separator%track%$separator%title%" search artist "$(mpc current -f %artist%)")" | dmenu_t -p "Tracks by $(mpc current --format '%artist%') > ")
-}
-
-currentTracksInsert () {
-    export status="$(mpc status)"
-    random=$(echo "$status" | tail -1 | awk -F ':' '{ print $4 }' | cut -d ' ' -f 2)
-    while read TRACK
-    do
-        TITLE=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
-        ALBUM=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
-        TRACKNUMBER=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
-        if [ "$TRACK" = "0  Return to current Artist Menu" ]; then
-            currentPrompt;
-        else
-            if [[ "$TRACK" == "Adding Mode: Insert" ]]; then
-                currentTracks
-            else
-                if [[ "$random" == "off" ]]; then
-                    mpc find album "$ALBUM" title "$TITLE" track "$TRACKNUMBER" | mpc insert
-                else
-                    mpc find album "$ALBUM" title "$TITLE" track "$TRACKNUMBER" | mpc add
-                    echo "$(( $(mpc playlist|wc -l) - 1 ))" | clerk_helper prio
-                fi
-            fi
-        fi
-    done < <(echo -e "0  Return to current Artist Menu\n---\nAdding Mode: Insert\n---\n$(mpc --format "%album%$separator%track%$separator%title%" search artist "$(mpc current -f %artist%)")" | dmenu_t -p "Tracks by $(mpc current --format '%artist%') > ")
-}
-
 escapeSql() {
     echo ${1//\'/\'\'}
 }
@@ -955,7 +875,7 @@ AddAlbumTags() {
 
 AddTrackTags() {
     loadCacheTracks
-    TRACK=$(echo -e "0  Return to Main Menu\n---\nAlt-2: Add, Alt-3: Insert, Alt-4: Replace, Alt-5: Rate\n---\n$(echo "$tracks_temp")"| dmenu_t -dmenu -u 2 -p "Choose Track > ")
+    TRACK=$(echo -e "0  Return to Main Menu\n---\nAlt-2: Add | Alt-3: Insert | Alt-4: Replace | Alt-5: Rate\n---\n$(echo "$tracks_temp")"| dmenu_t -dmenu -u 2 -p "Choose Track > ")
 
     val=$?
 
