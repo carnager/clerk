@@ -266,15 +266,21 @@ def prune_fastlistTrack(fastlist, mpdcachefile):
 def rateTrack(args):
     fastlist = load_fastlistTrack(os.getenv('HOME')+'/.config/clerk/trackratings.json')
     try:
-        entry = get_entryTrack(fastlist, client.currentsong()['artist'], client.currentsong()['album'], client.currentsong()['track'], client.currentsong()['title'])
-        entry["rating"] = os.getenv('rating')
+        entry = get_entryTrack(fastlist, args.artist, args.album, args.track, args.title)
+        entry["rating"] = args.rating
         save_fastlistTrack(os.getenv('HOME')+'/.config/clerk/trackratings.json', fastlist)
-        client.sticker_set("song", client.currentsong()['file'], "rating", os.getenv('rating'))
+        uri = client.find('artist', args.artist, 'album', args.album, 'track', args.track, 'title', args.title)
+        print(uri)
+        for i in uri:
+            client.sticker_set("song", i['file'], "rating", args.rating)
     except KeyError:
-        entry = {'artist': client.currentsong()['artist'], 'album': client.currentsong()['album'], 'track': client.currentsong()['track'], 'title': client.currentsong()['title'], 'rating': os.getenv('rating')}
+        entry = {'artist': args.artist, 'album': args.album, 'track': args.track, 'title': args.title, 'rating': args.rating}
         append_entryTrack(fastlist, entry)
         save_fastlistTrack(os.getenv('HOME')+'/.config/clerk/trackratings.json', fastlist)
-        client.sticker_set("song", client.currentsong()['file'], "rating", os.getenv('rating'))
+        uri = client.find('artist', args.artist, 'album', args.album, 'track', args.track, 'title', args.title)
+        print(uri)
+        for i in uri:
+            client.sticker_set("song", i['file'], "rating", args.rating)
 
 
 
@@ -348,6 +354,17 @@ def sendStickers(args):
                 print("Imported Rating of "+rating+" for album "+album['albumartist']+" - "+album['album'])
 
 
+def getAlbumRatings(args):
+    ratings = client.sticker_find('song', '', 'albumrating')
+    albumlist = []
+    for x in ratings:
+        rating = x['sticker']
+        albums = client.find('file', x['file'])
+        for album in albums:
+            entry = {'albumartist': album['albumartist'], 'date': album['date'], 'album': album['album'], 'track': album['track'], 'rating': rating}
+            print(entry['albumartist']+os.getenv('separator')+entry['date']+os.getenv('separator')+entry['album']+os.getenv('separator')+entry['rating'])
+
+
 def readComments(args):
     args = vars(args)
 
@@ -399,6 +416,11 @@ parser_ratealbum = subparsers.add_parser('ratealbum', help="rate current Album")
 parser_ratealbum.set_defaults(call=rateAlbum)
 
 parser_ratetrack = subparsers.add_parser('ratetrack', help="rate current Track")
+parser_ratetrack.add_argument('artist', action="store")
+parser_ratetrack.add_argument('album', action="store")
+parser_ratetrack.add_argument('track', action="store")
+parser_ratetrack.add_argument('title', action="store")
+parser_ratetrack.add_argument('rating', action="store")
 parser_ratetrack.set_defaults(call=rateTrack)
 
 parser_cleanratings = subparsers.add_parser('cleanratings', help="Clean up Ratings file.")
@@ -412,6 +434,9 @@ parser_importalbumratings.set_defaults(call=importAlbumRatings)
 
 parser_sendstickers = subparsers.add_parser('sendstickers', help="Send clerk ratings to mpd")
 parser_sendstickers.set_defaults(call=sendStickers)
+
+parser_getalbumratings = subparsers.add_parser('getalbumratings', help="Print Album Ratings")
+parser_getalbumratings.set_defaults(call=getAlbumRatings)
 
 # parse arguments (thanks jat)
 args = parser.parse_args()

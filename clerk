@@ -800,8 +800,13 @@ rateTrack () {
     if [[ $rating == "" ]]; then
         exit
     else
-        export rating=${rating}; clerk_helper ratetrack
-        notify-send "clerk" "rated $(mpc current) with $(echo ${rating})"
+        if [[ -z "$rateartist" ]]; then
+            export rating=${rating}; clerk_helper ratetrack $(mpc current -f '"%artist%" "%album%" "%track%" "%title%"')
+            notify-send "clerk" "rated $(mpc current) with $(echo ${rating})"
+        else
+            clerk_helper ratetrack "${rateartist}" "${ratealbum}" "${ratetrack}" "${ratetitle}" "${rating}"
+            notify-send "clerk" "rated ${artist} - ${title} with $(echo ${rating})"
+        fi
     fi
 }
 
@@ -950,7 +955,7 @@ AddAlbumTags() {
 
 AddTrackTags() {
     loadCacheTracks
-    TRACK=$(echo -e "0  Return to Main Menu\n---\nAlt-2: Add, Alt-3: Insert, Alt-4: Replace\n---\n$(echo "$tracks_temp")"| dmenu_t -dmenu -u 2 -p "Choose Track > ")
+    TRACK=$(echo -e "0  Return to Main Menu\n---\nAlt-2: Add, Alt-3: Insert, Alt-4: Replace, Alt-5: Rate\n---\n$(echo "$tracks_temp")"| dmenu_t -dmenu -u 2 -p "Choose Track > ")
 
     val=$?
 
@@ -973,6 +978,8 @@ AddTrackTags() {
             if [[ "$add_auto_play" ]]; then
                 mpc play $(mpc playlist | wc -l)
             fi
+        elif [[ $val -eq 5 ]]; then
+            rateartist=${artist} ratealbum=${album} ratetrack=${track} ratetitle=${title} rateTrack
         else
             exit
         fi
