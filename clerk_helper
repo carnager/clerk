@@ -6,6 +6,7 @@ import os
 import notify2
 import json
 import argparse
+import operator
 import fnmatch
 from pprint import pprint
 from mpd import MPDClient
@@ -388,6 +389,27 @@ def savetoPlaylist(args):
             client.playlistadd("clerk", line)
 #            print(line, end="")
 
+def getArtistAlbums(args):
+    albums=client.find('artist', args.artist)
+    albumlist=[]
+    for album in albums:
+        albumlist.append(album['date']+os.getenv('separator')+album['album'])
+    uni=set(albumlist)
+    result = list(uni)
+    sorted_results = sorted(result)
+    for x in sorted_results:
+        print("(Album) "+x)
+
+def getArtistTracks(args):
+    tracks=client.find('artist', args.artist)
+    tracklist=[]
+    for track in tracks:
+        tracklist.append(track['track']+os.getenv('separator')+track['title'])
+    uni=set(tracklist)
+    result = list(uni)
+    for x in result:
+        print("(Song) "+x)
+
 # create commandline arguments
 parser = argparse.ArgumentParser(prog='clerk_helper', description='Companion script for clerk')
 subparsers = parser.add_subparsers()
@@ -445,6 +467,14 @@ parser_sendstickers.set_defaults(call=sendStickers)
 
 parser_getalbumratings = subparsers.add_parser('getalbumratings', help="Print Album Ratings")
 parser_getalbumratings.set_defaults(call=getAlbumRatings)
+
+parser_getartistalbums = subparsers.add_parser('getartistalbums', help="Print all albums by Artist")
+parser_getartistalbums.add_argument('artist', action="store")
+parser_getartistalbums.set_defaults(call=getArtistAlbums)
+
+parser_getartisttracks = subparsers.add_parser('getartisttracks', help="Print all tracks by Artist")
+parser_getartisttracks.add_argument('artist', action="store")
+parser_getartisttracks.set_defaults(call=getArtistTracks)
 
 # parse arguments (thanks jat)
 args = parser.parse_args()

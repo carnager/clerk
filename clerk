@@ -202,8 +202,8 @@ browseFilesystem () {
 }
 
 currentMenu () {
-    albums=$(mpc list album albumartist "$(mpc current -f '%artist%')" | while read line; do mpc find -f "%date%$separator%album%" albumartist $(mpc current -f '%albumartist%') album "$line"; done | uniq | awk '$0="(Album) "$0')
-    titles=$(mpc -f '%title%' find artist "$(mpc current -f '%artist%')" | while read line; do mpc find -f "%track%$separator%title%" artist $(mpc current -f '%artist%') album "$line"; done | awk '$0="(Song) "$0')
+    albums=$(clerk_helper getartistalbums "$(mpc current -f '%artist%')")
+    titles=$(clerk_helper getartisttracks "$(mpc current -f '%artist%')")
 
     if [[ -z $(mpc current) ]]; then
         menu=$(echo -e "0 Return to Main Menu" | rofi -dmenu -p "No Music is playing")
