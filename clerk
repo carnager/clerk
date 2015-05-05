@@ -222,7 +222,7 @@ currentMenu () {
         menu=$(echo -e "0 Return to Main Menu" | rofi -dmenu -p "No Music is playing")
     else
         current=$(mpc current -f '%artist%')
-        menu=$(echo -e "0 Return to Main Menu\n---\nAlt-2: Add, Alt-3: Insert, Alt-4: Replace\n---\n$albums\n---\n$titles" | rofi -dmenu -u 2 -p "Other Music by ${current} > ")
+        menu=$(echo -e "0 Return to Main Menu\n---\nAlt-1: Add, Alt-2: Insert, Alt-3: Replace\n---\n$albums\n---\n$titles" | rofi -dmenu -u 2 -p "Other Music by ${current} > ")
 
         tempval=$?
         val=$tempval
@@ -230,30 +230,32 @@ currentMenu () {
         albumartist=$(mpc current -f '%albumartist%')
         artist=$(mpc current -f '%artist%')
 
-            if [[ $menu == "(Album)"* ]]; then
-                if [[ $val -eq 3 ]]; then
-                    mpc find album "$(echo ${menu} | awk -F ') ' '{ print $2 }')" albumartist "${albumartist}" | mpc insert
-                elif [[ $val -eq 4 ]]; then
-                    mpc clear
-                    mpc find album "$(echo ${menu} | awk -F ') ' '{ print $2 }')" albumartist "${albumartist}" | mpc add
-                    mpc play
-                else
-                    mpc find album "$(echo ${menu} | awk -F ') ' '{ print $2 }')" albumartist "${albumartist}" | mpc add
-                fi
-            elif [[ $menu == "(Song)"* ]]; then
-                if [[ $val -eq 3 ]]; then
-                    mpc find title "$(echo ${menu} | awk -F ') ' '{ print $2 }')" artist "${artist}" | mpc insert
-                elif [[ $val -eq 4 ]]; then
-                    mpc clear
-                    mpc find title "$(echo ${menu} | awk -F ') ' '{ print $2 }')" artist "${artist}" | mpc add
-                    mpc play
-                else
-                    mpc find title "$(echo ${menu} | awk -F ') ' '{ print $2 }')" artist "${artist}" | mpc add
-                fi
-            elif [[ $menu == "No Music is playing" ]]; then
-                mainMenu
+        if [[ $menu == "(Album)"* ]]; then
+            if [[ $val -eq 11 ]]; then
+                mpc find album "$(echo ${menu} | awk -F ') ' '{ print $2 }')" albumartist "${albumartist}" | mpc insert
+            elif [[ $val -eq 12 ]]; then
+                mpc clear
+                mpc find album "$(echo ${menu} | awk -F ') ' '{ print $2 }')" albumartist "${albumartist}" | mpc add
+                mpc play
+            else
+                mpc find album "$(echo ${menu} | awk -F ') ' '{ print $2 }')" albumartist "${albumartist}" | mpc add
             fi
-    fi
+        elif [[ $menu == "(Song)"* ]]; then
+            if [[ $val -eq 11 ]]; then
+                mpc find title "$(echo ${menu} | awk -F ') ' '{ print $2 }')" artist "${artist}" | mpc insert
+            elif [[ $val -eq 12 ]]; then
+                mpc clear
+                mpc find title "$(echo ${menu} | awk -F ') ' '{ print $2 }')" artist "${artist}" | mpc add
+                mpc play
+            elif [[ $val -eq 1 || 10 ]]; then
+                mpc find title "$(echo ${menu} | awk -F ') ' '{ print $2 }')" artist "${artist}" | mpc add
+            fi
+        elif [[ -z "$menu" ]]; then
+            exit
+        elif [[ $menu == "0 Return to Main Menu" ]]; then
+            mainMenu
+        fi
+fi
 }
 
 
@@ -603,7 +605,7 @@ resumePlaylist () {
 dplayQueue () {
     while true; do
         if [[ -z $POS ]]; then
-            TRACKDISPLAY=$(export separator=$separator; echo -e "0  Return to Main Menu\n---\nAlt-2: Play, Alt-3: Delete\n---\n$(mpc playlist --format "%position%$separator%artist%$separator%title%")" | rofi -dmenu -u 2 -p "Current Queue > ")
+            TRACKDISPLAY=$(export separator=$separator; echo -e "0  Return to Main Menu\n---\nAlt-1: Play, Alt-2: Delete\n---\n$(mpc playlist --format "%position%$separator%artist%$separator%title%")" | rofi -dmenu -u 2 -p "Current Queue > ")
         else
             re='^[0-9]+$'
             if [[ "$POS" =~ $re ]]; then
@@ -611,7 +613,7 @@ dplayQueue () {
             else
                 POS=0
             fi
-            TRACKDISPLAY=$(export separator=$separator; echo -e "0  Return to Main Menu\n---\nAlt-2: Play, Alt-3: Delete\n---\n$(mpc playlist --format "%position%$separator%artist%$separator%title%")" | rofi -dmenu -l $POS -u 2 -p "Current Queue > ")
+            TRACKDISPLAY=$(export separator=$separator; echo -e "0  Return to Main Menu\n---\nAlt-1: Play, Alt-2: Delete\n---\n$(mpc playlist --format "%position%$separator%artist%$separator%title%")" | rofi -dmenu -l $POS -u 2 -p "Current Queue > ")
         fi
 
         tempval=$?
@@ -622,10 +624,14 @@ dplayQueue () {
         export POS=$(echo "$TRACKDISPLAY" | awk -F "$separator" '{ print $1 }')
         if [[ "$TRACKDISPLAY" == "0  Return to Main Menu" ]]; then
             dplayPrompt
-        elif [[ $val -eq 3 ]]; then
-            mpc del $POS
+        elif [[ -z "$TRACKDISPLAY" ]]; then
+            exit
         else
-            mpc play $POS;
+            if [[ $val -eq 11 ]]; then
+                mpc del $POS
+            elif [[ $val -eq 1 || 10 ]]; then
+                mpc play $POS;
+            fi
         fi
     done
 }
@@ -830,24 +836,26 @@ playRandomTracks () {
 
 addLastMod() {
     loadCacheLatest
-    TRACK=$(echo -e "0  Return to Main Menu\n---\nAlt-2: Add, Alt-3: Insert, Alt-4: Replace\n---\n$(echo "$last_temp")" | dmenu_t -dmenu -u 2 -p "Chose Album > ")
+    TRACK=$(echo -e "0  Return to Main Menu\n---\nAlt-1: Add, Alt-2: Insert, Alt-3: Replace\n---\n$(echo "$last_temp")" | dmenu_t -dmenu -u 2 -p "Chose Album > ")
 
     val=$?
 
     if [[ "$TRACK" == "0  Return to Main Menu" ]]
         then dplayPrompt
+    elif [[ -z "$TRACK" ]]; then
+        exit
     else
         artist=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
         date=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
         album=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
-        if [[ $val -eq 3 ]]; then
-            echo "return code is 1"
+        if [[ $val -eq 11 ]]; then
+            echo "return code is 12"
             mpc search date "$date" album "$album" albumartist "$artist" | mpc insert
-        elif [[ $val -eq 4 ]]; then
-            echo "return code is 2"
+        elif [[ $val -eq 12 ]]; then
+            echo "return code is 13"
             mpc clear && mpc search date "$date" album "$album" albumartist "$artist" | mpc add
             mpc play
-        else
+        elif [[ $val -eq 1 || 10 ]]; then
             mpc search date "$date" album "$album" albumartist "$artist" | mpc add
         fi
     fi
@@ -855,24 +863,26 @@ addLastMod() {
 
 AddAlbumTags() {
     loadCacheAlbums
-    TRACK=$(echo -e "0  Return to Main Menu\n---\nAlt-2: Add, Alt-3: Insert, Alt-4: Replace Alt-5: Rate\n---\n$(echo "$album_temp")" | dmenu_t -dmenu -u 2 -p "Chose Album > ")
+    TRACK=$(echo -e "0  Return to Main Menu\n---\nAlt-1: Add, Alt-2: Insert, Alt-3: Replace Alt-4: Rate\n---\n$(echo "$album_temp")" | dmenu_t -dmenu -u 2 -p "Chose Album > ")
 
     val=$?
 
     if [[ "$TRACK" == "0  Return to Main Menu" ]]
         then dplayPrompt
+    elif [[ -z "$TRACK" ]]; then
+            exit
     else
         artist=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
         date=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
         album=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
-        if [[ $val -eq 3 ]]; then
+        if [[ $val -eq 11 ]]; then
             echo "return code is 1"
             mpc find date "$date" album "$album" albumartist "$artist" | mpc insert
-        elif [[ $val -eq 4 ]]; then
+        elif [[ $val -eq 12 ]]; then
             echo "return code is 2"
             mpc clear && mpc find date "$date" album "$album" albumartist "$artist" | mpc add
             mpc play
-        elif [[ $val -eq 5 ]]; then
+        elif [[ $val -eq 13 ]]; then
             if [[ -n $(mpc find -f '%disc%' albumartist "${artist}" album "${album}" date "${date}") ]]; then
                 disc=$(mpc find -f '%disc%' albumartist "${artist}" album "${album}" date "${date}" | head -1)
             else
@@ -884,7 +894,7 @@ AddAlbumTags() {
                 track="01"
             fi
                 disc=${disc} track=${track} rateartist="${artist}" ratealbum="${album}" ratedate="${date}" rateAlbum
-        else
+        elif [[ $val -eq 1 || 10 ]]; then
             mpc search date "$date" album "$album" albumartist "$artist" | mpc add
         fi
     fi
@@ -892,30 +902,32 @@ AddAlbumTags() {
 
 AddTrackTags() {
     loadCacheTracks
-    TRACK=$(echo -e "0  Return to Main Menu\n---\nAlt-2: Add | Alt-3: Insert | Alt-4: Replace | Alt-5: Rate\n---\n$(echo "$tracks_temp")"| dmenu_t -dmenu -u 2 -p "Choose Track > ")
+    TRACK=$(echo -e "0  Return to Main Menu\n---\nAlt-1: Add | Alt-2: Insert | Alt-3: Replace | Alt-4: Rate\n---\n$(echo "$tracks_temp")"| dmenu_t -dmenu -u 2 -p "Choose Track > ")
 
     val=$?
 
     if [[ "$TRACK" == "0  Return to Main Menu" ]]
         then dplayPrompt
+    elif [[ -z "$TRACK" ]]; then
+        exit
     else
         artist=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
         album=$(echo "$TRACK" | awk -F "$separator" '{print $4}')
         track=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
         title=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
 
-        if [[ $val -eq 3 ]]; then
+        if [[ $val -eq 11 ]]; then
             mpc find artist "$artist" album "$album" title "$title" | mpc insert
-        elif [[ $val -eq 4 ]]; then
+        elif [[ $val -eq 12 ]]; then
             mpc clear
             mpc findadd artist "$artist" album "$album" title "$title"
             mpc play
-        elif [[ $val -eq 2 ]]; then
+        elif [[ $val -eq 1 || 10 ]]; then
             mpc findadd artist "$artist" album "$album" title "$title"
             if [[ "$add_auto_play" ]]; then
                 mpc play $(mpc playlist | wc -l)
             fi
-        elif [[ $val -eq 5 ]]; then
+        elif [[ $val -eq 13 ]]; then
             rateartist=${artist} ratealbum=${album} ratetrack=${track} ratetitle=${title} rateTrack
         else
             exit
