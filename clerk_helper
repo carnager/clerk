@@ -300,7 +300,6 @@ def cleanRatings(args):
 
 
 def importTrackRatings(args):
-    client.clear()
     list = client.sticker_find('song', "", 'rating')
     rated_tracks = []
     for i in list:
@@ -317,7 +316,6 @@ def importTrackRatings(args):
         json.dump(rated_tracks, ratingfile)
 
 def importAlbumRatings(args):
-    client.clear()
     ratelist = client.sticker_find('song', "", 'albumrating')
     rated_tracks = []
     for i in ratelist:
