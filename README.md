@@ -4,6 +4,7 @@
 This is the multi_keys branch of clerk. This branch might replace regular clerk soon.
 The only difference is that it's possible to trigger different actions, depending on
 pressed key.
+This branch only works with rofi. dmenu is not supported.
 
 An image says more than 100 words:
 ![multi_keys branch]
