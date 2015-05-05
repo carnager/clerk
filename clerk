@@ -1292,22 +1292,9 @@ saveTrackToPlaylist() {
 ################################################################################
 
 
-if [[ "$backend" == "rofi" ]]
-    then function dmenu_t () {
+function dmenu_t () {
     rofi -dmenu $(echo "$rofiopts") "$@"
 }
-
-elif [[ "$backend" == "dmenu" ]]
-    then function dmenu_t () {
-    dmenu -l 15 "$@"
-}
-
-elif [[ "$backend" == "slmenu" ]]
-    then function dmenu_t () {
-    slmenu -l 15 "$@"
-}
-fi
-
 
 while :; do
     case $1 in
