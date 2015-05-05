@@ -200,15 +200,21 @@ def prune_fastlist(fastlist, mpdcachefile):
 def rateAlbum(args):
     fastlist = load_fastlist(os.getenv('HOME')+'/.config/clerk/albumratings.json')
     try:
-        entry = get_entry(fastlist, client.currentsong()['albumartist'], client.currentsong()['album'], client.currentsong()['date'], client.currentsong()['disc'])
-        entry["rating"] = os.getenv('rating')
+        entry = get_entry(fastlist, args.artist, args.album, args.date)
+        entry["rating"] = args.rating
         save_fastlist(os.getenv('HOME')+'/.config/clerk/albumratings.json', fastlist)
-        client.sticker_set("song", client.currentsong()['file'], "albumrating", os.getenv('rating'))
+        uri = client.find('albumartist', args.artist, 'album', args.album, 'date', args.date, 'track', os.getenv('track'), 'disc', os.getenv('disc'))
+        print(uri)
+        for i in uri:
+            client.sticker_set("song", i['file'], "albumrating", args.rating)
     except KeyError:
-        entry = {'albumartist': client.currentsong()['albumartist'], 'album': client.currentsong()['album'], 'date': client.currentsong()['date'], 'disc': client.currentsong()['disc'], 'albumrating': os.getenv('rating')}
+        entry = {'albumartist': args.artist, 'album': args.album, 'date': args.date, 'disc': os.getenv('disc'), 'track': os.getenv('track'), 'rating': args.rating}
         append_entry(fastlist, entry)
         save_fastlist(os.getenv('HOME')+'/.config/clerk/albumratings.json', fastlist)
-        client.sticker_set("song", client.currentsong()['file'], "albumrating", os.getenv('rating'))
+        uri = client.find('artist', args.artist, 'album', args.album, 'date', args.date, 'track', os.getenv('track'), 'disc', os.getenv('disc'))
+        print(uri)
+        for i in uri:
+            client.sticker_set("song", i['file'], "albumrating", args.rating)
 
 
 
@@ -413,6 +419,10 @@ parser_getlatest = subparsers.add_parser('getLatest', help="get all albums from 
 parser_getlatest.set_defaults(call=getLatest)
 
 parser_ratealbum = subparsers.add_parser('ratealbum', help="rate current Album")
+parser_ratealbum.add_argument('artist', action="store")
+parser_ratealbum.add_argument('album', action="store")
+parser_ratealbum.add_argument('date', action="store")
+parser_ratealbum.add_argument('rating', action="store")
 parser_ratealbum.set_defaults(call=rateAlbum)
 
 parser_ratetrack = subparsers.add_parser('ratetrack', help="rate current Track")

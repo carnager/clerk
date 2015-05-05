@@ -36,7 +36,6 @@ elif [[ $scrobbler == mpdscribble ]]; then
     export scrobbler_kill="mpdscribble"
 fi
 
-export mpd_artist=albumartist
 if [[ $(ps x| grep clerk_helper | head -1 | grep -v 'grep') ]]; then
     :
 else
@@ -709,8 +708,12 @@ rateAlbum () {
     if [[ $rating == "" ]]; then
         exit
     else
-        export rating=${rating}; clerk_helper ratealbum
-        notify-send "clerk" "rated $(mpc current -f '%artist% - %album%') with ${rating}"
+        if [[ -z "$rateartist" ]]; then
+            export disc=${disc}; export track=${track}; clerk_helper ratealbum "$(mpc current -f '%albumartist%')" "$(mpc current -f '%album%')" "$(mpc current -f '%date%')" "${rating}"
+        else
+            export disc=${disc}; export track=${track}; clerk_helper ratealbum "${rateartist}" "${ratealbum}" "${ratedate}" "${rating}"
+            notify-send "clerk" "rated ${rateartist} - ${ratealbum} with ${rating}"
+        fi
     fi
 }
 
@@ -725,7 +728,7 @@ rateTrack () {
             notify-send "clerk" "rated $(mpc current) with $(echo ${rating})"
         else
             clerk_helper ratetrack "${rateartist}" "${ratealbum}" "${ratetrack}" "${ratetitle}" "${rating}"
-            notify-send "clerk" "rated ${artist} - ${title} with $(echo ${rating})"
+            notify-send "clerk" "rated ${rateartist} - ${ratetitle} with $(echo ${rating})"
         fi
     fi
 }
@@ -797,9 +800,9 @@ loadRandomRating () {
 
 playRandomAlbum () {
     mpc clear > /dev/null
-    artist="$(mpc list "$mpd_artist" | $shuf -n 1)"
-    album="$(mpc list album "$mpd_artist" "$artist" | $shuf -n 1)"
-    mpc find album "$album" "$mpd_artist" "$artist" | mpc add && mpc play > /dev/null
+    artist="$(mpc list "albumartist" | $shuf -n 1)"
+    album="$(mpc list album "albumartist" "$artist" | $shuf -n 1)"
+    mpc find album "$album" "albumartist" "$artist" | mpc add && mpc play > /dev/null
 }
 
 playRandomTracks () {
@@ -834,20 +837,20 @@ addLastMod() {
         album=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
         if [[ $val -eq 3 ]]; then
             echo "return code is 1"
-            mpc search date "$date" album "$album" $mpd_artist "$artist" | mpc insert
+            mpc search date "$date" album "$album" albumartist "$artist" | mpc insert
         elif [[ $val -eq 4 ]]; then
             echo "return code is 2"
-            mpc clear && mpc search date "$date" album "$album" $mpd_artist "$artist" | mpc add
+            mpc clear && mpc search date "$date" album "$album" albumartist "$artist" | mpc add
             mpc play
         else
-            mpc search date "$date" album "$album" $mpd_artist "$artist" | mpc add
+            mpc search date "$date" album "$album" albumartist "$artist" | mpc add
         fi
     fi
 }
 
 AddAlbumTags() {
     loadCacheAlbums
-    TRACK=$(echo -e "0  Return to Main Menu\n---\nAlt-2: Add, Alt-3: Insert, Alt-4: Replace\n---\n$(echo "$album_temp")" | dmenu_t -dmenu -u 2 -p "Chose Album > ")
+    TRACK=$(echo -e "0  Return to Main Menu\n---\nAlt-2: Add, Alt-3: Insert, Alt-4: Replace Alt-5: Rate\n---\n$(echo "$album_temp")" | dmenu_t -dmenu -u 2 -p "Chose Album > ")
 
     val=$?
 
@@ -859,19 +862,28 @@ AddAlbumTags() {
         album=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
         if [[ $val -eq 3 ]]; then
             echo "return code is 1"
-            mpc search date "$date" album "$album" $mpd_artist "$artist" | mpc insert
+            mpc find date "$date" album "$album" albumartist "$artist" | mpc insert
         elif [[ $val -eq 4 ]]; then
             echo "return code is 2"
-            mpc clear && mpc search date "$date" album "$album" $mpd_artist "$artist" | mpc add
+            mpc clear && mpc find date "$date" album "$album" albumartist "$artist" | mpc add
             mpc play
+        elif [[ $val -eq 5 ]]; then
+            if [[ -n $(mpc find -f '%disc%' albumartist "${artist}" album "${album}" date "${date}") ]]; then
+                disc=$(mpc find -f '%disc%' albumartist "${artist}" album "${album}" date "${date}" | head -1)
+            else
+                disc=""
+            fi
+            if [[ -n $(mpc find track "1" albumartist "${artist}" album "${album}" date "${date}") ]]; then
+                track="1"
+            else
+                track="01"
+            fi
+                disc=${disc} track=${track} rateartist="${artist}" ratealbum="${album}" ratedate="${date}" rateAlbum
         else
-            mpc search date "$date" album "$album" $mpd_artist "$artist" | mpc add
+            mpc search date "$date" album "$album" albumartist "$artist" | mpc add
         fi
     fi
 }
-
-
-
 
 AddTrackTags() {
     loadCacheTracks
@@ -935,7 +947,7 @@ browseDateAdd() {
                 mpc findadd artist "$artist" album "$album"
             fi
         fi
-    done < <(echo -e "0  Return to Date Menu\n---\nAdding Mode: Add\n---\nAdd All\nReplace All\n---\n$(mpc --format "%$mpd_artist%$separator%album%" find date "$date" | uniq)" | dmenu_t -dmenu -p "Select Album > ")
+    done < <(echo -e "0  Return to Date Menu\n---\nAdding Mode: Add\n---\nAdd All\nReplace All\n---\n$(mpc --format "%albumartist%$separator%album%" find date "$date" | uniq)" | dmenu_t -dmenu -p "Select Album > ")
 
     if [[  $seen = 0 ]]
     then
@@ -963,7 +975,7 @@ browseDateInsert() {
                 mpc find artist "$artist" album "$album" | mpc insert
             fi
         fi
-    done < <(echo -e "0  Return to Date Menu\n---\nAdding Mode: Insert\n---\nAdd All\nReplace All\n---\n$(mpc --format "%$mpd_artist%$separator%album%" find date "$date" | uniq)" | dmenu_t -dmenu -p "Select Album > ")
+    done < <(echo -e "0  Return to Date Menu\n---\nAdding Mode: Insert\n---\nAdd All\nReplace All\n---\n$(mpc --format "%albumartist%$separator%album%" find date "$date" | uniq)" | dmenu_t -dmenu -p "Select Album > ")
 
     if [[  $seen = 0 ]]
     then
@@ -991,7 +1003,7 @@ browseDateReplace() {
                 mpc clear && mpc findadd artist "$artist" album "$album" && mpc play
             fi
         fi
-    done < <(echo -e "0  Return to Date Menu\n---\nAdding Mode: Replace\n---\nAdd All\nReplace All\n---\n$(mpc --format "%$mpd_artist%$separator%album%" find date "$date" | uniq)" | dmenu_t -dmenu -p "Select Album > ")
+    done < <(echo -e "0  Return to Date Menu\n---\nAdding Mode: Replace\n---\nAdd All\nReplace All\n---\n$(mpc --format "%albumartist%$separator%album%" find date "$date" | uniq)" | dmenu_t -dmenu -p "Select Album > ")
 }
 
 
@@ -1186,7 +1198,7 @@ browseGenre2() {
             ALBUM=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
             mpc findadd album "$ALBUM" genre "$GENRE" && mpc play
         fi
-    done < <(echo -e "0  Return to Genre Menu\n---\nAdd All\nInsert all\nReplace all\n---\n$(mpc search genre "$GENRE" --format "{$mpd_artist}$separator{album}$separator({date})" | sort | uniq)" | dmenu_t -dmenu -p "Choose Album > ")
+    done < <(echo -e "0  Return to Genre Menu\n---\nAdd All\nInsert all\nReplace all\n---\n$(mpc search genre "$GENRE" --format "{albumartist}$separator{album}$separator({date})" | sort | uniq)" | dmenu_t -dmenu -p "Choose Album > ")
 
     if [[  $seen = 0 ]]
     then
@@ -1205,7 +1217,7 @@ saveAlbumToPlaylist() {
             artist=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
             date=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
             album=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
-            mpc search date "$date" album "$album" $mpd_artist "$artist" | clerk_helper saveto
+            mpc search date "$date" album "$album" albumartist "$artist" | clerk_helper saveto
         fi
     done < <(echo -e "0  Return to Main Menu\n---\n$(echo "$album_temp")" | dmenu_t -dmenu -p "Save Album to Playlist > ")
 
@@ -1227,7 +1239,7 @@ saveLatestToPlaylist() {
             artist=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
             date=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
             album=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
-            mpc search date "$date" album "$album" $mpd_artist "$artist" | clerk_helper saveto
+            mpc search date "$date" album "$album" albumartist "$artist" | clerk_helper saveto
         fi
     done < <(echo -e "0  Return to Main Menu\n---\n$(echo "$last_temp")" | dmenu_t -dmenu -p "Save Album to Playlist > ")
 
@@ -1249,7 +1261,7 @@ saveTrackToPlaylist() {
             track=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
             album=$(echo "$TRACK" | awk -F "$separator" '{print $4}')
             title=$(echo "$TRACK" | awk -F "$separator" '{print $5}')
-            mpc search track "$track" album "$album" title "$title" $mpd_artist "$artist" | clerk_helper saveto
+            mpc search track "$track" album "$album" title "$title" albumartist "$artist" | clerk_helper saveto
         fi
     done < <(echo -e "0  Return to Main Menu\n---\n$(echo "$tracks_temp")" | dmenu_t -dmenu -p "Save Track to Playlist > ")
 
