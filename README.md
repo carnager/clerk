@@ -1,5 +1,15 @@
 # clerk - mpd client, based on rofi (or dmenu)
 
+# multi_keys branch
+This is the multi_keys branch of clerk. This branch might replace regular clerk soon.
+The only difference is that it's possible to trigger different actions, depending on
+pressed key.
+
+An image says more than 100 words:
+![multi_keys branch]
+(images/clerk_multi_keys.jpg)
+
+
 # CHANGES IN RATINGS!
 From clerk 1.0 on ratings are stored in json format.
 If you still used old ratings use the following steps to
