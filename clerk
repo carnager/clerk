@@ -253,7 +253,7 @@ currentMenu () {
         elif [[ -z "$menu" ]]; then
             exit
         elif [[ "$menu" == "Alt-1: Add, Alt-2: Insert, Alt-3: Replace" ]]; then
-            :
+            currentMenu
         elif [[ $menu == "0 Return to Main Menu" ]]; then
             mainMenu
         fi
@@ -629,7 +629,7 @@ dplayQueue () {
         elif [[ -z "$TRACKDISPLAY" ]]; then
             exit
         elif [[ "$TRACKDISPLAY" == "Alt-1: Play, Alt-2: Delete" ]]; then
-            :
+            dplayQueue
         else
             if [[ $val -eq 11 ]]; then
                 mpc del $POS
@@ -638,27 +638,6 @@ dplayQueue () {
             fi
         fi
     done
-}
-
-
-dplayQueueDelete () {
-    while read TRACKDISPLAY
-    do
-        TITLE=$(echo "$TRACKDISPLAY" | awk -F "$separator" '{ print $3 }')
-        ARTIST=$(echo "$TRACKDISPLAY" | awk -F "$separator" '{ print $2 }')
-        POS=$(echo "$TRACKDISPLAY" | awk -F "$separator" '{ print $1 }')
-        if [[ "$TRACKDISPLAY" == "0  Return to Main Menu" ]]; then
-            dplayPrompt
-        elif [[ "$TRACKDISPLAY" == "Mode: Delete" ]]; then
-            dplayQueue
-        elif [[ "$TRACKDISPLAY" == "Manage Playlists" ]]; then
-            managePlaylists
-        else
-            mpc del $POS;
-            dplayQueueDelete
-        fi
-    done < <(export separator=$separator; echo -e "0  Return to Main Menu\n---\nMode: Delete\n---\nManage Playlists\n---\n$(mpc playlist --format "%position%$separator%artist%$separator%title%")" | dmenu_t -p "Queue > ")
-    exit
 }
 
 dplayQueueLoad () {
@@ -849,7 +828,7 @@ addLastMod() {
     elif [[ -z "$TRACK" ]]; then
         exit
     elif [[ "$TRACK" == "Alt-1: Add, Alt-2: Insert, Alt-3: Replace (Default)" ]]; then
-        :
+        addLastMod
     else
         artist=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
         date=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
@@ -878,7 +857,7 @@ AddAlbumTags() {
     elif [[ -z "$TRACK" ]]; then
             exit
     elif [[ "$TRACK" == "Alt-1: Add, Alt-2: Insert, Alt-3: Replace (Default), Alt-4: Rate" ]]; then
-        :
+        AddAlbumTags
     else
         artist=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
         date=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
@@ -919,7 +898,7 @@ AddTrackTags() {
     elif [[ -z "$TRACK" ]]; then
         exit
     elif [[ "$TRACK" == "Alt-1: Add | Alt-2: Insert | Alt-3: Replace | Alt-4: Rate" ]]; then
-        :
+        AddTrackTags
     else
         artist=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
         album=$(echo "$TRACK" | awk -F "$separator" '{print $4}')
