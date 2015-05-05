@@ -404,11 +404,10 @@ def getArtistTracks(args):
     tracks=client.find('artist', args.artist)
     tracklist=[]
     for track in tracks:
-        tracklist.append(track['track']+os.getenv('separator')+track['title'])
-    uni=set(tracklist)
-    result = list(uni)
-    for x in result:
-        print("(Song) "+x)
+        entry = {'track': track['track'], 'title': track['title']}
+        tracklist.append(entry)
+    for x in tracklist:
+        print("(Song) "+x['track']+os.getenv('separator')+x['title'])
 
 # create commandline arguments
 parser = argparse.ArgumentParser(prog='clerk_helper', description='Companion script for clerk')
