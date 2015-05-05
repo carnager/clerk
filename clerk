@@ -75,66 +75,53 @@ updateCache() {
 }
 
 dplayPrompt () {
-    menu=("Q  Exit Clerk"
-          "---"
-          "1  Play random Album"
-          "2  Play random Songs"
-          "---"
-          "3  Current Artist"
-          "4  Current Queue"
-          "5  Browse Library"
-          "6  Manage Playlists"
-          "---"
-          "7  Options"
-          "8  Ratings"
-          "9  Lookup"
-          "0  Playback")
+    if [[ -z $(mpc status | grep "/") ]]; then
+        song="No Song is playing"
+    else
+        song=$(mpc current)
+    fi
+    menu=$(echo -e "Q  Exit Clerk\n---\nAlt-1: Toggle, Alt-2: Prev, Alt-3: Next, Alt-4: Stop\n---\n1  Play random Album\n2  Play random Songs\n---\n3  Current Artist\n4  Current Queue\n5  Browse Library\n6  Manage Playlists\n---\n7  Options\n8  Ratings\n9  Lookup" | rofi -dmenu -lines 17 -u 2 -p "Now Playing: ${song} > ")
 
-    prompt() {
-        printf "%s\n" "$@" | dmenu_t -p "MPD Menu > "
-    }
+    val=$?
 
-    case "$(prompt "${menu[@]}")" in
-        1*) playRandomAlbum ;;
-        2*) playRandomTracks ;;
-        3*) currentMenu ;;
-        4*) dplayQueue ;;
-        5*) browseLibPrompt ;;
-        6*) managePlaylists ;;
-        7*) dplayOptionsPrompt ;;
-        8*) ratingPrompt ;;
-        9*) infoPrompt ;;
-        0*) playbackPrompt ;;
-        Q) exit ;;
-          *) exit
-    esac
+    if [[ $val -eq 10 ]]; then
+        mpc toggle
+        dplayPrompt
+    elif [[ $val -eq 11 ]]; then
+        mpc prev
+        dplayPrompt
+    elif [[ $val -eq 12 ]]; then
+        mpc next
+        dplayPrompt
+    elif [[ $val -eq 13 ]]; then
+        mpc stop
+        dplayPrompt
+    fi
+
+    if [[ "$menu" == "Q  Exit Clerk" ]]; then
+        exit
+    elif [[ "$menu" == "1  Play random Album" ]]; then
+        playRandomAlbum
+    elif [[ "$menu" == "2  Play random Songs" ]]; then
+        playRandomTracks
+    elif [[ "$menu" == "3  Current Artist" ]]; then
+        currentMenu
+    elif [[ "$menu" == "4  Current Queue" ]]; then
+        dplayQueue
+    elif [[ "$menu" == "5  Browse Library" ]]; then
+        browseLibPrompt
+    elif [[ "$menu" == "6  Manage Playlists" ]]; then
+        managePlaylists
+    elif [[ "$menu" == "7  Options\n8  Ratings" ]]; then
+        dplayOptions
+    elif [[ "$menu" == "8  Ratings\n9  Lookup" ]]; then
+        ratingPrompt
+    elif [[ "$menu" == "9  Lookup" ]]; then
+        infoPrompt
+    elif [[ -z "$menu" ]]; then
+        exit
+    fi
 }
-
-
-playbackPrompt () {
-    menu=("0  Return to Main Menu"
-          "---"
-          "1  Toggle Playback"
-          "2  Next Song"
-          "3  Prev Song"
-          "4  Stop"
-          "5  Clear Playlist")
-
-   prompt() {
-        printf "%s\n" "$@" | dmenu_t -p "Playback > "
-    }
-
-    case "$(prompt "${menu[@]}")" in
-        1*) mpc toggle  && playbackPrompt;;
-        2*) mpc next && playbackPrompt ;;
-        3*) mpc prev && playbackPrompt ;;
-        4*) mpc stop && playbackPrompt ;;
-        5*) mpc clear && dplayPrompt ;;
-        0*) dplayPrompt ;;
-        *) exit ;;
-    esac
-}
-
 
 lastFM () {
 # Some Variables to clean up the code
@@ -215,8 +202,8 @@ browseFilesystem () {
 }
 
 currentMenu () {
-    albums=$(mpc list album albumartist "$(mpc current -f '%artist%')"| awk '$0="(Album) "$0')
-    titles=$(mpc -f '%title%' find artist "$(mpc current -f '%artist%')"|awk '$0="(Song) "$0')
+    albums=$(mpc list album albumartist "$(mpc current -f '%artist%')" | while read line; do mpc find -f "%date%$separator%album%" albumartist $(mpc current -f '%albumartist%') album "$line"; done | uniq | awk '$0="(Album) "$0')
+    titles=$(mpc -f '%title%' find artist "$(mpc current -f '%artist%')" | while read line; do mpc find -f "%track%$separator%title%" artist $(mpc current -f '%artist%') album "$line"; done | awk '$0="(Song) "$0')
 
     if [[ -z $(mpc current) ]]; then
         menu=$(echo -e "0 Return to Main Menu" | rofi -dmenu -p "No Music is playing")
@@ -232,30 +219,30 @@ currentMenu () {
 
         if [[ $menu == "(Album)"* ]]; then
             if [[ $val -eq 11 ]]; then
-                mpc find album "$(echo ${menu} | awk -F ') ' '{ print $2 }')" albumartist "${albumartist}" | mpc insert
+                mpc find album "$(echo "$menu" | awk -F "$separator" '{ print $2 }')" albumartist "${albumartist}" | mpc insert
             elif [[ $val -eq 1 || $val -eq 12 ]]; then
                 mpc clear
-                mpc find album "$(echo ${menu} | awk -F ') ' '{ print $2 }')" albumartist "${albumartist}" | mpc add
+                mpc find album "$(echo ${menu} | awk -F "$separator" '{ print $2 }')" albumartist "${albumartist}" | mpc add
                 mpc play
             else
-                mpc find album "$(echo ${menu} | awk -F ') ' '{ print $2 }')" albumartist "${albumartist}" | mpc add
+                mpc find album "$(echo ${menu} | awk -F "$separator" '{ print $2 }')" albumartist "${albumartist}" | mpc add
             fi
         elif [[ $menu == "(Song)"* ]]; then
             if [[ $val -eq 11 ]]; then
-                mpc find title "$(echo ${menu} | awk -F ') ' '{ print $2 }')" artist "${artist}" | mpc insert
+                mpc find track "$(echo ${menu} | awk -F ') ' '{ print $2 }' | awk -F "$separator" '{ print $1 }')" title "$(echo "$menu" | awk -F "$separator" '{ print $2 }')" artist "${artist}" | mpc insert
             elif [[ $val -eq 12 ]]; then
                 mpc clear
-                mpc find title "$(echo ${menu} | awk -F ') ' '{ print $2 }')" artist "${artist}" | mpc add
+                mpc find track "$(echo ${menu} | awk -F ') ' '{ print $2 }' | awk -F "$separator" '{ print $1 }')" title "$(echo "$menu" | awk -F "$separator" '{ print $2 }')" artist "${artist}" | mpc add
                 mpc play
             elif [[ $val -eq 1 || $val -eq 10 ]]; then
-                mpc find title "$(echo ${menu} | awk -F ') ' '{ print $2 }')" artist "${artist}" | mpc add
+                mpc find track "$(echo ${menu} | awk -F ') ' '{ print $2 }' | awk -F "$separator" '{ print $1 }')" title "$(echo "$menu" | awk -F "$separator" '{ print $2 }')" artist "${artist}" | mpc add
             fi
         elif [[ -z "$menu" ]]; then
             exit
         elif [[ "$menu" == "Alt-1: Add, Alt-2: Insert, Alt-3: Replace" ]]; then
             currentMenu
         elif [[ $menu == "0 Return to Main Menu" ]]; then
-            mainMenu
+            dplayPrompt
         fi
 fi
 }
