@@ -233,7 +233,7 @@ currentMenu () {
         if [[ $menu == "(Album)"* ]]; then
             if [[ $val -eq 11 ]]; then
                 mpc find album "$(echo ${menu} | awk -F ') ' '{ print $2 }')" albumartist "${albumartist}" | mpc insert
-            elif [[ $val -eq 12 ]]; then
+            elif [[ $val -eq 1 || 12 ]]; then
                 mpc clear
                 mpc find album "$(echo ${menu} | awk -F ') ' '{ print $2 }')" albumartist "${albumartist}" | mpc add
                 mpc play
