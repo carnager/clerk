@@ -836,7 +836,7 @@ playRandomTracks () {
 
 addLastMod() {
     loadCacheLatest
-    TRACK=$(echo -e "0  Return to Main Menu\n---\nAlt-1: Add, Alt-2: Insert, Alt-3: Replace\n---\n$(echo "$last_temp")" | dmenu_t -dmenu -u 2 -p "Chose Album > ")
+    TRACK=$(echo -e "0  Return to Main Menu\n---\nAlt-1: Add, Alt-2: Insert, Alt-3: Replace (Default)\n---\n$(echo "$last_temp")" | dmenu_t -dmenu -u 2 -p "Chose Album > ")
 
     val=$?
 
@@ -851,11 +851,11 @@ addLastMod() {
         if [[ $val -eq 11 ]]; then
             echo "return code is 12"
             mpc search date "$date" album "$album" albumartist "$artist" | mpc insert
-        elif [[ $val -eq 12 ]]; then
+        elif [[ $val -eq 1 || 12 ]]; then
             echo "return code is 13"
             mpc clear && mpc search date "$date" album "$album" albumartist "$artist" | mpc add
             mpc play
-        elif [[ $val -eq 1 || 10 ]]; then
+        elif [[ $val -eq 10 ]]; then
             mpc search date "$date" album "$album" albumartist "$artist" | mpc add
         fi
     fi
@@ -863,7 +863,7 @@ addLastMod() {
 
 AddAlbumTags() {
     loadCacheAlbums
-    TRACK=$(echo -e "0  Return to Main Menu\n---\nAlt-1: Add, Alt-2: Insert, Alt-3: Replace Alt-4: Rate\n---\n$(echo "$album_temp")" | dmenu_t -dmenu -u 2 -p "Chose Album > ")
+    TRACK=$(echo -e "0  Return to Main Menu\n---\nAlt-1: Add, Alt-2: Insert, Alt-3: Replace (Default), Alt-4: Rate\n---\n$(echo "$album_temp")" | dmenu_t -dmenu -u 2 -p "Chose Album > ")
 
     val=$?
 
@@ -878,7 +878,7 @@ AddAlbumTags() {
         if [[ $val -eq 11 ]]; then
             echo "return code is 1"
             mpc find date "$date" album "$album" albumartist "$artist" | mpc insert
-        elif [[ $val -eq 12 ]]; then
+        elif [[ $val -eq 1 || 12 ]]; then
             echo "return code is 2"
             mpc clear && mpc find date "$date" album "$album" albumartist "$artist" | mpc add
             mpc play
@@ -894,7 +894,7 @@ AddAlbumTags() {
                 track="01"
             fi
                 disc=${disc} track=${track} rateartist="${artist}" ratealbum="${album}" ratedate="${date}" rateAlbum
-        elif [[ $val -eq 1 || 10 ]]; then
+        elif [[ $val -eq 10 ]]; then
             mpc search date "$date" album "$album" albumartist "$artist" | mpc add
         fi
     fi
