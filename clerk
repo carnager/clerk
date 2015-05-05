@@ -605,8 +605,13 @@ dplayQueue () {
         if [[ -z $POS ]]; then
             TRACKDISPLAY=$(export separator=$separator; echo -e "0  Return to Main Menu\n---\nAlt-2: Play, Alt-3: Delete\n---\n$(mpc playlist --format "%position%$separator%artist%$separator%title%")" | rofi -dmenu -u 2 -p "Current Queue > ")
         else
-            POS=$(( $POS + 4 ))
-            TRACKDISPLAY=$(export separator=$separator; echo -e "0  Return to Main Menu\n---\nMode: Play\n---\n$(mpc playlist --format "%position%$separator%artist%$separator%title%")" | rofi -dmenu -l $POS -u 2 -p "Current Queue > ")
+            re='^[0-9]+$'
+            if [[ "$POS" =~ $re ]]; then
+                POS=$(( $POS + 4 ))
+            else
+                POS=1
+            fi
+            TRACKDISPLAY=$(export separator=$separator; echo -e "0  Return to Main Menu\n---\nAlt-2: Play, Alt-3: Delete\n---\n$(mpc playlist --format "%position%$separator%artist%$separator%title%")" | rofi -dmenu -l $POS -u 2 -p "Current Queue > ")
         fi
 
         tempval=$?
