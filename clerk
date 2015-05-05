@@ -233,7 +233,7 @@ currentMenu () {
         if [[ $menu == "(Album)"* ]]; then
             if [[ $val -eq 11 ]]; then
                 mpc find album "$(echo ${menu} | awk -F ') ' '{ print $2 }')" albumartist "${albumartist}" | mpc insert
-            elif [[ $val -eq 1 || 12 ]]; then
+            elif [[ $val -eq 1 || $val -eq 12 ]]; then
                 mpc clear
                 mpc find album "$(echo ${menu} | awk -F ') ' '{ print $2 }')" albumartist "${albumartist}" | mpc add
                 mpc play
@@ -247,7 +247,7 @@ currentMenu () {
                 mpc clear
                 mpc find title "$(echo ${menu} | awk -F ') ' '{ print $2 }')" artist "${artist}" | mpc add
                 mpc play
-            elif [[ $val -eq 1 || 10 ]]; then
+            elif [[ $val -eq 1 || $val -eq 10 ]]; then
                 mpc find title "$(echo ${menu} | awk -F ') ' '{ print $2 }')" artist "${artist}" | mpc add
             fi
         elif [[ -z "$menu" ]]; then
@@ -633,7 +633,7 @@ dplayQueue () {
         else
             if [[ $val -eq 11 ]]; then
                 mpc del $POS
-            elif [[ $val -eq 1 || 10 ]]; then
+            elif [[ $val -eq 1 || $val -eq 10 ]]; then
                 mpc play $POS;
             fi
         fi
@@ -836,7 +836,7 @@ addLastMod() {
         if [[ $val -eq 11 ]]; then
             echo "return code is 12"
             mpc search date "$date" album "$album" albumartist "$artist" | mpc insert
-        elif [[ $val -eq 1 || 12 ]]; then
+        elif [[ $val -eq 1 || $val -eq 12 ]]; then
             echo "return code is 13"
             mpc clear && mpc search date "$date" album "$album" albumartist "$artist" | mpc add
             mpc play
@@ -865,7 +865,7 @@ AddAlbumTags() {
         if [[ $val -eq 11 ]]; then
             echo "return code is 1"
             mpc find date "$date" album "$album" albumartist "$artist" | mpc insert
-        elif [[ $val -eq 1 || 12 ]]; then
+        elif [[ $val -eq 1 || $val -eq 12 ]]; then
             echo "return code is 2"
             mpc clear && mpc find date "$date" album "$album" albumartist "$artist" | mpc add
             mpc play
@@ -911,7 +911,7 @@ AddTrackTags() {
             mpc clear
             mpc findadd artist "$artist" album "$album" title "$title"
             mpc play
-        elif [[ $val -eq 1 || 10 ]]; then
+        elif [[ $val -eq 1 || $val -eq 10 ]]; then
             mpc findadd artist "$artist" album "$album" title "$title"
             if [[ "$add_auto_play" ]]; then
                 mpc play $(mpc playlist | wc -l)
