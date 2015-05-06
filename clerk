@@ -594,7 +594,7 @@ resumePlaylist () {
 dplayQueue () {
     while true; do
         if [[ -z $POS ]]; then
-            TRACKDISPLAY=$(export separator=$separator; echo -e "0  Return to Main Menu\n---\n: Play, Alt-2: Delete\n---\n$(mpc playlist --format "%position%$separator%artist%$separator%title%")" | rofi -dmenu -u 2 -p "Current Queue > ")
+            TRACKDISPLAY=$(export separator=$separator; echo -e "0  Return to Main Menu\n---\n${play}: Play, ${delete}: Delete\n---\n$(mpc playlist --format "%position%$separator%artist%$separator%title%")" | rofi -dmenu -u 2 -p "Current Queue > ")
         else
             re='^[0-9]+$'
             if [[ "$POS" =~ $re ]]; then
