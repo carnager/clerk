@@ -1,6 +1,3 @@
-# set backend, valid choices: rofi, dmenu, slmenu
-backend=rofi
-
 # custom rofi settings (rofi reads settings from ~/.Xresources)
 # but you can override settings here.
 # rofiopts="-width 35 -padding 12 -lines 40"
@@ -40,3 +37,20 @@ scrobbler=mpdas
 # set to 0 if mpdscribble runs locally
 ssh_lastfm=
 ssh_host=
+
+# custom keybindings
+# Adding of songs/albums
+add="Alt+1"
+insert="Alt+2"
+replace="Alt+3"
+rate="Alt+4"
+
+# playback controls
+toggle="Alt+1"
+prev="Alt+2"
+next="Alt+3"
+stop="Alt+4"
+
+# playlist menu
+play="Alt+1"
+delete="Alt+2"
