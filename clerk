@@ -112,9 +112,9 @@ dplayPrompt () {
         browseLibPrompt
     elif [[ "$menu" == "6  Manage Playlists" ]]; then
         managePlaylists
-    elif [[ "$menu" == "7  Options\n8  Ratings" ]]; then
+    elif [[ "$menu" == "7  Options" ]]; then
         dplayOptions
-    elif [[ "$menu" == "8  Ratings\n9  Lookup" ]]; then
+    elif [[ "$menu" == "8  Ratings" ]]; then
         ratingPrompt
     elif [[ "$menu" == "9  Lookup" ]]; then
         infoPrompt
@@ -715,7 +715,7 @@ rateTrack () {
 }
 
  instantRateTrack () {
-     export rating=${rating}; clerk_helper ratetrack
+     export rating=${rating}; clerk_helper ratetrack "${rateartist}" "${ratealbum}" "${ratetrack}" "${ratetitle}" "${rating}"
      notify-send "clerk" "rated $(mpc current) with $(echo ${rating})"
  }
 
