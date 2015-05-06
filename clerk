@@ -80,7 +80,7 @@ dplayPrompt () {
     else
         song=$(mpc current)
     fi
-    menu=$(echo -e "Q  Exit Clerk\n---\nAlt-1: Toggle, Alt-2: Prev, Alt-3: Next, Alt-4: Stop\n---\n1  Play random Album\n2  Play random Songs\n---\n3  Current Artist\n4  Current Queue\n5  Browse Library\n6  Manage Playlists\n---\n7  Options\n8  Ratings\n9  Lookup" | rofi -dmenu -lines 17 -u 2 -p "Now Playing: ${song} > ")
+    menu=$(echo -e "Q  Exit Clerk\n---\n${toggle}: Toggle, ${prev}: Prev, ${next}: Next, ${stop}: Stop\n---\n1  Play random Album\n2  Play random Songs\n---\n3  Current Artist\n4  Current Queue\n5  Browse Library\n6  Manage Playlists\n---\n7  Options\n8  Ratings\n9  Lookup" | rofi -dmenu -lines 17 -u 2 -p "Now Playing: ${song} > ")
 
     val=$?
 
@@ -209,7 +209,7 @@ currentMenu () {
         menu=$(echo -e "0 Return to Main Menu" | rofi -dmenu -p "No Music is playing")
     else
         current=$(mpc current -f '%artist%')
-        menu=$(echo -e "0 Return to Main Menu\n---\nAlt-1: Add, Alt-2: Insert, Alt-3: Replace\n---\n$albums\n---\n$titles" | rofi -dmenu -u 2 -p "Other Music by ${current} > ")
+        menu=$(echo -e "0 Return to Main Menu\n---\n${add}: Add, ${insert}: Insert, ${replace}: Replace\n---\n$albums\n---\n$titles" | rofi -dmenu -u 2 -p "Other Music by ${current} > ")
 
         tempval=$?
         val=$tempval
@@ -220,7 +220,7 @@ currentMenu () {
         if [[ $menu == "(Album)"* ]]; then
             if [[ $val -eq 11 ]]; then
                 mpc find album "$(echo "$menu" | awk -F "$separator" '{ print $2 }')" albumartist "${albumartist}" | mpc insert
-            elif [[ $val -eq 1 || $val -eq 12 ]]; then
+            elif [[ $val -eq 0 || $val -eq 12 ]]; then
                 mpc clear
                 mpc find album "$(echo ${menu} | awk -F "$separator" '{ print $2 }')" albumartist "${albumartist}" | mpc add
                 mpc play
@@ -234,12 +234,12 @@ currentMenu () {
                 mpc clear
                 mpc find track "$(echo ${menu} | awk -F ') ' '{ print $2 }' | awk -F "$separator" '{ print $1 }')" title "$(echo "$menu" | awk -F "$separator" '{ print $2 }')" artist "${artist}" | mpc add
                 mpc play
-            elif [[ $val -eq 1 || $val -eq 10 ]]; then
+            elif [[ $val -eq 0 || $val -eq 10 ]]; then
                 mpc find track "$(echo ${menu} | awk -F ') ' '{ print $2 }' | awk -F "$separator" '{ print $1 }')" title "$(echo "$menu" | awk -F "$separator" '{ print $2 }')" artist "${artist}" | mpc add
             fi
         elif [[ -z "$menu" ]]; then
             exit
-        elif [[ "$menu" == "Alt-1: Add, Alt-2: Insert, Alt-3: Replace" ]]; then
+        elif [[ "$menu" == "${add}: Add, ${insert}: Insert, ${replace}: Replace" ]]; then
             currentMenu
         elif [[ $menu == "0 Return to Main Menu" ]]; then
             dplayPrompt
@@ -594,7 +594,7 @@ resumePlaylist () {
 dplayQueue () {
     while true; do
         if [[ -z $POS ]]; then
-            TRACKDISPLAY=$(export separator=$separator; echo -e "0  Return to Main Menu\n---\nAlt-1: Play, Alt-2: Delete\n---\n$(mpc playlist --format "%position%$separator%artist%$separator%title%")" | rofi -dmenu -u 2 -p "Current Queue > ")
+            TRACKDISPLAY=$(export separator=$separator; echo -e "0  Return to Main Menu\n---\n: Play, Alt-2: Delete\n---\n$(mpc playlist --format "%position%$separator%artist%$separator%title%")" | rofi -dmenu -u 2 -p "Current Queue > ")
         else
             re='^[0-9]+$'
             if [[ "$POS" =~ $re ]]; then
@@ -602,7 +602,7 @@ dplayQueue () {
             else
                 POS=0
             fi
-            TRACKDISPLAY=$(export separator=$separator; echo -e "0  Return to Main Menu\n---\nAlt-1: Play, Alt-2: Delete\n---\n$(mpc playlist --format "%position%$separator%artist%$separator%title%")" | rofi -dmenu -l $POS -u 2 -p "Current Queue > ")
+            TRACKDISPLAY=$(export separator=$separator; echo -e "0  Return to Main Menu\n---\n${play}: Play, ${delete}: Delete\n---\n$(mpc playlist --format "%position%$separator%artist%$separator%title%")" | rofi -dmenu -l $POS -u 2 -p "Current Queue > ")
         fi
 
         tempval=$?
@@ -615,12 +615,12 @@ dplayQueue () {
             dplayPrompt
         elif [[ -z "$TRACKDISPLAY" ]]; then
             exit
-        elif [[ "$TRACKDISPLAY" == "Alt-1: Play, Alt-2: Delete" ]]; then
+        elif [[ "$TRACKDISPLAY" == "${play}: Play, ${delete}: Delete" ]]; then
             dplayQueue
         else
             if [[ $val -eq 11 ]]; then
                 mpc del $POS
-            elif [[ $val -eq 1 || $val -eq 10 ]]; then
+            elif [[ $val -eq 0 || $val -eq 10 ]]; then
                 mpc play $POS;
             fi
         fi
@@ -806,7 +806,7 @@ playRandomTracks () {
 
 addLastMod() {
     loadCacheLatest
-    TRACK=$(echo -e "0  Return to Main Menu\n---\nAlt-1: Add, Alt-2: Insert, Alt-3: Replace (Default)\n---\n$(echo "$last_temp")" | dmenu_t -dmenu -u 2 -p "Chose Album > ")
+    TRACK=$(echo -e "0  Return to Main Menu\n---\n${add}: Add, ${insert}: Insert, ${replace}: Replace (Default)\n---\n$(echo "$last_temp")" | dmenu_t -dmenu -u 2 -p "Chose Album > ")
 
     val=$?
 
@@ -814,7 +814,7 @@ addLastMod() {
         then dplayPrompt
     elif [[ -z "$TRACK" ]]; then
         exit
-    elif [[ "$TRACK" == "Alt-1: Add, Alt-2: Insert, Alt-3: Replace (Default)" ]]; then
+    elif [[ "$TRACK" == "${add}: Add, ${insert}: Insert, ${replace}: Replace (Default)" ]]; then
         addLastMod
     else
         artist=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
@@ -823,7 +823,7 @@ addLastMod() {
         if [[ $val -eq 11 ]]; then
             echo "return code is 12"
             mpc search date "$date" album "$album" albumartist "$artist" | mpc insert
-        elif [[ $val -eq 1 || $val -eq 12 ]]; then
+        elif [[ $val -eq 0 || $val -eq 12 ]]; then
             echo "return code is 13"
             mpc clear && mpc search date "$date" album "$album" albumartist "$artist" | mpc add
             mpc play
@@ -835,15 +835,15 @@ addLastMod() {
 
 AddAlbumTags() {
     loadCacheAlbums
-    TRACK=$(echo -e "0  Return to Main Menu\n---\nAlt-1: Add, Alt-2: Insert, Alt-3: Replace (Default), Alt-4: Rate\n---\n$(echo "$album_temp")" | dmenu_t -dmenu -u 2 -p "Chose Album > ")
+    TRACK=$(echo -e "0  Return to Main Menu\n---\n${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate\n---\n$(echo "$album_temp")" | dmenu_t -dmenu -u 2 -p "Chose Album > ")
 
     val=$?
 
     if [[ "$TRACK" == "0  Return to Main Menu" ]]
-        then dplayPrompt
+        then AddAlbumTags
     elif [[ -z "$TRACK" ]]; then
             exit
-    elif [[ "$TRACK" == "Alt-1: Add, Alt-2: Insert, Alt-3: Replace (Default), Alt-4: Rate" ]]; then
+    elif [[ "$TRACK" == "${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate" ]]; then
         AddAlbumTags
     else
         artist=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
@@ -852,7 +852,7 @@ AddAlbumTags() {
         if [[ $val -eq 11 ]]; then
             echo "return code is 1"
             mpc find date "$date" album "$album" albumartist "$artist" | mpc insert
-        elif [[ $val -eq 1 || $val -eq 12 ]]; then
+        elif [[ $val -eq 0 || $val -eq 12 ]]; then
             echo "return code is 2"
             mpc clear && mpc find date "$date" album "$album" albumartist "$artist" | mpc add
             mpc play
@@ -876,7 +876,7 @@ AddAlbumTags() {
 
 AddTrackTags() {
     loadCacheTracks
-    TRACK=$(echo -e "0  Return to Main Menu\n---\nAlt-1: Add | Alt-2: Insert | Alt-3: Replace | Alt-4: Rate\n---\n$(echo "$tracks_temp")"| dmenu_t -dmenu -u 2 -p "Choose Track > ")
+    TRACK=$(echo -e "0  Return to Main Menu\n---\n${add}: Add | ${insert}: Insert | ${replace}: Replace | ${rate}: Rate\n---\n$(echo "$tracks_temp")"| dmenu_t -dmenu -u 2 -p "Choose Track > ")
 
     val=$?
 
@@ -884,7 +884,7 @@ AddTrackTags() {
         then dplayPrompt
     elif [[ -z "$TRACK" ]]; then
         exit
-    elif [[ "$TRACK" == "Alt-1: Add | Alt-2: Insert | Alt-3: Replace | Alt-4: Rate" ]]; then
+    elif [[ "$TRACK" == "${add}: Add | ${insert}: Insert | ${replace}: Replace | ${rate}: Rate" ]]; then
         AddTrackTags
     else
         artist=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
@@ -898,7 +898,7 @@ AddTrackTags() {
             mpc clear
             mpc findadd artist "$artist" album "$album" title "$title"
             mpc play
-        elif [[ $val -eq 1 || $val -eq 10 ]]; then
+        elif [[ $val -eq 0 || $val -eq 10 ]]; then
             mpc findadd artist "$artist" album "$album" title "$title"
             if [[ "$add_auto_play" ]]; then
                 mpc play $(mpc playlist | wc -l)
