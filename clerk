@@ -80,7 +80,23 @@ dplayPrompt () {
     else
         song=$(mpc current)
     fi
-    menu=$(echo -e "Q  Exit Clerk\n---\n${toggle}: Toggle Playback, ${prev}: Prev, ${next}: Next, ${stop}: Stop\n---\n1  Play random Album\n2  Play random Songs\n---\n3  Current Artist\n4  Current Queue\n5  Browse Library\n6  Manage Playlists\n---\n7  Options\n8  Ratings\n9  Lookup" | rofi -dmenu -lines 17 -u 2 -p "Now Playing: ${song} > ")
+    menu=("Q  Exit Clerk"
+          "---"
+          "${toggle}: Toggle Playback, ${prev}: Prev, ${next}: Next, ${stop}: Stop"
+          "---"
+          "1  Play random Album"
+          "2  Play random Songs"
+          "---"
+          "3  Current Artist"
+          "4  Current Queue"
+          "5  Browse Library"
+          "6  Manage Playlists"
+          "---"
+          "7  Options"
+          "8  Ratings"
+          "9  Lookup")
+
+    menu=$(printf "%s\n" "${menu[@]}" | rofi -dmenu -lines 17 -u 2 -p "Now Playing: ${song} > ")
 
     val=$?
 
@@ -121,6 +137,7 @@ dplayPrompt () {
     elif [[ -z "$menu" ]]; then
         exit
     fi
+
 }
 
 lastFM () {
@@ -209,7 +226,16 @@ currentMenu () {
         menu=$(echo -e "0 Return to Main Menu" | rofi -dmenu -p "No Music is playing")
     else
         current=$(mpc current -f '%artist%')
-        menu=$(echo -e "0 Return to Main Menu\n---\n${add}: Add, ${insert}: Insert, ${replace}: Replace\n---\n$albums\n---\n$titles" | rofi -dmenu -u 2 -p "Other Music by ${current} > ")
+        menu=("0 Return to Main Menu"
+            "---"
+            "${add}: Add, ${insert}: Insert, ${replace}: Replace"
+            "---"
+            "$albums"
+            "---"
+            "$titles")
+        fi
+
+        menu=$(printf "%s\n" "${menu[@]}" | rofi -dmenu -u 2 -p "Other Music by ${current} > ")
 
         tempval=$?
         val=$tempval
@@ -244,7 +270,6 @@ currentMenu () {
         elif [[ $menu == "0 Return to Main Menu" ]]; then
             dplayPrompt
         fi
-fi
 }
 
 
@@ -594,7 +619,11 @@ resumePlaylist () {
 dplayQueue () {
     while true; do
         if [[ -z $POS ]]; then
-            TRACKDISPLAY=$(export separator=$separator; echo -e "0  Return to Main Menu\n---\n${play}: Play, ${delete}: Delete\n---\n$(mpc playlist --format "%position%$separator%artist%$separator%title%")" | rofi -dmenu -u 2 -p "Current Queue > ")
+            TRACKDISPLAY=("0  Return to Main Menu"
+                          "---"
+                          "${play}: Play, ${delete}: Delete"
+                          "---"
+                          "$(mpc playlist --format "%position%$separator%artist%$separator%title%")")
         else
             re='^[0-9]+$'
             if [[ "$POS" =~ $re ]]; then
@@ -602,8 +631,15 @@ dplayQueue () {
             else
                 POS=0
             fi
-            TRACKDISPLAY=$(export separator=$separator; echo -e "0  Return to Main Menu\n---\n${play}: Play, ${delete}: Delete\n---\n$(mpc playlist --format "%position%$separator%artist%$separator%title%")" | rofi -dmenu -l $POS -u 2 -p "Current Queue > ")
+            TRACKDISPLAY=("0  Return to Main Menu"
+                          "---"
+                          "${play}: Play, ${delete}: Delete"
+                          "---"
+                          "$(mpc playlist --format "%position%$separator%artist%$separator%title%")")
+
         fi
+
+        TRACKDISPLAY=$(printf "%s\n" "${TRACKDISPLAY[@]}"  | rofi -dmenu -l $POS -u 2 -p "Current Queue > ")
 
         tempval=$?
         val=$tempval
