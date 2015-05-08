@@ -666,7 +666,7 @@ dplayQueue () {
 dplayQueueLoad () {
     playlist=$(echo -e "0  Return to Playlist Menu\n---\n$(mpc lsplaylists)" | dmenu_t -p "Load Playlist > ")
     if [[ "$playlist" == "0  Return to Playlist Menu" ]]; then
-        dplayQueue
+        managePlaylists
     else
         mpc clear
         mpc load "$playlist" && dplayQueue
