@@ -817,8 +817,8 @@ addLastMod() {
     elif [[ "$TRACK" == "${add}: Add, ${insert}: Insert, ${replace}: Replace (Default)" ]]; then
         addLastMod
     else
-        artist=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
-        date=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
+        artist=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
+        date=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
         album=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
         if [[ $val -eq 11 ]]; then
             echo "return code is 12"
