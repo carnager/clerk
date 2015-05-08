@@ -113,7 +113,7 @@ dplayPrompt () {
     elif [[ "$menu" == "6  Manage Playlists" ]]; then
         managePlaylists
     elif [[ "$menu" == "7  Options" ]]; then
-        dplayOptions
+        dplayOptionsPrompt
     elif [[ "$menu" == "8  Ratings" ]]; then
         ratingPrompt
     elif [[ "$menu" == "9  Lookup" ]]; then
