@@ -2,20 +2,24 @@
 
 shopt -s globstar
 
+# check for config files
 if [[ ! -f $HOME/.config/clerk/config ]] && [[ ! -f /etc/clerk ]]; then
     echo "Error: could not find configuration file \"$HOME/.config/clerk/config\""
     echo "You can use the provided example configuration file (config.clerk), copy it to the above location and edit it to your needs."
 	exit
 fi
 
+# read global config, if present
 if [[ -f /etc/clerk ]]; then
     source /etc/clerk
 fi
 
+# read local config file
 if [[ -f $HOME/.config/clerk/config ]]; then
     source $HOME/.config/clerk/config
 fi
 
+# check for clerk_helper config. Create if needed.
 if [[ -f $HOME/.config/clerk/helper_config ]]; then
     :
 else
@@ -29,6 +33,7 @@ fi
 
 echo "$backend"
 
+# check for scrobbler
 if [[ $scrobbler == mpdas ]]; then
     export scrobbler="mpdas -d"
     export scrobbler_kill="mpdas"
@@ -36,6 +41,8 @@ elif [[ $scrobbler == mpdscribble ]]; then
     export scrobbler_kill="mpdscribble"
 fi
 
+# check if clerk_helper process is running. if it isn't update cache files, if
+# needed
 if [[ $(ps x| grep clerk_helper | head -1 | grep -v 'grep') ]]; then
     :
 else
@@ -44,6 +51,7 @@ fi
 
 export separator="$separator"
 
+# load cache files into variables to speed up access
 loadCacheAlbums () {
 if [[ -f $HOME/.config/clerk/albums.cache.json ]]; then
     album_temp=$(clerk_helper getAlbums)
@@ -74,6 +82,7 @@ updateCache() {
     clerk_helper createcache
 }
 
+# main Menu
 dplayPrompt () {
     if [[ -z $(mpc status | grep "/") ]]; then
         song="No Song is playing"
@@ -140,6 +149,7 @@ dplayPrompt () {
 
 }
 
+# start/stop scrobbler. locally or remote
 lastFM () {
 # Some Variables to clean up the code
 
@@ -161,6 +171,7 @@ lastFM () {
        fi
 }
 
+
 lastFMCheck () {
 # Some Variables to clean up the code
 
@@ -181,6 +192,8 @@ lastFMCheck () {
        fi
 }
 
+# function to browse local filesystem.
+# Only works, if music_dir is accessible locally
 browseFilesystem () {
     usefile() {
     realpath="$(realpath "$selection")"
@@ -218,6 +231,8 @@ browseFilesystem () {
     chose
 }
 
+
+# Show Albums and Tracks by currently playing artist
 currentMenu () {
     albums=$(clerk_helper getartistalbums "$(mpc current -f '%artist%')")
     titles=$(clerk_helper getartisttracks "$(mpc current -f '%artist%')")
@@ -237,12 +252,15 @@ currentMenu () {
 
         menu=$(printf "%s\n" "${menu[@]}" | rofi -dmenu -u 2 -p "Other Music by ${current} > ")
 
+        # for some reason directly defining $val wasnt working. Using a
+        # temporary variable instead.
         tempval=$?
         val=$tempval
 
         albumartist=$(mpc current -f '%albumartist%')
         artist=$(mpc current -f '%artist%')
 
+        # checking for exit codes.
         if [[ $menu == "(Album)"* ]]; then
             if [[ $val -eq 11 ]]; then
                 mpc find album "$(echo "$menu" | awk -F "$separator" '{ print $2 }')" albumartist "${albumartist}" | mpc insert
@@ -272,8 +290,7 @@ currentMenu () {
         fi
 }
 
-
-
+# rating menu
 ratingPrompt () {
     menu=("Q  Return to Main Menu"
           "---"
@@ -307,6 +324,7 @@ ratingPrompt () {
     esac
 }
 
+# create rating json files from mpd sticker database and vice versa
 backupPrompt () {
     menu=("0  Return to Ratings Menu"
           "---"
@@ -328,16 +346,14 @@ backupPrompt () {
     esac
 }
 
+# if mpdas is used use mpc to love track on last.fm. otherwise try
+# lastfm-mpd-cli
 loveLast () {
     if [[ "$scrobbler" == "mpdscribble" ]]; then
         lastfm-mpd-cli love > /dev/null && notify-send "MPD" "Loved $(mpc current -f '%title%') on LastFM" && exit
     elif [[ "$scrobbler" == "mpdas" ]]; then
         mpc sendmessage mpdas love
     fi
-}
-
-killDB () {
-    rm -f $HOME/.config/clerk/ratings.db
 }
 
 infoPrompt () {
@@ -396,6 +412,7 @@ currentTag () {
     fi
 }
 
+# read all tags from file. Note that mpd can only read vorbiscomment properly
 readComments () {
     declare -i seen=0
     while read line
@@ -416,9 +433,11 @@ readComments () {
     fi
 }
 
-
+# Messy options menu.
 dplayOptionsPrompt () {
-export status="$(mpc status)"
+
+    # define variables to be used in menu
+    export status="$(mpc status)"
     single=$(echo "$status" | tail -1 | awk -F ':' '{ print $5 }' | cut -d ' ' -f 2)
     random=$(echo "$status" | tail -1 | awk -F ':' '{ print $4 }' | cut -d ' ' -f 2)
     consume=$(echo "$status" | tail -1 | awk -F ':' '{ print $6 }' | cut -d ' ' -f 2)
@@ -429,8 +448,6 @@ export status="$(mpc status)"
     else
         export sima=off
     fi
-
-
 
     if [[ "$ssh_lastfm" == "1" ]]; then
         mpds_check="$(ssh $ssh_host -q -t "pgrep $scrobbler_kill")"
@@ -446,7 +463,6 @@ export status="$(mpc status)"
             export scrobble=off
         fi
     fi
-
 
     export rgain="$(mpc replaygain | cut -d ' ' -f 2)"
     replayGain () {
@@ -493,6 +509,7 @@ export status="$(mpc status)"
     esac
 }
 
+# toggle similar artist playback
 mpdSima () {
     if [[ -a /tmp/mpd-sima.pid ]]; then
         kill $(cat /tmp/mpd-sima.pid)
@@ -503,6 +520,7 @@ mpdSima () {
     fi
 }
 
+# function to change number of random songs in config file
 optionRandomPrompt() {
     number="$(echo " " | dmenu_t -p 'Set No. of Songs for random Songs > ')"
     $sed -i "s/value=.*/value="$number"/" $HOME/.config/clerk/config
@@ -566,7 +584,8 @@ managePlaylists () {
     esac
 }
 
-
+# read list of available podcasts. Not using mpd playlists, because mpd does
+# not support custom names for urls. format of podcast in file is "Name \ URL"
 loadRSS () {
     mpc clear
     podcast=$(echo -e "0  Return to Playlist Menu\n---\n$(cat $HOME/.config/clerk/podcasts | cut -d '\' -f1)" | dmenu_t -p "Choose Podcast > ")
@@ -580,6 +599,8 @@ loadRSS () {
     fi
 }
 
+# suspend current playlist. playlist, song id and play-position are saved to
+# $HOME/.config/clerk/suspend
 suspendPlaylist () {
     playing=$(! mpc status | grep 'playing\|paused')
     time=$(mpc status | $sed '2!d;s;/.:.*;;;s;.* ;;')
@@ -602,6 +623,8 @@ suspendPlaylist () {
     fi
 }
 
+# read $HOME/.config/clerk/suspend and restore playlist. Then start playing
+# from same position that was saved in suspend file
 resumePlaylist () {
     http=$(! mpc current --format %file% | grep 'http://')
     source $HOME/.config/clerk/suspend
@@ -616,6 +639,7 @@ resumePlaylist () {
     managePlaylists
 }
 
+# Play or delete items from current Queue
 dplayQueue () {
     while true; do
         if [[ -z $POS ]]; then
@@ -625,6 +649,8 @@ dplayQueue () {
                           "---"
                           "$(mpc playlist --format "%position%$separator%artist%$separator%title%")")
         else
+            # check if POS is a number. if it is, add 4 to it. POS is later
+            # exported from song ID in playlist.
             re='^[0-9]+$'
             if [[ "$POS" =~ $re ]]; then
                 POS=$(( $POS + 4 ))
@@ -663,6 +689,7 @@ dplayQueue () {
     done
 }
 
+# show all mpd playlists and load them to queue
 dplayQueueLoad () {
     playlist=$(echo -e "0  Return to Playlist Menu\n---\n$(mpc lsplaylists)" | dmenu_t -p "Load Playlist > ")
     if [[ "$playlist" == "0  Return to Playlist Menu" ]]; then
@@ -673,6 +700,7 @@ dplayQueueLoad () {
     fi
 }
 
+# save current playlist to playlist file.
 dplayQueueSave () {
     while read playlists
     do
@@ -705,6 +733,7 @@ dplayQueueSave () {
     exit
 }
 
+# enable/disable outputs
 outputPrompt () {
     menu="$(echo -e "0  Return to Options Menu\n---\n$(mpc outputs)" | dmenu_t -p "Outputs > ")";
     if [[ "$menu" == "0  Return to Options Menu" ]]
@@ -715,16 +744,16 @@ outputPrompt () {
     fi
 }
 
-escapeSql() {
-    echo ${1//\'/\'\'}
-}
-
+# rate any album
 rateAlbum () {
     rating="$(seq 10 | dmenu_t -p "Select Album Rating: > ")"
 
     if [[ $rating == "" ]]; then
         exit
     else
+        # check if rateartist was defined, if it wasn't use currently playing
+        # track for rating, otherwise use what was delivered in the rate*
+        # variables.
         if [[ -z "$rateartist" ]]; then
             export disc=${disc}; export track=${track}; clerk_helper ratealbum "$(mpc current -f '%albumartist%')" "$(mpc current -f '%album%')" "$(mpc current -f '%date%')" "${rating}"
         else
@@ -750,12 +779,14 @@ rateTrack () {
     fi
 }
 
- instantRateTrack () {
+# function to instantly rate a track without a submenu. rating is defined on
+# commandline
+instantRateTrack () {
      export rating=${rating}; clerk_helper ratetrack "${rateartist}" "${ratealbum}" "${ratetrack}" "${ratetitle}" "${rating}"
      notify-send "clerk" "rated $(mpc current) with $(echo ${rating})"
- }
+}
 
-
+# load rated albums with minimum rating of xx
 loadRatedAlbums () {
     rating="$(seq 10 | dmenu_t -p "Minimum Rating > ")"
     if [[ $rating == "" ]]; then
@@ -815,6 +846,8 @@ loadRandomRating () {
     fi
 }
 
+# load random album. Make sure to make each sub item random. this way each
+# artist has equal chances of being played, no matter how many albums it has.
 playRandomAlbum () {
     mpc clear > /dev/null
     artist="$(mpc list "albumartist" | $shuf -n 1)"
@@ -822,6 +855,7 @@ playRandomAlbum () {
     mpc find album "$album" "albumartist" "$artist" | mpc add && mpc play > /dev/null
 }
 
+# same for tracks, no artist should be preferred because it has more tracks.
 playRandomTracks () {
     mpc clear > /dev/null
     artist="$(mpc list "$random_artist" | $shuf -n 1)"
@@ -1109,25 +1143,65 @@ done
 }
 
 browseAlbum() {
-    ALBUMS=$(mpc list album "$ARTIST")
-    ALBUM=$(echo -e "0  Return to Artist Menu\n---\nAlt-1: Add All, Alt+2: Insert All, Alt+3: Replace All\n---\n$(mpc --format "%date%$separator%album%" find artist "$ARTIST" | sort | uniq)" | dmenu_t -dmenu -u 2 -p "Choose Album > ")
+    ALBUMS=$(mpc list album artist "$ARTIST")
+    ALBUM=("0  Return to Artist Menu"
+           "---"
+           "Alt+1: Add Album | Alt+2: Insert Album | Alt+3: Replace Album (Default)"
+           "Alt+4: Add All   | Alt+5: Insert All   | Alt+6: Replace All"
+           "---"
+           "$(mpc --format "%date%$separator%album%" find artist "$ARTIST" | sort | uniq)")
+
+    if [[ -z $line ]]; then
+        ALBUM=$(printf "%s\n" "${ALBUM[@]}" | dmenu_t -dmenu -u 2-3 -p "Choose Album > ")
+    else
+        ALBUM=$(printf "%s\n" "${ALBUM[@]}" | dmenu_t -dmenu -l $(( $line + 5 )) -u 2-3 -p "Choose Album > ")
+    fi
 
     val=$?
 
     ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
     DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
 
-    if [[ "$val" -eq 12 ]]; then
+    if [[ "$val" -eq 10 ]]; then
+        export ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
+        export DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
+        mpc find artist "$ARTIST" date "$DATE" album "$ALBUM_FINAL" | mpc add
+        echo "$ALBUM"
+        echo "$ALBUMS"
+        export line=$(echo "$(mpc --format "%date%$separator%album%" find artist "$ARTIST" | sort | uniq)" | grep -n "$ALBUM_FINAL" | awk -F ':' '{ print $1 }')
+        browseAlbum
+
+    elif [[ "$val" -eq 11 ]]; then
+        export ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
+        export DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
+        mpc find artist "$ARTIST" date "$DATE" album "$ALBUM_FINAL" | mpc insert
+        echo "$ALBUM"
+        echo "$ALBUMS"
+        export line=$(echo "$(mpc --format "%date%$separator%album%" find artist "$ARTIST" | sort | uniq)" | grep -n "$ALBUM_FINAL" | awk -F ':' '{ print $1 }')
+        browseAlbum
+
+    elif [[ "$val" -eq 12 ]]; then
+        export ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
+        export DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
+        mpc clear
+        mpc find artist "$ARTIST" date "$DATE" album "$ALBUM_FINAL" | mpc add
+        mpc play
+        echo "$ALBUM"
+        echo "$ALBUMS"
+        export line=$(echo "$(mpc --format "%date%$separator%album%" find artist "$ARTIST" | sort | uniq)" | grep -n "$ALBUM_FINAL" | awk -F ':' '{ print $1 }')
+        browseAlbum
+
+    elif [[ "$val" -eq 15 ]]; then
         export ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
         export DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
         mpc clear && mpc find artist "$ARTIST" | mpc add && mpc play
 
-    elif [[ "$val" -eq 10 ]]; then
+    elif [[ "$val" -eq 13 ]]; then
         export ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
         export DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
         mpc find artist "$ARTIST" | mpc add
 
-    elif [[ "$val" -eq 11 ]]; then
+    elif [[ "$val" -eq 14 ]]; then
         export ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
         export DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
         mpc find artist "$ARTIST" | mpc insert
@@ -1144,22 +1218,38 @@ browseAlbum() {
     elif [[ "$val" -eq 1 ]]; then
         exit
     fi
+    exit
 }
 
 browseTrack() {
-    TRACK=$(echo -e "0  Return to Album Menu\n---\nAlt-1: Add All, Alt+2: Insert All, Alt+3: Replace All\n---\n$(mpc --format "%track%$separator%title%" find artist "$ARTIST" album "$ALBUM_FINAL")" | dmenu_t -dmenu -u 2 -p "Chose Track > ")
+    TRACK=("0  Return to Album Menu"
+           "---"
+           "Alt+1: Add Track (Default) | Alt+2: Insert Track | Alt+3: Replace Track"
+           "Alt+4: Add All             | Alt+5: Insert All   | Alt+6: Replace All"
+           "---"
+           "$(mpc --format "%track%$separator%title%" find artist "$ARTIST" album "$ALBUM_FINAL")")
+
+    TRACK=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -dmenu -u 2-3 -p "Chose Track > ")
 
     val=$?
 
     TRACKFINAL=$(echo "$TRACK" | awk -F "$separator" '{ print $2 }')
 
-    if [[ "$val" -eq 12 ]]; then
+    if [[ "$val" -eq 10 ]]; then
+        mpc find artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL" | mpc add
+    elif [[ "$val" -eq 11 ]]; then
+        mpc find artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL" | mpc insert
+    elif [[ "$val" -eq 12 ]]; then
+        mpc clear
+        mpc find artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL" | mpc add
+        mpc play
+    elif [[ "$val" -eq 15 ]]; then
         mpc clear && mpc find artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" |mpc add && mpc play
 
-    elif [[ "$val" -eq 10 ]]; then
+    elif [[ "$val" -eq 13 ]]; then
         mpc find artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" | mpc add
 
-    elif [[ "$val" -eq 11 ]]; then
+    elif [[ "$val" -eq 14 ]]; then
         mpc find artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" | mpc insert
     elif [[ "$val" -eq 1 ]]; then
         exit
