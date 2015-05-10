@@ -970,11 +970,12 @@ AddAlbumTags() {
     unset line
     export line="${TRACK_TEMP%:*}"
 
-    if [[ "$TRACK" == "0  Return to Main Menu" ]]
-        then AddAlbumTags
+    if [[ "$TRACK" == "0  Return to Main Menu" ]]; then
+        dplayPrompt
     elif [[ -z "$TRACK" ]]; then
             exit
     elif [[ "$TRACK" == "${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate" ]]; then
+        unset line
         AddAlbumTags
     else
         artist=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
