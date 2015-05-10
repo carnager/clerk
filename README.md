@@ -1,4 +1,4 @@
-# clerk - mpd client, based on rofi (or dmenu)
+# clerk - mpd client, based on rofi
 
 # Version 2.0
 ![multi_keys branch]
@@ -34,7 +34,6 @@ For this to work, you need a recent rofi build from git.
 
 # Dependencies:
 
-* dmenu2 (https://bitbucket.org/melek/dmenu2) OR
 * rofi (https://github.com/DaveDavenport/rofi)
 * mpc
 * python-mpd2 (https://github.com/Mic92/python-mpd2)
