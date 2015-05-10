@@ -301,16 +301,28 @@ def cleanRatings(args):
 
 
 def importTrackRatings(args):
-    list = client.sticker_find('song', "", 'rating')
+    tracklist = client.sticker_find('song', "", 'rating')
     rated_tracks = []
-    for i in list:
+    for i in tracklist:
         rating_temp = i['sticker']
         rating = rating_temp.split('=')[1]
         for x in client.find('file', i['file']):
-            artist = x['artist']
-            album = x['album']
-            track = x['track']
-            title = x['title']
+            if isinstance(x['artist'], list):
+                artist = x['artist'][0]
+            else:
+                artist = x['artist']
+            if isinstance(x['album'], list):
+                album = x['album'][0]
+            else:
+                album = x['album']
+            if isinstance(x['track'], list):
+                track = x['track'][0]
+            else:
+                track = x['track']
+            if isinstance(x['title'], list):
+                title = x['title'][0]
+            else:
+                title = x['title']
         entry = {'artist': artist, 'album': album, 'track': track, 'title': title, 'rating': rating}
         rated_tracks.append(entry)
     with open(os.getenv('HOME')+'/.config/clerk/trackratings.json', 'w') as ratingfile:
