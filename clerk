@@ -784,7 +784,12 @@ rateTrack () {
         exit
     else
         if [[ -z "$rateartist" ]]; then
-            export rating=${rating}; clerk_helper ratetrack $(mpc current -f '"%artist%" "%album%" "%track%" "%title%"')
+            export rating=${rating}
+            rateartist=$(mpc current -f '%artist%')
+            ratetitle=$(mpc current -f '%title%')
+            ratetrack=$(mpc current -f '%track%')
+            ratealbum=$(mpc current -f '%album%')
+            clerk_helper ratetrack "${rateartist}" "${ratealbum}" "${ratetrack}" "${ratetitle}" "${rating}"
             notify-send "clerk" "rated $(mpc current) with $(echo ${rating})"
         else
             clerk_helper ratetrack "${rateartist}" "${ratealbum}" "${ratetrack}" "${ratetitle}" "${rating}"
@@ -918,7 +923,14 @@ addLastMod() {
 }
 
 AddAlbumTags() {
-    loadCacheAlbums
+    if [[ -z $album_temp ]]; then
+        loadCacheAlbums
+        export album_temp=${album_temp}
+        echo "\$album_temp not set, reading..."
+    else
+        export album_temp=${album_temp}
+        echo "Re-Using \$album_temp"
+    fi
     menu=("0  Return to Main Menu"
            "---"
            "${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate"
@@ -976,10 +988,32 @@ AddAlbumTags() {
 }
 
 AddTrackTags() {
-    loadCacheTracks
-    TRACK=$(echo -e "0  Return to Main Menu\n---\n${add}: Add | ${insert}: Insert | ${replace}: Replace | ${rate}: Rate\n---\n$(echo "$tracks_temp")"| dmenu_t -dmenu -u 2 -p "Choose Track > ")
+    if [[ -z $tracks_temp ]]; then
+        loadCacheTracks > /dev/null
+        export tracks_temp=${tracks_temp}
+    else
+        export tracks_temp=${tracks_temp}
+    fi
+
+    menu=("0  Return to Main Menu"
+          "---"
+          "${add}: Add | ${insert}: Insert | ${replace}: Replace | ${rate}: Rate"
+          "---"
+          "${tracks_temp}")
+
+    echo "$menu"
+
+    if [[ -z $line ]]; then
+        TRACK_TEMP=$(printf "%s\n" "${menu[@]}" | dmenu_t -dmenu -format "i:s" -u 2 -p "Choose Track > ")
+    else
+        TRACK_TEMP=$(printf "%s\n" "${menu[@]}" | dmenu_t -dmenu -format "i:s" -l $(( $line + 1 )) -u 2 -p "Choose Track > ")
+    fi
 
     val=$?
+
+    TRACK="${TRACK_TEMP#*:}"
+    unset line
+    export line="${TRACK_TEMP%:*}"
 
     if [[ "$TRACK" == "0  Return to Main Menu" ]]
         then dplayPrompt
@@ -1005,10 +1039,11 @@ AddTrackTags() {
                 mpc play $(mpc playlist | wc -l)
             fi
         elif [[ $val -eq 13 ]]; then
-            rateartist=${artist} ratealbum=${album} ratetrack=${track} ratetitle=${title} rateTrack
-        else
+            rateartist="${artist}" ratealbum="${album}" ratetrack="${track}" ratetitle="${title}" rateTrack
+        elif [[ $val -eq 1 ]]; then
             exit
         fi
+        AddTrackTags
     fi
 }
 
