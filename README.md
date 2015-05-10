@@ -1,28 +1,10 @@
 # clerk - mpd client, based on rofi (or dmenu)
 
-# multi_keys branch
-This is the multi_keys branch of clerk. This branch might replace regular clerk soon.
-The only difference is that it's possible to trigger different actions, depending on
-pressed key.
-This branch only works with rofi. dmenu is not supported.
-
-An image says more than 100 words:
+# Version 2.0
 ![multi_keys branch]
 (images/clerk_multi_keys.jpg)
 
-
-# CHANGES IN RATINGS!
-From clerk 1.0 on ratings are stored in json format.
-If you still used old ratings use the following steps to
-create the new files:
-
-* make sure, mpds stickers are up to date. (they should, clerk sends ratings to mpd)
-* run `clerk_helper importtrackratings` and
-* `clerk_helper importalbumratings` to create new ratings files.
-
-The new files are 100% tag based. Even if your files move within your collection,
-you can always re-import your ratings into mpd's sticker database with `clerk_helper sendstickers`,
-as long as the tags havent changed.
+#### clerk is a rofi-driven mpd client with some advanced features.
 
 # Functions:
 
@@ -30,12 +12,12 @@ as long as the tags havent changed.
 * Play x random tracks
 * Browse Library (Artist > Album > Tracks)
 * Browse local filesystem (needs unix socket in mpd.conf)
-* Show current Playback Queue
-* Show Albums/Tracks by currently playing Artist
-* Enable or disable scrobbling (with support for remote mpdscribble)
-* Love current song on lastfm (Using lastfm-mpd-cli)
-* Rate albums (Stored in flat files for portability & mpds sticker database)
-* Rate tracks (Stored in flat files for portability & mpds sticker database)
+* Manage current Queue
+* Show Albums/Tracks by currently playing Artist and add those to Queue.
+* Enable or disable scrobbling (with support for remote mpdscribble/mpdas)
+* Love current song on lastfm (Using lastfm-mpd-cli or mpdas)
+* Rate albums/tracks (Stored in mpds sticker database)
+ * local copies are stored, allowing a tag based search (yet to come)
 * Load rated albums/tracks
 * Play Similar Songs (based on lastfm)
 * Control mpd options (modes, replaygain, crossfade)
@@ -47,6 +29,8 @@ For example `clerk --random track` will play random songs.
 
 see `clerk -h` for all default arguments.
 
+From every database related menu it's possible to add/insert/replace one or multple entries.
+For this to work, you need a recent rofi build from git.
 
 # Dependencies:
 
