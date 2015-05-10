@@ -919,9 +919,23 @@ addLastMod() {
 
 AddAlbumTags() {
     loadCacheAlbums
-    TRACK=$(echo -e "0  Return to Main Menu\n---\n${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate\n---\n$(echo "$album_temp")" | dmenu_t -dmenu -u 2 -p "Chose Album > ")
+    menu=("0  Return to Main Menu"
+           "---"
+           "${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate"
+           "---"
+           "${album_temp}")
+
+    if [[ -z $line ]]; then
+        TRACK_TEMP=$(printf "%s\n" "${menu[@]}" | dmenu_t -dmenu -format "i:s" -u 2 -p "Chose Album > ")
+    else
+        TRACK_TEMP=$(printf "%s\n" "${menu[@]}" | dmenu_t -dmenu -l $(( $line + 1 )) -format "i:s" -u 2 -p "Chose Album > ")
+    fi
 
     val=$?
+
+    TRACK="${TRACK_TEMP#*:}"
+    unset line
+    export line="${TRACK_TEMP%:*}"
 
     if [[ "$TRACK" == "0  Return to Main Menu" ]]
         then AddAlbumTags
@@ -954,7 +968,10 @@ AddAlbumTags() {
                 disc=${disc} track=${track} rateartist="${artist}" ratealbum="${album}" ratedate="${date}" rateAlbum
         elif [[ $val -eq 10 ]]; then
             mpc search date "$date" album "$album" albumartist "$artist" | mpc add
+        elif [[ $val -eq 1 ]]; then
+            exit
         fi
+        AddAlbumTags
     fi
 }
 
