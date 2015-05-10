@@ -310,7 +310,7 @@ def importTrackRatings(args):
             artist = x['artist']
             title = x['title']
             album = x['album']
-            if isinstance(x, list):
+            if isinstance(x['track'], list):
                 track = x['track'][0]
             else:
                 track = x['track']
@@ -329,12 +329,15 @@ def importAlbumRatings(args):
             artist = x['albumartist']
             album = x['album']
             date = x['date']
-            if isinstance(x, list):
+            if isinstance(x['track'], list):
                 track = x['track'][0]
             else:
                 track = x['track']
             if 'disc' in x:
-                disc = x['disc']
+                if isinstance(x['disc'], list):
+                    disc = x['disc'][0]
+                else:
+                    disc = x['disc']
             else:
                 disc = ""
         entry = {'albumartist': artist, 'track': track, 'album': album, 'date': date, 'disc': disc, 'rating': rating}
