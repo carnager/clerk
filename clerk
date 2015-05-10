@@ -894,10 +894,28 @@ playRandomTracks () {
 }
 
 addLastMod() {
-    loadCacheLatest
-    TRACK=$(echo -e "0  Return to Main Menu\n---\n${add}: Add, ${insert}: Insert, ${replace}: Replace (Default)\n---\n$(echo "$last_temp")" | dmenu_t -dmenu -u 2 -p "Chose Album > ")
+    if [[ -z $last_temp ]]; then
+        loadCacheLatest
+    else
+        echo "re-using album list from memory"
+    fi
+
+    menu=("0  Return to Main Menu"
+          "---"
+          "${add}: Add, ${insert}: Insert, ${replace}: Replace (Default)"
+          "---"
+          "${last_temp}")
+
+   if [[ -z $line ]]; then
+       TRACK_TEMP=$(printf "%s\n" "${menu[@]}" | dmenu_t -dmenu -format "i:s" -u 2 -p "Chose Album > ")
+   else
+       TRACK_TEMP=$(printf "%s\n" "${menu[@]}" | dmenu_t -dmenu -l $(( $line + 1 )) -format "i:s" -u 2 -p "Chose Album > ")
+   fi
 
     val=$?
+
+    TRACK="${TRACK_TEMP#*:}"
+    export line="$(echo ${TRACK_TEMP} | awk -F ':' '{ print $1}')"
 
     if [[ "$TRACK" == "0  Return to Main Menu" ]]
         then dplayPrompt
@@ -918,7 +936,10 @@ addLastMod() {
             mpc play
         elif [[ $val -eq 10 ]]; then
             mpc search date "$date" album "$album" albumartist "$artist" | mpc add
+        elif [[ $val -eq 1 ]]; then
+            exit
         fi
+        addLastMod
     fi
 }
 
@@ -990,9 +1011,10 @@ AddAlbumTags() {
 AddTrackTags() {
     if [[ -z $tracks_temp ]]; then
         loadCacheTracks > /dev/null
-        export tracks_temp=${tracks_temp}
     else
-        export tracks_temp=${tracks_temp}
+        echo "re-using track list from memory"
+#        unset tracks_temp
+#        export tracks_temp=${tracks_temp} > /dev/null
     fi
 
     menu=("0  Return to Main Menu"
@@ -1000,8 +1022,6 @@ AddTrackTags() {
           "${add}: Add | ${insert}: Insert | ${replace}: Replace | ${rate}: Rate"
           "---"
           "${tracks_temp}")
-
-    echo "$menu"
 
     if [[ -z $line ]]; then
         TRACK_TEMP=$(printf "%s\n" "${menu[@]}" | dmenu_t -dmenu -format "i:s" -u 2 -p "Choose Track > ")
@@ -1012,8 +1032,7 @@ AddTrackTags() {
     val=$?
 
     TRACK="${TRACK_TEMP#*:}"
-    unset line
-    export line="${TRACK_TEMP%:*}"
+    export line="$(echo ${TRACK_TEMP} | awk -F ':' '{ print $1}')"
 
     if [[ "$TRACK" == "0  Return to Main Menu" ]]
         then dplayPrompt
@@ -1035,7 +1054,7 @@ AddTrackTags() {
             mpc play
         elif [[ $val -eq 0 || $val -eq 10 ]]; then
             mpc findadd artist "$artist" album "$album" title "$title"
-            if [[ "$add_auto_play" ]]; then
+            if [[ "$add_auto_play" == yes ]]; then
                 mpc play $(mpc playlist | wc -l)
             fi
         elif [[ $val -eq 13 ]]; then
