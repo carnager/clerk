@@ -1495,7 +1495,7 @@ browseAlbumArtist() {
         dplayPrompt
     elif [[ "$val" -eq 0 ]]; then
         export ARTIST="$ARTIST"
-        browseAlbum
+        browseAlbumArtistAlbum
     elif [[ "$val" -eq 1 ]]; then
         exit
     fi
