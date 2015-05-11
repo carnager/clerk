@@ -44,6 +44,9 @@ add="Alt+1"
 insert="Alt+2"
 replace="Alt+3"
 rate="Alt+4"
+addall="Alt+4"
+insertall="Alt+5"
+replaceall="Alt+6"
 
 # playback controls
 toggle="Alt+1"

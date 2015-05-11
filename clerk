@@ -1079,8 +1079,8 @@ browseDate() {
 browseDateAdd() {
     menu=("0  Return to Date Menu"
             "---"
-            "Alt+1: Add Album | Alt+2: Insert Album | Alt+3: Replace Album"
-            "Alt+4: Add All   | Alt+5: Insert All   | Alt+6: Replace All"
+            "${add}: Add Album | ${insert}: Insert Album | ${replace}: Replace Album"
+            "${addall}: Add All   | ${insertall}: Insert All   | ${replaceall}: Replace All"
             "---"
             "$(mpc --format "%albumartist%$separator%album%" find date "$date" | uniq)")
 
@@ -1207,8 +1207,8 @@ browseAlbum() {
     ALBUMS=$(mpc list album artist "$ARTIST")
     ALBUM=("0  Return to Artist Menu"
            "---"
-           "Alt+1: Add Album | Alt+2: Insert Album | Alt+3: Replace Album (Default)"
-           "Alt+4: Add All   | Alt+5: Insert All   | Alt+6: Replace All"
+           "${add}: Add Album | ${insert}: Insert Album | ${replace}: Replace Album (Default)"
+           "${addall}: Add All   | ${insertall}: Insert All   | ${replaceall}: Replace All"
            "---"
            "$(mpc --format "%date%$separator%album%" find artist "$ARTIST" | sort | uniq)")
 
@@ -1281,8 +1281,8 @@ browseAlbum() {
 browseTrack() {
     TRACK=("0  Return to Album Menu"
            "---"
-           "Alt+1: Add Track (Default) | Alt+2: Insert Track | Alt+3: Replace Track"
-           "Alt+4: Add All             | Alt+5: Insert All   | Alt+6: Replace All"
+           "${add}: Add Track (Default) | ${insert}: Insert Track | ${replace}: Replace Track"
+           "${addall}: Add All             | ${insertall}: Insert All   | ${replaceall}: Replace All"
            "---"
            "$(mpc --format "%track%$separator%title%" find artist "$ARTIST" album "$ALBUM_FINAL")")
 
