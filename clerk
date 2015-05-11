@@ -1069,8 +1069,8 @@ AddTrackTags() {
 
 browseDate() {
     date=$(echo -e "0  Return to Main Menu\n---\n$(mpc list date | $tac)" | dmenu_t -dmenu -p "Choose Date > ")
-    if [[ "$date" == "0  Return to Main Menu" ]]
-        then dplayPrompt
+    if [[ "$date" == "0  Return to Browse Menu" ]]
+        then browseLibPrompt
     else
         browseDateAdd
     fi
@@ -1418,8 +1418,8 @@ browseArtist() {
     val=$?
 
     export ARTIST="$ARTIST"
-    if [[ "$ARTIST" == "0  Return to Main Menu" ]]; then
-        dplayPrompt
+    if [[ "$ARTIST" == "0  Return to Browse Menu" ]]; then
+        browseLibPrompt
     elif [[ "$val" -eq 0 ]]; then
         export ARTIST="$ARTIST"
         browseAlbum
@@ -1491,8 +1491,8 @@ browseAlbumArtist() {
     val=$?
 
     export ARTIST="$ARTIST"
-    if [[ "$ARTIST" == "0  Return to Main Menu" ]]; then
-        dplayPrompt
+    if [[ "$ARTIST" == "0  Return to Browse Menu" ]]; then
+        browseLibPrompt
     elif [[ "$val" -eq 0 ]]; then
         export ARTIST="$ARTIST"
         browseAlbumArtistAlbum
