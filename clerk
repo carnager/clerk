@@ -697,6 +697,7 @@ dplayQueue () {
             dplayQueue
         else
             if [[ $val -eq 11 ]]; then
+                POS=$(( $POS - 1))
                 mpc del $POS
             elif [[ $val -eq 0 || $val -eq 10 ]]; then
                 mpc play $POS;
