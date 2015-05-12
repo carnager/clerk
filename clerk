@@ -1139,12 +1139,10 @@ browseLibPrompt() {
           "2  Browse by Albumartist"
           "3  Browse by Date"
           "4  Browse by Genre"
-          "5  Browse by Folders"
-          "6  Browse latest additions"
-          "7  Browse local Filesystem"
+          "5  Browse latest additions"
           "---"
-          "8  Choose Albums"
-          "9  Choose Track"
+          "6  Choose Albums"
+          "7  Choose Track"
           "---"
           "0  Update Album/Track Cache")
 
@@ -1157,52 +1155,13 @@ browseLibPrompt() {
         2*) browseAlbumArtist ;;
         3*) browseDate ;;
         4*) browseGenre ;;
-        5*) browseFolders ;;
-        7*) browseFilesystem ;;
-        8*) AddAlbumTags ;;
-        9*) AddTrackTags ;;
+        6*) AddAlbumTags ;;
+        7*) AddTrackTags ;;
         0*) updateCache && browseLibPrompt ;;
         Q*) dplayPrompt ;;
-        6*) addLastMod ;;
+        5*) addLastMod ;;
         *) exit
     esac
-}
-
-browseFolders () {
-    folder=$(echo -e "0  Return to Browse Menu\n---\nAdd current\nInsert current\nReplace current\n---\n$(mpc ls "")" | dmenu_t -p "Choose Folder > ")
-    if [[ "$folder" == "" ]]; then
-        exit
-    elif [[ "$folder" == "0  Return to Browse Menu" ]]; then
-        browseLibPrompt
-    elif [[ "$folder" == "Add current" ]]; then
-        mpc add "$current"
-        exit
-    elif [[ "$folder" == "Insert current" ]]; then
-        mpc insert "$current"
-        exit
-    elif [[ "$folder" == "Replace current" ]]; then
-        mpc clear && mpc add "$current" && mpc play
-        exit
-    fi
-
-    while true; do
-    current="$folder"
-    folder=$(echo -e "0  Return to Folders Menu\n---\nAdd current\nInsert current\nReplace current\n---\n$(mpc ls "$folder")" | dmenu_t -p "Choose folder > ")
-    if [[ "$folder" == "Add current" ]]; then
-        mpc add "$current"
-        exit
-    elif [[ "$folder" == "Insert current" ]]; then
-        mpc insert "$current"
-        exit
-    elif [[ "$folder" == "Replace current" ]]; then
-        mpc clear && mpc add "$current" && mpc play
-        exit
-    elif [[ "$folder" == "0  Return to Folders Menu" ]]; then
-        browseFolders
-    elif [[ "$folder" == "" ]]; then
-        exit
-    fi
-done
 }
 
 browseAlbum() {
