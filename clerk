@@ -659,9 +659,9 @@ dplayQueue () {
         if [[ -z $POS ]]; then
             TRACKDISPLAY=("0  Return to Main Menu"
                           "---"
-                          "${play}: Play, ${delete}: Delete"
+                          "${play}: Play, ${delete}: Delete, ${rate}: Rate"
                           "---"
-                          "$(mpc playlist --format "%position%$separator%artist%$separator%title%")")
+                          "$(mpc playlist --format "%position%$separator%artist%$separator%track%$separator%title%$separator%album%")")
         else
             # check if POS is a number. if it is, add 4 to it. POS is later
             # exported from song ID in playlist.
@@ -673,9 +673,9 @@ dplayQueue () {
             fi
             TRACKDISPLAY=("0  Return to Main Menu"
                           "---"
-                          "${play}: Play, ${delete}: Delete"
+                          "${play}: Play, ${delete}: Delete, ${rate}: Rate"
                           "---"
-                          "$(mpc playlist --format "%position%$separator%artist%$separator%title%")")
+                          "$(mpc playlist --format "%position%$separator%artist%$separator%track%$separator%title%$separator%album%")")
 
         fi
 
@@ -684,8 +684,10 @@ dplayQueue () {
         tempval=$?
         val=$tempval
 
-        TITLE=$(echo "$TRACKDISPLAY" | awk -F "$separator" '{ print $3 }')
+        TITLE=$(echo "$TRACKDISPLAY" | awk -F "$separator" '{ print $4 }')
         ARTIST=$(echo "$TRACKDISPLAY" | awk -F "$separator" '{ print $2 }')
+        ALBUM=$(echo "$TRACKDISPLAY" | awk -F "$separator" '{ print $5 }')
+        TRACK=$(echo "$TRACKDISPLAY" | awk -F "$separator" '{ print $3 }')
         export POS=$(echo "$TRACKDISPLAY" | awk -F "$separator" '{ print $1 }')
         if [[ "$TRACKDISPLAY" == "0  Return to Main Menu" ]]; then
             dplayPrompt
@@ -698,6 +700,8 @@ dplayQueue () {
                 mpc del $POS
             elif [[ $val -eq 0 || $val -eq 10 ]]; then
                 mpc play $POS;
+            elif [[ $val -eq 13 ]]; then
+                rateartist="${ARTIST}" ratealbum="${ALBUM}" ratetrack="${TRACK}" ratetitle="${TITLE}" rateTrack
             fi
         fi
     done
