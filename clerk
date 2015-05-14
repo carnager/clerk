@@ -774,7 +774,17 @@ rateAlbum () {
         # track for rating, otherwise use what was delivered in the rate*
         # variables.
         if [[ -z "$rateartist" ]]; then
-            export disc=${disc}; export track=${track}; clerk_helper ratealbum "$(mpc current -f '%albumartist%')" "$(mpc current -f '%album%')" "$(mpc current -f '%date%')" "${rating}"
+            artist=$(mpc current -f '%artist%')
+            album=$(mpc current -f '%album%')
+            date=$(mpc current -f '%date%')
+            if [[ -n $(mpc find track "1" albumartist "${artist}" album "${album}" date "${date}") ]]; then
+                track="1"
+            else
+                track="01"
+            fi
+            disc=$(mpc current -f '%disc%')
+            export disc=${disc}; export track=${track}; clerk_helper ratealbum "${artist}" "${album}" "${date}" "${rating}"
+            notify-send "clerk" "rated ${artist} - ${album} with ${rating}"
         else
             export disc=${disc}; export track=${track}; clerk_helper ratealbum "${rateartist}" "${ratealbum}" "${ratedate}" "${rating}"
             notify-send "clerk" "rated ${rateartist} - ${ratealbum} with ${rating}"
