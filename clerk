@@ -748,7 +748,7 @@ dplayQueueSave () {
                 fi
             fi
         fi
-    done < <(echo -e "0  Return to Main Menu\n---\nSave new Playlist\n---\n$(mpc lsplaylists)" | dmenu_t -p "Choose Playlist > ")
+    done < <(echo -e "0  Return to Main Menu\n---\nSave new Playlist\n---\n$(mpc lsplaylists)" | dmenu_t -p "Chose Playlist > ")
     exit
 }
 
@@ -915,16 +915,16 @@ addLastMod() {
         echo "re-using album list from memory"
     fi
 
-    menu=("0  Return to Main Menu"
-          "---"
-          "${add}: Add, ${insert}: Insert, ${replace}: Replace (Default)"
-          "---"
-          "${last_temp}")
+menu="0  Return to Main Menu
+---
+${add}: Add, ${insert}: Insert, ${replace}: Replace (Default)
+---
+${last_temp}"
 
    if [[ -z $line ]]; then
-       TRACK_TEMP=$(printf "%s\n" "${menu[@]}" | dmenu_t -dmenu -format "i:s" -u 2 -p "Choose Album > ")
+       TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -dmenu -format "i:s" -u 2 -p "Chose Album > ")
    else
-       TRACK_TEMP=$(printf "%s\n" "${menu[@]}" | dmenu_t -dmenu -l $(( $line + 1 )) -format "i:s" -u 2 -p "Choose Album > ")
+       TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -dmenu -l $(( $line + 1 )) -format "i:s" -u 2 -p "Chose Album > ")
    fi
 
     val=$?
@@ -967,16 +967,16 @@ AddAlbumTags() {
         export album_temp=${album_temp}
         echo "Re-Using \$album_temp"
     fi
-    menu=("0  Return to Main Menu"
-           "---"
-           "${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate"
-           "---"
-           "${album_temp}")
+menu="0  Return to Main Menu
+---
+${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate
+---
+${album_temp}"
 
     if [[ -z $line ]]; then
-        TRACK_TEMP=$(printf "%s\n" "${menu[@]}" | dmenu_t -dmenu -format "i:s" -u 2 -p "Choose Album > ")
+        TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -dmenu -format "i:s" -u 2 -p "Chose Album > ")
     else
-        TRACK_TEMP=$(printf "%s\n" "${menu[@]}" | dmenu_t -dmenu -l $(( $line + 1 )) -format "i:s" -u 2 -p "Choose Album > ")
+        TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -dmenu -l $(( $line + 1 )) -format "i:s" -u 2 -p "Chose Album > ")
     fi
 
     val=$?
@@ -1033,16 +1033,16 @@ AddTrackTags() {
 #        export tracks_temp=${tracks_temp} > /dev/null
     fi
 
-    menu=("0  Return to Main Menu"
-          "---"
-          "${add}: Add | ${insert}: Insert | ${replace}: Replace | ${rate}: Rate"
-          "---"
-          "${tracks_temp}")
+menu="0  Return to Main Menu
+---
+${add}: Add | ${insert}: Insert | ${replace}: Replace | ${rate}: Rate
+---
+${tracks_temp}"
 
     if [[ -z $line ]]; then
-        TRACK_TEMP=$(printf "%s\n" "${menu[@]}" | dmenu_t -dmenu -format "i:s" -u 2 -p "Choose Track > ")
+        TRACK_TEMP=$(echo -e "$menu" | dmenu_t -dmenu -format "i:s" -u 2 -p "Choose Track > ")
     else
-        TRACK_TEMP=$(printf "%s\n" "${menu[@]}" | dmenu_t -dmenu -format "i:s" -l $(( $line + 1 )) -u 2 -p "Choose Track > ")
+        TRACK_TEMP=$(echo -e "$menu" | dmenu_t -dmenu -format "i:s" -l $(( $line + 1 )) -u 2 -p "Choose Track > ")
     fi
 
     val=$?
@@ -1339,9 +1339,9 @@ browseTrack() {
            "$(mpc --format "%track%$separator%title%" find artist "$ARTIST" album "$ALBUM_FINAL")")
 
     if [[ -z $line ]]; then
-        TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -dmenu -u 2-3 -format "i:s" -p "Choose Track > ")
+        TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -dmenu -u 2-3 -format "i:s" -p "Chose Track > ")
     else
-        TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -dmenu -l $(( $line + 1 )) -u 2-3 -format "i:s" -p "Choose Track > ")
+        TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -dmenu -l $(( $line + 1 )) -u 2-3 -format "i:s" -p "Chose Track > ")
     fi
 
     val=$?
@@ -1411,9 +1411,9 @@ browseAlbumArtistTrack() {
            "$(mpc --format "%track%$separator%title%" find albumartist "$ARTIST" album "$ALBUM_FINAL")")
 
     if [[ -z $line ]]; then
-        TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -dmenu -u 2-3 -format "i:s" -p "Choose Track > ")
+        TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -dmenu -u 2-3 -format "i:s" -p "Chose Track > ")
     else
-        TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -dmenu -l $(( $line + 1 )) -u 2-3 -format "i:s" -p "Choose Track > ")
+        TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -dmenu -l $(( $line + 1 )) -u 2-3 -format "i:s" -p "Chose Track > ")
     fi
 
     val=$?
