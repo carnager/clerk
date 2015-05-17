@@ -697,8 +697,8 @@ dplayQueue () {
             dplayQueue
         else
             if [[ $val -eq 11 ]]; then
-                POS=$(( $POS - 1))
                 mpc del $POS
+                POS=$(( $POS - 1))
             elif [[ $val -eq 0 || $val -eq 10 ]]; then
                 mpc play $POS;
             elif [[ $val -eq 13 ]]; then
@@ -748,7 +748,7 @@ dplayQueueSave () {
                 fi
             fi
         fi
-    done < <(echo -e "0  Return to Main Menu\n---\nSave new Playlist\n---\n$(mpc lsplaylists)" | dmenu_t -p "Chose Playlist > ")
+    done < <(echo -e "0  Return to Main Menu\n---\nSave new Playlist\n---\n$(mpc lsplaylists)" | dmenu_t -p "Choose Playlist > ")
     exit
 }
 
@@ -922,9 +922,9 @@ ${add}: Add, ${insert}: Insert, ${replace}: Replace (Default)
 ${last_temp}"
 
    if [[ -z $line ]]; then
-       TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -dmenu -format "i:s" -u 2 -p "Chose Album > ")
+       TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -dmenu -format "i:s" -u 2 -p "Choose Album > ")
    else
-       TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -dmenu -l $(( $line + 1 )) -format "i:s" -u 2 -p "Chose Album > ")
+       TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -dmenu -l $(( $line + 1 )) -format "i:s" -u 2 -p "Choose Album > ")
    fi
 
     val=$?
@@ -973,17 +973,13 @@ ${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate
 ---
 ${album_temp}"
 
-    if [[ -z $line ]]; then
-        TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -dmenu -format "i:s" -u 2 -p "Chose Album > ")
-    else
-        TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -dmenu -l $(( $line + 1 )) -format "i:s" -u 2 -p "Chose Album > ")
-    fi
+    TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -dmenu -filter "$filter" -format "f:s" -u 2 -p "Choose Album > ")
 
     val=$?
 
     TRACK="${TRACK_TEMP#*:}"
     unset line
-    export line="${TRACK_TEMP%:*}"
+    export filter="${TRACK_TEMP%:*}"
 
     if [[ "$TRACK" == "0  Return to Main Menu" ]]; then
         dplayPrompt
@@ -1039,16 +1035,12 @@ ${add}: Add | ${insert}: Insert | ${replace}: Replace | ${rate}: Rate
 ---
 ${tracks_temp}"
 
-    if [[ -z $line ]]; then
-        TRACK_TEMP=$(echo -e "$menu" | dmenu_t -dmenu -format "i:s" -u 2 -p "Choose Track > ")
-    else
-        TRACK_TEMP=$(echo -e "$menu" | dmenu_t -dmenu -format "i:s" -l $(( $line + 1 )) -u 2 -p "Choose Track > ")
-    fi
+    TRACK_TEMP=$(echo -e "$menu" | dmenu_t -dmenu -filter "$filter" -format "f:s" -u 2 -p "Choose Track > ")
 
     val=$?
 
     TRACK="${TRACK_TEMP#*:}"
-    export line="$(echo ${TRACK_TEMP} | awk -F ':' '{ print $1}')"
+    export filter="$(echo ${TRACK_TEMP} | awk -F ':' '{ print $1}')"
 
     if [[ "$TRACK" == "0  Return to Main Menu" ]]
         then dplayPrompt
@@ -1339,9 +1331,9 @@ browseTrack() {
            "$(mpc --format "%track%$separator%title%" find artist "$ARTIST" album "$ALBUM_FINAL")")
 
     if [[ -z $line ]]; then
-        TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -dmenu -u 2-3 -format "i:s" -p "Chose Track > ")
+        TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -dmenu -u 2-3 -format "i:s" -p "Choose Track > ")
     else
-        TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -dmenu -l $(( $line + 1 )) -u 2-3 -format "i:s" -p "Chose Track > ")
+        TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -dmenu -l $(( $line + 1 )) -u 2-3 -format "i:s" -p "Choose Track > ")
     fi
 
     val=$?
@@ -1411,9 +1403,9 @@ browseAlbumArtistTrack() {
            "$(mpc --format "%track%$separator%title%" find albumartist "$ARTIST" album "$ALBUM_FINAL")")
 
     if [[ -z $line ]]; then
-        TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -dmenu -u 2-3 -format "i:s" -p "Chose Track > ")
+        TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -dmenu -u 2-3 -format "i:s" -p "Choose Track > ")
     else
-        TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -dmenu -l $(( $line + 1 )) -u 2-3 -format "i:s" -p "Chose Track > ")
+        TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -dmenu -l $(( $line + 1 )) -u 2-3 -format "i:s" -p "Choose Track > ")
     fi
 
     val=$?
