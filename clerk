@@ -250,11 +250,7 @@ currentMenu () {
             "$titles")
         fi
 
-        if [[ -z $line ]]; then
-            menu_temp=$(printf "%s\n" "${menu[@]}" | rofi -dmenu -format "i:s" -u 2 -p "Other Music by ${current} > ")
-        else
-            menu_temp=$(printf "%s\n" "${menu[@]}" | rofi -dmenu -l $(( $line + 1 )) -format "i:s" -u 2 -p "Other Music by ${current} > ")
-        fi
+        menu_temp=$(printf "%s\n" "${menu[@]}" | rofi -dmenu -format "f:s" -filter "$filter" -select "$entry" -u 2 -p "Other Music by ${current} > ")
 
         # for some reason directly defining $val wasnt working. Using a
         # temporary variable instead.
@@ -264,20 +260,21 @@ currentMenu () {
         menu="${menu_temp#*:}"
         albumartist=$(mpc current -f '%albumartist%')
         artist=$(mpc current -f '%artist%')
-
-        unset line
-        export line="${menu_temp%:*}"
+        export filter="${menu_temp%:*}"
 
         # checking for exit codes.
         if [[ $menu == "(Album)"* ]]; then
             if [[ $val -eq 11 ]]; then
                 mpc find album "$(echo "$menu" | awk -F "$separator" '{ print $2 }')" albumartist "${albumartist}" | mpc insert
+                entry="$menu"
             elif [[ $val -eq 0 || $val -eq 12 ]]; then
                 mpc clear
                 mpc find album "$(echo ${menu} | awk -F "$separator" '{ print $2 }')" albumartist "${albumartist}" | mpc add
                 mpc play
+                entry="$menu"
             elif [[ $val -eq 10 ]]; then
                 mpc find album "$(echo ${menu} | awk -F "$separator" '{ print $2 }')" albumartist "${albumartist}" | mpc add
+                entry="$menu"
             elif [[ $val -eq 1 ]]; then
                 exit
             fi
@@ -285,12 +282,15 @@ currentMenu () {
         elif [[ $menu == "(Song)"* ]]; then
             if [[ $val -eq 11 ]]; then
                 mpc find track "$(echo ${menu} | awk -F ') ' '{ print $2 }' | awk -F "$separator" '{ print $1 }')" title "$(echo "$menu" | awk -F "$separator" '{ print $2 }')" artist "${artist}" | mpc insert
+                entry="$menu"
             elif [[ $val -eq 12 ]]; then
                 mpc clear
                 mpc find track "$(echo ${menu} | awk -F ') ' '{ print $2 }' | awk -F "$separator" '{ print $1 }')" title "$(echo "$menu" | awk -F "$separator" '{ print $2 }')" artist "${artist}" | mpc add
                 mpc play
+                entry="$menu"
             elif [[ $val -eq 0 || $val -eq 10 ]]; then
                 mpc find track "$(echo ${menu} | awk -F ') ' '{ print $2 }' | awk -F "$separator" '{ print $1 }')" title "$(echo "$menu" | awk -F "$separator" '{ print $2 }')" artist "${artist}" | mpc add
+                entry="$menu"
             elif [[ $val -eq 1 ]]; then
                 exit
             fi
@@ -973,7 +973,7 @@ ${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate
 ---
 ${album_temp}"
 
-    TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -dmenu -filter "$filter" -format "f:s" -u 2 -p "Choose Album > ")
+    TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -dmenu -filter "$filter" -select "$entry" -format "f:s" -u 2 -p "Choose Album > ")
 
     val=$?
 
@@ -995,10 +995,12 @@ ${album_temp}"
         if [[ $val -eq 11 ]]; then
             echo "return code is 1"
             mpc find date "$date" album "$album" albumartist "$artist" | mpc insert
+            entry="$TRACK"
         elif [[ $val -eq 0 || $val -eq 12 ]]; then
             echo "return code is 2"
             mpc clear && mpc find date "$date" album "$album" albumartist "$artist" | mpc add
             mpc play
+            entry="$TRACK"
         elif [[ $val -eq 13 ]]; then
             if [[ -n $(mpc find -f '%disc%' albumartist "${artist}" album "${album}" date "${date}") ]]; then
                 disc=$(mpc find -f '%disc%' albumartist "${artist}" album "${album}" date "${date}" | head -1)
@@ -1011,8 +1013,10 @@ ${album_temp}"
                 track="01"
             fi
                 disc=${disc} track=${track} rateartist="${artist}" ratealbum="${album}" ratedate="${date}" rateAlbum
+                entry="$TRACK"
         elif [[ $val -eq 10 ]]; then
             mpc search date "$date" album "$album" albumartist "$artist" | mpc add
+            entry="$TRACK"
         elif [[ $val -eq 1 ]]; then
             exit
         fi
@@ -1035,7 +1039,7 @@ ${add}: Add | ${insert}: Insert | ${replace}: Replace | ${rate}: Rate
 ---
 ${tracks_temp}"
 
-    TRACK_TEMP=$(echo -e "$menu" | dmenu_t -dmenu -filter "$filter" -format "f:s" -u 2 -p "Choose Track > ")
+    TRACK_TEMP=$(echo -e "$menu" | dmenu_t -dmenu -filter "$filter" -select "$entry" -format "f:s" -u 2 -p "Choose Track > ")
 
     val=$?
 
@@ -1056,17 +1060,21 @@ ${tracks_temp}"
 
         if [[ $val -eq 11 ]]; then
             mpc find artist "$artist" album "$album" title "$title" | mpc insert
+            entry="$TRACK"
         elif [[ $val -eq 12 ]]; then
             mpc clear
             mpc findadd artist "$artist" album "$album" title "$title"
             mpc play
+            entry="$TRACK"
         elif [[ $val -eq 0 || $val -eq 10 ]]; then
             mpc findadd artist "$artist" album "$album" title "$title"
             if [[ "$add_auto_play" == yes ]]; then
                 mpc play $(mpc playlist | wc -l)
+                entry="$TRACK"
             fi
         elif [[ $val -eq 13 ]]; then
             rateartist="${artist}" ratealbum="${album}" ratetrack="${track}" ratetitle="${title}" rateTrack
+            entry="$TRACK"
         elif [[ $val -eq 1 ]]; then
             exit
         fi
