@@ -1267,10 +1267,7 @@ browseAlbumArtistAlbum() {
            "---"
            "$(mpc --format "%date%$separator%album%" find albumartist "$ARTIST" | sort | uniq)")
 
-    if [[ -z $line ]]; then
-        ALBUM_TEMP=$(printf "%s\n" "${ALBUM[@]}" | dmenu_t -dmenu -format "i:s" -u 2-3 -p "Choose Album > ")
-    else
-        ALBUM_TEMP=$(printf "%s\n" "${ALBUM[@]}" | dmenu_t -dmenu -l $(( $line + 1 )) -format "i:s" -u 2-3 -p "Choose Album > ")
+           ALBUM_TEMP=$(printf "%s\n" "${ALBUM[@]}" | dmenu_t -filter "$filter" -select "$entry" -dmenu -format "f:s" -u 2-3 -p "Choose Album > ")
     fi
 
     val=$?
@@ -1279,20 +1276,21 @@ browseAlbumArtistAlbum() {
 
     ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
     DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
-
-    unset line
-    export line="${ALBUM_TEMP%:*}"
+    unset filter
+    export filter="${ALBUM_TEMP%:*}"
 
     if [[ "$val" -eq 10 ]]; then
         export ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
         export DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
         mpc find albumartist "$ARTIST" date "$DATE" album "$ALBUM_FINAL" | mpc add
+        entry="$ALBUM_FINAL"
         browseAlbumArtistAlbum
 
     elif [[ "$val" -eq 11 ]]; then
         export ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
         export DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
         mpc find albumartist "$ARTIST" date "$DATE" album "$ALBUM_FINAL" | mpc insert
+        entry="$ALBUM_FINAL"
         browseAlbumArtistAlbum
 
     elif [[ "$val" -eq 12 ]]; then
@@ -1301,22 +1299,26 @@ browseAlbumArtistAlbum() {
         mpc clear
         mpc find albumartist "$ARTIST" date "$DATE" album "$ALBUM_FINAL" | mpc add
         mpc play
+        entry="$ALBUM_FINAL"
         browseAlbumArtistAlbum
 
     elif [[ "$val" -eq 15 ]]; then
         export ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
         export DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
         mpc clear && mpc find albumartist "$ARTIST" | mpc add && mpc play
+        entry="$ALBUM_FINAL"
 
     elif [[ "$val" -eq 13 ]]; then
         export ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
         export DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
         mpc find albumartist "$ARTIST" | mpc add
+        entry="$ALBUM_FINAL"
 
     elif [[ "$val" -eq 14 ]]; then
         export ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
         export DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
         mpc find albumartist "$ARTIST" | mpc insert
+        entry="$ALBUM_FINAL"
 
     elif [[ "$val" -eq 0 ]]; then
         if  [[ "$ALBUM" == "0  Return to Artist Menu" ]]; then
@@ -1324,6 +1326,7 @@ browseAlbumArtistAlbum() {
         else
             export ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
             export DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
+            entry="$ALBUM_FINAL"
             browseAlbumArtistTrack
         fi
 
@@ -1342,39 +1345,41 @@ browseTrack() {
            "---"
            "$(mpc --format "%track%$separator%title%" find artist "$ARTIST" album "$ALBUM_FINAL")")
 
-    if [[ -z $line ]]; then
-        TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -dmenu -u 2-3 -format "i:s" -p "Choose Track > ")
-    else
-        TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -dmenu -l $(( $line + 1 )) -u 2-3 -format "i:s" -p "Choose Track > ")
-    fi
+    TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -filter "$filter" -select "$entry" -dmenu -u 2-3 -format "f:s" -p "Choose Track > ")
 
     val=$?
 
     TRACK="${TRACK_TEMP#*:}"
     TRACKFINAL=$(echo "$TRACK" | awk -F "$separator" '{ print $2 }')
+    unset filter
+    export filter="${TRACK_TEMP%:*}"
 
-    unset line
-    export line="${TRACK_TEMP%:*}"
 
     if [[ "$val" -eq 10 ]]; then
         mpc find artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL" | mpc add
+        entry="$TRACK_TEMP"
         browseTrack
     elif [[ "$val" -eq 11 ]]; then
         mpc find artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL" | mpc insert
+        entry="$TRACK_TEMP"
         browseTrack
     elif [[ "$val" -eq 12 ]]; then
         mpc clear
         mpc find artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL" | mpc add
         mpc play
+        entry="$TRACK_TEMP"
         browseTrack
     elif [[ "$val" -eq 15 ]]; then
         mpc clear && mpc find artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" |mpc add && mpc play
+        entry="$TRACK_TEMP"
 
     elif [[ "$val" -eq 13 ]]; then
         mpc find artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" | mpc add
+        entry="$TRACK_TEMP"
 
     elif [[ "$val" -eq 14 ]]; then
         mpc find artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" | mpc insert
+        entry="$TRACK_TEMP"
     elif [[ "$val" -eq 1 ]]; then
         exit
     elif [[ "$val" -eq 0 ]]; then
@@ -1414,43 +1419,45 @@ browseAlbumArtistTrack() {
            "---"
            "$(mpc --format "%track%$separator%title%" find albumartist "$ARTIST" album "$ALBUM_FINAL")")
 
-    if [[ -z $line ]]; then
-        TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -dmenu -u 2-3 -format "i:s" -p "Choose Track > ")
-    else
-        TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -dmenu -l $(( $line + 1 )) -u 2-3 -format "i:s" -p "Choose Track > ")
-    fi
+           TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -filter "$filter" -select "$entry" -dmenu -u 2-3 -format "i:s" -p "Choose Track > ")
 
     val=$?
 
     TRACK="${TRACK_TEMP#*:}"
     TRACKFINAL=$(echo "$TRACK" | awk -F "$separator" '{ print $2 }')
-
-    unset line
-    export line="${TRACK_TEMP%:*}"
+    unset filter
+    export filter="${TRACK_TEMP%:*}"
 
     if [[ "$val" -eq 10 ]]; then
         mpc find albumartist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL" | mpc add
+        entry="$TRACK_TEMP"
         browseAlbumArtistTrack
     elif [[ "$val" -eq 11 ]]; then
         mpc find albumartist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL" | mpc insert
+        entry="$TRACK_TEMP"
         browseAlbumArtistTrack
     elif [[ "$val" -eq 12 ]]; then
         mpc clear
         mpc find albumartist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL" | mpc add
         mpc play
+        entry="$TRACK_TEMP"
         browseAlbumArtistTrack
     elif [[ "$val" -eq 15 ]]; then
         mpc clear && mpc find albumartist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" |mpc add && mpc play
+        entry="$TRACK_TEMP"
 
     elif [[ "$val" -eq 13 ]]; then
         mpc find albumartist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" | mpc add
+        entry="$TRACK_TEMP"
 
     elif [[ "$val" -eq 14 ]]; then
         mpc find albumartist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" | mpc insert
+        entry="$TRACK_TEMP"
     elif [[ "$val" -eq 1 ]]; then
         exit
     elif [[ "$val" -eq 0 ]]; then
         if [[ "$TRACK" = "0  Return to Album Menu" ]]; then
+            entry="$TRACK_TEMP"
             browseAlbumArtistAlbum
         else
             if [[ -z $(mpc playlist) ]]; then
