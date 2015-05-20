@@ -1656,6 +1656,8 @@ while :; do
                 echo "Possible values: artist, date, genre, folder, system"
             elif [[ $2 == artist ]]; then
                 browseArtist
+            elif [[ $2 == albumartist ]]; then
+                browseAlbumArtist
             elif [[ $2 == date ]]; then
                 browseDate
             elif [[ $2 == genre ]]; then
@@ -1754,7 +1756,7 @@ while :; do
             echo ""
             echo "Library"
             echo "  --add <track, album, latest>                    adds selection at the end of the queue"
-            echo "  --browse <artist, date, genre, folder, system>  browse library"
+            echo "  --browse <artist, albumartist, date, genre, folder, system>  browse library"
             echo "  --random <track, album>                         play random track or album"
             echo ""
             echo "Playlist"
