@@ -1267,8 +1267,7 @@ browseAlbumArtistAlbum() {
            "---"
            "$(mpc --format "%date%$separator%album%" find albumartist "$ARTIST" | sort | uniq)")
 
-           ALBUM_TEMP=$(printf "%s\n" "${ALBUM[@]}" | dmenu_t -filter "$filter" -select "$entry" -dmenu -format "f:s" -u 2-3 -p "Choose Album > ")
-    fi
+    ALBUM_TEMP=$(printf "%s\n" "${ALBUM[@]}" | dmenu_t -filter "$filter" -select "$entry" -dmenu -format "f:s" -u 2-3 -p "Choose Album > ")
 
     val=$?
 
