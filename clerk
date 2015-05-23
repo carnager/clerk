@@ -817,8 +817,13 @@ rateTrack () {
 # function to instantly rate a track without a submenu. rating is defined on
 # commandline
 instantRateTrack () {
-     export rating=${rating}; clerk_helper ratetrack "${rateartist}" "${ratealbum}" "${ratetrack}" "${ratetitle}" "${rating}"
-     notify-send "clerk" "rated $(mpc current) with $(echo ${rating})"
+     rateartist=$(mpc current -f '%artist%')
+     ratetitle=$(mpc current -f '%title%')
+     ratetrack=$(mpc current -f '%track%')
+     ratealbum=$(mpc current -f '%album%')
+     export rating=$1
+     clerk_helper ratetrack "${rateartist}" "${ratealbum}" "${ratetrack}" "${ratetitle}" "${rating}"
+     notify-send "clerk" "rated ${rateartist} - ${ratetitle} with $(echo ${rating})"
 }
 
 # load rated albums with minimum rating of xx
@@ -1634,8 +1639,7 @@ while :; do
                     echo "Missing argument for --rate instant"
                     echo "Please define rating between 1-10"
                 else
-                    export rating="$3"
-                    instantRateTrack
+                    instantRateTrack $3
                 fi
             elif [[ $2 == load ]]; then
                 mpc clear && mpc sticker "" find rating | grep -E "rating=6|rating=7|rating=8|rating=9|rating=10" | awk -F ':' '{print $1}' | $shuf -n $value | mpc add && mpc play
