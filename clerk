@@ -91,8 +91,6 @@ dplayPrompt () {
     fi
     menu=("Q  Exit Clerk"
           "---"
-          "${toggle}: Toggle Playback, ${prev}: Prev, ${next}: Next, ${stop}: Stop"
-          "---"
           "1  Play random Album"
           "2  Play random Songs"
           "---"
@@ -105,7 +103,7 @@ dplayPrompt () {
           "8  Ratings"
           "9  Lookup")
 
-    menu=$(printf "%s\n" "${menu[@]}" | rofi -dmenu -lines 17 -u 2 -p "Now Playing: ${song} > ")
+    menu=$(printf "%s\n" "${menu[@]}" | rofi -dmenu -lines 17 -mesg "<span color='$help_color'>${toggle}: Toggle Playback, ${prev}: Prev, ${next}: Next, ${stop}: Stop</span>" -p "Now Playing: ${song} > ")
 
     val=$?
 
@@ -243,14 +241,12 @@ currentMenu () {
         current=$(mpc current -f '%artist%')
         menu=("0 Return to Main Menu"
             "---"
-            "${add}: Add, ${insert}: Insert, ${replace}: Replace"
-            "---"
             "$albums"
             "---"
             "$titles")
         fi
 
-        menu_temp=$(printf "%s\n" "${menu[@]}" | rofi -dmenu -format "f:s" -filter "$filter" -select "$entry" -u 2 -p "Other Music by ${current} > ")
+        menu_temp=$(printf "%s\n" "${menu[@]}" | rofi -dmenu -format "f:s" -filter "$filter" -select "$entry" -mesg "<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace</span>" -p "Other Music by ${current} > ")
 
         # for some reason directly defining $val wasnt working. Using a
         # temporary variable instead.
@@ -660,8 +656,6 @@ dplayQueue () {
         if [[ -z $POS ]]; then
             TRACKDISPLAY=("0  Return to Main Menu"
                           "---"
-                          "${play}: Play, ${delete}: Delete, ${rate}: Rate"
-                          "---"
                           "$(mpc playlist --format "%position%$separator%artist%$separator%track%$separator%title%$separator%album%")")
         else
             # check if POS is a number. if it is, add 4 to it. POS is later
@@ -674,13 +668,11 @@ dplayQueue () {
             fi
             TRACKDISPLAY=("0  Return to Main Menu"
                           "---"
-                          "${play}: Play, ${delete}: Delete, ${rate}: Rate"
-                          "---"
                           "$(mpc playlist --format "%position%$separator%artist%$separator%track%$separator%title%$separator%album%")")
 
         fi
 
-        TRACKDISPLAY=$(printf "%s\n" "${TRACKDISPLAY[@]}"  | rofi -dmenu -l $POS -u 2 -p "Current Queue > ")
+        TRACKDISPLAY=$(printf "%s\n" "${TRACKDISPLAY[@]}"  | rofi -dmenu -l $POS -mesg "<span color='$help_color'>${play}: Play, ${delete}: Delete, ${rate}: Rate</span>" -p "Current Queue > ")
 
         tempval=$?
         val=$tempval
@@ -923,11 +915,9 @@ addLastMod() {
 
 menu="0  Return to Main Menu
 ---
-${add}: Add, ${insert}: Insert, ${replace}: Replace (Default)
----
 ${last_temp}"
 
-TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -dmenu -select "$entry" -filter "$filter" -format "f:s" -u 2 -p "Choose Album > ")
+TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -dmenu -select "$entry" -filter "$filter" -format "f:s" -mesg "<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace (Default)</span>" -p "Choose Album > ")
 
     val=$?
 
@@ -976,11 +966,9 @@ AddAlbumTags() {
     fi
 menu="0  Return to Main Menu
 ---
-${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate
----
 ${album_temp}"
 
-    TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -dmenu -filter "$filter" -select "$entry" -format "f:s" -u 2 -p "Choose Album > ")
+TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -dmenu -filter "$filter" -select "$entry" -format "f:s" -mesg "<span color='#0C73C2'>${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate</span>" -p "Choose Album > ")
 
     val=$?
 
@@ -1042,11 +1030,9 @@ AddTrackTags() {
 
 menu="0  Return to Main Menu
 ---
-${add}: Add | ${insert}: Insert | ${replace}: Replace | ${rate}: Rate
----
 ${tracks_temp}"
 
-    TRACK_TEMP=$(echo -e "$menu" | dmenu_t -dmenu -filter "$filter" -select "$entry" -format "f:s" -u 2 -p "Choose Track > ")
+TRACK_TEMP=$(echo -e "$menu" | dmenu_t -dmenu -filter "$filter" -select "$entry" -format "f:s" -mesg "<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate</span>" -p "Choose Track > ")
 
     val=$?
 
@@ -1091,7 +1077,7 @@ ${tracks_temp}"
 }
 
 browseDate() {
-    date=$(echo -e "0  Return to Main Menu\n---\n$(mpc list date | $tac)" | dmenu_t -dmenu -p "Choose Date > ")
+    date=$(echo -e "0  Return to Browse Menu\n---\n$(mpc list date | $tac)" | dmenu_t -dmenu -p "Choose Date > ")
     if [[ "$date" == "0  Return to Browse Menu" ]]
         then browseLibPrompt
     else
@@ -1100,17 +1086,17 @@ browseDate() {
 }
 
 browseDateAdd() {
+    HELP="<span color='$help_color'>${add}: Add Album | ${insert}: Insert Album | ${replace}: Replace Album
+${addall}: Add All   | ${insertall}: Insert All   | ${replaceall}: Replace All</span>"
+
     menu=("0  Return to Date Menu"
-            "---"
-            "${add}: Add Album | ${insert}: Insert Album | ${replace}: Replace Album"
-            "${addall}: Add All   | ${insertall}: Insert All   | ${replaceall}: Replace All"
             "---"
             "$(mpc --format "%albumartist%$separator%album%" find date "$date" | uniq)")
 
     if [[ -z $line ]]; then
-        select_temp=$(printf "%s\n" "${menu[@]}" | rofi -dmenu -format "i:s" -u 2-3 -p "Select Album > ")
+        select_temp=$(printf "%s\n" "${menu[@]}" | rofi -dmenu -format "i:s" -mesg "${HELP}" -p "Select Album > ")
     else
-        select_temp=$(printf "%s\n" "${menu[@]}" | rofi -dmenu -l $(( $line + 1 )) -format "i:s" -u 2-3 -p "Select Album > ")
+        select_temp=$(printf "%s\n" "${menu[@]}" | rofi -dmenu -l $(( $line + 1 )) -format "i:s" -mesg "${HELP}" -p "Select Album > ")
     fi
 
     val=$?
@@ -1188,14 +1174,14 @@ browseLibPrompt() {
 }
 
 browseAlbum() {
+    HELP="<span color='$help_color'>${add}: Add Album | ${insert}: Insert Album | ${replace}: Replace Album (Default)
+${addall}: Add All   | ${insertall}: Insert All   | ${replaceall}: Replace All</span>"
+
     ALBUMS=$(mpc list album artist "$ARTIST")
     ALBUM=("0  Return to Artist Menu"
            "---"
-           "${add}: Add Album | ${insert}: Insert Album | ${replace}: Replace Album (Default)"
-           "${addall}: Add All   | ${insertall}: Insert All   | ${replaceall}: Replace All"
-           "---"
            "$(mpc --format "%date%$separator%album%" find artist "$ARTIST" | sort | uniq)")
-    ALBUM_TEMP=$(printf "%s\n" "${ALBUM[@]}" | dmenu_t -dmenu -select "$entry" -filter "$filter" -format "f:s" -u 2-3 -p "Choose Album > ")
+    ALBUM_TEMP=$(printf "%s\n" "${ALBUM[@]}" | dmenu_t -dmenu -select "$entry" -filter "$filter" -format "f:s" -mesg "${HELP}" -p "Choose Album > ")
 
     val=$?
 
@@ -1265,15 +1251,15 @@ browseAlbum() {
 }
 
 browseAlbumArtistAlbum() {
+    HELP="<span color='$help_color'>${add}: Add Album | ${insert}: Insert Album | ${replace}: Replace Album (Default)
+${addall}: Add All   | ${insertall}: Insert All   | ${replaceall}: Replace All</span>"
+
     ALBUMS=$(mpc list album albumartist "$ARTIST")
     ALBUM=("0  Return to Artist Menu"
            "---"
-           "${add}: Add Album | ${insert}: Insert Album | ${replace}: Replace Album (Default)"
-           "${addall}: Add All   | ${insertall}: Insert All   | ${replaceall}: Replace All"
-           "---"
            "$(mpc --format "%date%$separator%album%" find albumartist "$ARTIST" | sort | uniq)")
 
-    ALBUM_TEMP=$(printf "%s\n" "${ALBUM[@]}" | dmenu_t -filter "$filter" -select "$entry" -dmenu -format "f:s" -u 2-3 -p "Choose Album > ")
+    ALBUM_TEMP=$(printf "%s\n" "${ALBUM[@]}" | dmenu_t -filter "$filter" -select "$entry" -dmenu -format "f:s" -mesg "${HELP}" -p "Choose Album > ")
 
     val=$?
 
@@ -1343,14 +1329,14 @@ browseAlbumArtistAlbum() {
 
 
 browseTrack() {
+    HELP="<span color='$help_color'>${add}: Add Track (Default) | ${insert}: Insert Track | ${replace}: Replace Track
+${addall}: Add All             | ${insertall}: Insert All   | ${replaceall}: Replace All</span>"
+
     TRACK=("0  Return to Album Menu"
-           "---"
-           "${add}: Add Track (Default) | ${insert}: Insert Track | ${replace}: Replace Track"
-           "${addall}: Add All             | ${insertall}: Insert All   | ${replaceall}: Replace All"
            "---"
            "$(mpc --format "%track%$separator%title%" find artist "$ARTIST" album "$ALBUM_FINAL")")
 
-    TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -filter "$filter" -select "$entry" -dmenu -u 2-3 -format "f:s" -p "Choose Track > ")
+    TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -filter "$filter" -select "$entry" -dmenu -mesg "${HELP}" -format "f:s" -p "Choose Track > ")
 
     val=$?
 
@@ -1401,7 +1387,7 @@ browseTrack() {
 }
 
 browseArtist() {
-    ARTIST=$(echo -e "0  Return to Main Menu\n---\n$(mpc list artist)" | dmenu_t -dmenu -p "Choose Artist > ")
+    ARTIST=$(echo -e "0  Return to Browse Menu\n---\n$(mpc list artist)" | dmenu_t -dmenu -p "Choose Artist > ")
 
     val=$?
 
@@ -1417,14 +1403,14 @@ browseArtist() {
 }
 
 browseAlbumArtistTrack() {
+    HELP="<span color='$help_color'>${add}: Add Track (Default) | ${insert}: Insert Track | ${replace}: Replace Track
+${addall}: Add All             | ${insertall}: Insert All   | ${replaceall}: Replace All</span>"
+
     TRACK=("0  Return to Album Menu"
-           "---"
-           "${add}: Add Track (Default) | ${insert}: Insert Track | ${replace}: Replace Track"
-           "${addall}: Add All             | ${insertall}: Insert All   | ${replaceall}: Replace All"
            "---"
            "$(mpc --format "%track%$separator%title%" find albumartist "$ARTIST" album "$ALBUM_FINAL")")
 
-           TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -filter "$filter" -select "$entry" -dmenu -u 2-3 -format "i:s" -p "Choose Track > ")
+           TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -filter "$filter" -select "$entry" -dmenu -mesg "${HELP}" -format "i:s" -p "Choose Track > ")
 
     val=$?
 
@@ -1476,7 +1462,7 @@ browseAlbumArtistTrack() {
 
 
 browseAlbumArtist() {
-    ARTIST=$(echo -e "0  Return to Main Menu\n---\n$(mpc list albumartist)" | dmenu_t -dmenu -p "Choose Artist > ")
+    ARTIST=$(echo -e "0  Return to Browse Menu\n---\n$(mpc list albumartist)" | dmenu_t -dmenu -p "Choose Artist > ")
 
     val=$?
 
