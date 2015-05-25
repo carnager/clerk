@@ -826,7 +826,7 @@ loadRatedAlbums () {
     else
         albums="$(while read -a line; do
             dirname "${line[*]}";
-        done <<< "$(mpc sticker "" find albumrating | grep -E "albumrating=$rating")" | $sed 's/\/\CD.*//g' | sort | uniq | dmenu_t -p "Choose Album")"
+        done <<< "$(mpc sticker "" find albumrating | grep -E "albumrating=$rating")" | $sed 's/\/\CD.*//g' | sort | uniq | dmenu_t -p "Choose Album > ")"
         if [[ $albums == "" ]]; then
             exit
         else
