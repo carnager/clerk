@@ -988,8 +988,15 @@ TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -dmenu -filter "$filter" -select "$entr
         date=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
         album=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
         if [[ $val -eq 11 ]]; then
-            echo "return code is 1"
             mpc find date "$date" album "$album" albumartist "$artist" | mpc insert
+            random=$(mpc status | tail -1 | awk '{ print $6 }')
+            if [[ $random == on ]]; then
+                mpc playlist -f "%position% $separator %artist% $separator %album% $separator %date%" | grep "$album" | grep "$date" | grep $artist | while read tracks; do
+                pos=$(echo "$tracks" | awk -F " $separator " '{ print $1 }')
+                pos=$(( $pos - 1 ))
+                clerk_helper prio < <(echo "$pos")
+            done
+            fi
             entry="$TRACK"
         elif [[ $val -eq 0 || $val -eq 12 ]]; then
             echo "return code is 2"
@@ -1054,6 +1061,14 @@ TRACK_TEMP=$(echo -e "$menu" | dmenu_t -dmenu -filter "$filter" -select "$entry"
 
         if [[ $val -eq 11 ]]; then
             mpc find artist "$artist" album "$album" title "$title" | mpc insert
+            random=$(mpc status | tail -1 | awk '{ print $6 }')
+            if [[ $random == "on" ]]; then
+                mpc playlist -f "%position% $separator %artist% $separator %title%" | grep "$title" | grep "$artist" | while read tracks; do
+                pos=$(echo "$tracks" | awk -F " $separator " '{ print $1 }')
+                pos=$(( $pos -1 ))
+                clerk_helper prio < <(echo "$pos")
+            done
+            fi
             entry="$TRACK"
         elif [[ $val -eq 12 ]]; then
             mpc clear
