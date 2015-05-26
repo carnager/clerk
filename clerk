@@ -263,6 +263,14 @@ currentMenu () {
         if [[ $menu == "(Album)"* ]]; then
             if [[ $val -eq 11 ]]; then
                 mpc find album "$(echo "$menu" | awk -F "$separator" '{ print $2 }')" albumartist "${albumartist}" | mpc insert
+                random=$(mpc status | tail -1 | awk '{ print $6 }')
+                if [[ $random == on ]]; then
+                    mpc playlist -f "%position% $separator %artist% $separator %album%" | grep "$album" | grep "$albumartist" | while read tracks; do
+                    pos=$(echo "$tracks" | awk -F " $separator " '{ print $1 }')
+                    pos=$(( $pos - 1 ))
+                    clerk_helper prio < <(echo "$pos")
+                done
+                fi
                 entry="$menu"
             elif [[ $val -eq 0 || $val -eq 12 ]]; then
                 mpc clear
@@ -279,6 +287,15 @@ currentMenu () {
         elif [[ $menu == "(Song)"* ]]; then
             if [[ $val -eq 11 ]]; then
                 mpc find track "$(echo ${menu} | awk -F ') ' '{ print $2 }' | awk -F "$separator" '{ print $1 }')" title "$(echo "$menu" | awk -F "$separator" '{ print $2 }')" artist "${artist}" | mpc insert
+                random=$(mpc status | tail -1 | awk '{ print $6 }')
+                title="$(echo "$menu" | awk -F "$separator" '{ print $2 }')"
+                if [[ $random == "on" ]]; then
+                    mpc playlist -f "%position% $separator %artist% $separator %title%" | grep "$title" | grep "$artist" | while read tracks; do
+                    pos=$(echo "$tracks" | awk -F " $separator " '{ print $1 }')
+                    pos=$(( $pos -1 ))
+                    clerk_helper prio < <(echo "$pos")
+                done
+                fi
                 entry="$menu"
             elif [[ $val -eq 12 ]]; then
                 mpc clear
@@ -937,8 +954,15 @@ TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -dmenu -select "$entry" -filter "$filte
         date=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
         album=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
         if [[ $val -eq 11 ]]; then
-            echo "return code is 12"
             mpc search date "$date" album "$album" albumartist "$artist" | mpc insert
+            random=$(mpc status | tail -1 | awk '{ print $6 }')
+            if [[ $random == on ]]; then
+                mpc playlist -f "%position% $separator %artist% $separator %album% $separator %date%" | grep "$album" | grep "$date" | grep $artist | while read tracks; do
+                pos=$(echo "$tracks" | awk -F " $separator " '{ print $1 }')
+                pos=$(( $pos - 1 ))
+                clerk_helper prio < <(echo "$pos")
+            done
+            fi
             entry="$TRACK"
         elif [[ $val -eq 0 || $val -eq 12 ]]; then
             echo "return code is 13"
@@ -1144,8 +1168,15 @@ ${addall}: Add All   | ${insertall}: Insert All   | ${replaceall}: Replace All</
 
         elif [[ "$val" -eq 11 ]]; then
             mpc find date "$date" artist "$artist" album "$album" | mpc insert
+            random=$(mpc status | tail -1 | awk '{ print $6 }')
+            if [[ $random == on ]]; then
+                mpc playlist -f "%position% $separator %artist% $separator %album% $separator %date%" | grep "$album" | grep "$date" | grep $artist | while read tracks; do
+                pos=$(echo "$tracks" | awk -F " $separator " '{ print $1 }')
+                pos=$(( $pos - 1 ))
+                clerk_helper prio < <(echo "$pos")
+            done
+            fi
             browseDateAdd
-
         elif [[ "$val" -eq 12 || "$val" -eq 0 ]]; then
             mpc clear && mpc findadd date "$date" artist "$artist" album "$album" && mpc play
             browseDateAdd
@@ -1220,6 +1251,14 @@ ${addall}: Add All   | ${insertall}: Insert All   | ${replaceall}: Replace All</
         export ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
         export DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
         mpc find artist "$ARTIST" date "$DATE" album "$ALBUM_FINAL" | mpc insert
+        random=$(mpc status | tail -1 | awk '{ print $6 }')
+        if [[ $random == on ]]; then
+            mpc playlist -f "%position% $separator %artist% $separator %album% $separator %date%" | grep "$ALBUM_FINAL" | grep "$DATE" | grep "$ARTIST" | while read tracks; do
+            pos=$(echo "$tracks" | awk -F " $separator " '{ print $1 }')
+            pos=$(( $pos - 1 ))
+            clerk_helper prio < <(echo "$pos")
+        done
+        fi
         entry="$ALBUM_FINAL"
         browseAlbum
 
@@ -1296,6 +1335,14 @@ ${addall}: Add All   | ${insertall}: Insert All   | ${replaceall}: Replace All</
         export ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
         export DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
         mpc find albumartist "$ARTIST" date "$DATE" album "$ALBUM_FINAL" | mpc insert
+        random=$(mpc status | tail -1 | awk '{ print $6 }')
+        if [[ $random == on ]]; then
+            mpc playlist -f "%position% $separator %artist% $separator %album% $separator %date%" | grep "$ALBUM_FINAL" | grep "$DATE" | grep "$ARTIST" | while read tracks; do
+            pos=$(echo "$tracks" | awk -F " $separator " '{ print $1 }')
+            pos=$(( $pos - 1 ))
+            clerk_helper prio < <(echo "$pos")
+        done
+        fi
         entry="$ALBUM_FINAL"
         browseAlbumArtistAlbum
 
@@ -1367,8 +1414,17 @@ ${addall}: Add All             | ${insertall}: Insert All   | ${replaceall}: Rep
         browseTrack
     elif [[ "$val" -eq 11 ]]; then
         mpc find artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL" | mpc insert
+        random=$(mpc status | tail -1 | awk '{ print $6 }')
+        if [[ $random == "on" ]]; then
+            mpc playlist -f "%position% $separator %artist% $separator %title% $separator %date%" | grep "$TRACKFINAL" | grep "$ARTIST" | grep "$DATE" | while read tracks; do
+            pos=$(echo "$tracks" | awk -F " $separator " '{ print $1 }')
+            pos=$(( $pos -1 ))
+            clerk_helper prio < <(echo "$pos")
+        done
+        fi
         entry="$TRACK_TEMP"
         browseTrack
+
     elif [[ "$val" -eq 12 ]]; then
         mpc clear
         mpc find artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL" | mpc add
@@ -1440,6 +1496,14 @@ ${addall}: Add All             | ${insertall}: Insert All   | ${replaceall}: Rep
         browseAlbumArtistTrack
     elif [[ "$val" -eq 11 ]]; then
         mpc find albumartist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL" | mpc insert
+        random=$(mpc status | tail -1 | awk '{ print $6 }')
+        if [[ $random == "on" ]]; then
+            mpc playlist -f "%position% $separator %artist% $separator %title% $separator %date%" | grep "$TRACKFINAL" | grep "$ARTIST" | grep "$DATE" | while read tracks; do
+            pos=$(echo "$tracks" | awk -F " $separator " '{ print $1 }')
+            pos=$(( $pos -1 ))
+            clerk_helper prio < <(echo "$pos")
+        done
+        fi
         entry="$TRACK_TEMP"
         browseAlbumArtistTrack
     elif [[ "$val" -eq 12 ]]; then
