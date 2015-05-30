@@ -679,7 +679,7 @@ dplayQueue () {
             # exported from song ID in playlist.
             re='^[0-9]+$'
             if [[ "$POS" =~ $re ]]; then
-                POS=$(( $POS + 4 ))
+                POS=$(( $POS + 2 ))
             else
                 POS=0
             fi
