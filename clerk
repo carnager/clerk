@@ -10,8 +10,8 @@ if [[ ! -f $HOME/.config/clerk/config ]] && [[ ! -f /etc/clerk ]]; then
 fi
 
 # read global config, if present
-if [[ -f /etc/clerk ]]; then
-    source /etc/clerk
+if [[ -f /etc/clerk.conf ]]; then
+    source /etc/clerk.conf
 fi
 
 # read local config file
