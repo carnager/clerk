@@ -262,7 +262,7 @@ currentMenu () {
         # checking for exit codes.
         if [[ $menu == "(Album)"* ]]; then
             if [[ $val -eq 11 ]]; then
-                mpc find album "$(echo "$menu" | awk -F "$separator" '{ print $2 }')" albumartist "${albumartist}" | mpc insert
+                mpc find album "$(echo "$menu" | awk -F "$separator" '{ print $2 }')" artist "${artist}" | mpc insert
                 random=$(mpc status | tail -1 | awk '{ print $6 }')
                 if [[ $random == on ]]; then
                     mpc playlist -f "%position% $separator %artist% $separator %album%" | grep "$album" | grep "$albumartist" | while read tracks; do
@@ -274,11 +274,11 @@ currentMenu () {
                 entry="$menu"
             elif [[ $val -eq 0 || $val -eq 12 ]]; then
                 mpc clear
-                mpc find album "$(echo ${menu} | awk -F "$separator" '{ print $2 }')" albumartist "${albumartist}" | mpc add
+                mpc find album "$(echo ${menu} | awk -F "$separator" '{ print $2 }')" artist "${artist}" | mpc add
                 mpc play
                 entry="$menu"
             elif [[ $val -eq 10 ]]; then
-                mpc find album "$(echo ${menu} | awk -F "$separator" '{ print $2 }')" albumartist "${albumartist}" | mpc add
+                mpc find album "$(echo ${menu} | awk -F "$separator" '{ print $2 }')" artist "${artist}" | mpc add
                 entry="$menu"
             elif [[ $val -eq 1 ]]; then
                 exit
