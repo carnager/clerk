@@ -1103,8 +1103,8 @@ TRACK_TEMP=$(echo -e "$menu" | dmenu_t -dmenu -filter "$filter" -select "$entry"
             mpc findadd artist "$artist" album "$album" title "$title"
             if [[ "$add_auto_play" == yes ]]; then
                 mpc play $(mpc playlist | wc -l)
-                entry="$TRACK"
             fi
+            entry="$TRACK"
         elif [[ $val -eq 13 ]]; then
             rateartist="${artist}" ratealbum="${album}" ratetrack="${track}" ratetitle="${title}" rateTrack
             entry="$TRACK"
