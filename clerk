@@ -246,18 +246,18 @@ currentMenu () {
             "$titles")
         fi
 
-        menu_temp=$(printf "%s\n" "${menu[@]}" | rofi -dmenu -format "f:s" -filter "$filter" -select "$entry" -mesg "<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace</span>" -p "Other Music by ${current} > ")
+        menu_temp=$(printf "%s\n" "${menu[@]}" | rofi -dmenu -format "f¬s" -filter "$filter" -select "$entry" -mesg "<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace</span>" -p "Other Music by ${current} > ")
 
         # for some reason directly defining $val wasnt working. Using a
         # temporary variable instead.
         tempval=$?
         val=$tempval
 
-        menu="${menu_temp#*:}"
+        menu="${menu_temp#*¬}"
         albumartist=$(mpc current -f '%albumartist%')
         artist=$(mpc current -f '%artist%')
         unset filter
-        export filter="${menu_temp%:*}"
+        export filter="${menu_temp%¬*}"
 
         # checking for exit codes.
         if [[ $menu == "(Album)"* ]]; then
@@ -934,13 +934,13 @@ menu="0  Return to Main Menu
 ---
 ${last_temp}"
 
-TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -dmenu -select "$entry" -filter "$filter" -format "f:s" -mesg "<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace (Default)</span>" -p "Choose Album > ")
+TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -dmenu -select "$entry" -filter "$filter" -format "f¬s" -mesg "<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace (Default)</span>" -p "Choose Album > ")
 
     val=$?
 
-    TRACK="${TRACK_TEMP#*:}"
+    TRACK="${TRACK_TEMP#*¬}"
     unset filter
-    export filter="${TRACK_TEMP%:*}"
+    export filter="${TRACK_TEMP%¬*}"
 
 
     if [[ "$TRACK" == "0  Return to Main Menu" ]]
@@ -992,13 +992,13 @@ menu="0  Return to Main Menu
 ---
 ${album_temp}"
 
-TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -dmenu -filter "$filter" -select "$entry" -format "f:s" -mesg "<span color='#0C73C2'>${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate</span>" -p "Choose Album > ")
+TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "<span color='#0C73C2'>${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate</span>" -p "Choose Album > ")
 
     val=$?
 
-    TRACK="${TRACK_TEMP#*:}"
+    TRACK="${TRACK_TEMP#*¬}"
     unset filter
-    export filter="${TRACK_TEMP%:*}"
+    export filter="${TRACK_TEMP%¬*}"
 
     if [[ "$TRACK" == "0  Return to Main Menu" ]]; then
         dplayPrompt
@@ -1063,13 +1063,13 @@ menu="0  Return to Main Menu
 ---
 ${tracks_temp}"
 
-TRACK_TEMP=$(echo -e "$menu" | dmenu_t -dmenu -filter "$filter" -select "$entry" -format "f:s" -mesg "<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate</span>" -p "Choose Track > ")
+TRACK_TEMP=$(echo -e "$menu" | dmenu_t -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate</span>" -p "Choose Track > ")
 
     val=$?
 
-    TRACK="${TRACK_TEMP#*:}"
+    TRACK="${TRACK_TEMP#*¬}"
     unset filter
-    export filter="$(echo ${TRACK_TEMP} | awk -F ':' '{ print $1}')"
+    export filter="$(echo ${TRACK_TEMP} | awk -F '¬' '{ print $1 }')"
 
     if [[ "$TRACK" == "0  Return to Main Menu" ]]
         then dplayPrompt
@@ -1133,16 +1133,16 @@ ${addall}: Add All   | ${insertall}: Insert All   | ${replaceall}: Replace All</
             "$(mpc --format "%albumartist%$separator%album%" find date "$date" | uniq)")
 
     if [[ -z $line ]]; then
-        select_temp=$(printf "%s\n" "${menu[@]}" | rofi -dmenu -format "i:s" -mesg "${HELP}" -p "Select Album > ")
+        select_temp=$(printf "%s\n" "${menu[@]}" | rofi -dmenu -format "i¬s" -mesg "${HELP}" -p "Select Album > ")
     else
-        select_temp=$(printf "%s\n" "${menu[@]}" | rofi -dmenu -l $(( $line + 1 )) -format "i:s" -mesg "${HELP}" -p "Select Album > ")
+        select_temp=$(printf "%s\n" "${menu[@]}" | rofi -dmenu -l $(( $line + 1 )) -format "i¬s" -mesg "${HELP}" -p "Select Album > ")
     fi
 
     val=$?
 
-    select="${select_temp#*:}"
+    select="${select_temp#*¬}"
     unset line
-    export line="${select_temp%:*}"
+    export line="${select_temp%¬*}"
     echo "$line"
 
     artist=$(echo "$select" | awk -F "$separator" '{print $1}')
@@ -1227,18 +1227,18 @@ ${addall}: Add All   | ${insertall}: Insert All   | ${replaceall}: Replace All</
     ALBUM=("0  Return to Artist Menu"
            "---"
            "$(mpc --format "%date%$separator%album%" find artist "$ARTIST" | sort | uniq)")
-    ALBUM_TEMP=$(printf "%s\n" "${ALBUM[@]}" | dmenu_t -dmenu -select "$entry" -filter "$filter" -format "f:s" -mesg "${HELP}" -p "Choose Album > ")
+    ALBUM_TEMP=$(printf "%s\n" "${ALBUM[@]}" | dmenu_t -dmenu -select "$entry" -filter "$filter" -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")
 
     val=$?
 
-    ALBUM="${ALBUM_TEMP#*:}"
+    ALBUM="${ALBUM_TEMP#*¬}"
     unset filter
-    export filter="${ALBUM_TEMP%:*}"
+    export filter="${ALBUM_TEMP%¬*}"
     ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
     DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
 
     unset line
-    export line="${ALBUM_TEMP%:*}"
+    export line="${ALBUM_TEMP%¬*}"
 
     if [[ "$val" -eq 10 ]]; then
         export ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
@@ -1313,16 +1313,16 @@ ${addall}: Add All   | ${insertall}: Insert All   | ${replaceall}: Replace All</
            "---"
            "$(mpc --format "%date%$separator%album%" find albumartist "$ARTIST" | sort | uniq)")
 
-    ALBUM_TEMP=$(printf "%s\n" "${ALBUM[@]}" | dmenu_t -filter "$filter" -select "$entry" -dmenu -format "f:s" -mesg "${HELP}" -p "Choose Album > ")
+    ALBUM_TEMP=$(printf "%s\n" "${ALBUM[@]}" | dmenu_t -filter "$filter" -select "$entry" -dmenu -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")
 
     val=$?
 
-    ALBUM="${ALBUM_TEMP#*:}"
+    ALBUM="${ALBUM_TEMP#*¬}"
 
     ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
     DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
     unset filter
-    export filter="${ALBUM_TEMP%:*}"
+    export filter="${ALBUM_TEMP%¬*}"
 
     if [[ "$val" -eq 10 ]]; then
         export ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
@@ -1398,14 +1398,14 @@ ${addall}: Add All             | ${insertall}: Insert All   | ${replaceall}: Rep
            "---"
            "$(mpc --format "%track%$separator%title%" find artist "$ARTIST" album "$ALBUM_FINAL")")
 
-    TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -filter "$filter" -select "$entry" -dmenu -mesg "${HELP}" -format "f:s" -p "Choose Track > ")
+    TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -filter "$filter" -select "$entry" -dmenu -mesg "${HELP}" -format "f¬s" -p "Choose Track > ")
 
     val=$?
 
-    TRACK="${TRACK_TEMP#*:}"
+    TRACK="${TRACK_TEMP#*¬}"
     TRACKFINAL=$(echo "$TRACK" | awk -F "$separator" '{ print $2 }')
     unset filter
-    export filter="${TRACK_TEMP%:*}"
+    export filter="${TRACK_TEMP%¬*}"
 
 
     if [[ "$val" -eq 10 ]]; then
@@ -1481,14 +1481,14 @@ ${addall}: Add All             | ${insertall}: Insert All   | ${replaceall}: Rep
            "---"
            "$(mpc --format "%track%$separator%title%" find albumartist "$ARTIST" album "$ALBUM_FINAL")")
 
-           TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -filter "$filter" -select "$entry" -dmenu -mesg "${HELP}" -format "i:s" -p "Choose Track > ")
+           TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -filter "$filter" -select "$entry" -dmenu -mesg "${HELP}" -format "i¬s" -p "Choose Track > ")
 
     val=$?
 
-    TRACK="${TRACK_TEMP#*:}"
+    TRACK="${TRACK_TEMP#*¬}"
     TRACKFINAL=$(echo "$TRACK" | awk -F "$separator" '{ print $2 }')
     unset filter
-    export filter="${TRACK_TEMP%:*}"
+    export filter="${TRACK_TEMP%¬*}"
 
     if [[ "$val" -eq 10 ]]; then
         mpc find albumartist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL" | mpc add
