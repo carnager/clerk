@@ -10,8 +10,7 @@
 
 * Play random album
 * Play x random tracks
-* Browse Library (Artist > Album > Tracks)
-* Browse local filesystem (needs unix socket in mpd.conf)
+* Browse Library (Artist > Album > Tracks, Genre, Date, Latest Additions)
 * Manage current Queue
 * Show Albums/Tracks by currently playing Artist and add those to Queue.
 * Enable or disable scrobbling (with support for remote mpdscribble/mpdas)
@@ -38,9 +37,6 @@ For this to work, you need a recent rofi build from git.
 * mpc
 * python-mpd2 (https://github.com/Mic92/python-mpd2)
 * python-notify2
-
-Hint: When using rofi, you can use Shift+Enter to execute several commands
-e.g. adding more than one song.
 
 # Optional Dependencies
 
