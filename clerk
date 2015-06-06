@@ -1557,8 +1557,8 @@ browseAlbumArtist() {
 }
 
 browseGenre () {
-    menu=$(echo -e "0 Return to Browser Menu\n---\n$(mpc list genre)" | rofi -dmenu -p "Choose Genre > ")
-    if [[ $menu == "0 Return to Browser Menu" ]]; then
+    GENRE=$(echo -e "0 Return to Browser Menu\n---\n$(mpc list genre)" | rofi -dmenu -p "Choose Genre > ")
+    if [[ $GENRE == "0 Return to Browser Menu" ]]; then
         browseLibPrompt
     else
     browseGenre2
@@ -1569,7 +1569,7 @@ browseGenre2 () {
     HELP="<span color='$help_color'>${add}: Add Album | ${insert}: Insert Album | ${replace}: Replace Album (Default)
 ${addall}: Add All   | ${insertall}: Insert All   | ${replaceall}: Replace All</span>"
 
-ALBUM_TEMP=$(echo -e "< Return to Genre Browser\n---\n$(mpc -f "%date%$separator%artist%$separator%album%" search genre "$GENRE" | uniq | sort -r)" | rofi -dmenu -select "$entry" -format "f¬s" -filter "$filter" -mesg "${HELP}" -p "Choose Album > ")
+ALBUM_TEMP=$(echo -e "< Return to Genre Browser\n---\n$(mpc -f "%date%$separator%albumartist%$separator%album%" search genre "$GENRE" | uniq | sort -r)" | rofi -dmenu -select "$entry" -format "f¬s" -filter "$filter" -mesg "${HELP}" -p "Choose Album > ")
     val=$?
 
 
