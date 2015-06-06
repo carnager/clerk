@@ -1556,49 +1556,86 @@ browseAlbumArtist() {
     fi
 }
 
-browseGenre() {
-    declare -i seen=0
-    while read GENRE
-    do
-        seen=1
-        export GENRE="$GENRE"
-        if [[ "$GENRE" == "0  Return to Main Menu" ]]
-            then dplayPrompt
-        else
-            browseGenre2
-        fi
-    done < <(echo -e "0  Return to Main Menu\n---\n$(mpc list genre)" | dmenu_t -dmenu -p "Choose Genre > ")
-
-    if [[  $seen = 0 ]]
-    then
-        exit
+browseGenre () {
+    menu=$(echo -e "0 Return to Browser Menu\n---\n$(mpc list genre)" | rofi -dmenu -p "Choose Genre > ")
+    if [[ $menu == "0 Return to Browser Menu" ]]; then
+        browseLibPrompt
+    else
+    browseGenre2
     fi
 }
 
-browseGenre2() {
-    declare -i seen=0
-    while read ALBUM
-    do
-        seen=1
-        export GENRE="$GENRE"
-        if [[ "$ALBUM" == "0  Return to Genre Menu" ]]
-            then browseGenre
-        elif [[ "$ALBUM" == "Replace All" ]]
-            then mpc clear && mpc findadd genre "$GENRE" && mpc play
-        elif [[ "$ALBUM" == "Add All" ]]
-            then mpc findadd genre "$GENRE"
-        elif [[ "$ALBUM" == "Insert All" ]]
-            then mpc find genre "$GENRE" | mpc insert
-        else
-            ALBUM=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
-            mpc findadd album "$ALBUM" genre "$GENRE" && mpc play
-        fi
-    done < <(echo -e "0  Return to Genre Menu\n---\nAdd All\nInsert all\nReplace all\n---\n$(mpc search genre "$GENRE" --format "{albumartist}$separator{album}$separator({date})" | sort | uniq)" | dmenu_t -dmenu -p "Choose Album > ")
+browseGenre2 () {
+    HELP="<span color='$help_color'>${add}: Add Album | ${insert}: Insert Album | ${replace}: Replace Album (Default)
+${addall}: Add All   | ${insertall}: Insert All   | ${replaceall}: Replace All</span>"
 
-    if [[  $seen = 0 ]]
-    then
-        exit
+ALBUM_TEMP=$(echo -e "< Return to Genre Browser\n---\n$(mpc -f "%date%$separator%artist%$separator%album%" search genre "$GENRE" | uniq | sort -r)" | rofi -dmenu -select "$entry" -format "f¬s" -filter "$filter" -mesg "${HELP}" -p "Choose Album > ")
+    val=$?
+
+
+    ALBUM="${ALBUM_TEMP#*¬}"
+    unset filter
+    export filter="${ALBUM_TEMP%¬*}"
+    ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $3 }')
+    DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
+    ARTIST=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
+
+    unset line
+    export line="${ALBUM_TEMP%¬*}"
+
+    if [[ "$ALBUM" == "< Return to Genre Browser" ]]; then
+        browseGenre
     fi
+
+    if [[ "$val" -eq 10 ]]; then
+        mpc find artist "$ARTIST" date "$DATE" album "$ALBUM_FINAL" | mpc add
+        entry="$ALBUM_FINAL"
+        browseGenre2
+
+    elif [[ "$val" -eq 11 ]]; then
+        mpc find artist "$ARTIST" date "$DATE" album "$ALBUM_FINAL" | mpc insert
+        random=$(mpc status | tail -1 | awk '{ print $6 }')
+        if [[ $random == on ]]; then
+            mpc playlist -f "%position% $separator %artist% $separator %album% $separator %date%" | grep "$ALBUM_FINAL" | grep "$DATE" | grep "$ARTIST" | while read tracks; do
+            pos=$(echo "$tracks" | awk -F " $separator " '{ print $1 }')
+            pos=$(( $pos - 1 ))
+            clerk_helper prio < <(echo "$pos")
+        done
+        fi
+        entry="$ALBUM_FINAL"
+        browseGenre2
+
+    elif [[ "$val" -eq 12 ]]; then
+        mpc clear
+        mpc find artist "$ARTIST" date "$DATE" album "$ALBUM_FINAL" | mpc add
+        mpc play
+        entry="$ALBUM_FINAL"
+        browseGenre2
+
+    elif [[ "$val" -eq 15 ]]; then
+        mpc clear && mpc find genre "$GENRE" | mpc add && mpc play
+        entry="$ALBUM_FINAL"
+        browseGenre2
+
+    elif [[ "$val" -eq 13 ]]; then
+        mpc find genre "$GENRE" | mpc add
+        entry="$ALBUM_FINAL"
+        browseGenre2
+
+    elif [[ "$val" -eq 14 ]]; then
+        mpc find genre "$GENRE" | mpc insert
+        random=$(mpc status | tail -1 | awk '{ print $6 }')
+        if [[ $random == on ]]; then
+            mpc playlist -f "%position% $separator %artist% $separator %album% $separator %date%" | grep "$ALBUM_FINAL" | grep "$DATE" | grep "$ARTIST" | while read tracks; do
+            pos=$(echo "$tracks" | awk -F " $separator " '{ print $1 }')
+            pos=$(( $pos - 1 ))
+            clerk_helper prio < <(echo "$pos")
+        done
+        fi
+
+    elif [[ $val -eq 1 ]]; then
+         exit
+     fi
 }
 
 saveAlbumToPlaylist() {
