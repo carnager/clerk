@@ -925,9 +925,11 @@ playRandomTracks () {
 
 addLastMod() {
     if [[ -z $last_temp ]]; then
-        loadCacheLatest
+        loadCacheLatest > /dev/null
     else
-        echo "re-using album list from memory"
+        echo "re-using track list from memory"
+#        unset tracks_temp
+#        export tracks_temp=${tracks_temp} > /dev/null
     fi
 
 menu="0  Return to Main Menu
@@ -981,13 +983,13 @@ TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -dmenu -select "$entry" -filter "$filte
 
 AddAlbumTags() {
     if [[ -z $album_temp ]]; then
-        loadCacheAlbums
-        export album_temp=${album_temp}
-        echo "\$album_temp not set, reading..."
+        loadCacheAlbums > /dev/null
     else
-        export album_temp=${album_temp}
-        echo "Re-Using \$album_temp"
+        echo "re-using track list from memory"
+#        unset tracks_temp
+#        export tracks_temp=${tracks_temp} > /dev/null
     fi
+
 menu="0  Return to Main Menu
 ---
 ${album_temp}"
