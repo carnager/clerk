@@ -1483,7 +1483,7 @@ ${addall}: Add All             | ${insertall}: Insert All   | ${replaceall}: Rep
            "---"
            "$(mpc --format "%track%$separator%title%" find albumartist "$ARTIST" album "$ALBUM_FINAL")")
 
-           TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -filter "$filter" -select "$entry" -dmenu -mesg "${HELP}" -format "i¬s" -p "Choose Track > ")
+           TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -filter "$filter" -select "$entry" -dmenu -mesg "${HELP}" -format "f¬s" -p "Choose Track > ")
 
     val=$?
 
