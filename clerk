@@ -1109,10 +1109,8 @@ TRACK_TEMP=$(echo -e "$menu" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${ins
 
         elif [[ $val -eq 0 || $val -eq 10 ]]; then
             mpc findadd artist "$artist" album "$album" title "$title"
-            if [[ "$add_auto_play" == yes ]]; then
-                mpc play $(mpc playlist | wc -l)
-            fi
             entry="$TRACK"
+
         elif [[ $val -eq 13 ]]; then
             mpc findadd artist "$artist" album "$album" title "$title"
             mpc searchplay "${title}"
