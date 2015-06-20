@@ -920,7 +920,10 @@ menu="0  Return to Main Menu
 ---
 ${last_temp}"
 
-TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -dmenu -select "$entry" -filter "$filter" -format "f¬s" -mesg "<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace (Default)</span>" -p "Choose Album > ")
+HELP="<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate
+${addplay}: Add &amp; Play, ${insertplay}: Insert &amp; Play</span>"
+
+TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -select "$entry" -filter "$filter" -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")
 
     val=$?
 
@@ -949,7 +952,30 @@ TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${i
             entry="$TRACK"
         elif [[ $val -eq 10 ]]; then
             mpc search date "$date" album "$album" albumartist "$artist" | mpc add
-            entry="$TRACK"
+
+        elif [[ $val -eq 13 ]]; then
+            mpc findadd date "$date" album "$album" albumartist "$artist"
+            mpc searchplay "${album}"
+
+        elif [[ $val -eq 17 ]]; then
+            if [[ -n $(mpc find -f '%disc%' albumartist "${artist}" album "${album}" date "${date}") ]]; then
+                disc=$(mpc find -f '%disc%' albumartist "${artist}" album "${album}" date "${date}" | head -1)
+            else
+                disc=""
+            fi
+            if [[ -n $(mpc find track "1" albumartist "${artist}" album "${album}" date "${date}") ]]; then
+                track="1"
+            else
+                track="01"
+            fi
+                disc=${disc} track=${track} rateartist="${artist}" ratealbum="${album}" ratedate="${date}" rateAlbum
+                entry="$TRACK"
+
+        elif [[ $val -eq 14 ]]; then
+            mpc clear && mpc find date "$date" album "$album" albumartist "$artist" | mpc add
+            mpc searchplay "${album}"
+
+           entry="$TRACK"
         elif [[ $val -eq 1 ]]; then
             exit
         fi
@@ -970,7 +996,10 @@ menu="0  Return to Main Menu
 ---
 ${album_temp}"
 
-TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-4 "${rate}" -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "<span color='#0C73C2'>${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate</span>" -p "Choose Album > ")
+HELP="<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate
+${addplay}: Add &amp; Play, ${insertplay}: Insert &amp; Play</span>"
+
+TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")
 
     val=$?
 
@@ -989,15 +1018,17 @@ TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${i
         artist=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
         date=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
         album=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
+
         if [[ $val -eq 11 ]]; then
             mpc find date "$date" album "$album" albumartist "$artist" | mpc insert
             entry="$TRACK"
+
         elif [[ $val -eq 0 || $val -eq 12 ]]; then
-            echo "return code is 2"
             mpc clear && mpc find date "$date" album "$album" albumartist "$artist" | mpc add
             mpc play
             entry="$TRACK"
-        elif [[ $val -eq 13 ]]; then
+
+        elif [[ $val -eq 17 ]]; then
             if [[ -n $(mpc find -f '%disc%' albumartist "${artist}" album "${album}" date "${date}") ]]; then
                 disc=$(mpc find -f '%disc%' albumartist "${artist}" album "${album}" date "${date}" | head -1)
             else
@@ -1010,9 +1041,19 @@ TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${i
             fi
                 disc=${disc} track=${track} rateartist="${artist}" ratealbum="${album}" ratedate="${date}" rateAlbum
                 entry="$TRACK"
+
         elif [[ $val -eq 10 ]]; then
             mpc search date "$date" album "$album" albumartist "$artist" | mpc add
             entry="$TRACK"
+
+        elif [[ $val -eq 14 ]]; then
+            mpc findadd date "$date" album "$album" albumartist "$artist"
+            mpc searchplay "${album}"
+
+        elif [[ $val -eq 15 ]]; then
+            mpc clear && mpc find date "$date" album "$album" albumartist "$artist" | mpc add
+            mpc searchplay "${album}"
+
         elif [[ $val -eq 1 ]]; then
             exit
         fi
@@ -1033,7 +1074,10 @@ menu="0  Return to Main Menu
 ---
 ${tracks_temp}"
 
-TRACK_TEMP=$(echo -e "$menu" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-4 "${rate}" -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate</span>" -p "Choose Track > ")
+HELP="<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate
+${addplay}: Add &amp; Play, ${insertplay}: Insert &amp; Play</span>"
+
+TRACK_TEMP=$(echo -e "$menu" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "${HELP}" -p "Choose Track > ")
 
     val=$?
 
@@ -1056,11 +1100,13 @@ TRACK_TEMP=$(echo -e "$menu" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${ins
         if [[ $val -eq 11 ]]; then
             mpc find artist "$artist" album "$album" title "$title" | mpc insert
             entry="$TRACK"
+
         elif [[ $val -eq 12 ]]; then
             mpc clear
             mpc findadd artist "$artist" album "$album" title "$title"
             mpc play
             entry="$TRACK"
+
         elif [[ $val -eq 0 || $val -eq 10 ]]; then
             mpc findadd artist "$artist" album "$album" title "$title"
             if [[ "$add_auto_play" == yes ]]; then
@@ -1068,6 +1114,14 @@ TRACK_TEMP=$(echo -e "$menu" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${ins
             fi
             entry="$TRACK"
         elif [[ $val -eq 13 ]]; then
+            mpc findadd artist "$artist" album "$album" title "$title"
+            mpc searchplay "${title}"
+
+        elif [[ $val -eq 14 ]]; then
+            mpc find artist "$artist" album "$album" title "$title" | mpc insert
+            mpc searchplay "${title}"
+
+        elif [[ $val -eq 17 ]]; then
             rateartist="${artist}" ratealbum="${album}" ratetrack="${track}" ratetitle="${title}" rateTrack
             entry="$TRACK"
         elif [[ $val -eq 1 ]]; then
@@ -1174,6 +1228,8 @@ browseLibPrompt() {
 }
 
 browseAlbum() {
+    echo "$artistentry"
+    export artistentry="$artistentry"
     HELP="<span color='$help_color'>${add}: Add                | ${insert}: Insert            | ${replace}: Replace (Default)
 ${addplay}: Add &amp; Play         | ${insertplay}: Insert &amp; Play</span>"
 
@@ -1181,13 +1237,12 @@ ${addplay}: Add &amp; Play         | ${insertplay}: Insert &amp; Play</span>"
     ALBUM=("0  Return to Artist Menu"
            "---"
            "$(mpc --format "%date%$separator%album%" find artist "$ARTIST" | sort | uniq)")
-    ALBUM_TEMP=$(printf "%s\n" "${ALBUM[@]}" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -select "$entry" -filter "$filter" -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")
+    ALBUM_TEMP=$(printf "%s\n" "${ALBUM[@]}" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -select "$albumentry" -filter "$albumfilter" -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")
 
     val=$?
 
     ALBUM="${ALBUM_TEMP#*¬}"
-    unset filter
-    export filter="${ALBUM_TEMP%¬*}"
+    export albumfilter="${ALBUM_TEMP%¬*}"
     ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
     DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
 
@@ -1198,15 +1253,13 @@ ${addplay}: Add &amp; Play         | ${insertplay}: Insert &amp; Play</span>"
         export ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
         export DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
         mpc find artist "$ARTIST" date "$DATE" album "$ALBUM_FINAL" | mpc add
-        entry="$ALBUM_FINAL"
-        browseAlbum
+        albumentry="$ALBUM_FINAL" browseAlbum
 
     elif [[ "$val" -eq 11 ]]; then
         export ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
         export DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
         mpc find artist "$ARTIST" date "$DATE" album "$ALBUM_FINAL" | mpc insert
-        entry="$ALBUM_FINAL"
-        browseAlbum
+        albumentry="$ALBUM_FINAL" browseAlbum
 
     elif [[ "$val" -eq 12 ]]; then
         export ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
@@ -1214,41 +1267,38 @@ ${addplay}: Add &amp; Play         | ${insertplay}: Insert &amp; Play</span>"
         mpc clear
         mpc find artist "$ARTIST" date "$DATE" album "$ALBUM_FINAL" | mpc add
         mpc play
-        entry="$ALBUM_FINAL"
-        browseAlbum
+        albumentry="$ALBUM_FINAL" browseAlbum
 
     elif [[ "$val" -eq 15 ]]; then
         export ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
         export DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
         mpc clear && mpc findadd artist "$ARTIST" album "$ALBUM_FINAL"
         mpc searchplay "${ALBUM_FINAL}"
-        entry="$ALBUM_FINAL"
-        browseAlbum
+        albumentry="$ALBUM_FINAL" browseAlbum
 
     elif [[ "$val" -eq 13 ]]; then
         export ALBUM_FINAL=$(echo "${ALBUM}" | awk -F "$separator" '{ print $2 }')
         export DATE=$(echo "${ALBUM}" | awk -F "$separator" '{ print $1 }')
         mpc findadd artist "$ARTIST" date "$DATE" album "$ALBUM_FINAL"
         mpc searchplay "${ALBUM_FINAL}"
-        entry="$ALBUM_FINAL"
-        browseAlbum
+        albumentry="$ALBUM_FINAL" browseAlbum
 
     elif [[ "$val" -eq 14 ]]; then
         export ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
         export DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
         mpc find artist "$ARTIST" date "$DATE" album "$ALBUM_FINAL" | mpc insert
         mpc searchplay "${ALBUM_FINAL}"
-        entry="$ALBUM_FINAL"
-        browseAlbum
+        albumentry="$ALBUM_FINAL" browseAlbum
 
     elif [[ "$val" -eq 0 ]]; then
-        unset filter
         if  [[ "$ALBUM" == "0  Return to Artist Menu" ]]; then
+            unset albumfilter
+            unset albumentry
             browseArtist
         else
             export ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
             export DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
-            browseTrack
+            albumentry="${ALBUM_FINAL}" browseTrack
         fi
 
     elif [[ "$val" -eq 1 ]]; then
@@ -1266,7 +1316,7 @@ ${addplay}: Add &amp; Play | ${insertplay}: Insert &amp; Play</span>"
            "---"
            "$(mpc --format "%date%$separator%album%" find albumartist "$ARTIST" | sort | uniq)")
 
-    ALBUM_TEMP=$(printf "%s\n" "${ALBUM[@]}" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -filter "$filter" -select "$entry" -dmenu -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")
+    ALBUM_TEMP=$(printf "%s\n" "${ALBUM[@]}" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -filter "$albumartistalbumfilter" -select "$albumartistalbumentry" -dmenu -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")
 
     val=$?
 
@@ -1274,22 +1324,19 @@ ${addplay}: Add &amp; Play | ${insertplay}: Insert &amp; Play</span>"
 
     ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
     DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
-    unset filter
-    export filter="${ALBUM_TEMP%¬*}"
+    export albumartistalbumfilter="${ALBUM_TEMP%¬*}"
 
     if [[ "$val" -eq 10 ]]; then
         export ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
         export DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
         mpc find albumartist "$ARTIST" date "$DATE" album "$ALBUM_FINAL" | mpc add
-        entry="$ALBUM_FINAL"
-        browseAlbumArtistAlbum
+        albumartistalbumentry="$ALBUM_FINAL" browseAlbumArtistAlbum
 
     elif [[ "$val" -eq 11 ]]; then
         export ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
         export DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
         mpc find albumartist "$ARTIST" date "$DATE" album "$ALBUM_FINAL" | mpc insert
-        entry="$ALBUM_FINAL"
-        browseAlbumArtistAlbum
+        albumartistalbumentry="$ALBUM_FINAL" browseAlbumArtistAlbum
 
     elif [[ "$val" -eq 12 ]]; then
         export ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
@@ -1297,42 +1344,38 @@ ${addplay}: Add &amp; Play | ${insertplay}: Insert &amp; Play</span>"
         mpc clear
         mpc find albumartist "$ARTIST" date "$DATE" album "$ALBUM_FINAL" | mpc add
         mpc play
-        entry="$ALBUM_FINAL"
-        browseAlbumArtistAlbum
+        albumartistalbumentry="$ALBUM_FINAL" browseAlbumArtistAlbum
 
     elif [[ "$val" -eq 15 ]]; then
         export ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
         export DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
         mpc clear && mpc findadd albumartist "$ARTIST" album "${ALBUM_FINAL}"
         mpc searchplay "${ALBUM_FINAL}"
-        entry="$ALBUM_FINAL"
-        browseAlbumArtistAlbum
+        albumartistalbumentry="$ALBUM_FINAL" browseAlbumArtistAlbum
 
     elif [[ "$val" -eq 13 ]]; then
         export ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
         export DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
         mpc findadd albumartist "$ARTIST" album "${ALBUM_FINAL}"
         mpc searchplay "${ALBUM_FINAL}"
-        entry="$ALBUM_FINAL"
-        browseAlbumArtistAlbum
+        albumartistalbumentry="$ALBUM_FINAL" browseAlbumArtistAlbum
 
     elif [[ "$val" -eq 14 ]]; then
         export ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
         export DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
         mpc find albumartist "$ARTIST" album "${ALBUM_FINAL}" | mpc insert
         mpc searchplay "${ALBUM_FINAL}"
-        entry="$ALBUM_FINAL"
-        browseAlbumArtistAlbum
+        albumartistalbumentry="$ALBUM_FINAL" browseAlbumArtistAlbum
 
     elif [[ "$val" -eq 0 ]]; then
-        unset filter
         if  [[ "$ALBUM" == "0  Return to Artist Menu" ]]; then
+            unset albumartistalbumfilter
+            unset albumartistalbumentry
             browseAlbumArtist
         else
             export ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
             export DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
-            entry="$ALBUM_FINAL"
-            browseAlbumArtistTrack
+            albumartistalbumentry="$ALBUM_FINAL" browseAlbumArtistTrack
         fi
 
     elif [[ "$val" -eq 1 ]]; then
@@ -1350,54 +1393,48 @@ browseTrack() {
            "---"
            "$(mpc --format "%track%$separator%title%" find artist "$ARTIST" album "$ALBUM_FINAL")")
 
-    TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -filter "$filter" -select "$entry" -dmenu -mesg "${HELP}" -format "f¬s" -p "Choose Track > ")
+    TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -filter "$trackfilter" -select "$trackentry" -dmenu -mesg "${HELP}" -format "f¬s" -p "Choose Track > ")
 
     val=$?
 
     TRACK="${TRACK_TEMP#*¬}"
     TRACKFINAL=$(echo "$TRACK" | awk -F "$separator" '{ print $2 }')
-    unset filter
-    export filter="${TRACK_TEMP%¬*}"
+    export trackfilter="${TRACK_TEMP%¬*}"
 
 
     if [[ "$val" -eq 10 ]]; then
         mpc find artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL" | mpc add
-        entry="$TRACK_TEMP"
+        trackentry="$TRACK_TEMP"
         browseTrack
     elif [[ "$val" -eq 11 ]]; then
         mpc find artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL" | mpc insert
-        entry="$TRACK_TEMP"
-        browseTrack
+        trackentry="$TRACK_TEMP" browseTrack
 
     elif [[ "$val" -eq 12 ]]; then
         mpc clear
         mpc find artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL" | mpc add
         mpc play
-        entry="$TRACK_TEMP"
-        browseTrack
+        trackentry="$TRACK_TEMP" browseTrack
     elif [[ "$val" -eq 15 ]]; then
         mpc clear && mpc find artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "${TRACKFINAL}" |mpc add
         mpc searchplay "${TRACKFINAL}"
-        entry="$TRACK_TEMP"
-        browseTrack
+        trackentry="$TRACK_TEMP" browseTrack
 
     elif [[ "$val" -eq 13 ]]; then
         mpc findadd artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "${TRACKFINAL}"
         mpc searchplay "${TRACKFINAL}"
-        entry="$TRACK_TEMP"
-        browseTrack
+        trackentry="$TRACK_TEMP" browseTrack
 
     elif [[ "$val" -eq 14 ]]; then
         mpc find artist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "${TRACKFINAL}" | mpc insert
         mpc searchplay "${TRACKFINAL}"
-        entry="$TRACK_TEMP"
-        browseTrack
+        traclentry="$TRACK_TEMP" browseTrack
 
     elif [[ "$val" -eq 1 ]]; then
         exit
     elif [[ "$val" -eq 0 ]]; then
-        unset filter
         if [[ "$TRACK" = "0  Return to Album Menu" ]]; then
+            unset trackfilter
             browseAlbum
         else
             if [[ -z $(mpc playlist) ]]; then
@@ -1412,46 +1449,38 @@ browseTrack() {
 browseArtist() {
     HELP="<span color='$help_color'>${add}: Add Artist | ${insert}: Insert Artist | ${replace}: Replace Artist
 ${addplay}: Add &amp; Play | ${insertplay}: Insert &amp; Play</span>"
-    ARTIST_TEMP=$(echo -e "0  Return to Browse Menu\n---\n$(mpc list artist)" | dmenu_t -mesg "${HELP}" -filter "$filter" -select "$entry" -dmenu -format "f¬s" -p "Choose Artist > ")
+    ARTIST_TEMP=$(echo -e "0  Return to Browse Menu\n---\n$(mpc list artist)" | dmenu_t -mesg "${HELP}" -filter "$artistfilter" -select "$artistentry" -dmenu -format "f¬s" -p "Choose Artist > ")
 
     val=$?
 
     ARTIST="${ARTIST_TEMP#*¬}"
     ARTISTFINAL=$(echo "$ARTIST" | awk -F "$separator" '{ print $2 }')
-    unset filter
-    export filter="${ARTIST_TEMP%¬*}"
+    export artistfilter="${ARTIST_TEMP%¬*}"
 
     if [[ "$ARTIST" == "0  Return to Browse Menu" ]]; then
-        unset filter
+        unset artistfilter
         browseLibPrompt
     elif [[ "$val" -eq 0 ]]; then
-        export ARTIST="$ARTIST"
-        unset filter
-        browseAlbum
+        ARTIST="$ARTIST" artistentry="$ARTIST" browseAlbum
     elif [[ "$val" -eq 1 ]]; then
         exit
     elif [[ "$val" -eq 10 ]]; then
         mpc findadd artist "${ARTIST}"
-        entry="$ARTIST"
-        browseArtist
+        artistentry="$ARTIST" browseArtist
     elif [[ "$val" -eq 11 ]]; then
         mpc find artist "${ARTIST}" | mpc insert
-        entry="$ARTIST"
-        browseArtist
+        artistentry="$ARTIST" browseArtist
     elif [[ "$val" -eq 12 ]]; then
         mpc clear && mpc findadd artist "${ARTIST}" && mpc play
-        entry="$ARTIST"
-        browseArtist
+        artistentry="$ARTIST" browseArtist
     elif [[ "$val" -eq 13 ]]; then
         mpc findadd artist "${ARTIST}"
         mpc searchplay "${ARTIST}"
-        entry="$ARTIST"
-        browseArtist
+        artistentry="$ARTIST" browseArtist
     elif [[ "$val" -eq 14 ]]; then
         mpc find artist "${ARTIST}" | mpc insert
         mpc searchplay "${ARTIST}"
-        entry="$ARTIST"
-        browseArtist
+        artistentry="$ARTIST" browseArtist
     fi
 }
 
@@ -1463,56 +1492,48 @@ ${addall}: Add &amp; Play | ${insertplay}: Insert &amp; Play</span>"
            "---"
            "$(mpc --format "%track%$separator%title%" find albumartist "$ARTIST" album "$ALBUM_FINAL")")
 
-           TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -filter "$filter" -select "$entry" -dmenu -mesg "${HELP}" -format "f¬s" -p "Choose Track > ")
+           TRACK_TEMP=$(printf "%s\n" "${TRACK[@]}" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -filter "$albumartisttrackfilter" -select "$albumartisttrackentry" -dmenu -mesg "${HELP}" -format "f¬s" -p "Choose Track > ")
 
     val=$?
 
     TRACK="${TRACK_TEMP#*¬}"
     TRACKFINAL=$(echo "$TRACK" | awk -F "$separator" '{ print $2 }')
-    unset filter
-    export filter="${TRACK_TEMP%¬*}"
+    export albumartisttrackfilter="${TRACK_TEMP%¬*}"
 
     if [[ "$val" -eq 10 ]]; then
         mpc find albumartist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL" | mpc add
-        entry="$TRACK"
-        browseAlbumArtistTrack
+        albumartisttrackentry="${TRACK}" browseAlbumArtistTrack
 
     elif [[ "$val" -eq 11 ]]; then
         mpc find albumartist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL" | mpc insert
-        entry="$TRACK"
-        browseAlbumArtistTrack
+        albumartisttrackentry="${TRACK}" browseAlbumArtistTrack
 
     elif [[ "$val" -eq 12 ]]; then
         mpc clear
         mpc find albumartist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "$TRACKFINAL" | mpc add
         mpc play
-        entry="$TRACK"
-        browseAlbumArtistTrack
+        albumartisttrackentry="${TRACK}" browseAlbumArtistTrack
 
     elif [[ "$val" -eq 15 ]]; then
         mpc clear && mpc findadd albumartist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "${TRACKFINAL}"
         mpc searchplay "${TRACKFINAL}"
-        entry="$TRACK"
-        browseAlbumArtistTrack
+        albumartisttrackentry="${TRACK}" browseAlbumArtistTrack
 
     elif [[ "$val" -eq 13 ]]; then
         mpc findadd albumartist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "${TRACKFINAL}"
         mpc searchplay "${TRACKFINAL}"
-        entry="$TRACK"
-        browseAlbumArtistTrack
+        albumartisttrackentry="${TRACK}" browseAlbumArtistTrack
 
     elif [[ "$val" -eq 14 ]]; then
         mpc find albumartist "$ARTIST" album "$ALBUM_FINAL" date "$DATE" title "${TRACKFINAL}" | mpc insert
         mpc searchplay "${TRACKFINAL}"
-        entry="$TRACK"
-        browseAlbumArtistTrack
+        albumartisttrackentry="${TRACK}" browseAlbumArtistTrack
 
     elif [[ "$val" -eq 1 ]]; then
         exit
     elif [[ "$val" -eq 0 ]]; then
-        unset filter
         if [[ "$TRACK" = "0  Return to Album Menu" ]]; then
-            entry="$TRACK"
+            unset albumartisttrackfilter
             browseAlbumArtistAlbum
         else
             if [[ -z $(mpc playlist) ]]; then
@@ -1528,45 +1549,44 @@ ${addall}: Add &amp; Play | ${insertplay}: Insert &amp; Play</span>"
 browseAlbumArtist() {
     HELP="<span color='$help_color'>${add}: Add         | ${insert}: Insert        | ${replace}: Replace
 ${addplay}: Add &amp; Play  | ${insertplay}: Insert &amp; Play</span>"
-ARTIST_TEMP=$(echo -e "0  Return to Browse Menu\n---\n$(mpc list albumartist)" | dmenu_t -mesg "${HELP}" -filter "$filter" -select "$entry" -dmenu -format "f¬s" -p "Choose Artist > ")
+ARTIST_TEMP=$(echo -e "0  Return to Browse Menu\n---\n$(mpc list albumartist)" | dmenu_t -mesg "${HELP}" -filter "$albumartistfilter" -select "$albumartistentry" -dmenu -format "f¬s" -p "Choose Artist > ")
 
     val=$?
 
     ARTIST="${ARTIST_TEMP#*¬}"
     ARTISTFINAL=$(echo "$ARTIST" | awk -F "$separator" '{ print $2 }')
-    unset filter
-    export filter="${ARTIST_TEMP%¬*}"
+    export albumartistfilter="${ARTIST_TEMP%¬*}"
 
     if [[ "$ARTIST" == "0  Return to Browse Menu" ]]; then
         unset filter
         browseLibPrompt
     elif [[ "$val" -eq 0 ]]; then
-        unset filter
-        browseAlbumArtistAlbum
+        if [[ "$ARTIST" == "0  Return to Browse Menu" ]]; then
+            unset albumartistfilter
+            browseLibPrompt
+        else
+            albumartistentry="${ARTIST}" browseAlbumArtistAlbum
+        fi
+
     elif [[ "$val" -eq 1 ]]; then
         exit
     elif [[ "$val" -eq 10 ]]; then
         mpc findadd albumartist "${ARTIST}"
-        entry="$ARTIST"
-        browseAlbumArtist
+        albumartistentry="${ARTIST}" browseAlbumArtist
     elif [[ "$val" -eq 11 ]]; then
         mpc find albumartist "${ARTIST}" | mpc insert
-        entry="$ARTIST"
-        browseAlbumArtist
+        albumartistentry="${ARTIST}" browseAlbumArtist
     elif [[ "$val" -eq 12 ]]; then
         mpc clear && mpc findadd artist "${ARTIST}" && mpc play
-        entry="$ARTIST"
-        browseAlbumArtist
+        albumartistentry="${ARTIST}" browseAlbumArtist
     elif [[ "$val" -eq 13 ]]; then
         mpc findadd albumartist "${ARTIST}"
         mpc searchplay "${ARTIST}"
-        entry="$ARTIST"
-        browseAlbumArtist
+        albumartistentry="${ARTIST}" browseAlbumArtist
     elif [[ "$val" -eq 14 ]]; then
         mpc find albumartist "${ARTIST}" | mpc insert
         mpc searchplay "${ARTIST}"
-        entry="$ARTIST"
-        browseAlbumArtist
+        albumartistentry="${ARTIST}" browseAlbumArtist
     fi
 }
 
