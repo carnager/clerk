@@ -502,7 +502,7 @@ dplayOptionsPrompt () {
           "0  Number of Random Songs: $(echo $value)")
 
      prompt() {
-         printf "%s\n" "$@" | dmenu_t -p "MPD Options > "
+         printf "%s\n" "$@" | dmenu_t -auto-select -p "MPD Options > "
      }
 
      case "$(prompt "${menu[@]}")" in
