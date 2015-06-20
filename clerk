@@ -1538,7 +1538,6 @@ ALBUM_TEMP=$(echo -e "< Return to Genre Browser\n---\n$(mpc -f "%date%$separator
 
     elif [[ "$val" -eq 14 ]]; then
         mpc find genre "$GENRE" | mpc insert
-        fi
 
     elif [[ $val -eq 1 ]]; then
          exit
