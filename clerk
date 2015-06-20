@@ -1422,6 +1422,7 @@ ${addplay}: Add &amp; Play | ${insertplay}: Insert &amp; Play</span>"
         browseLibPrompt
     elif [[ "$val" -eq 0 ]]; then
         export ARTIST="$ARTIST"
+        unset filter
         browseAlbum
     elif [[ "$val" -eq 1 ]]; then
         exit
@@ -1534,6 +1535,7 @@ ARTIST_TEMP=$(echo -e "0  Return to Browse Menu\n---\n$(mpc list albumartist)" |
     if [[ "$ARTIST" == "0  Return to Browse Menu" ]]; then
         browseLibPrompt
     elif [[ "$val" -eq 0 ]]; then
+        unset filter
         browseAlbumArtistAlbum
     elif [[ "$val" -eq 1 ]]; then
         exit
