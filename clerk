@@ -1242,6 +1242,7 @@ ${addplay}: Add &amp; Play         | ${insertplay}: Insert &amp; Play</span>"
         browseAlbum
 
     elif [[ "$val" -eq 0 ]]; then
+        unset filter
         if  [[ "$ALBUM" == "0  Return to Artist Menu" ]]; then
             browseArtist
         else
@@ -1324,6 +1325,7 @@ ${addplay}: Add &amp; Play | ${insertplay}: Insert &amp; Play</span>"
         browseAlbumArtistAlbum
 
     elif [[ "$val" -eq 0 ]]; then
+        unset filter
         if  [[ "$ALBUM" == "0  Return to Artist Menu" ]]; then
             browseAlbumArtist
         else
@@ -1394,6 +1396,7 @@ browseTrack() {
     elif [[ "$val" -eq 1 ]]; then
         exit
     elif [[ "$val" -eq 0 ]]; then
+        unset filter
         if [[ "$TRACK" = "0  Return to Album Menu" ]]; then
             browseAlbum
         else
@@ -1419,6 +1422,7 @@ ${addplay}: Add &amp; Play | ${insertplay}: Insert &amp; Play</span>"
     export filter="${ARTIST_TEMP%¬*}"
 
     if [[ "$ARTIST" == "0  Return to Browse Menu" ]]; then
+        unset filter
         browseLibPrompt
     elif [[ "$val" -eq 0 ]]; then
         export ARTIST="$ARTIST"
@@ -1506,6 +1510,7 @@ ${addall}: Add &amp; Play | ${insertplay}: Insert &amp; Play</span>"
     elif [[ "$val" -eq 1 ]]; then
         exit
     elif [[ "$val" -eq 0 ]]; then
+        unset filter
         if [[ "$TRACK" = "0  Return to Album Menu" ]]; then
             entry="$TRACK"
             browseAlbumArtistAlbum
@@ -1533,6 +1538,7 @@ ARTIST_TEMP=$(echo -e "0  Return to Browse Menu\n---\n$(mpc list albumartist)" |
     export filter="${ARTIST_TEMP%¬*}"
 
     if [[ "$ARTIST" == "0  Return to Browse Menu" ]]; then
+        unset filter
         browseLibPrompt
     elif [[ "$val" -eq 0 ]]; then
         unset filter
