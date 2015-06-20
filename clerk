@@ -1620,25 +1620,53 @@ ARTIST_TEMP=$(echo -e "0  Return to Browse Menu\n---\n$(mpc list albumartist)" |
 }
 
 browseGenre () {
-    GENRE=$(echo -e "0 Return to Browser Menu\n---\n$(mpc list genre)" | rofi -dmenu -p "Choose Genre > ")
-    if [[ $GENRE == "0 Return to Browser Menu" ]]; then
-        browseLibPrompt
-    else
-    browseGenre2
-    fi
+    HELP="<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace (Default)
+${addplay}: Add &amp; Play, ${insertplay}: Insert &amp; Play</span>"
+
+    GENRE=$(echo -e "0 Return to Browser Menu\n---\n$(mpc list genre)" | rofi -dmenu -mesg "${HELP}" -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -p "Choose Genre > ")
+    val=$?
+
+    if [[ $val -eq 0 ]]; then
+        if [[ $GENRE == "0 Return to Browser Menu" ]]; then
+            browseLibPrompt
+        else
+            browseGenre2
+        fi
+
+   elif [[ $val -eq 10 ]]; then
+       mpc findadd genre "${GENRE}"
+       browseGenre
+
+   elif [[ $val -eq 11 ]]; then
+       mpc find genre "${GENRE}" | mpc insert
+       browseGenre
+
+   elif [[ $val -eq 12 ]]; then
+       mpc clear; mpc findadd genre "${GENRE}"; mpc play
+       browseGenre
+
+   elif [[ $val -eq 13 ]]; then
+       mpc findadd genre "${GENRE}"
+       mpc searchplay "${GENRE}"
+       browseGenre
+
+   elif [[ $val -eq 14 ]]; then
+       mpc find genre "${GENRE}" | mpc insert
+       mpc searchplay "${GENRE}"
+       browseGenre
+   fi
 }
 
 browseGenre2 () {
-    HELP="<span color='$help_color'>${add}: Add Album | ${insert}: Insert Album | ${replace}: Replace Album (Default)
-${addall}: Add All   | ${insertall}: Insert All   | ${replaceall}: Replace All</span>"
+    HELP="<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace (Default)
+${addplay}: Add &amp; Play, ${insertplay}: Insert &amp; Play</span>"
 
-ALBUM_TEMP=$(echo -e "< Return to Genre Browser\n---\n$(mpc -f "%date%$separator%albumartist%$separator%album%" search genre "$GENRE" | uniq | sort -r)" | rofi -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-4 "${addall}" -custom-kb-5 "${insertall}" -custom-kb-6 "${replaceall}" -dmenu -select "$entry" -format "f¬s" -filter "$filter" -mesg "${HELP}" -p "Choose Album > ")
+ALBUM_TEMP=$(echo -e "< Return to Genre Browser\n---\n$(mpc -f "%date%$separator%albumartist%$separator%album%" search genre "$GENRE" | uniq | sort -r)" | rofi -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -select "$genreentry" -format "f¬s" -filter "$genrefilter" -mesg "${HELP}" -p "Choose Album > ")
     val=$?
 
 
     ALBUM="${ALBUM_TEMP#*¬}"
-    unset filter
-    export filter="${ALBUM_TEMP%¬*}"
+    export genrefilter="${ALBUM_TEMP%¬*}"
     ALBUM_FINAL=$(echo "$ALBUM" | awk -F "$separator" '{ print $3 }')
     DATE=$(echo "$ALBUM" | awk -F "$separator" '{ print $1 }')
     ARTIST=$(echo "$ALBUM" | awk -F "$separator" '{ print $2 }')
@@ -1652,33 +1680,27 @@ ALBUM_TEMP=$(echo -e "< Return to Genre Browser\n---\n$(mpc -f "%date%$separator
 
     if [[ "$val" -eq 10 ]]; then
         mpc find artist "$ARTIST" date "$DATE" album "$ALBUM_FINAL" | mpc add
-        entry="$ALBUM_FINAL"
-        browseGenre2
+        genreentry="$ALBUM_FINAL" browseGenre2
 
     elif [[ "$val" -eq 11 ]]; then
         mpc find artist "$ARTIST" date "$DATE" album "$ALBUM_FINAL" | mpc insert
-        entry="$ALBUM_FINAL"
-        browseGenre2
+        genreentry="$ALBUM_FINAL" browseGenre2
 
     elif [[ "$val" -eq 12 ]]; then
         mpc clear
         mpc find artist "$ARTIST" date "$DATE" album "$ALBUM_FINAL" | mpc add
         mpc play
-        entry="$ALBUM_FINAL"
-        browseGenre2
-
-    elif [[ "$val" -eq 15 ]]; then
-        mpc clear && mpc find genre "$GENRE" | mpc add && mpc play
-        entry="$ALBUM_FINAL"
-        browseGenre2
+        genreentry="$ALBUM_FINAL" browseGenre2
 
     elif [[ "$val" -eq 13 ]]; then
-        mpc find genre "$GENRE" | mpc add
-        entry="$ALBUM_FINAL"
-        browseGenre2
+        mpc findadd genre "$GENRE"
+        mpc searchplay "${GENRE}"
+        genreentry="$ALBUM_FINAL" browseGenre2
 
     elif [[ "$val" -eq 14 ]]; then
         mpc find genre "$GENRE" | mpc insert
+        mpc searchplay "${GENRE}"
+        genreentry="$ALBUM_FINAL" browseGenre2
 
     elif [[ $val -eq 1 ]]; then
          exit
