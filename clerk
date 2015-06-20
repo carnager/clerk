@@ -580,7 +580,7 @@ managePlaylists () {
           "7  Clear Playlist")
 
     prompt() {
-        printf "%s\n" "$@" | dmenu_t -p "Crossfade > "
+        printf "%s\n" "$@" | dmenu_t -auto-select -p "Playlists > "
     }
 
     case "$(prompt "${menu[@]}")" in
