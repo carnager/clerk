@@ -103,7 +103,7 @@ dplayPrompt () {
           "8  Ratings"
           "9  Lookup")
 
-    menu=$(printf "%s\n" "${menu[@]}" | rofi -dmenu -lines 17 -mesg "<span color='$help_color'>${toggle}: Toggle Playback, ${prev}: Prev, ${next}: Next, ${stop}: Stop</span>" -p "Now Playing: ${song} > ")
+    menu=$(printf "%s\n" "${menu[@]}" | rofi -dmenu -lines 17 -mesg "<span color='$help_color'>${toggle}: Toggle Playback, ${prev}: Prev, ${next}: Next, ${stop}: Stop</span>" -auto-select -p "Now Playing: ${song} > ")
 
     val=$?
 
