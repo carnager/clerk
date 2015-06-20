@@ -1511,7 +1511,7 @@ ${addall}: Add &amp; Play | ${insertplay}: Insert &amp; Play</span>"
 
 
 browseAlbumArtist() {
-    HELP="<span color='$help_color'>${add}: Add         | ${insert}: Insert        | ${replace}: Replace Artist
+    HELP="<span color='$help_color'>${add}: Add         | ${insert}: Insert        | ${replace}: Replace
 ${addplay}: Add &amp; Play  | ${insertplay}: Insert &amp; Play</span>"
     ARTIST=$(echo -e "0  Return to Browse Menu\n---\n$(mpc list albumartist)" | dmenu_t -mesg "${HELP}" -dmenu -p "Choose Artist > ")
 
