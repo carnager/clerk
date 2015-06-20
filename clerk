@@ -1132,26 +1132,52 @@ TRACK_TEMP=$(echo -e "$menu" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${ins
 }
 
 browseDate() {
-    date=$(echo -e "0  Return to Browse Menu\n---\n$(mpc list date | $tac)" | dmenu_t -dmenu -p "Choose Date > ")
-    if [[ "$date" == "0  Return to Browse Menu" ]]
-        then browseLibPrompt
-    else
+    HELP="<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace
+${addplay}: Add &amp; Play, ${insertplay}, Insert &amp; Play</span>"
+    date=$(echo -e "0  Return to Browse Menu\n---\n$(mpc list date | $tac)" | dmenu_t -mesg "${HELP}" -dmenu -p "Choose Date > ")
+    val=$?
+    if [[ $val -eq 0 ]]; then
+        if [[ "$date" == "0  Return to Browse Menu" ]]
+            then browseLibPrompt
+            else
         browseDateAdd
+        fi
+    elif [[ $val -eq 10 ]]; then
+        mpc findadd date "${date}"
+        browseDate
+
+    elif [[ $val -eq 11 ]]; then
+        mpc find date "${date}" | mpc insert
+        browseDate
+
+    elif [[ $val -eq 12 ]]; then
+        mpc clear; mpc findadd date "${date}"; mpc play
+        browseDate
+
+    elif [[ $val -eq 13 ]]; then
+        mpc findadd date "${date}"
+        mpc searchplay "${date}"
+        browseDate
+
+    elif [[ $val -eq 14 ]]; then
+        mpc find date "${date}" | mpc insert
+        mpc searchplay "${date}"
+        browseDate
     fi
 }
 
 browseDateAdd() {
-    HELP="<span color='$help_color'>${add}: Add Album | ${insert}: Insert Album | ${replace}: Replace Album
-${addall}: Add All   | ${insertall}: Insert All   | ${replaceall}: Replace All</span>"
+    HELP="<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace
+${addall}: Add &amp; Play, ${insertall}: Insert &amp; Play</span>"
 
     menu=("0  Return to Date Menu"
             "---"
             "$(mpc --format "%albumartist%$separator%album%" find date "$date" | uniq)")
 
     if [[ -z $line ]]; then
-        select_temp=$(printf "%s\n" "${menu[@]}" | rofi -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-4 "${addall}" -custom-kb-5 "${insertall}" -custom-kb-6 "${replaceall}" -dmenu -format "i¬s" -mesg "${HELP}" -p "Select Album > ")
+        select_temp=$(printf "%s\n" "${menu[@]}" | rofi -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -format "i¬s" -mesg "${HELP}" -p "Select Album > ")
     else
-        select_temp=$(printf "%s\n" "${menu[@]}" | rofi -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-4 "${addall}" -custom-kb-5 "${insertall}" -custom-kb-6 "${replaceall}" -dmenu -l $(( $line + 1 )) -format "i¬s" -mesg "${HELP}" -p "Select Album > ")
+        select_temp=$(printf "%s\n" "${menu[@]}" | rofi -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -l $(( $line + 1 )) -format "i¬s" -mesg "${HELP}" -p "Select Album > ")
     fi
 
     val=$?
@@ -1165,13 +1191,16 @@ ${addall}: Add All   | ${insertall}: Insert All   | ${replaceall}: Replace All</
     album=$(echo "$select" | awk -F "$separator" '{print $2}')
 
     if [[ "$val" -eq 13 ]]; then
-        mpc findadd date "$date"
+        mpc findadd date "$date" artist "${artist}" album "${album}"
+        mpc searchplay "${album}"
         browseDateAdd
     elif [[ "$val" -eq 15 ]]; then
-        mpc clear && mpc findadd date "$date" && mpc play
+        mpc clear && mpc findadd date "$date" artist "${artist}" album "${album}"
+        mpc searchplay "${album}"
         browseDateAdd
     elif [[ "$val" -eq 14 ]]; then
-        mpc find date "$date" | mpc insert
+        mpc find date "$date" artist "${artist}" album "${album}" | mpc insert
+        mpc searchplay "${album}"
         browseDateAdd
     fi
 
