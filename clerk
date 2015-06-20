@@ -1156,7 +1156,7 @@ browseLibPrompt() {
           "0  Update Album/Track Cache")
 
     prompt() {
-        printf "%s\n" "$@" | dmenu_t -p "Library Menu > "
+        printf "%s\n" "$@" | dmenu_t -p -auto-select "Library Menu > "
     }
 
     case "$(prompt "${menu[@]}")" in
