@@ -39,7 +39,7 @@ ssh_lastfm=
 ssh_host=
 
 # color of the help messages
-# help_color="#0C73C2"
+help_color="#0C73C2"
 
 # custom keybindings
 # Adding of songs/albums
