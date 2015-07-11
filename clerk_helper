@@ -95,7 +95,7 @@ def createCache(args):
         # key = repr(entry)
         # cant use repr in this case because last-modified could differ for
         # songs from the same album and we want these to clash.
-        key = entry['albumartist'] + entry['album']
+        key = entry['albumartist'] + entry['album'] + entry['date']
         if key not in album_cache:
             album_cache[key] = entry
         else:
@@ -205,7 +205,6 @@ def rateAlbum(args):
         entry["rating"] = args.rating
         save_fastlist(os.getenv('HOME')+'/.config/clerk/albumratings.json', fastlist)
         uri = client.find('albumartist', args.artist, 'album', args.album, 'date', args.date, 'track', os.getenv('track'), 'disc', os.getenv('disc'))
-        print(uri)
         for i in uri:
             client.sticker_set("song", i['file'], "albumrating", args.rating)
     except KeyError:
@@ -213,7 +212,6 @@ def rateAlbum(args):
         append_entry(fastlist, entry)
         save_fastlist(os.getenv('HOME')+'/.config/clerk/albumratings.json', fastlist)
         uri = client.find('artist', args.artist, 'album', args.album, 'date', args.date, 'track', os.getenv('track'), 'disc', os.getenv('disc'))
-        print(uri)
         for i in uri:
             client.sticker_set("song", i['file'], "albumrating", args.rating)
 
@@ -277,7 +275,6 @@ def rateTrack(args):
         entry["rating"] = args.rating
         save_fastlistTrack(os.getenv('HOME')+'/.config/clerk/trackratings.json', fastlist)
         uri = client.find('artist', args.artist, 'album', args.album, 'track', args.track, 'title', args.title)
-        print(uri)
         for i in uri:
             client.sticker_set("song", i['file'], "rating", args.rating)
     except KeyError:
@@ -285,7 +282,6 @@ def rateTrack(args):
         append_entryTrack(fastlist, entry)
         save_fastlistTrack(os.getenv('HOME')+'/.config/clerk/trackratings.json', fastlist)
         uri = client.find('artist', args.artist, 'album', args.album, 'track', args.track, 'title', args.title)
-        print(uri)
         for i in uri:
             client.sticker_set("song", i['file'], "rating", args.rating)
 
