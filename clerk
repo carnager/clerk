@@ -751,6 +751,8 @@ outputPrompt () {
     menu="$(echo -e "0  Return to Options Menu\n---\n$(mpc outputs)" | dmenu_t -p "Outputs > ")";
     if [[ "$menu" == "0  Return to Options Menu" ]]
         then dplayOptionsPrompt;
+        elif [[ "$menu" == "" ]]; then
+            exit
     else
         mpc toggleoutput $(echo "$menu" | awk '{print $2}');
         notify-send "MPD" "$(echo "$menu" | $sed -e 's/enabled$/disabled/;ta;s/disabled$/enabled/;:a;')";
