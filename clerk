@@ -754,6 +754,7 @@ outputPrompt () {
     else
         mpc toggleoutput $(echo "$menu" | awk '{print $2}');
         notify-send "MPD" "$(echo "$menu" | $sed -e 's/enabled$/disabled/;ta;s/disabled$/enabled/;:a;')";
+        outputPrompt
     fi
 }
 
@@ -1775,7 +1776,7 @@ saveTrackToPlaylist() {
 
 
 function dmenu_t () {
-    rofi -dmenu $(echo "$rofiopts") "$@"
+    rofi -dmenu -z $(echo "$rofiopts") "$@"
 }
 
 while :; do
