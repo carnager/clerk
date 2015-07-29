@@ -12,7 +12,6 @@ from pprint import pprint
 from mpd import MPDClient
 import configparser
 client = MPDClient()
-
 config = configparser.ConfigParser()
 config.sections()
 config.read(os.getenv('HOME')+'/.config/clerk/helper_config')
@@ -46,7 +45,7 @@ def update(args):
     db = (client.stats())
     new_db = db.get('db_update')
     if change_db == new_db:
-        if (os.path.isfile(os.getenv('HOME')+'/.config/clerk/tracks.cache.json')):
+        if (os.path.isfile(os.getenv('HOME')+'/.config/clerk/latest.cache')):
             quit()
         else:
             notify2.init('Clerk')
@@ -63,46 +62,41 @@ def update(args):
         config.write(configfile)
 
 
-def lookup(key, fields):
-    artistlist = client.list(key)
-    for artist in artistlist:
-        for element in client.find(key, artist):
-            entry = {}
-            for field in fields:
-                if field in element:
-                    if isinstance(element[field], list):
-                        entry[field] = element[field][0]
-                    else:
-                        entry[field] = element[field]
-                else:
-                    entry[field] = ''
-            yield entry
-
-
 def createCache(args):
-    # track cache creation
-    key = 'artist'
-    fields = ('artist', 'track', 'title', 'album', 'disc')
-    all_tracks = list({repr(t): t for t in lookup(key, fields)}.values())
-    with open(os.getenv('HOME')+'/.config/clerk/tracks.cache.json', "w") as cache_file:
-        json.dump(all_tracks, cache_file)
+    alist=client.search('filename', " ")
 
-    # album cache creation with only the youngest track modified
-    key = 'albumartist'
-    fields = ('albumartist', 'date', 'album', 'last-modified')
-    album_cache = {}
-    for entry in lookup(key, fields):
-        # key = repr(entry)
-        # cant use repr in this case because last-modified could differ for
-        # songs from the same album and we want these to clash.
-        key = entry['albumartist'] + entry['album'] + entry['date']
-        if key not in album_cache:
-            album_cache[key] = entry
+    latest=[]
+    for i in alist:
+        date_time=i['last-modified']
+        mtime=date_time[:10]
+        if isinstance(i['albumartist'], list):
+            albumartist = i['albumartist'][0]
         else:
-            if entry['last-modified'] > album_cache[key]['last-modified']:
-                album_cache[key] = entry
-    with open(os.getenv('HOME')+'/.config/clerk/albums.cache.json', "w") as cache_file:
-        json.dump([entry for entry in album_cache.values()], cache_file)
+            albumartist = i['albumartist']
+        date=i['date']
+        if isinstance(i['album'], list):
+            album = i['album'][0]
+        else:
+            album = i['album']
+        title=i['title']
+        if isinstance(i['track'], list):
+            track = i['track'][0]
+        else:
+            track = i['track']
+        if isinstance(i['artist'], list):
+            artist = i['artist'][0]
+        else:
+            artist = i['artist']
+
+        latest.append(mtime+" • "+albumartist+" • "+date+" • "+album)
+
+    output=set(latest)
+    with open(os.getenv('HOME')+'/.config/clerk/latest.cache', "w") as cache_file:
+        for album in sorted(output, reverse=True):
+            cache_file.write(album[13:]+'\n')
+
+    os.system("mpc --format \'%artist%"+os.getenv('separator')+"%date%"+os.getenv('separator')+"%album%"+os.getenv('separator')+"%track%"+os.getenv('separator')+"%title%\' search filename \' \' >"+os.getenv('HOME')+"/.config/clerk/tracks.cache")
+    os.system("mpc --format \'%artist%"+os.getenv('separator')+"%date%"+os.getenv('separator')+"%album%\' search filename \' \' | uniq >"+os.getenv('HOME')+"/.config/clerk/albums.cache")
 
 
 def track_sort(track_num):

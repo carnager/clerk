@@ -53,22 +53,21 @@ export separator="$separator"
 
 # load cache files into variables to speed up access
 loadCacheAlbums () {
-if [[ -f $HOME/.config/clerk/albums.cache.json ]]; then
-    album_temp=$(clerk_helper getAlbums)
+if [[ -f $HOME/.config/clerk/albums.cache ]]; then
+    album_temp=$(cat $HOME/.config/clerk/albums.cache)
 fi
 }
 
 loadCacheLatest () {
-if [[ -f $HOME/.config/clerk/albums.cache.json ]]; then
-    last_temp=$(clerk_helper getLatest | awk -F "${separator}" '{ print $1 ENVIRON["separator"] $2 ENVIRON["separator"] $3 }')
+if [[ -f $HOME/.config/clerk/latest.cache ]]; then
+    last_temp=$(cat $HOME/.config/clerk/latest.cache)
 fi
 }
 
 
 loadCacheTracks () {
-if [[ -f $HOME/.config/clerk/tracks.cache.json ]]; then
-    #tracks_temp=$(cat $HOME/.config/clerk/tracks.cache)
-    tracks_temp=$(clerk_helper getTracks)
+if [[ -f $HOME/.config/clerk/tracks.cache ]]; then
+    tracks_temp=$(cat $HOME/.config/clerk/tracks.cache)
 fi
 }
 
@@ -919,7 +918,7 @@ addLastMod() {
 #        export tracks_temp=${tracks_temp} > /dev/null
     fi
 
-menu="0  Return to Main Menu
+menu="0  Return to Browse Menu
 ---
 ${last_temp}"
 
@@ -935,8 +934,8 @@ TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${i
     export filter="${TRACK_TEMP%¬*}"
 
 
-    if [[ "$TRACK" == "0  Return to Main Menu" ]]
-        then dplayPrompt
+    if [[ "$TRACK" == "0  Return to Browse Menu" ]]
+        then browseLibPrompt
     elif [[ -z "$TRACK" ]]; then
         exit
     elif [[ "$TRACK" == "${add}: Add, ${insert}: Insert, ${replace}: Replace (Default)" ]]; then
@@ -995,7 +994,7 @@ AddAlbumTags() {
 #        export tracks_temp=${tracks_temp} > /dev/null
     fi
 
-menu="0  Return to Main Menu
+menu="0  Return to Browse Menu
 ---
 ${album_temp}"
 
@@ -1010,8 +1009,8 @@ TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${i
     unset filter
     export filter="${TRACK_TEMP%¬*}"
 
-    if [[ "$TRACK" == "0  Return to Main Menu" ]]; then
-        dplayPrompt
+    if [[ "$TRACK" == "0  Return to Browse Menu" ]]; then
+        browseLibPrompt
     elif [[ -z "$TRACK" ]]; then
             exit
     elif [[ "$TRACK" == "${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate" ]]; then
@@ -1073,7 +1072,7 @@ AddTrackTags() {
 #        export tracks_temp=${tracks_temp} > /dev/null
     fi
 
-menu="0  Return to Main Menu
+menu="0  Return to Browse Menu
 ---
 ${tracks_temp}"
 
@@ -1088,8 +1087,8 @@ TRACK_TEMP=$(echo -e "$menu" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${ins
     unset filter
     export filter="$(echo ${TRACK_TEMP} | awk -F '¬' '{ print $1 }')"
 
-    if [[ "$TRACK" == "0  Return to Main Menu" ]]
-        then dplayPrompt
+    if [[ "$TRACK" == "0  Return to Browse Menu" ]]
+        then browseLibPrompt
     elif [[ -z "$TRACK" ]]; then
         exit
     elif [[ "$TRACK" == "${add}: Add | ${insert}: Insert | ${replace}: Replace | ${rate}: Rate" ]]; then
