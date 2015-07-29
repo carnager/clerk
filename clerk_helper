@@ -69,24 +69,55 @@ def createCache(args):
     for i in alist:
         date_time=i['last-modified']
         mtime=date_time[:10]
-        if isinstance(i['albumartist'], list):
-            albumartist = i['albumartist'][0]
+
+        if 'albumartist' in i:
+            if isinstance(i['albumartist'], list):
+                albumartist = i['albumartist'][0]
+            else:
+                albumartist = i['albumartist']
         else:
-            albumartist = i['albumartist']
-        date=i['date']
-        if isinstance(i['album'], list):
-            album = i['album'][0]
+            print("albumartist tag missing from "+i['file'])
+
+        if 'date' in i:
+            date=i['date']
+            if isinstance(i['date'], list):
+                album = i['date'][0]
+            else:
+                album = i['date']
         else:
-            album = i['album']
-        title=i['title']
-        if isinstance(i['track'], list):
-            track = i['track'][0]
+            print("date tag missing from "+i['file'])
+
+        if 'title' in i:
+            if isinstance(i['title'], list):
+                title = i['title'][0]
+            else:
+                title=i['title']
         else:
-            track = i['track']
-        if isinstance(i['artist'], list):
-            artist = i['artist'][0]
+            print("title tag missing from "+i['file'])
+
+        if 'track' in i:
+            if isinstance(i['track'], list):
+                track = i['track'][0]
+            else:
+                track = i['track']
         else:
-            artist = i['artist']
+            print("track tag missing from "+i['file'])
+
+        if 'album' in i:
+            if isinstance(i['album'], list):
+                track = i['album'][0]
+            else:
+                track = i['album']
+        else:
+            print("album tag missing from "+i['file'])
+
+        if 'artist' in i:
+            if isinstance(i['artist'], list):
+                artist = i['artist'][0]
+            else:
+                artist = i['artist']
+        else:
+            print("artist tag missing from "+i['file'])
 
         latest.append(mtime+" • "+albumartist+" • "+date+" • "+album)
 
@@ -104,41 +135,6 @@ def track_sort(track_num):
         return 0
     else:
         return int(track_num.split('/')[0])
-
-
-def getTracks(args):
-    with open(os.getenv('HOME')+'/.config/clerk/tracks.cache.json') as cache_file:
-        content = json.load(cache_file)
-    sorted_content = sorted(content, key=lambda x: (x['artist'],
-                                                    x['album'],
-                                                    x['disc'],
-                                                    track_sort(x['track'])))
-    print('\n'.join([os.getenv('separator').join([entry['artist'],
-                                                  entry['track'],
-                                                  entry['title'],
-                                                  entry['album']])
-                     for entry in sorted_content]))
-
-
-def getAlbums(args):
-    with open(os.getenv('HOME')+'/.config/clerk/albums.cache.json') as cache_file:
-        content = json.load(cache_file)
-    sorted_content = sorted(content, key=lambda x: (x['albumartist'], x['date'], x['album']))
-    print('\n'.join([os.getenv('separator').join([entry['albumartist'],
-                                                  entry['date'],
-                                                  entry['album']])
-                     for entry in sorted_content]))
-
-
-def getLatest(args):
-    with open(os.getenv('HOME')+'/.config/clerk/albums.cache.json') as cache_file:
-        content = json.load(cache_file)
-    sorted_content = sorted(content, key=lambda x: (x['last-modified']), reverse=True)
-    print('\n'.join([os.getenv('separator').join([entry['date'],
-                                                  entry['albumartist'],
-                                                  entry['album'],
-                                                  entry['last-modified']])
-                     for entry in sorted_content]))
 
 
 def loadjson(fname):
@@ -423,15 +419,6 @@ parser_saveto.set_defaults(call=savetoPlaylist)
 
 parser_createcache = subparsers.add_parser('createcache', help="create track cache for clerk")
 parser_createcache.set_defaults(call=createCache)
-
-parser_gettracks = subparsers.add_parser('getTracks', help="get all tracks from track cache for clerk")
-parser_gettracks.set_defaults(call=getTracks)
-
-parser_getalbums = subparsers.add_parser('getAlbums', help="get all albums from album cache for clerk")
-parser_getalbums.set_defaults(call=getAlbums)
-
-parser_getlatest = subparsers.add_parser('getLatest', help="get all albums from album cache for clerk, sorted by mtime")
-parser_getlatest.set_defaults(call=getLatest)
 
 parser_ratealbum = subparsers.add_parser('ratealbum', help="rate current Album")
 parser_ratealbum.add_argument('artist', action="store")
