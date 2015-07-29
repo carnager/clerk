@@ -941,8 +941,8 @@ TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${i
     elif [[ "$TRACK" == "${add}: Add, ${insert}: Insert, ${replace}: Replace (Default)" ]]; then
         addLastMod
     else
-        artist=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
-        date=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
+        artist=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
+        date=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
         album=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
         if [[ $val -eq 11 ]]; then
             mpc search date "$date" album "$album" albumartist "$artist" | mpc insert
