@@ -76,7 +76,7 @@ def createCache(args):
             else:
                 albumartist = i['albumartist']
         else:
-            print("albumartist tag missing from "+i['file'])
+            print("WARNING: missing albumartist tag for file: "+i['file'])
 
         if 'date' in i:
             date=i['date']
@@ -85,7 +85,7 @@ def createCache(args):
             else:
                 album = i['date']
         else:
-            print("date tag missing from "+i['file'])
+            print("WARNING: missing date tag for file:        "+i['file'])
 
         if 'title' in i:
             if isinstance(i['title'], list):
@@ -93,7 +93,7 @@ def createCache(args):
             else:
                 title=i['title']
         else:
-            print("title tag missing from "+i['file'])
+            print("WARNING: missing title tag for file:       "+i['file'])
 
         if 'track' in i:
             if isinstance(i['track'], list):
@@ -101,7 +101,7 @@ def createCache(args):
             else:
                 track = i['track']
         else:
-            print("track tag missing from "+i['file'])
+            print("WARNING: missing track tag for file:       "+i['file'])
 
         if 'album' in i:
             if isinstance(i['album'], list):
@@ -109,7 +109,7 @@ def createCache(args):
             else:
                 track = i['album']
         else:
-            print("album tag missing from "+i['file'])
+            print("WARNING: missing album tag for file:       "+i['file'])
 
         if 'artist' in i:
             if isinstance(i['artist'], list):
@@ -117,7 +117,7 @@ def createCache(args):
             else:
                 artist = i['artist']
         else:
-            print("artist tag missing from "+i['file'])
+            print("WARNING: missing artist tag for file:      "+i['file'])
 
         latest.append(mtime+" • "+albumartist+" • "+date+" • "+album)
 
