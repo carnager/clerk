@@ -1095,30 +1095,31 @@ TRACK_TEMP=$(echo -e "$menu" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${ins
         AddTrackTags
     else
         artist=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
-        album=$(echo "$TRACK" | awk -F "$separator" '{print $4}')
-        track=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
-        title=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
+        date=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
+        album=$(echo "$TRACK" | awk -F "$separator" '{print $5}')
+        track=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
+        title=$(echo "$TRACK" | awk -F "$separator" '{print $4}')
 
         if [[ $val -eq 11 ]]; then
-            mpc find artist "$artist" album "$album" title "$title" | mpc insert
+            mpc find artist "$artist" album "$album" title "$title" date "$date" | mpc insert
             entry="$TRACK"
 
         elif [[ $val -eq 12 ]]; then
             mpc clear
-            mpc findadd artist "$artist" album "$album" title "$title"
+            mpc findadd artist "$artist" album "$album" title "$title" date "$date"
             mpc play
             entry="$TRACK"
 
         elif [[ $val -eq 0 || $val -eq 10 ]]; then
-            mpc findadd artist "$artist" album "$album" title "$title"
+            mpc findadd artist "$artist" album "$album" title "$title" date "$date"
             entry="$TRACK"
 
         elif [[ $val -eq 13 ]]; then
-            mpc findadd artist "$artist" album "$album" title "$title"
+            mpc findadd artist "$artist" album "$album" title "$title" date "$date"
             mpc searchplay "${title}"
 
         elif [[ $val -eq 14 ]]; then
-            mpc find artist "$artist" album "$album" title "$title" | mpc insert
+            mpc find artist "$artist" album "$album" title "$title" date "$date" | mpc insert
             mpc searchplay "${title}"
 
         elif [[ $val -eq 17 ]]; then
