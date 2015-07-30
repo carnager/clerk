@@ -8,5 +8,3 @@ install:
 	install -Dm644 config.clerk $(DESTDIR)$(PREFIX)/share/doc/clerk/config.example
 	install -Dm644 config.clerk $(DESTDIR)/etc/clerk.conf
 	install -Dm644 README.md $(DESTDIR)$(PREFIX)/share/doc/clerk/README.md
-	install -Dm755 sticker_import.sh $(DESTDIR)$(PREFIX)/share/doc/clerk/sticker_import.sh
-
