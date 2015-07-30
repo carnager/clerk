@@ -95,10 +95,7 @@ def getAlbums(allTracks):
         reduceToFstElm(t['track'])
         reduceToFstElm(t['title'])
 
-    accu = []
-    for album in allTracks:
-        accu.append(album)
-    return (accu)
+    return (allTracks)
 
 
 def createCache(args):
