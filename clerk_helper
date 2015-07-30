@@ -81,9 +81,9 @@ def createCache(args):
         if 'date' in i:
             date=i['date']
             if isinstance(i['date'], list):
-                album = i['date'][0]
+                date = i['date'][0]
             else:
-                album = i['date']
+                date = i['date']
         else:
             print("WARNING: missing date tag for file:        "+i['file'])
 
@@ -105,9 +105,9 @@ def createCache(args):
 
         if 'album' in i:
             if isinstance(i['album'], list):
-                track = i['album'][0]
+                album = i['album'][0]
             else:
-                track = i['album']
+                album = i['album']
         else:
             print("WARNING: missing album tag for file:       "+i['file'])
 
