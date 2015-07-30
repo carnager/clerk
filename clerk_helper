@@ -119,7 +119,7 @@ def createCache(args):
         else:
             print("WARNING: missing artist tag for file:      "+i['file'])
 
-        latest.append(mtime+" • "+albumartist+" • "+date+" • "+album)
+        latest.append(mtime+os.getenv('separator')+albumartist+os.getenv('separator')+date+os.getenv('separator')+album)
 
     output=set(latest)
     with open(os.getenv('HOME')+'/.config/clerk/latest.cache', "w") as cache_file:
