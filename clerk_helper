@@ -2,6 +2,8 @@
 
 from __future__ import print_function
 import sys
+from itertools import groupby
+from dateutil.parser import parse as parseISO8601
 import os
 import notify2
 import json
@@ -61,72 +63,29 @@ def update(args):
     with open(os.getenv('HOME')+'/.config/clerk/helper_config', 'w') as configfile:
         config.write(configfile)
 
+def getRecentEachAlbum(allTracks):
+    def gp(t):
+        return (t['album'], t['albumartist'], t['date'])
+
+    for t in allTracks:
+        if isinstance(t['albumartist'], list):
+            t['albumartist']=t['albumartist'][0]
+        if isinstance(t['date'], list):
+            t['date']=t['date'][0]
+        t['cto'] = parseISO8601(t['last-modified']) # ct = comparable time object
+
+    accu = []
+    for album, tracksOfAlbum in groupby(allTracks, key=gp):
+        accu.append(sorted(tracksOfAlbum, key=lambda t: t['cto'])[-1])
+    return sorted(accu, key=lambda t: t['cto'], reverse=True)
 
 def createCache(args):
     alist=client.search('filename', " ")
-
-    latest=[]
-    for i in alist:
-        mtime=i['last-modified']
-#        mtime=date_time[:10]
-
-        if 'albumartist' in i:
-            if isinstance(i['albumartist'], list):
-                albumartist = i['albumartist'][0]
-            else:
-                albumartist = i['albumartist']
-        else:
-            print("WARNING: missing albumartist tag for file: "+i['file'])
-
-        if 'date' in i:
-            date=i['date']
-            if isinstance(i['date'], list):
-                date = i['date'][0]
-            else:
-                date = i['date']
-        else:
-            print("WARNING: missing date tag for file:        "+i['file'])
-
-        if 'title' in i:
-            if isinstance(i['title'], list):
-                title = i['title'][0]
-            else:
-                title=i['title']
-        else:
-            print("WARNING: missing title tag for file:       "+i['file'])
-
-        if 'track' in i:
-            if isinstance(i['track'], list):
-                track = i['track'][0]
-            else:
-                track = i['track']
-        else:
-            print("WARNING: missing track tag for file:       "+i['file'])
-
-        if 'album' in i:
-            if isinstance(i['album'], list):
-                album = i['album'][0]
-            else:
-                album = i['album']
-        else:
-            print("WARNING: missing album tag for file:       "+i['file'])
-
-        if 'artist' in i:
-            if isinstance(i['artist'], list):
-                artist = i['artist'][0]
-            else:
-                artist = i['artist']
-        else:
-            print("WARNING: missing artist tag for file:      "+i['file'])
-
-        latest.append(mtime+os.getenv('separator')+albumartist+os.getenv('separator')+date+os.getenv('separator')+album)
-
-    output=set(latest)
+    blist=getRecentEachAlbum(alist)
+   
     with open(os.getenv('HOME')+'/.config/clerk/latest.cache', "w") as cache_file:
-        for album in sorted(output, reverse=True):
-            cache_file.write(album[23:]+'\n')
-    os.system("cat "+os.getenv('HOME')+'/.config/clerk/latest.cache'+" | uniq > /tmp/latest.cache")
-    os.system("mv /tmp/latest.cache "+os.getenv('HOME')+'/.config/clerk/latest.cache')
+        for album in blist:
+            cache_file.write(album['albumartist']+os.getenv('separator')+album['date']+os.getenv('separator')+album['album']+'\n')
 
     os.system("mpc --format \'%artist%"+os.getenv('separator')+"%date%"+os.getenv('separator')+"%album%"+os.getenv('separator')+"%track%"+os.getenv('separator')+"%title%\' search filename \' \' >"+os.getenv('HOME')+"/.config/clerk/tracks.cache")
     os.system("mpc --format \'%artist%"+os.getenv('separator')+"%date%"+os.getenv('separator')+"%album%\' search filename \' \' | uniq >"+os.getenv('HOME')+"/.config/clerk/albums.cache")
