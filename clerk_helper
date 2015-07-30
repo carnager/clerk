@@ -13,6 +13,7 @@ import fnmatch
 from pprint import pprint
 from mpd import MPDClient
 import configparser
+
 client = MPDClient()
 config = configparser.ConfigParser()
 config.sections()
@@ -63,21 +64,42 @@ def update(args):
     with open(os.getenv('HOME')+'/.config/clerk/helper_config', 'w') as configfile:
         config.write(configfile)
 
+def reduceToFstElm(maybeList):
+    if isinstance(maybeList, list):
+        maybeList = maybeList[0]
+
+# sort albums by mtime
+# thanks to kuyatzu for this.
 def getRecentEachAlbum(allTracks):
     def gp(t):
         return (t['album'], t['albumartist'], t['date'])
 
     for t in allTracks:
-        if isinstance(t['albumartist'], list):
-            t['albumartist']=t['albumartist'][0]
-        if isinstance(t['date'], list):
-            t['date']=t['date'][0]
+        reduceToFstElm(t['date'])
+        reduceToFstElm(t['albumartist'])
         t['cto'] = parseISO8601(t['last-modified']) # ct = comparable time object
 
     accu = []
     for album, tracksOfAlbum in groupby(allTracks, key=gp):
         accu.append(sorted(tracksOfAlbum, key=lambda t: t['cto'])[-1])
     return sorted(accu, key=lambda t: t['cto'], reverse=True)
+
+def getAlbums(allTracks):
+    def gp(t):
+        return (t['album'], t['albumartist'], t['date'], t['title'], t['track'], t['artist'])
+
+    for t in allTracks:
+        reduceToFstElm(t['date'])
+        reduceToFstElm(t['albumartist'])
+        reduceToFstElm(t['album'])
+        reduceToFstElm(t['track'])
+        reduceToFstElm(t['title'])
+
+    accu = []
+    for album in allTracks:
+        accu.append(album)
+    return (accu)
+
 
 def createCache(args):
     alist=client.search('filename', " ")
@@ -87,8 +109,32 @@ def createCache(args):
         for album in blist:
             cache_file.write(album['albumartist']+os.getenv('separator')+album['date']+os.getenv('separator')+album['album']+'\n')
 
-    os.system("mpc --format \'%artist%"+os.getenv('separator')+"%date%"+os.getenv('separator')+"%album%"+os.getenv('separator')+"%track%"+os.getenv('separator')+"%title%\' search filename \' \' >"+os.getenv('HOME')+"/.config/clerk/tracks.cache")
-    os.system("mpc --format \'%artist%"+os.getenv('separator')+"%date%"+os.getenv('separator')+"%album%\' search filename \' \' | uniq >"+os.getenv('HOME')+"/.config/clerk/albums.cache")
+    temp_albums=[]
+    albumlist=getAlbums(alist)
+    for album in albumlist:
+        temp_albums.append(album['albumartist']+os.getenv('separator')+album['date']+os.getenv('separator')+album['album'])
+
+    final_albumlist=set(temp_albums)
+    blub=sorted(final_albumlist)
+    
+    with open(os.getenv('HOME')+'/.config/clerk/albums.cache', "w") as cache_file:
+        for album in blub:
+            cache_file.write(album+'\n')
+
+    temp_tracks=[]
+    tracklist=albumlist
+    for track in tracklist:
+        if isinstance(track['artist'], list):
+            track['artist']=track['artist'][0]
+ 
+        temp_tracks.append(track['artist']+os.getenv('separator')+track['date']+os.getenv('separator')+track['album']+os.getenv('separator')+track['track']+os.getenv('separator')+track['title'])
+#
+    final_tracklist=set(temp_tracks)
+    blub=sorted(final_tracklist)
+#    
+    with open(os.getenv('HOME')+'/.config/clerk/tracks.cache', "w") as cache_file:
+        for track in blub:
+            cache_file.write(track+'\n')
 
 
 def track_sort(track_num):
