@@ -67,8 +67,8 @@ def createCache(args):
 
     latest=[]
     for i in alist:
-        date_time=i['last-modified']
-        mtime=date_time[:10]
+        mtime=i['last-modified']
+#        mtime=date_time[:10]
 
         if 'albumartist' in i:
             if isinstance(i['albumartist'], list):
@@ -124,7 +124,9 @@ def createCache(args):
     output=set(latest)
     with open(os.getenv('HOME')+'/.config/clerk/latest.cache', "w") as cache_file:
         for album in sorted(output, reverse=True):
-            cache_file.write(album[13:]+'\n')
+            cache_file.write(album[23:]+'\n')
+    os.system("cat "+os.getenv('HOME')+'/.config/clerk/latest.cache'+" | uniq > /tmp/latest.cache")
+    os.system("mv /tmp/latest.cache "+os.getenv('HOME')+'/.config/clerk/latest.cache')
 
     os.system("mpc --format \'%artist%"+os.getenv('separator')+"%date%"+os.getenv('separator')+"%album%"+os.getenv('separator')+"%track%"+os.getenv('separator')+"%title%\' search filename \' \' >"+os.getenv('HOME')+"/.config/clerk/tracks.cache")
     os.system("mpc --format \'%artist%"+os.getenv('separator')+"%date%"+os.getenv('separator')+"%album%\' search filename \' \' | uniq >"+os.getenv('HOME')+"/.config/clerk/albums.cache")
