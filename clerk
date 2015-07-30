@@ -1417,7 +1417,7 @@ ${addplay}: Add &amp; Play | ${insertplay}: Insert &amp; Play</span>"
 
 browseTrack() {
     HELP="<span color='$help_color'>${add}: Add (Default)         | ${insert}: Insert        | ${replace}: Replace
-                                    ${addall}: Add &amp; Play             | ${insertall}: Insert &amp; Play</span>"
+${addall}: Add &amp; Play             | ${insertall}: Insert &amp; Play</span>"
 
     TRACK=("0  Return to Album Menu"
            "---"
