@@ -70,7 +70,7 @@ def reduceToFstElm(maybeList):
 
 # sort albums by mtime
 # thanks to kuyatzu for this.
-def getRecentEachAlbum(allTracks):
+def createRecentList(allTracks):
     def gp(t):
         return (t['album'], t['albumartist'], t['date'])
 
@@ -84,30 +84,26 @@ def getRecentEachAlbum(allTracks):
         accu.append(sorted(tracksOfAlbum, key=lambda t: t['cto'])[-1])
     return sorted(accu, key=lambda t: t['cto'], reverse=True)
 
-def getAlbums(allTracks):
-    def gp(t):
-        return (t['album'], t['albumartist'], t['date'], t['title'], t['track'], t['artist'])
+def createAlbumsList(tracks):
+    ks = ['date', 'albumartist', 'album', 'track', 'title']
+    
+    for li in [tracks[k] for k in tracks if k in ks]:
+        reduceToFstElm(li)
 
-    for t in allTracks:
-        reduceToFstElm(t['date'])
-        reduceToFstElm(t['albumartist'])
-        reduceToFstElm(t['album'])
-        reduceToFstElm(t['track'])
-        reduceToFstElm(t['title'])
 
-    return (allTracks)
+    return tracks
 
 
 def createCache(args):
     alist=client.search('filename', " ")
-    blist=getRecentEachAlbum(alist)
+    blist=createRecentList(alist)
    
     with open(os.getenv('HOME')+'/.config/clerk/latest.cache', "w") as cache_file:
         for album in blist:
             cache_file.write(album['albumartist']+os.getenv('separator')+album['date']+os.getenv('separator')+album['album']+'\n')
 
     temp_albums=[]
-    albumlist=getAlbums(alist)
+    albumlist=createAlbumsList(alist)
     for album in albumlist:
         temp_albums.append(album['albumartist']+os.getenv('separator')+album['date']+os.getenv('separator')+album['album'])
 
