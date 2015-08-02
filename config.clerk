@@ -1,6 +1,6 @@
 # custom rofi settings (rofi reads settings from ~/.Xresources)
 # but you can override settings here.
-rofiopts="-no-levenshtein-sort"
+rofiopts="-i -no-levenshtein-sort"
 
 # If you don't have physical access to your music_dir
 # set this to no. This setting will make sure that ratings files
