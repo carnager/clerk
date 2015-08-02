@@ -672,7 +672,7 @@ dplayQueue () {
 
         fi
 
-        TRACKDISPLAY=$(printf "%s\n" "${TRACKDISPLAY[@]}"  | rofi -custom-kb-1 "${play}" -custom-kb-2 "${delete}" -custom-kb-3 "${rate}" -dmenu -l $POS -mesg "<span color='$help_color'>${play}: Play, ${delete}: Delete, ${rate}: Rate</span>" -p "Current Queue > ")
+        TRACKDISPLAY=$(printf "%s\n" "${TRACKDISPLAY[@]}"  | rofi -custom-kb-1 "${play}" -custom-kb-2 "${delete}" -custom-kb-3 "${rate}" -dmenu -selected-row $POS -mesg "<span color='$help_color'>${play}: Play, ${delete}: Delete, ${rate}: Rate</span>" -p "Current Queue > ")
 
         tempval=$?
         val=$tempval
@@ -1178,7 +1178,7 @@ ${addall}: Add &amp; Play, ${insertall}: Insert &amp; Play</span>"
     if [[ -z $line ]]; then
         select_temp=$(printf "%s\n" "${menu[@]}" | rofi -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -format "i¬s" -mesg "${HELP}" -p "Select Album > ")
     else
-        select_temp=$(printf "%s\n" "${menu[@]}" | rofi -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -l $(( $line + 1 )) -format "i¬s" -mesg "${HELP}" -p "Select Album > ")
+        select_temp=$(printf "%s\n" "${menu[@]}" | rofi -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -selected-row $(( $line + 1 )) -format "i¬s" -mesg "${HELP}" -p "Select Album > ")
     fi
 
     val=$?
