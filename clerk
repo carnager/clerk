@@ -922,7 +922,7 @@ menu="0  Return to Browse Menu
 ---
 ${last_temp}"
 
-help_text=$(echo -e "${add}: Add - ${insert}: Insert - ${replace}: Replace\n${rate}: Rate - ${addplay}: Add + Play - ${insertplay}: Insert + Play" | column -s '-' -t)
+help_text=$(echo -e "${add}: Add - ${insert}: Insert - ${replace}: Replace (Default)\n${rate}: Rate - ${addplay}: Add + Play - ${insertplay}: Insert + Play" | column -s '-' -t)
 line1=$(echo "${help_text}" | head -1)
 line2=$(echo "${help_text}" | tail -1)
 HELP="<span color='$help_color'>${line1}
