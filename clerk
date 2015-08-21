@@ -922,8 +922,14 @@ menu="0  Return to Browse Menu
 ---
 ${last_temp}"
 
-HELP="<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate
-${addplay}: Add &amp; Play, ${insertplay}: Insert &amp; Play</span>"
+help_text=$(echo -e "${add}: Add - ${insert}: Insert - ${replace}: Replace\n${rate}: Rate - ${addplay}: Add + Play - ${insertplay}: Insert + Play" | column -s '-' -t)
+line1=$(echo "${help_text}" | column -s ':' -t -o ':' | head -1)
+line2=$(echo "${help_text}" | column -s ':' -t -o ':' | tail -1)
+HELP="<span color='$help_color'>${line1}
+${line2}</span>"
+
+#HELP="<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate
+#${addplay}: Add &amp; Play, ${insertplay}: Insert &amp; Play</span>"
 
 TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -select "$entry" -filter "$filter" -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")
 
@@ -998,8 +1004,13 @@ menu="0  Return to Browse Menu
 ---
 ${album_temp}"
 
-HELP="<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate
-${addplay}: Add &amp; Play, ${insertplay}: Insert &amp; Play</span>"
+help_text=$(echo -e "${add}: Add - ${insert}: Insert - ${replace}: Replace (Default)\n${rate}: Rate - ${addplay}: Add + Play - ${insertplay}: Insert + Play" | column -s '-' -t)
+
+line1=$(echo "${help_text}" | column -s ':' -t -o ':' | head -1)
+line2=$(echo "${help_text}" | column -s ':' -t -o ':' | tail -1)
+HELP="<span color='$help_color'>${line1}
+${line2}</span>"
+
 
 TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")
 
@@ -1076,8 +1087,12 @@ menu="0  Return to Browse Menu
 ---
 ${tracks_temp}"
 
-HELP="<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate
-${addplay}: Add &amp; Play, ${insertplay}: Insert &amp; Play</span>"
+help_text=$(echo -e "${add}: Add (Default) - ${insert}: Insert - ${replace}: Replace\n${rate}: Rate - ${addplay}: Add + Play - ${insertplay}: Insert + Play" | column -s '-' -t)
+line1=$(echo "${help_text}" | column -s ':' -t -o ':' | head -1)
+line2=$(echo "${help_text}" | column -s ':' -t -o ':' | tail -1)
+HELP="<span color='$help_color'>${line1}
+${line2}</span>"
+
 
 TRACK_TEMP=$(echo -e "$menu" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "${HELP}" -p "Choose Track > ")
 
@@ -1133,8 +1148,14 @@ TRACK_TEMP=$(echo -e "$menu" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${ins
 }
 
 browseDate() {
-    HELP="<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace
-${addplay}: Add &amp; Play, ${insertplay}, Insert &amp; Play</span>"
+
+    help_text=$(echo -e "${add}: Add - ${insert}: Insert - ${replace}: Replace\n${addplay}: Add + Play - ${insertplay}: Insert + Play" | column -s '-' -t)
+    line1=$(echo "${help_text}" | column -s ':' -t -o ':' | head -1)
+    line2=$(echo "${help_text}" | column -s ':' -t -o ':' | tail -1)
+HELP="<span color='$help_color'>${line1}
+${line2}</span>"
+
+
     date=$(echo -e "0  Return to Browse Menu\n---\n$(mpc list date | $tac)" | dmenu_t -mesg "${HELP}" -dmenu -p "Choose Date > ")
     val=$?
     if [[ $val -eq 0 ]]; then
@@ -1168,8 +1189,12 @@ ${addplay}: Add &amp; Play, ${insertplay}, Insert &amp; Play</span>"
 }
 
 browseDateAdd() {
-    HELP="<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace
-${addall}: Add &amp; Play, ${insertall}: Insert &amp; Play</span>"
+    help_text=$(echo -e "${add}: Add - ${insert}: Insert - ${replace}: Replace\n${addplay}: Add + Play - ${insertplay}: Insert + Play" | column -s '-' -t)
+line1=$(echo "${help_text}" | column -s ':' -t -o ':' | head -1)
+line2=$(echo "${help_text}" | column -s ':' -t -o ':' | tail -1)
+HELP="<span color='$help_color'>${line1}
+${line2}</span>"
+
 
     menu=("0  Return to Date Menu"
             "---"
@@ -1621,8 +1646,11 @@ ARTIST_TEMP=$(echo -e "0  Return to Browse Menu\n---\n$(mpc list albumartist)" |
 }
 
 browseGenre () {
-    HELP="<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace (Default)
-${addplay}: Add &amp; Play, ${insertplay}: Insert &amp; Play</span>"
+    help_text=$(echo -e "${add}: Add - ${insert}: Insert - ${replace}: Replace (Default)\n${rate}: Rate - ${addplay}: Add + Play - ${insertplay}: Insert + Play" | column -s '-' -t)
+line1=$(echo "${help_text}" | column -s ':' -t -o ':' | head -1)
+line2=$(echo "${help_text}" | column -s ':' -t -o ':' | tail -1)
+HELP="<span color='$help_color'>${line1}
+${line2}</span>"
 
     GENRE=$(echo -e "0 Return to Browser Menu\n---\n$(mpc list genre)" | rofi -dmenu -mesg "${HELP}" -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -p "Choose Genre > ")
     val=$?
