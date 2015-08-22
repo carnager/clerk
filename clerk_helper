@@ -77,6 +77,7 @@ def createRecentList(allTracks):
     for t in allTracks:
         reduceToFstElm(t['date'])
         reduceToFstElm(t['albumartist'])
+        reduceToFstElm(t['album'])
         t['cto'] = parseISO8601(t['last-modified']) # ct = comparable time object
 
     accu = []
