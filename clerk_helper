@@ -108,6 +108,15 @@ def createCache(args):
     temp_albums=[]
     albumlist=createAlbumsList(alist)
     for album in albumlist:
+        if isinstance(album['albumartist'], list):
+            album['albumartist'] = album['albumartist'][0]
+
+        if isinstance(album['date'], list):
+            album['date'] = album['date'][0]
+
+        if isinstance(album['album'], list):
+            album['album'] = album['album'][0]
+
         temp_albums.append(album['albumartist']+os.getenv('separator')+album['date']+os.getenv('separator')+album['album'])
 
     final_albumlist=set(temp_albums)
