@@ -65,9 +65,7 @@ def update(args):
         config.write(configfile)
 
 def reduceToFstElm(maybeList):
-    if isinstance(maybeList, list):
-        maybeList = maybeList[0]
-        print(maybeList)
+    return maybeList[0] if isinstance(maybeList, list) else maybeList
 
 # sort albums by mtime
 # thanks to kuyatzu for this.
@@ -76,9 +74,9 @@ def createRecentList(allTracks):
         return (t['album'], t['albumartist'], t['date'])
 
     for t in allTracks:
-        reduceToFstElm(t['date'])
-        reduceToFstElm(t['albumartist'])
-        t['cto'] = parseISO8601(t['last-modified']) # ct = comparable time object
+        t['date'] = reduceToFstElm(t['date'])
+        t['albumartist'] = reduceToFstElm(t['albumartist'])
+        t['cto'] = parseISO8601(t['last-modified']) # cto = comparable time object
 
     accu = []
     for album, tracksOfAlbum in groupby(allTracks, key=gp):
@@ -86,37 +84,27 @@ def createRecentList(allTracks):
     return sorted(accu, key=lambda t: t['cto'], reverse=True)
 
 def createAlbumsList(tracks):
-    ks = ['date', 'albumartist', 'album', 'track', 'title']
-    
-    for li in [tracks[k] for k in tracks if k in ks]:
-        reduceToFstElm(li)
+    ks = ['date', 'artist', 'albumartist', 'album', 'track', 'title']
 
-
+    for t in tracks:
+        t.update([(k, reduceToFstElm(v)) for (k, v) in t.items() if k in ks])
     return tracks
 
-
 def createCache(args):
+    # create latest.cache
     alist=client.search('filename', " ")
     blist=createRecentList(alist)
    
     with open(os.getenv('HOME')+'/.config/clerk/latest.cache', "w") as cache_file:
         for album in blist:
-            if isinstance(album['albumartist'], list):
-                album['albumartist'] = album['albumartist'][0]
             cache_file.write(album['albumartist']+os.getenv('separator')+album['date']+os.getenv('separator')+album['album']+'\n')
 
+    # create albums.cache
     temp_albums=[]
-    albumlist=createAlbumsList(alist)
+    blist=createAlbumsList(alist)
+    albumlist=createRecentList(blist)
+
     for album in albumlist:
-        if isinstance(album['albumartist'], list):
-            album['albumartist'] = album['albumartist'][0]
-
-        if isinstance(album['date'], list):
-            album['date'] = album['date'][0]
-
-        if isinstance(album['album'], list):
-            album['album'] = album['album'][0]
-
         temp_albums.append(album['albumartist']+os.getenv('separator')+album['date']+os.getenv('separator')+album['album'])
 
     final_albumlist=set(temp_albums)
@@ -126,26 +114,16 @@ def createCache(args):
         for album in blub:
             cache_file.write(album+'\n')
 
-    temp_tracks=[]
-    tracklist=albumlist
-    for track in tracklist:
-        if isinstance(track['artist'], list):
-            track['artist']=track['artist'][0]
-        
-        if isinstance(track['albumartist'], list):
-            track['albumartist']=track['albumartist'][0]
- 
-        if isinstance(track['track'], list):
-            track['track']=track['track'][0]
-        if isinstance(track['date'], list):
-            track['date']=track['date'][0]
-        temp_tracks.append(track['artist']+os.getenv('separator')+track['date']+os.getenv('separator')+track['album']+os.getenv('separator')+track['track']+os.getenv('separator')+track['title'])
+    # create tracks.cache
+    tracklist=[]
+    for track in alist:
+        taglist = ['date', 'artist', 'albumartist', 'album', 'track', 'title']
+        track.update([(k, reduceToFstElm(v)) for (k, v) in track.items() if k in taglist])       
+
+        tracklist.append(track['artist']+os.getenv('separator')+track['date']+os.getenv('separator')+track['album']+os.getenv('separator')+track['track']+os.getenv('separator')+track['title'])
 #
-    final_tracklist=set(temp_tracks)
-    blub=sorted(final_tracklist)
-#    
     with open(os.getenv('HOME')+'/.config/clerk/tracks.cache', "w") as cache_file:
-        for track in blub:
+        for track in tracklist:
 
             cache_file.write(track+'\n')
 
