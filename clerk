@@ -661,9 +661,7 @@ resumePlaylist () {
 dplayQueue () {
     while true; do
         if [[ -z $POS ]]; then
-            TRACKDISPLAY=("0  Return to Main Menu"
-                          "---"
-                          "$(mpc playlist --format "%position%$separator%artist%$separator%track%$separator%title%$separator%album%")")
+            TRACKDISPLAY=$(echo -e "0  Return to Main Menu\n---\n$(mpc playlist --format '%position%\t%title%\tby %artist% on %album% (%date%)' | sed 's,^\([^\t]*\t[^\t]\{40\}\)[^\t]*,\1…,' | column -o ' ' -s $'\t' -t)" | rofi -custom-kb-1 "${play}" -custom-kb-2 "${delete}" -custom-kb-3 "${rate}" -dmenu -selected-row $POS -mesg "<span color='$help_color'>${play}: Play, ${delete}: Delete, ${rate}: Rate</span>" -p "Current Queue > ")
         else
             # check if POS is a number. if it is, add 4 to it. POS is later
             # exported from song ID in playlist.
@@ -673,22 +671,15 @@ dplayQueue () {
             else
                 POS=0
             fi
-            TRACKDISPLAY=("0  Return to Main Menu"
-                          "---"
-                          "$(mpc playlist --format "%position%$separator%artist%$separator%track%$separator%title%$separator%album%")")
+            TRACKDISPLAY=$(echo -e "0  Return to Main Menu\n---\n$(mpc playlist --format '%position%\t%title%\tby %artist% on %album% (%date%)' | sed 's,^\([^\t]*\t[^\t]\{40\}\)[^\t]*,\1…,' | column -o ' ' -s $'\t' -t)" | rofi -custom-kb-1 "${play}" -custom-kb-2 "${delete}" -custom-kb-3 "${rate}" -dmenu -selected-row $POS -mesg "<span color='$help_color'>${play}: Play, ${delete}: Delete, ${rate}: Rate</span>" -p "Current Queue > ")
 
         fi
-
-        TRACKDISPLAY=$(printf "%s\n" "${TRACKDISPLAY[@]}"  | rofi -custom-kb-1 "${play}" -custom-kb-2 "${delete}" -custom-kb-3 "${rate}" -dmenu -selected-row $POS -mesg "<span color='$help_color'>${play}: Play, ${delete}: Delete, ${rate}: Rate</span>" -p "Current Queue > ")
 
         tempval=$?
         val=$tempval
 
-        TITLE=$(echo "$TRACKDISPLAY" | awk -F "$separator" '{ print $4 }')
-        ARTIST=$(echo "$TRACKDISPLAY" | awk -F "$separator" '{ print $2 }')
-        ALBUM=$(echo "$TRACKDISPLAY" | awk -F "$separator" '{ print $5 }')
-        TRACK=$(echo "$TRACKDISPLAY" | awk -F "$separator" '{ print $3 }')
-        export POS=$(echo "$TRACKDISPLAY" | awk -F "$separator" '{ print $1 }')
+        POS=$(echo "${TRACKDISPLAY}" | awk '{ print $1 }')
+        echo "${POS}"
         if [[ "$TRACKDISPLAY" == "0  Return to Main Menu" ]]; then
             dplayPrompt
         elif [[ -z "$TRACKDISPLAY" ]]; then
@@ -699,9 +690,16 @@ dplayQueue () {
             if [[ $val -eq 11 ]]; then
                 mpc del $POS
                 POS=$(( $POS - 1))
+                dplayQueue
             elif [[ $val -eq 0 || $val -eq 10 ]]; then
                 mpc play $POS;
             elif [[ $val -eq 13 ]]; then
+                info=$(mpc search --format '%artist%\t%album%\t%date%\t%track%\t%title%' filename "${filename}")
+                ARTIST=$(echo "${info}" | awk -F '\t' '{ print $1 }')
+                ALBUM=$(echo "${info}" | awk -F '\t' '{ print $2 }')
+                DATE=$(echo "${info}" | awk -F '\t' '{ print $3 }')
+                TRACK=$(echo "${info}" | awk -F '\t' '{ print $4 }')
+                TITLE=$(echo "${info}" | awk -F '\t' '{ print $5 }')
                 rateartist="${ARTIST}" ratealbum="${ALBUM}" ratetrack="${TRACK}" ratetitle="${TITLE}" rateTrack
             fi
         fi
