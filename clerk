@@ -41,12 +41,31 @@ elif [[ $scrobbler == mpdscribble ]]; then
     export scrobbler_kill="mpdscribble"
 fi
 
+updateCache () {
+    cd $HOME/.config/clerk
+    rm -f *.cache
+    clerk_helper createcache
+    cat tracks.cache | sed 's,^\([^\t]*\t[^\t]\{40\}\)[^\t]*,\1,' | column -o ' ' -s $'\t' -t > tracks.cache.new
+    mv tracks.cache.new tracks.cache
+    cat latest.cache | column -o $'\t' -s $'\t' -t > latest.cache.new
+    mv latest.cache.new latest.cache
+    cat albums.cache | column -o $'\t' -s $'\t' -t > albums.cache.new
+    mv albums.cache.new albums.cache
+}
+
 # check if clerk_helper process is running. if it isn't update cache files, if
 # needed
 if [[ $(ps x| grep clerk_helper | head -1 | grep -v 'grep') ]]; then
     :
 else
-    clerk_helper update &
+    date=$(mpc stats | grep 'DB Updated: ')
+    file="$HOME/.config/clerk/.lastupdate"
+    if [ "$(< $file)" = "$date" ] && [ -f "$file" ] ; then
+        :
+    else
+        updateCache
+        echo "${date}" > "${file}"
+    fi
 fi
 
 export separator="$separator"
@@ -76,17 +95,6 @@ sed=$([[ "$OSTYPE" == "darwin"* ]] && echo 'gsed' || echo 'sed')
 shuf=$([[ "$OSTYPE" == "darwin"* ]] && echo 'gshuf' || echo 'shuf')
 tac=$([[ "$OSTYPE" == "darwin"* ]] && echo 'gtac' || echo 'tac')
 
-updateCache() {
-    cd $HOME/.config/clerk
-    rm -f *.cache
-    clerk_helper createcache
-    cat tracks.cache | sed 's,^\([^\t]\{40\}\)[^\t]*,\1…,' | column -o $'\t' -s $'\t' -t > tracks.cache.new
-    mv tracks.cache.new tracks.cache
-    cat latest.cache | column -o $'\t' -s $'\t' -t > latest.cache.new
-    mv latest.cache.new latest.cache
-    cat albums.cache | column -o $'\t' -s $'\t' -t > albums.cache.new
-    mv albums.cache.new albums.cache
-}
 
 # main Menu
 dplayPrompt () {
