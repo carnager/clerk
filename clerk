@@ -1093,11 +1093,6 @@ TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/t
         AddTrackTags
     else
         filename=$(echo "$TRACK" | awk -F "\t" '{print $3}')
-        artist=$(mpc search --format '%artist%' filename "${filename}")
-        album=$(mpc search --format '%album%' filename "${filename}")
-        date=$(mpc search --format '%date%' filename "${filename}")
-        track=$(mpc search --format '%track%' filename "${filename}")
-        title=$(mpc search --format '%title%' filename "${filename}")
 
         echo -e "artist: ${artist}\nalbum: ${album}\ntitle: ${title}\ntrack: ${track}\ndate: ${date}\ngroup1: ${group1}\ngroup2: ${group2}"
         if [[ $val -eq 11 ]]; then
@@ -1126,6 +1121,11 @@ TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/t
             entry="$TRACK"
 
         elif [[ $val -eq 17 ]]; then
+            artist=$(mpc search --format '%artist%' filename "${filename}")
+            album=$(mpc search --format '%album%' filename "${filename}")
+            date=$(mpc search --format '%date%' filename "${filename}")
+            track=$(mpc search --format '%track%' filename "${filename}")
+            title=$(mpc search --format '%title%' filename "${filename}")
             rateartist="${artist}" ratealbum="${album}" ratetrack="${track}" ratetitle="${title}" rateTrack
             entry="$TRACK"
         elif [[ $val -eq 1 ]]; then
