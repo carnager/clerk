@@ -1080,10 +1080,11 @@ ${line2}</span>"
 TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/tracks.cache) | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "${HELP}" -p "Choose Track > ")
 
     val=$?
-
     TRACK="${TRACK_TEMP#*¬}"
     unset filter
     export filter="$(echo ${TRACK_TEMP} | awk -F '¬' '{ print $1 }')"
+    echo "${filter}"
+    echo "${TRACK}"
 
     if [[ "$TRACK" == "0  Return to Browse Menu" ]]
         then browseLibPrompt
@@ -1121,11 +1122,13 @@ TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/t
             entry="$TRACK"
 
         elif [[ $val -eq 17 ]]; then
-            artist=$(mpc search --format '%artist%' filename "${filename}")
-            album=$(mpc search --format '%album%' filename "${filename}")
-            date=$(mpc search --format '%date%' filename "${filename}")
-            track=$(mpc search --format '%track%' filename "${filename}")
-            title=$(mpc search --format '%title%' filename "${filename}")
+            info=$(mpc search --format '%artist%\t%album%\t%date%\t%track%\t%title%' filename "${filename}")
+            artist="$(echo "$info" | awk -F '\t' '{ print $1 }')"
+            album="$(echo "$info" | awk -F '\t' '{ print $2 }')"
+            date="$(echo "$info" | awk -F '\t' '{ print $3 }')"
+            track="$(echo "$info" | awk -F '\t' '{ print $4 }')"
+            title="$(echo "$info" | awk -F '\t' '{ print $5 }')"
+            echo "${artist} ${album} ${date} ${track} ${title}"
             rateartist="${artist}" ratealbum="${album}" ratetrack="${track}" ratetitle="${title}" rateTrack
             entry="$TRACK"
         elif [[ $val -eq 1 ]]; then
