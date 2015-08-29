@@ -77,8 +77,16 @@ shuf=$([[ "$OSTYPE" == "darwin"* ]] && echo 'gshuf' || echo 'shuf')
 tac=$([[ "$OSTYPE" == "darwin"* ]] && echo 'gtac' || echo 'tac')
 
 updateCache() {
-    rm -f $HOME/.config/clerk/*.cache
+    cd $HOME/.config/clerk
+    rm -f *.cache
     clerk_helper createcache
+    for i in {tracks,albums}.cache; do
+        cat "$i" | column -o $'\t' -s $'\t' -t | sort -n > "${i}.new"
+        mv "${i}.new" "$i"
+        cat latest.cache | column -o $'\t' -s $'\t' -t > latest.cache.new
+        mv latest.cache.new latest.cache
+    done
+
 }
 
 # main Menu
@@ -910,18 +918,6 @@ playRandomTracks () {
 }
 
 addLastMod() {
-    if [[ -z $last_temp ]]; then
-        loadCacheLatest > /dev/null
-    else
-        echo "re-using track list from memory"
-#        unset tracks_temp
-#        export tracks_temp=${tracks_temp} > /dev/null
-    fi
-
-menu="0  Return to Browse Menu
----
-${last_temp}"
-
 help_text=$(echo -e "${add}: Add - ${insert}: Insert - ${replace}: Replace (Default)\n${rate}: Rate - ${addplay}: Add + Play - ${insertplay}: Insert + Play" | column -s '-' -t)
 line1=$(echo "${help_text}" | head -1)
 line2=$(echo "${help_text}" | tail -1)
@@ -931,7 +927,7 @@ ${line2}</span>"
 #HELP="<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate
 #${addplay}: Add &amp; Play, ${insertplay}: Insert &amp; Play</span>"
 
-TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -select "$entry" -filter "$filter" -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")
+TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/latest.cache) | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -select "$entry" -filter "$filter" -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")
 
     val=$?
 
@@ -947,9 +943,10 @@ TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${i
     elif [[ "$TRACK" == "${add}: Add, ${insert}: Insert, ${replace}: Replace (Default)" ]]; then
         addLastMod
     else
-        artist=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
-        date=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
-        album=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
+        artist=$(echo -en "$TRACK" | awk -F "\t" '{print $1}' | sed -e 's/[[:space:]]*$//')
+        group2=$(echo -en "$TRACK" | awk -F '\t' '{print $2}'| sed -e 's/[[:space:]]*$//')
+        album=$(echo "$group2" | awk -F " - " '{print $2}')
+        date=$(echo "$group2" | awk -F " - " '{print $1}' | awk '{print substr($0, 2, length($0) - 2)}')
         if [[ $val -eq 11 ]]; then
             mpc search date "$date" album "$album" albumartist "$artist" | mpc insert
             entry="$TRACK"
@@ -992,17 +989,6 @@ TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${i
 }
 
 AddAlbumTags() {
-    if [[ -z $album_temp ]]; then
-        loadCacheAlbums > /dev/null
-    else
-        echo "re-using track list from memory"
-#        unset tracks_temp
-#        export tracks_temp=${tracks_temp} > /dev/null
-    fi
-
-menu="0  Return to Browse Menu
----
-${album_temp}"
 
 help_text=$(echo -e "${add}: Add - ${insert}: Insert - ${replace}: Replace (Default)\n${rate}: Rate - ${addplay}: Add + Play - ${insertplay}: Insert + Play" | column -s '-' -t)
 
@@ -1012,7 +998,7 @@ HELP="<span color='$help_color'>${line1}
 ${line2}</span>"
 
 
-TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")
+TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/albums.cache) | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")
 
     val=$?
 
@@ -1028,9 +1014,11 @@ TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${i
         unset line
         AddAlbumTags
     else
-        artist=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
-        date=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
-        album=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
+        artist=$(echo -en "$TRACK" | awk -F "\t" '{print $1}' | sed -e 's/[[:space:]]*$//')
+        group2=$(echo -en "$TRACK" | awk -F '\t' '{print $2}'| sed -e 's/[[:space:]]*$//')
+        album=$(echo "$group2" | awk -F " - " '{print $2}')
+        date=$(echo "$group2" | awk -F " - " '{print $1}' | awk '{print substr($0, 2, length($0) - 2)}')
+        echo -e "artist: ${artist}\ndate: ${date}\nalbum: ${album}"
 
         if [[ $val -eq 11 ]]; then
             mpc find date "$date" album "$album" albumartist "$artist" | mpc insert
@@ -1075,17 +1063,13 @@ TRACK_TEMP=$(echo -e "${menu}" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${i
 }
 
 AddTrackTags() {
-    if [[ -z $tracks_temp ]]; then
-        loadCacheTracks > /dev/null
-    else
-        echo "re-using track list from memory"
+#    if [[ -z $tracks_temp ]]; then
+#        loadCacheTracks > /dev/null
+#    else
+#        echo "re-using track list from memory"
 #        unset tracks_temp
 #        export tracks_temp=${tracks_temp} > /dev/null
-    fi
-
-menu="0  Return to Browse Menu
----
-${tracks_temp}"
+#    fi
 
 help_text=$(echo -e "${add}: Add (Default) - ${insert}: Insert - ${replace}: Replace\n${rate}: Rate - ${addplay}: Add + Play - ${insertplay}: Insert + Play" | column -s '-' -t)
 line1=$(echo "${help_text}" | head -1)
@@ -1094,7 +1078,7 @@ HELP="<span color='$help_color'>${line1}
 ${line2}</span>"
 
 
-TRACK_TEMP=$(echo -e "$menu" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "${HELP}" -p "Choose Track > ")
+TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/tracks.cache) | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "${HELP}" -p "Choose Track > ")
 
     val=$?
 
@@ -1109,33 +1093,40 @@ TRACK_TEMP=$(echo -e "$menu" | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${ins
     elif [[ "$TRACK" == "${add}: Add | ${insert}: Insert | ${replace}: Replace | ${rate}: Rate" ]]; then
         AddTrackTags
     else
-        artist=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
-        date=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
-        album=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
-        track=$(echo "$TRACK" | awk -F "$separator" '{print $4}')
-        title=$(echo "$TRACK" | awk -F "$separator" '{print $5}')
+        group1=$(echo -en "$TRACK" | awk -F "\t" '{print $1}' | sed -e 's/[[:space:]]*$//')
+        artist=$(echo -ne "$group1" | awk -F " - " '{print $1}')
+        date=$(echo -ne "$group1" | awk -F " - " '{print $2}' | awk '{print substr($0, 2, length($0) - 2)}')
+        album=$(echo -ne "$group1" | awk -F " - " '{print $2}')
+        group2=$(echo -en "$TRACK" | awk -F "\t" '{print $2}' | sed -e 's/[[:space:]]*$//')
+        track=$(echo -ne "$group2" | awk -F " - " '{print $1}')
+        title=$(echo -en "$group2" | awk -F " - " '{print $2}')
+        filename=$(echo "$TRACK" | awk -F "\t" '{print $3}')
 
+        echo -e "artist: ${artist}\nalbum: ${album}\ntitle: ${title}\ntrack: ${track}\ndate: ${date}\ngroup1: ${group1}\ngroup2: ${group2}"
         if [[ $val -eq 11 ]]; then
-            mpc find artist "$artist" album "$album" title "$title" date "$date" | mpc insert
+            mpc insert "${filename}"
             entry="$TRACK"
 
         elif [[ $val -eq 12 ]]; then
             mpc clear
-            mpc findadd artist "$artist" album "$album" title "$title" date "$date"
+            mpc add "${filename}"
             mpc play
             entry="$TRACK"
 
         elif [[ $val -eq 0 || $val -eq 10 ]]; then
-            mpc findadd artist "$artist" album "$album" title "$title" date "$date"
+            #mpc findadd artist "$artist" album "$album" title "$title" date "$date"
+            mpc add "${filename}"
             entry="$TRACK"
 
         elif [[ $val -eq 13 ]]; then
-            mpc findadd artist "$artist" album "$album" title "$title" date "$date"
+            mpc add "${filename}"
             mpc searchplay "${title}"
+            entry="$TRACK"
 
         elif [[ $val -eq 14 ]]; then
-            mpc find artist "$artist" album "$album" title "$title" date "$date" | mpc insert
+            mpc insert "${filename}"
             mpc searchplay "${title}"
+            entry="$TRACK"
 
         elif [[ $val -eq 17 ]]; then
             rateartist="${artist}" ratealbum="${album}" ratetrack="${track}" ratetitle="${title}" rateTrack
