@@ -120,7 +120,7 @@ def createCache(args):
         taglist = ['date', 'artist', 'albumartist', 'album', 'track', 'title', 'file']
         track.update([(k, reduceToFstElm(v)) for (k, v) in track.items() if k in taglist])       
 
-        tracklist.append(track['artist']+" - ("+track['date']+") - "+track['album']+"\t"+track['track']+" - "+track['title']+"\t"+track['file'])
+        tracklist.append(track['track']+" "+track['title']+"\tby "+track['artist']+" on "+track['album']+" ("+track['date']+")\t"+track['file'])
 #
     with open(os.getenv('HOME')+'/.config/clerk/tracks.cache', "w") as cache_file:
         for track in tracklist:
