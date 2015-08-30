@@ -1227,7 +1227,7 @@ browseLibPrompt() {
           "---"
           "4 Play Random Album"
           "5 Play Random Tracks" 
-          "0  Update Album/Track Cache")
+          "6 Update Album/Track Cache")
 
     prompt() {
         printf "%s\n" "$@" | dmenu_t -auto-select -p "Library Menu > "
@@ -1236,7 +1236,7 @@ browseLibPrompt() {
     case "$(prompt "${menu[@]}")" in
         1*) AddAlbumTags ;;
         2*) AddTrackTags ;;
-        0*) updateCache && browseLibPrompt ;;
+        6*) updateCache && browseLibPrompt ;;
         \<*) dplayPrompt ;;
         3*) addLastMod ;;
         4*) playRandomAlbum ;;
