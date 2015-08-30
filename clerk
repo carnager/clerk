@@ -264,7 +264,7 @@ currentMenu () {
     if [[ -z $(mpc current) ]]; then
         menu_temp=$(echo -e "< Return" | rofi -dmenu -p "No Music is playing")
     else
-        menu_temp=$((echo -e "0 Return to Main Menu\n---"; getAlbums; echo -e "---"; getTracks) | rofi -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -dmenu -format "f¬s" -filter "$filter" -select "$entry" -mesg "<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace</span>" -p "Other Music by $(mpc current -f '%artist%') > ")
+        menu_temp=$((echo -e "< Return\n---"; getAlbums; echo -e "---"; getTracks) | rofi -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -dmenu -format "f¬s" -filter "$filter" -select "$entry" -mesg "<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace</span>" -p "Other Music by $(mpc current -f '%artist%') > ")
 
         # for some reason directly defining $val wasnt working. Using a
         # temporary variable instead.
