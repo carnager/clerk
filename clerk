@@ -724,7 +724,7 @@ resumePlaylist () {
 dplayQueue () {
     while true; do
         if [[ -z $POS ]]; then
-            TRACKDISPLAY=$(echo -e "0  Return to Main Menu\n---\n$(mpc playlist --format '%position%\t%title%\tby %artist% on %album% (%date%)' | sed 's,^\([^\t]*\t[^\t]\{40\}\)[^\t]*,\1…,' | column -o ' ' -s $'\t' -t)" | rofi -custom-kb-1 "${play}" -custom-kb-2 "${delete}" -custom-kb-3 "${rate}" -dmenu -selected-row $POS -mesg "<span color='$help_color'>${play}: Play, ${delete}: Delete, ${rate}: Rate</span>" -p "Current Queue > ")
+            TRACKDISPLAY=$(echo -e "0  Return to Main Menu\n---\n$(mpc playlist --format '%position%\t%title%\t(by %artist% on %album% (%date%))' | sed 's,^\([^\t]*\t[^\t]\{40\}\)[^\t]*,\1…,' | column -o ' ' -s $'\t' -t)" | rofi -custom-kb-1 "${play}" -custom-kb-2 "${delete}" -custom-kb-3 "${rate}" -dmenu -selected-row $POS -mesg "<span color='$help_color'>${play}: Play, ${delete}: Delete, ${rate}: Rate</span>" -p "Current Queue > ")
         else
             # check if POS is a number. if it is, add 4 to it. POS is later
             # exported from song ID in playlist.
@@ -734,7 +734,7 @@ dplayQueue () {
             else
                 POS=0
             fi
-            TRACKDISPLAY=$(echo -e "0  Return to Main Menu\n---\n$(mpc playlist --format '%position%\t%title%\tby %artist% on %album% (%date%)' | sed 's,^\([^\t]*\t[^\t]\{40\}\)[^\t]*,\1…,' | column -o ' ' -s $'\t' -t)" | rofi -custom-kb-1 "${play}" -custom-kb-2 "${delete}" -custom-kb-3 "${rate}" -dmenu -selected-row $POS -mesg "<span color='$help_color'>${play}: Play, ${delete}: Delete, ${rate}: Rate</span>" -p "Current Queue > ")
+            TRACKDISPLAY=$(echo -e "0  Return to Main Menu\n---\n$(mpc playlist --format '%position%\t%title%\t(by %artist% on %album% (%date%))' | sed 's,^\([^\t]*\t[^\t]\{40\}\)[^\t]*,\1…,' | column -o ' ' -s $'\t' -t)" | rofi -custom-kb-1 "${play}" -custom-kb-2 "${delete}" -custom-kb-3 "${rate}" -dmenu -selected-row $POS -mesg "<span color='$help_color'>${play}: Play, ${delete}: Delete, ${rate}: Rate</span>" -p "Current Queue > ")
 
         fi
 
