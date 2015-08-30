@@ -81,6 +81,7 @@ fix_date_format() {
 
 
 updateCache () {
+    notify-send "clerk" "updating cache files"
     cd $HOME/.config/clerk
     rm -f *.cache
     mpc --format '[%mtime%\t%albumartist%|%artist%] - (%date%) - %album%' \
@@ -88,12 +89,12 @@ updateCache () {
         | grep -v '^ — ' \
         | grep -v ' — $' \
         | uniq \
-        | fix_date_format 1 '%Y-%m-%d' \
+        | fix_date_format 1 '%Y-%m-%d-%H:%M:%S' \
         | sort -u \
         | sort -nr \
         | awk '{for (i=2; i<NF; i++) printf $i " "; print $NF}' \
         | awk -F ' - ' '{ print $1 "\t" $2 " - " $3 }' \
-        | sed 's,^\([^\t]*\t[^\t]\{40\}\)[^\t]*,\1,' | column -o ' ' -s $'\t' -t > $HOME/.config/clerk/latest.cache
+        | sed 's,^\([^\t]*\t[^\t]\{40\}\)[^\t]*,\1,' | column -o ' ' -s $'\t' -t | uniq > $HOME/.config/clerk/latest.cache
     mpc --format '[%albumartist%|%artist%]\t(%date%) - %album%' \
         search filename '' \
         | grep -v '^ - ' \
@@ -108,21 +109,18 @@ updateCache () {
         | uniq \
         | sed 's,^\([^\t]\{40\}\)[^\t]*,\1…,' | column -o $'\t' -s $'\t' -t \
         > $HOME/.config/clerk/tracks.cache
+    notify-send "clerk" "finished updating cache files"
 }
 
 # check if clerk_helper process is running. if it isn't update cache files, if
 # needed
-if [[ $(ps x| grep clerk_helper | head -1 | grep -v 'grep') ]]; then
+date=$(mpc stats | grep 'DB Updated: ')
+file="$HOME/.config/clerk/.lastupdate"
+if [ "$(< $file)" = "$date" ] && [ -f "$file" ] ; then
     :
 else
-    date=$(mpc stats | grep 'DB Updated: ')
-    file="$HOME/.config/clerk/.lastupdate"
-    if [ "$(< $file)" = "$date" ] && [ -f "$file" ] ; then
-        :
-    else
-        updateCache
-        echo "${date}" > "${file}"
-    fi
+    updateCache
+    echo "${date}" > "${file}"
 fi
 
 export separator="$separator"
