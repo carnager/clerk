@@ -84,7 +84,7 @@ updateCache () {
     notify-send "clerk" "updating cache files"
     cd $HOME/.config/clerk
     rm -f *.cache
-    mpc --format '[%mtime%\t%albumartist%|%artist%] - (%date%) - %album%' \
+    mpc --format '[%mtime%\t%albumartist%|%artist%] — (%date%) — %album%' \
         search filename '' \
         | grep -v '^ — ' \
         | grep -v ' — $' \
@@ -93,19 +93,19 @@ updateCache () {
         | sort -u \
         | sort -nr \
         | awk '{for (i=2; i<NF; i++) printf $i " "; print $NF}' \
-        | awk -F ' - ' '{ print $1 "\t" $2 " - " $3 }' \
+        | awk -F ' — ' '{ print $1 "\t" $2 " — " $3 }' \
         | sed 's,^\([^\t]*\t[^\t]\{40\}\)[^\t]*,\1,' | column -o $'\t' -s $'\t' -t | uniq > $HOME/.config/clerk/latest.cache
-    mpc --format '[%albumartist%|%artist%]\t(%date%) - %album%' \
+    mpc --format '[%albumartist%|%artist%]\t(%date%) — %album%' \
         search filename '' \
-        | grep -v '^ - ' \
-        | grep -v ' - $' \
+        | grep -v '^ — ' \
+        | grep -v ' — $' \
         | sort \
         | uniq \
         | column -o $'\t' -s $'\t' -t > $HOME/.config/clerk/albums.cache
     mpc --format '[[%title%\t[(by %artist%[ on %album%])]]|[%file%]]\t%file%' \
         search filename '' \
-        | grep -v '^ - ' \
-        | grep -v ' - $' \
+        | grep -v '^ — ' \
+        | grep -v ' — $' \
         | uniq \
         | sed 's,^\([^\t]\{40\}\)[^\t]*,\1…,' | column -o $'\t' -s $'\t' -t \
         > $HOME/.config/clerk/tracks.cache
@@ -1005,8 +1005,8 @@ TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/l
     else
         artist=$(echo -en "$TRACK" | awk -F '\t' '{ print $1 }' | sed -e 's/[[:space:]]*$//')
         group2=$(echo -en "$TRACK" | awk -F '\t' '{ print $2 }' | sed -e 's/[[:space:]]*$//')
-        album=$(echo "$group2" | awk -F " - " '{print $2}')
-        date=$(echo "$group2" | awk -F " - " '{print $1}' | awk '{print substr($0, 2, length($0) - 2)}')
+        album=$(echo "$group2" | awk -F " — " '{print $2}')
+        date=$(echo "$group2" | awk -F " — " '{print $1}' | awk '{print substr($0, 2, length($0) - 2)}')
 
         echo -e "${TRACK}\nartist: ${artist}\nalbum: ${album}\ndate: ${date}"
 
@@ -1077,10 +1077,10 @@ TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/a
         unset line
         AddAlbumTags
     else
-        artist=$(echo -en "$TRACK" | awk -F "\t" '{print $1}' | sed -e 's/[[:space:]]*$//')
+        artist=$(echo -en "$TRACK" | awk -F '\t' '{print $1}' | sed -e 's/[[:space:]]*$//')
         group2=$(echo -en "$TRACK" | awk -F '\t' '{print $2}'| sed -e 's/[[:space:]]*$//')
-        album=$(echo "$group2" | awk -F " - " '{print $2}')
-        date=$(echo "$group2" | awk -F " - " '{print $1}' | awk '{print substr($0, 2, length($0) - 2)}')
+        album=$(echo "$group2" | awk -F " — " '{print $2}')
+        date=$(echo "$group2" | awk -F " — " '{print $1}' | awk '{print substr($0, 2, length($0) - 2)}')
         echo -e "artist: ${artist}\ndate: ${date}\nalbum: ${album}"
 
         if [[ $val -eq 11 ]]; then
