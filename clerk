@@ -163,10 +163,7 @@ dplayPrompt () {
           "3 [ Current Queue ]>"
           "---"
           "4 [ Options ]>"
-          "5 [ Ratings ]>"
-          "---"
-          "6 Play random Album"
-          "7 Play random Songs")
+          "5 [ Ratings ]>")
 
     menu=$(printf "%s\n" "${menu[@]}" | rofi -dmenu -lines 17 -mesg "<span color='$help_color'>${toggle}: Toggle Playback, ${prev}: Prev, ${next}: Next, ${stop}: Stop</span>" -auto-select -p "Now Playing: ${song} > ")
 
@@ -188,10 +185,6 @@ dplayPrompt () {
 
     if [[ "$menu" == "< Exit" ]]; then
         exit
-    elif [[ "$menu" == "6 "* ]]; then
-        playRandomAlbum
-    elif [[ "$menu" == "7 "* ]]; then
-        playRandomTracks
     elif [[ "$menu" == "2 "* ]]; then
         currentMenu
     elif [[ "$menu" == "3 "* ]]; then
@@ -659,7 +652,7 @@ dplayQueue () {
 
         echo "$POS"
 
-        help_text=$(echo -e "${play}: Play - ${delete}: Delete - ${crop}: Crop - ${clear}: Clear - ${rate}: Rate\n${load}: Load - ${rss}: RSS - ${save}: Save - ${suspend}: Suspend - ${resume}: Resume" | column -s '-' -t)
+        help_text=$(echo -e "${delete}: Delete - ${crop}: Crop - ${clear}: Clear - ${rate}: Rate\n${load}: Load - ${rss}: RSS - ${save}: Save - ${suspend}: Suspend - ${resume}: Resume" | column -s '-' -t)
         line1=$(echo "${help_text}" | head -1)
         line2=$(echo "${help_text}" | tail -1)
 HELP="<span color='$help_color'>${line1}
@@ -1226,12 +1219,14 @@ TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/t
 }
 
 browseLibPrompt() {
-    menu=("Q  Return to Main Menu"
+    menu=("< Return to Main Menu"
           "---"
-          "1  Choose Albums"
-          "2  Choose Track"
-          "3  Browse latest additions"
+          "1 Choose Albums>"
+          "2 Choose Track"
+          "3 Browse latest additions"
           "---"
+          "4 Play Random Album"
+          "5 Play Random Tracks" 
           "0  Update Album/Track Cache")
 
     prompt() {
@@ -1242,8 +1237,10 @@ browseLibPrompt() {
         1*) AddAlbumTags ;;
         2*) AddTrackTags ;;
         0*) updateCache && browseLibPrompt ;;
-        Q*) dplayPrompt ;;
+        \<*) dplayPrompt ;;
         3*) addLastMod ;;
+        4*) playRandomAlbum ;;
+        5*) playRandomTracks ;;
         *) exit
     esac
 }
