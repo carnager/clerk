@@ -791,8 +791,8 @@ dplayQueueSave () {
             if [[ "$playlist" == "" ]]; then
                 dplayQueueSave
             else
-            mpc save "$playlist"
-            dplayQueue
+                mpc save "$playlist"
+                dplayQueue
             fi
         else
             playlist=$(echo -e "0  Return to Playlist Menu\n---\nYes\nNo" | dmenu_t -p "Overwrite Playlist? > ")
@@ -815,14 +815,20 @@ dplayQueueSave () {
 
 # enable/disable outputs
 outputPrompt () {
-    menu="$(echo -e "0  Return to Options Menu\n---\n$(mpc outputs)" | dmenu_t -p "Outputs > ")";
+    menu="$(echo -e "0  Return to Options Menu\n---\n$(mpc outputs)" \
+        | dmenu_t -p "Outputs > ")";
+
     if [[ "$menu" == "0  Return to Options Menu" ]]
         then dplayOptionsPrompt;
         elif [[ "$menu" == "" ]]; then
             exit
     else
-        mpc toggleoutput $(echo "$menu" | awk '{print $2}');
-        notify-send "MPD" "$(echo "$menu" | $sed -e 's/enabled$/disabled/;ta;s/disabled$/enabled/;:a;')";
+        mpc toggleoutput $(echo "$menu" \
+            | awk '{print $2}');
+
+        notify-send "MPD" "$(echo "$menu" \
+            | $sed -e 's/enabled$/disabled/;ta;s/disabled$/enabled/;:a;')";
+
         outputPrompt
     fi
 }
@@ -847,17 +853,22 @@ rateAlbum () {
                 track="01"
             fi
             disc=$(mpc current -f '%disc%')
-            export disc=${disc}; export track=${track}; clerk_helper ratealbum "${artist}" "${album}" "${date}" "${rating}"
+            export disc=${disc}
+            export track=${track}
+            clerk_helper ratealbum "${artist}" "${album}" "${date}" "${rating}"
             notify-send "clerk" "rated ${artist} - ${album} with ${rating}"
         else
-            export disc=${disc}; export track=${track}; clerk_helper ratealbum "${rateartist}" "${ratealbum}" "${ratedate}" "${rating}"
+            export disc=${disc}
+            export track=${track}
+            clerk_helper ratealbum "${rateartist}" "${ratealbum}" "${ratedate}" "${rating}"
             notify-send "clerk" "rated ${rateartist} - ${ratealbum} with ${rating}"
         fi
     fi
 }
 
 rateTrack () {
-    rating="$(seq 10 | dmenu_t -p "Select Track Rating: > ")"
+    rating="$(seq 10 \
+        | dmenu_t -p "Select Track Rating: > ")"
 
     if [[ $rating == "" ]]; then
         exit
@@ -868,6 +879,7 @@ rateTrack () {
             ratetitle=$(mpc current -f '%title%')
             ratetrack=$(mpc current -f '%track%')
             ratealbum=$(mpc current -f '%album%')
+
             clerk_helper ratetrack "${rateartist}" "${ratealbum}" "${ratetrack}" "${ratetitle}" "${rating}"
             notify-send "clerk" "rated $(mpc current) with $(echo ${rating})"
         else
@@ -892,16 +904,25 @@ instantRateTrack () {
 # load rated albums with minimum rating of xx
 loadRatedAlbums () {
     rating="$(seq 10 | dmenu_t -p "Minimum Rating > ")"
+
     if [[ $rating == "" ]]; then
-            exit
+        exit
     else
         albums="$(while read -a line; do
             dirname "${line[*]}";
-        done <<< "$(mpc sticker "" find albumrating | grep -E "albumrating=$rating")" | $sed 's/\/\CD.*//g' | sort | uniq | dmenu_t -p "Choose Album > ")"
+        done <<< "$(mpc sticker "" find albumrating \
+            | grep -E "albumrating=$rating")" \
+            | $sed 's/\/\CD.*//g' \
+            | sort \
+            | uniq \
+            | dmenu_t -p "Choose Album > ")"
+
         if [[ $albums == "" ]]; then
             exit
         else
-        mpc clear && mpc add "$albums" && mpc play
+            mpc clear;
+            mpc add "$albums";
+            mpc play
 
         fi
     fi
@@ -929,13 +950,18 @@ loadRandomRatedTracks () {
     else
         cd $HOME/.config/clerk
         mpc clear
-        songs="$(mpc sticker "" find rating | grep -E "rating=$rating|rating=$(echo $(( $rating + 1 )))|rating=$(echo $(( $rating + 2 )))|rating=$(echo $(( $rating + 3 )))|rating=$(echo $(( $rating + 4 )))" | awk -F ':' '{ print $1 }')"
-        echo "$songs" | $shuf -n $number | mpc add
+        songs="$(mpc sticker "" find rating \
+            | grep -E "rating=$rating|rating=$(echo $(( $rating + 1 )))|rating=$(echo $(( $rating + 2 )))|rating=$(echo $(( $rating + 3 )))|rating=$(echo $(( $rating + 4 )))" \
+            | awk -F ':' '{ print $1 }')"
+
+        echo "$songs" \
+            | $shuf -n $number \
+            | mpc add
+
         mpc play
         rm -f /tmp/clerk_tracklist
     fi
 }
-
 
 loadRandomRating () {
     rating="$(seq 10 | dmenu_t -p "Minimum Rating > ")"
@@ -944,8 +970,14 @@ loadRandomRating () {
     else
         album="$(while read -a line; do
             dirname "${line[*]}";
-        done <<< "$(mpc sticker "" find albumrating | grep -E "albumrating=$rating|albumrating=$(echo $(( $rating+1 )))|albumrating=$(echo $(( $rating+2 )))|albumrating=$(echo $(( $rating+3 )))|albumrating=$(echo $(( $rating+4 )))|albumrating=$(echo $(( $rating+5 )))|albumrating=$(echo $(( $rating+6 )))")" | $sed 's/\/\CD.*//g' | $shuf -n1)"
-        mpc clear && mpc add "$album" && mpc play
+        done <<< "$(mpc sticker "" find albumrating \
+            | grep -E "albumrating=$rating|albumrating=$(echo $(( $rating+1 )))|albumrating=$(echo $(( $rating+2 )))|albumrating=$(echo $(( $rating+3 )))|albumrating=$(echo $(( $rating+4 )))|albumrating=$(echo $(( $rating+5 )))|albumrating=$(echo $(( $rating+6 )))")" \
+            | $sed 's/\/\CD.*//g' \
+            | $shuf -n1)"
+
+        mpc clear;
+        mpc add "$album";
+        mpc play
     fi
 }
 
@@ -955,7 +987,8 @@ playRandomAlbum () {
     mpc clear > /dev/null
     artist="$(mpc list "albumartist" | $shuf -n 1)"
     album="$(mpc list album "albumartist" "$artist" | $shuf -n 1)"
-    mpc find album "$album" "albumartist" "$artist" | mpc add && mpc play > /dev/null
+    mpc findadd album "$album" "albumartist" "$artist";
+    mpc play > /dev/null
 }
 
 # same for tracks, no artist should be preferred because it has more tracks.
@@ -964,14 +997,14 @@ playRandomTracks () {
     artist="$(mpc list "$random_artist" | $shuf -n 1)"
     album="$(mpc list album "$random_artist" "$artist" | $shuf -n 1)"
     title="$(mpc list title album "$album" "$random_artist" "$artist" | $shuf -n 1)"
-    mpc find album "$album" "$random_artist" "$artist" title "$title" | mpc add
+    mpc findadd album "$album" "$random_artist" "$artist" title "$title";
     mpc play > /dev/null
-    n=0; while (( n++ < $value -1 ));
-    do
+
+    n=0; while (( n++ < $value -1 )); do
         artist="$(mpc list "$random_artist" | $shuf -n 1)"
         album="$(mpc list album "$random_artist" "$artist" | $shuf -n 1)"
         title="$(mpc list title album "$album" "$random_artist" "$artist" | $shuf -n 1)"
-        mpc find album "$album" "$random_artist" "$artist" title "$title" | mpc add
+        mpc findadd album "$album" "$random_artist" "$artist" title "$title"
     done
     mpc play > /dev/null
     exit
@@ -987,7 +1020,8 @@ ${line2}</span>"
 #HELP="<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate
 #${addplay}: Add &amp; Play, ${insertplay}: Insert &amp; Play</span>"
 
-TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/latest.cache) | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -select "$entry" -filter "$filter" -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")
+TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/latest.cache) \
+    | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -select "$entry" -filter "$filter" -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")
 
     val=$?
 
@@ -996,30 +1030,39 @@ TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/l
     export filter="${TRACK_TEMP%¬*}"
 
 
-    if [[ "$TRACK" == "0  Return to Browse Menu" ]]
-        then browseLibPrompt
+    if [[ "$TRACK" == "0  Return to Browse Menu" ]]; then
+        browseLibPrompt
     elif [[ -z "$TRACK" ]]; then
         exit
     elif [[ "$TRACK" == "${add}: Add, ${insert}: Insert, ${replace}: Replace (Default)" ]]; then
         addLastMod
     else
-        artist=$(echo -en "$TRACK" | awk -F '\t' '{ print $1 }' | sed -e 's/[[:space:]]*$//')
-        group2=$(echo -en "$TRACK" | awk -F '\t' '{ print $2 }' | sed -e 's/[[:space:]]*$//')
-        album=$(echo "$group2" | awk -F " — " '{print $2}')
-        date=$(echo "$group2" | awk -F " — " '{print $1}' | awk '{print substr($0, 2, length($0) - 2)}')
+        artist=$(echo -en "$TRACK" \
+            | awk -F '\t' '{ print $1 }' \
+            | sed -e 's/[[:space:]]*$//')
+        group2=$(echo -en "$TRACK" \
+            | awk -F '\t' '{ print $2 }' \
+            | sed -e 's/[[:space:]]*$//')
+        album=$(echo "$group2" \
+            | awk -F " — " '{print $2}')
+        date=$(echo "$group2" \
+            | awk -F " — " '{print $1}' \
+            | awk '{print substr($0, 2, length($0) - 2)}')
 
         echo -e "${TRACK}\nartist: ${artist}\nalbum: ${album}\ndate: ${date}"
 
         if [[ $val -eq 11 ]]; then
             mpc search date "$date" album "$album" albumartist "$artist" | mpc insert
             entry="$TRACK"
+
         elif [[ $val -eq 0 || $val -eq 12 ]]; then
             echo "return code is 13"
-            mpc clear && mpc search date "$date" album "$album" albumartist "$artist" | mpc add
+            mpc clear;
+            mpc searchadd date "$date" album "$album" albumartist "$artist";
             mpc play
             entry="$TRACK"
         elif [[ $val -eq 10 ]]; then
-            mpc search date "$date" album "$album" albumartist "$artist" | mpc add
+            mpc searchadd date "$date" album "$album" albumartist "$artist";
 
         elif [[ $val -eq 13 ]]; then
             mpc findadd date "$date" album "$album" albumartist "$artist"
@@ -1040,9 +1083,9 @@ TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/l
                 entry="$TRACK"
 
         elif [[ $val -eq 14 ]]; then
-            mpc clear && mpc find date "$date" album "$album" albumartist "$artist" | mpc add
+            mpc clear;
+            mpc findadd date "$date" album "$album" albumartist "$artist";
             mpc searchplay "${album}"
-
            entry="$TRACK"
         elif [[ $val -eq 1 ]]; then
             exit
@@ -1061,7 +1104,8 @@ HELP="<span color='$help_color'>${line1}
 ${line2}</span>"
 
 
-TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/albums.cache) | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")
+TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/albums.cache) \
+    | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")
 
     val=$?
 
@@ -1072,15 +1116,22 @@ TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/a
     if [[ "$TRACK" == "0  Return to Browse Menu" ]]; then
         browseLibPrompt
     elif [[ -z "$TRACK" ]]; then
-            exit
+        exit
     elif [[ "$TRACK" == "${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate" ]]; then
         unset line
         AddAlbumTags
     else
-        artist=$(echo -en "$TRACK" | awk -F '\t' '{print $1}' | sed -e 's/[[:space:]]*$//')
-        group2=$(echo -en "$TRACK" | awk -F '\t' '{print $2}'| sed -e 's/[[:space:]]*$//')
-        album=$(echo "$group2" | awk -F " — " '{print $2}')
-        date=$(echo "$group2" | awk -F " — " '{print $1}' | awk '{print substr($0, 2, length($0) - 2)}')
+        artist=$(echo -en "$TRACK" \
+            | awk -F '\t' '{print $1}' \
+            | sed -e 's/[[:space:]]*$//')
+        group2=$(echo -en "$TRACK" \
+            | awk -F '\t' '{print $2}' \
+            | sed -e 's/[[:space:]]*$//')
+        album=$(echo "$group2" \
+            | awk -F " — " '{print $2}')
+        date=$(echo "$group2" \
+            | awk -F " — " '{print $1}' \
+            | awk '{print substr($0, 2, length($0) - 2)}')
         echo -e "artist: ${artist}\ndate: ${date}\nalbum: ${album}"
 
         if [[ $val -eq 11 ]]; then
@@ -1088,7 +1139,8 @@ TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/a
             entry="$TRACK"
 
         elif [[ $val -eq 0 || $val -eq 12 ]]; then
-            mpc clear && mpc find date "$date" album "$album" albumartist "$artist" | mpc add
+            mpc clear;
+            mpc findadd date "$date" album "$album" albumartist "$artist";
             mpc play
             entry="$TRACK"
 
@@ -1107,15 +1159,16 @@ TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/a
                 entry="$TRACK"
 
         elif [[ $val -eq 10 ]]; then
-            mpc search date "$date" album "$album" albumartist "$artist" | mpc add
+            mpc searchadd date "$date" album "$album" albumartist "$artist";
             entry="$TRACK"
 
         elif [[ $val -eq 14 ]]; then
-            mpc findadd date "$date" album "$album" albumartist "$artist"
+            mpc findadd date "$date" album "$album" albumartist "$artist";
             mpc searchplay "${album}"
 
         elif [[ $val -eq 15 ]]; then
-            mpc clear && mpc find date "$date" album "$album" albumartist "$artist" | mpc add
+            mpc clear;
+            mpc findadd date "$date" album "$album" albumartist "$artist";
             mpc searchplay "${album}"
 
         elif [[ $val -eq 1 ]]; then
@@ -1126,22 +1179,17 @@ TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/a
 }
 
 AddTrackTags() {
-#    if [[ -z $tracks_temp ]]; then
-#        loadCacheTracks > /dev/null
-#    else
-#        echo "re-using track list from memory"
-#        unset tracks_temp
-#        export tracks_temp=${tracks_temp} > /dev/null
-#    fi
-
-help_text=$(echo -e "${add}: Add (Default) - ${insert}: Insert - ${replace}: Replace\n${rate}: Rate - ${addplay}: Add + Play - ${insertplay}: Insert + Play" | column -s '-' -t)
-line1=$(echo "${help_text}" | head -1)
-line2=$(echo "${help_text}" | tail -1)
+    help_text=$(echo -e "${add}: Add (Default) - ${insert}: Insert - ${replace}: Replace \
+        \n${rate}: Rate - ${addplay}: Add + Play - ${insertplay}: Insert + Play" \
+        | column -s '-' -t)
+    line1=$(echo "${help_text}" | head -1)
+    line2=$(echo "${help_text}" | tail -1)
 HELP="<span color='$help_color'>${line1}
 ${line2}</span>"
 
 
-TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/tracks.cache) | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "${HELP}" -p "Choose Track > ")
+TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/tracks.cache) \
+    | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "${HELP}" -p "Choose Track > ")
 
     val=$?
     TRACK="${TRACK_TEMP#*¬}"
@@ -1165,13 +1213,12 @@ TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/t
             entry="$TRACK"
 
         elif [[ $val -eq 12 ]]; then
-            mpc clear
-            mpc add "${filename}"
+            mpc clear;
+            mpc add "${filename}";
             mpc play
             entry="$TRACK"
 
         elif [[ $val -eq 0 || $val -eq 10 ]]; then
-            #mpc findadd artist "$artist" album "$album" title "$title" date "$date"
             mpc add "${filename}"
             entry="$TRACK"
 
@@ -1187,11 +1234,17 @@ TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/t
 
         elif [[ $val -eq 17 ]]; then
             info=$(mpc search --format '%artist%\t%album%\t%date%\t%track%\t%title%' filename "${filename}")
-            artist="$(echo "$info" | awk -F '\t' '{ print $1 }')"
-            album="$(echo "$info" | awk -F '\t' '{ print $2 }')"
-            date="$(echo "$info" | awk -F '\t' '{ print $3 }')"
-            track="$(echo "$info" | awk -F '\t' '{ print $4 }')"
-            title="$(echo "$info" | awk -F '\t' '{ print $5 }')"
+            artist="$(echo "$info" \
+                | awk -F '\t' '{ print $1 }')"
+            album="$(echo "$info" \
+                | awk -F '\t' '{ print $2 }')"
+            date="$(echo "$info" \
+                | awk -F '\t' '{ print $3 }')"
+            track="$(echo "$info" \
+                | awk -F '\t' '{ print $4 }')"
+            title="$(echo "$info" \
+                | awk -F '\t' '{ print $5 }')"
+
             echo "${artist} ${album} ${date} ${track} ${title}"
             rateartist="${artist}" ratealbum="${album}" ratetrack="${track}" ratetitle="${title}" rateTrack
             entry="$TRACK"
@@ -1211,13 +1264,15 @@ HELP="<span color='$help_color'>${line1}
 ${line2}</span>"
 
 
-    date=$(echo -e "0  Return to Browse Menu\n---\n$(mpc list date | $tac)" | dmenu_t -mesg "${HELP}" -dmenu -p "Choose Date > ")
+    date=$(echo -e "0  Return to Browse Menu\n---\n$(mpc list date | $tac)" \
+        | dmenu_t -mesg "${HELP}" -dmenu -p "Choose Date > ")
     val=$?
+
     if [[ $val -eq 0 ]]; then
-        if [[ "$date" == "0  Return to Browse Menu" ]]
-            then browseLibPrompt
-            else
-        browseDateAdd
+        if [[ "$date" == "0  Return to Browse Menu" ]]; then
+            browseLibPrompt
+        else
+            browseDateAdd
         fi
     elif [[ $val -eq 10 ]]; then
         mpc findadd date "${date}"
@@ -1228,7 +1283,9 @@ ${line2}</span>"
         browseDate
 
     elif [[ $val -eq 12 ]]; then
-        mpc clear; mpc findadd date "${date}"; mpc play
+        mpc clear;
+        mpc findadd date "${date}";
+        mpc play;
         browseDate
 
     elif [[ $val -eq 13 ]]; then
@@ -1250,15 +1307,12 @@ line2=$(echo "${help_text}" | tail -1)
 HELP="<span color='$help_color'>${line1}
 ${line2}</span>"
 
-
-    menu=("0  Return to Date Menu"
-            "---"
-            "$(mpc --format "%albumartist%$separator%album%" find date "$date" | uniq)")
-
     if [[ -z $line ]]; then
-        select_temp=$(printf "%s\n" "${menu[@]}" | rofi -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -format "i¬s" -mesg "${HELP}" -p "Select Album > ")
+        select_temp=$((echo -e "0  Return to Date Menu\n---"; mpc --format "%albumartist%$separator%album%" find date "$date" | uniq) \
+            | rofi -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -format "i¬s" -mesg "${HELP}" -p "Select Album > ")
     else
-        select_temp=$(printf "%s\n" "${menu[@]}" | rofi -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -selected-row $(( $line + 1 )) -format "i¬s" -mesg "${HELP}" -p "Select Album > ")
+        select_temp=$((echo -e "0  Return to Date Menu\n---"; mpc --format "%albumartist%$separator%album%" find date "$date" | uniq) \
+            | rofi -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -selected-row $(( $line + 1 )) -format "i¬s" -mesg "${HELP}" -p "Select Album > ")
     fi
 
     val=$?
@@ -1272,16 +1326,19 @@ ${line2}</span>"
     album=$(echo "$select" | awk -F "$separator" '{print $2}')
 
     if [[ "$val" -eq 13 ]]; then
-        mpc findadd date "$date" artist "${artist}" album "${album}"
-        mpc searchplay "${album}"
+        mpc findadd date "$date" artist "${artist}" album "${album}";
+        mpc searchplay "${album}";
         browseDateAdd
+
     elif [[ "$val" -eq 15 ]]; then
-        mpc clear && mpc findadd date "$date" artist "${artist}" album "${album}"
+        mpc clear;
+        mpc findadd date "$date" artist "${artist}" album "${album}";
         mpc searchplay "${album}"
         browseDateAdd
+
     elif [[ "$val" -eq 14 ]]; then
-        mpc find date "$date" artist "${artist}" album "${album}" | mpc insert
-        mpc searchplay "${album}"
+        mpc find date "$date" artist "${artist}" album "${album}" | mpc insert;
+        mpc searchplay "${album}";
         browseDateAdd
     fi
 
@@ -1289,14 +1346,17 @@ ${line2}</span>"
         then browseDate
     else
         if [[ "$val" -eq 10 ]]; then
-            mpc findadd date "$date" artist "$artist" album "$album"
+            mpc findadd date "$date" artist "$artist" album "$album";
             browseDateAdd
 
         elif [[ "$val" -eq 11 ]]; then
-            mpc find date "$date" artist "$artist" album "$album" | mpc insert
+            mpc find date "$date" artist "$artist" album "$album" | mpc insert;
             browseDateAdd
+
         elif [[ "$val" -eq 12 || "$val" -eq 0 ]]; then
-            mpc clear && mpc findadd date "$date" artist "$artist" album "$album" && mpc play
+            mpc clear;
+            mpc findadd date "$date" artist "$artist" album "$album";
+            mpc play;
             browseDateAdd
 
         elif [[ "$val" -eq 1 ]]; then
