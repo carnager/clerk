@@ -159,7 +159,7 @@ dplayPrompt () {
     menu=("< Exit"
           "---"
           "1 [ Browse Library ]>"
-          "2 [ Current Artist]>"
+          "2 [ Current Artist ]>"
           "3 [ Current Queue ]>"
           "---"
           "4 [ Options ]>"
@@ -591,43 +591,13 @@ crossfadePrompt () {
     esac
 }
 
-managePlaylists () {
-    menu=("< Return"
-          "---"
-          "1 Load Playlist"
-          "2 Save Playlist"
-          "3 Load RSS Feed"
-          "4 Crop Playlist"
-          "---"
-          "5 Suspend Playlist"
-          "6 Resume Playlist"
-          "---"
-          "7 Clear Playlist")
-
-    prompt() {
-        printf "%s\n" "$@" | dmenu_t -auto-select -p "Playlists > "
-    }
-
-    case "$(prompt "${menu[@]}")" in
-        \<*) dplayPrompt ;;
-        1*) dplayQueueLoad ;;
-        2*) dplayQueueSave ;;
-        3*) loadRSS ;;
-        4*) mpc crop && dplayQueue ;;
-        5*) suspendPlaylist ;;
-        6*) resumePlaylist ;;
-        7*) mpc clear ;;
-        *) exit
-    esac
-}
-
 # read list of available podcasts. Not using mpd playlists, because mpd does
 # not support custom names for urls. format of podcast in file is "Name \ URL"
 loadRSS () {
     mpc clear
-    podcast=$(echo -e "0  Return to Playlist Menu\n---\n$(cat $HOME/.config/clerk/podcasts | cut -d '\' -f1)" | dmenu_t -p "Choose Podcast > ")
-    if [[ $podcast == "0  Return to Playlist Menu" ]]; then
-        managePlaylists
+    podcast=$(echo -e "< Return\n---\n$(cat $HOME/.config/clerk/podcasts | cut -d '\' -f1)" | dmenu_t -p "Choose Podcast > ")
+    if [[ $podcast == "< Return" ]]; then
+        dplayQueue
     else
         mpc load $(grep "$podcast" $HOME/.config/clerk/podcasts | cut -d '\' -f2)
         episode=$(mpc playlist --format "%position%$separator%artist%$separator%title%" | dmenu_t -p "Choose Episode > ")
@@ -656,7 +626,7 @@ suspendPlaylist () {
             echo " "
         fi
             notify-send "Clerk" "Playlist suspended"
-            managePlaylists
+            dplayQueue
     fi
 }
 
@@ -673,7 +643,7 @@ resumePlaylist () {
     mpc seek "$time"
     mpc toggle
     notify-send "Clerk" "Resumed last-suspended Playlist"
-    managePlaylists
+    dplayQueue
 }
 
 # Play or delete items from current Queue
@@ -689,7 +659,7 @@ dplayQueue () {
 
         echo "$POS"
 
-        help_text=$(echo -e "${play}: Play - ${delete}: Delete - ${crop}: Crop\n${save}: Save - ${clear}: Clear - ${rate}: Rate" | column -s '-' -t)
+        help_text=$(echo -e "${play}: Play - ${delete}: Delete - ${crop}: Crop - ${clear}: Clear - ${rate}: Rate\n${load}: Load - ${rss}: RSS - ${save}: Save - ${suspend}: Suspend - ${resume}: Resume" | column -s '-' -t)
         line1=$(echo "${help_text}" | head -1)
         line2=$(echo "${help_text}" | tail -1)
 HELP="<span color='$help_color'>${line1}
@@ -701,14 +671,14 @@ songs () {
         | column -o ' ' -s $'\t' -t
 }
 
-        TRACKDISPLAY=$(echo -e "0  Return to Main Menu\n---\n$(songs)" | rofi -kb-custom-1 "${play}" -kb-custom-2 "${delete}" -kb-custom-3 "${rate}" -kb-custom-4 "${save}" -kb-custom-5 "${crop}" -kb-custom-6 "${clear}" -dmenu $(echo "${select}") -mesg "${HELP}" -p "Current Queue > ")
+        TRACKDISPLAY=$(echo -e "0  Return to Main Menu\n---\n$(songs)" | rofi -kb-custom-1 "${delete}" -kb-custom-2 "${rate}" -kb-custom-3 "${save}" -kb-custom-4 "${crop}" -kb-custom-5 "${clear}" -kb-custom-6 "${load}" -kb-custom-7 "${rss}" -kb-custom-8 "${suspend}" -kb-custom-9 "${resume}" -dmenu $(echo "${select}") -mesg "${HELP}" -p "Current Queue > ")
 
         tempval=$?
         val=$tempval
 
         POS=$(echo "${TRACKDISPLAY}" | awk '{ print $1 }')
 
-        if [[ $val -eq 11 ]]; then
+        if [[ $val -eq 10 ]]; then
             mpc del $POS;
             POS=$(( $POS - 1));
             dplayQueue
@@ -716,19 +686,31 @@ songs () {
         elif [[ $val -eq 1 ]]; then
             exit
 
-        elif [[ $val -eq 14 ]]; then
+        elif [[ $val -eq 13 ]]; then
             mpc play $POS;
             mpc crop
 
-        elif [[ $val -eq 13 ]]; then
-            dplayQueueSave
+        elif [[ $val -eq 16 ]]; then
+            loadRSS
 
         elif [[ $val -eq 15 ]]; then
+            dplayQueueLoad
+
+        elif [[ $val -eq 17 ]]; then
+            suspendPlaylist
+
+        elif [[ $val -eq 18 ]]; then
+            resumePlaylist
+
+        elif [[ $val -eq 12 ]]; then
+            dplayQueueSave
+
+        elif [[ $val -eq 14 ]]; then
             if [[ $TRACKDISPLAY == *""* ]]; then
                 mpc clear
             fi
 
-        elif [[ $val -eq 0 || $val -eq 10 ]]; then
+        elif [[ $val -eq 0 ]]; then
             if [[ $TRACKDISPLAY == *"Main Menu"* ]]; then
                 dplayPrompt
             else
@@ -761,9 +743,9 @@ songs () {
 
 # show all mpd playlists and load them to queue
 dplayQueueLoad () {
-    playlist=$(echo -e "0  Return to Playlist Menu\n---\n$(mpc lsplaylists)" | dmenu_t -p "Load Playlist > ")
-    if [[ "$playlist" == "0  Return to Playlist Menu" ]]; then
-        managePlaylists
+    playlist=$(echo -e "< Return\n---\n$(mpc lsplaylists)" | dmenu_t -p "Load Playlist > ")
+    if [[ "$playlist" == "< Return" ]]; then
+        dplayQueue
     else
         mpc clear
         mpc load "$playlist" && dplayQueue
@@ -774,7 +756,7 @@ dplayQueueLoad () {
 dplayQueueSave () {
     while read playlists
     do
-        if [[ "$playlists" == "0  Return to Main Menu" ]]; then
+        if [[ "$playlists" == "< Return" ]]; then
             dplayPrompt
         elif [[ "$playlists" == "Save new Playlist" ]]; then
             playlist=$(echo "" | dmenu_t -p "Type Name for Playlist > ")
@@ -799,7 +781,7 @@ dplayQueueSave () {
                 fi
             fi
         fi
-    done < <(echo -e "0  Return to Main Menu\n---\nSave new Playlist\n---\n$(mpc lsplaylists)" | dmenu_t -p "Choose Playlist > ")
+    done < <(echo -e "< Return\n---\nSave new Playlist\n---\n$(mpc lsplaylists)" | dmenu_t -p "Choose Playlist > ")
     exit
 }
 
@@ -1482,9 +1464,6 @@ while :; do
         --rss)
             loadRSS
             break
-            ;;
-        --manage)
-            managePlaylists
             ;;
         --playlist)
             if [[ $2 == savealbum ]]; then
