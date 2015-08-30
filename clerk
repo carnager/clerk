@@ -710,7 +710,7 @@ songs () {
                 mpc play $POS;
             fi
 
-        elif [[ $val -eq 12 ]]; then
+        elif [[ $val -eq 11 ]]; then
 
             filename=$(mpc playlist --format '%position%\t%file%' | grep "^${POS}" | awk -F '\t' '{ print $2 }') 
             info=$(mpc --format '%artist%\t%album%\t%date%\t%track%\t%title%' search filename "${filename}")
@@ -1227,6 +1227,7 @@ browseLibPrompt() {
           "---"
           "4 Play Random Album"
           "5 Play Random Tracks" 
+          "---"
           "6 Update Album/Track Cache")
 
     prompt() {
