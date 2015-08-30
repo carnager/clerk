@@ -832,11 +832,12 @@ rateAlbum () {
 }
 
 rateTrack () {
-    rating="$(seq 10 \
-        | dmenu_t -p "Select Track Rating: > ")"
+    rating="$(echo -e "< Return\n---\n$(seq 10)" | dmenu_t -p "Select Track Rating: > ")"
 
     if [[ $rating == "" ]]; then
         exit
+    elif [[ $rating == "< Return" ]]; then
+        dplayQueue
     else
         if [[ -z "$rateartist" ]]; then
             export rating=${rating}
