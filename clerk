@@ -277,6 +277,10 @@ currentMenu () {
         unset filter
         export filter="${menu_temp%¬*}"
 
+        if [[ $menu == "< Return" ]]; then
+            dplayPrompt
+        fi
+
         if [[ $(echo "${menu}" | awk -F '\t' '{ print $1 }') == "("* ]]; then
             item="Album"
         elif [[ $(echo "${menu}" | awk -F '\t' '{ print $1 }') != *"(" ]]; then
@@ -319,10 +323,6 @@ currentMenu () {
             currentMenu
         elif [[ -z "$menu" ]]; then
             exit
-        elif [[ "$menu" == "${add}: Add, ${insert}: Insert, ${replace}: Replace" ]]; then
-            currentMenu
-        elif [[ $menu == "< Return" ]]; then
-            dplayPrompt
         fi
     fi
 }
