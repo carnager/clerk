@@ -19,7 +19,7 @@ if [[ -f $HOME/.config/clerk2/config ]]; then
     source $HOME/.config/clerk2/config
 fi
 
-# check for clerk_helper2 config. Create if needed.
+# check for ./clerk_helper2 config. Create if needed.
 if [[ -f $HOME/.config/clerk2/helper_config ]]; then
     :
 else
@@ -44,7 +44,7 @@ fi
 updateCache () {
     cd $HOME/.config/clerk2
     rm -f *.cache
-    clerk_helper2 createcache
+    ./clerk_helper2 createcache
     cat tracks.cache | sed 's,^\([^\t]*\t[^\t]\{40\}\)[^\t]*,\1,' | column -o ' ' -s $'\t' -t > tracks.cache.new
     mv tracks.cache.new tracks.cache
     cat latest.cache | column -o $'\t' -s $'\t' -t > latest.cache.new
@@ -53,9 +53,9 @@ updateCache () {
     mv albums.cache.new albums.cache
 }
 
-# check if clerk_helper2 process is running. if it isn't update cache files, if
+# check if ./clerk_helper2 process is running. if it isn't update cache files, if
 # needed
-if [[ $(ps x| grep clerk_helper2 | head -1 | grep -v 'grep') ]]; then
+if [[ $(ps x| grep ./clerk_helper2 | head -1 | grep -v 'grep') ]]; then
     :
 else
     date=$(mpc stats | grep 'DB Updated: ')
@@ -246,8 +246,8 @@ browseFilesystem () {
 
 # Show Albums and Tracks by currently playing artist
 currentMenu () {
-    albums=$(clerk_helper2 getartistalbums "$(mpc current -f '%artist%')")
-    titles=$(clerk_helper2 getartisttracks "$(mpc current -f '%artist%')")
+    albums=$(./clerk_helper2 getartistalbums "$(mpc current -f '%artist%')")
+    titles=$(./clerk_helper2 getartisttracks "$(mpc current -f '%artist%')")
 
     if [[ -z $(mpc current) ]]; then
         menu=$(echo -e "0 Return to Main Menu" | rofi -dmenu -p "No Music is playing")
@@ -364,9 +364,9 @@ backupPrompt () {
     }
 
     case "$(prompt "${menu[@]}")" in
-        1*) clerk_helper2 importalbumratings & ;;
-        2*) clerk_helper2 importtrackratings & ;;
-        3*) clerk_helper2 sendstickers & ;;
+        1*) ./clerk_helper2 importalbumratings & ;;
+        2*) ./clerk_helper2 importtrackratings & ;;
+        3*) ./clerk_helper2 sendstickers & ;;
         0*) ratingPrompt ;;
           *) exit
     esac
@@ -451,7 +451,7 @@ readComments () {
         elif [[ "$line" == "" ]]; then
             return
         fi
-    done < <(echo -e "0  Return to Main Menu\n---\nShow Tags\n---\n$(mpc current --format '%file%' | clerk_helper2 readcomments)" | dmenu_t -p 'Current Song > ')
+    done < <(echo -e "0  Return to Main Menu\n---\nShow Tags\n---\n$(mpc current --format '%file%' | ./clerk_helper2 readcomments)" | dmenu_t -p 'Current Song > ')
 
     if [[  $seen = 0 ]]
     then
@@ -792,10 +792,10 @@ rateAlbum () {
                 track="01"
             fi
             disc=$(mpc current -f '%disc%')
-            export disc=${disc}; export track=${track}; clerk_helper2 ratealbum "${artist}" "${album}" "${date}" "${rating}"
+            export disc=${disc}; export track=${track}; ./clerk_helper2 ratealbum "${artist}" "${album}" "${date}" "${rating}"
             notify-send "clerk" "rated ${artist} - ${album} with ${rating}"
         else
-            export disc=${disc}; export track=${track}; clerk_helper2 ratealbum "${rateartist}" "${ratealbum}" "${ratedate}" "${rating}"
+            export disc=${disc}; export track=${track}; ./clerk_helper2 ratealbum "${rateartist}" "${ratealbum}" "${ratedate}" "${rating}"
             notify-send "clerk" "rated ${rateartist} - ${ratealbum} with ${rating}"
         fi
     fi
@@ -813,10 +813,10 @@ rateTrack () {
             ratetitle=$(mpc current -f '%title%')
             ratetrack=$(mpc current -f '%track%')
             ratealbum=$(mpc current -f '%album%')
-            clerk_helper2 ratetrack "${rateartist}" "${ratealbum}" "${ratetrack}" "${ratetitle}" "${rating}"
+            ./clerk_helper2 ratetrack "${rateartist}" "${ratealbum}" "${ratetrack}" "${ratetitle}" "${rating}"
             notify-send "clerk" "rated $(mpc current) with $(echo ${rating})"
         else
-            clerk_helper2 ratetrack "${rateartist}" "${ratealbum}" "${ratetrack}" "${ratetitle}" "${rating}"
+            ./clerk_helper2 ratetrack "${rateartist}" "${ratealbum}" "${ratetrack}" "${ratetitle}" "${rating}"
             notify-send "clerk" "rated ${rateartist} - ${ratetitle} with $(echo ${rating})"
         fi
     fi
@@ -830,7 +830,7 @@ instantRateTrack () {
      ratetrack=$(mpc current -f '%track%')
      ratealbum=$(mpc current -f '%album%')
      export rating=$1
-     clerk_helper2 ratetrack "${rateartist}" "${ratealbum}" "${ratetrack}" "${ratetitle}" "${rating}"
+     ./clerk_helper2 ratetrack "${rateartist}" "${ratealbum}" "${ratetrack}" "${ratetitle}" "${rating}"
      notify-send "clerk" "rated ${rateartist} - ${ratetitle} with $(echo ${rating})"
 }
 
@@ -1744,7 +1744,7 @@ saveAlbumToPlaylist() {
             artist=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
             date=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
             album=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
-            mpc search date "$date" album "$album" albumartist "$artist" | clerk_helper2 saveto
+            mpc search date "$date" album "$album" albumartist "$artist" | ./clerk_helper2 saveto
         fi
     done < <(echo -e "0  Return to Main Menu\n---\n$(echo "$album_temp")" | dmenu_t -dmenu -p "Save Album to Playlist > ")
 
@@ -1766,7 +1766,7 @@ saveLatestToPlaylist() {
             artist=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
             date=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
             album=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
-            mpc search date "$date" album "$album" albumartist "$artist" | clerk_helper2 saveto
+            mpc search date "$date" album "$album" albumartist "$artist" | ./clerk_helper2 saveto
         fi
     done < <(echo -e "0  Return to Main Menu\n---\n$(echo "$last_temp")" | dmenu_t -dmenu -p "Save Album to Playlist > ")
 
@@ -1788,7 +1788,7 @@ saveTrackToPlaylist() {
             track=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
             album=$(echo "$TRACK" | awk -F "$separator" '{print $4}')
             title=$(echo "$TRACK" | awk -F "$separator" '{print $5}')
-            mpc search track "$track" album "$album" title "$title" albumartist "$artist" | clerk_helper2 saveto
+            mpc search track "$track" album "$album" title "$title" albumartist "$artist" | ./clerk_helper2 saveto
         fi
     done < <(echo -e "0  Return to Main Menu\n---\n$(echo "$tracks_temp")" | dmenu_t -dmenu -p "Save Track to Playlist > ")
 
