@@ -1221,7 +1221,7 @@ TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/t
 browseLibPrompt() {
     menu=("< Return to Main Menu"
           "---"
-          "1 Choose Albums>"
+          "1 Choose Albums"
           "2 Choose Track"
           "3 Browse latest additions"
           "---"
