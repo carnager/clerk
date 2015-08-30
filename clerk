@@ -3,8 +3,8 @@
 shopt -s globstar
 
 # check for config files
-if [[ ! -f $HOME/.config/clerk2/config ]] && [[ ! -f /etc/clerk ]]; then
-    echo "Error: could not find configuration file \"$HOME/.config/clerk2/config\""
+if [[ ! -f $HOME/.config/clerk/config ]] && [[ ! -f /etc/clerk ]]; then
+    echo "Error: could not find configuration file \"$HOME/.config/clerk/config\""
     echo "You can use the provided example configuration file (config.clerk), copy it to the above location and edit it to your needs."
 	exit
 fi
@@ -15,20 +15,20 @@ if [[ -f /etc/clerk.conf ]]; then
 fi
 
 # read local config file
-if [[ -f $HOME/.config/clerk2/config ]]; then
-    source $HOME/.config/clerk2/config
+if [[ -f $HOME/.config/clerk/config ]]; then
+    source $HOME/.config/clerk/config
 fi
 
-# check for ./clerk_helper2 config. Create if needed.
-if [[ -f $HOME/.config/clerk2/helper_config ]]; then
+# check for clerk_helper config. Create if needed.
+if [[ -f $HOME/.config/clerk/helper_config ]]; then
     :
 else
-    echo "[global]" > $HOME/.config/clerk2/helper_config
-	echo "separator = " $separator "" >> $HOME/.config/clerk2/helper_config
-    echo "music_path = "$music_path"" >> $HOME/.config/clerk2/helper_config
-    echo " " >> $HOME/.config/clerk2/helper_config
-    echo "[updater]" >> $HOME/.config/clerk2/helper_config
-    echo "change_db = xxx" >> $HOME/.config/clerk2/helper_config
+    echo "[global]" > $HOME/.config/clerk/helper_config
+	echo "separator = " $separator "" >> $HOME/.config/clerk/helper_config
+    echo "music_path = "$music_path"" >> $HOME/.config/clerk/helper_config
+    echo " " >> $HOME/.config/clerk/helper_config
+    echo "[updater]" >> $HOME/.config/clerk/helper_config
+    echo "change_db = xxx" >> $HOME/.config/clerk/helper_config
 fi
 
 echo "$backend"
@@ -81,7 +81,7 @@ fix_date_format() {
 
 
 updateCache () {
-    cd $HOME/.config/clerk2
+    cd $HOME/.config/clerk
     rm -f *.cache
     mpc --format '[%mtime%\t%albumartist%|%artist%] - (%date%) - %album%' \
         search filename '' \
@@ -93,30 +93,30 @@ updateCache () {
         | sort -nr \
         | awk '{for (i=2; i<NF; i++) printf $i " "; print $NF}' \
         | awk -F ' - ' '{ print $1 "\t" $2 " - " $3 }' \
-        | sed 's,^\([^\t]*\t[^\t]\{40\}\)[^\t]*,\1,' | column -o ' ' -s $'\t' -t > $HOME/.config/clerk2/latest.cache
+        | sed 's,^\([^\t]*\t[^\t]\{40\}\)[^\t]*,\1,' | column -o ' ' -s $'\t' -t > $HOME/.config/clerk/latest.cache
     mpc --format '[%albumartist%|%artist%]\t(%date%) - %album%' \
         search filename '' \
         | grep -v '^ - ' \
         | grep -v ' - $' \
         | sort \
         | uniq \
-        | column -o $'\t' -s $'\t' -t > $HOME/.config/clerk2/albums.cache
+        | column -o $'\t' -s $'\t' -t > $HOME/.config/clerk/albums.cache
     mpc --format '[[%title%\t[(by %artist%[ on %album%])]]|[%file%]]\t%file%' \
         search filename '' \
         | grep -v '^ - ' \
         | grep -v ' - $' \
         | uniq \
         | sed 's,^\([^\t]\{40\}\)[^\t]*,\1…,' | column -o $'\t' -s $'\t' -t \
-        > $HOME/.config/clerk2/tracks.cache
+        > $HOME/.config/clerk/tracks.cache
 }
 
-# check if ./clerk_helper2 process is running. if it isn't update cache files, if
+# check if clerk_helper process is running. if it isn't update cache files, if
 # needed
-if [[ $(ps x| grep ./clerk_helper2 | head -1 | grep -v 'grep') ]]; then
+if [[ $(ps x| grep clerk_helper | head -1 | grep -v 'grep') ]]; then
     :
 else
     date=$(mpc stats | grep 'DB Updated: ')
-    file="$HOME/.config/clerk2/.lastupdate"
+    file="$HOME/.config/clerk/.lastupdate"
     if [ "$(< $file)" = "$date" ] && [ -f "$file" ] ; then
         :
     else
@@ -129,21 +129,21 @@ export separator="$separator"
 
 # load cache files into variables to speed up access
 loadCacheAlbums () {
-if [[ -f $HOME/.config/clerk2/albums.cache ]]; then
-    album_temp=$(cat $HOME/.config/clerk2/albums.cache)
+if [[ -f $HOME/.config/clerk/albums.cache ]]; then
+    album_temp=$(cat $HOME/.config/clerk/albums.cache)
 fi
 }
 
 loadCacheLatest () {
-if [[ -f $HOME/.config/clerk2/latest.cache ]]; then
-    last_temp=$(cat $HOME/.config/clerk2/latest.cache)
+if [[ -f $HOME/.config/clerk/latest.cache ]]; then
+    last_temp=$(cat $HOME/.config/clerk/latest.cache)
 fi
 }
 
 
 loadCacheTracks () {
-if [[ -f $HOME/.config/clerk2/tracks.cache ]]; then
-    tracks_temp=$(cat $HOME/.config/clerk2/tracks.cache)
+if [[ -f $HOME/.config/clerk/tracks.cache ]]; then
+    tracks_temp=$(cat $HOME/.config/clerk/tracks.cache)
 fi
 }
 
@@ -303,8 +303,8 @@ browseFilesystem () {
 
 # Show Albums and Tracks by currently playing artist
 currentMenu () {
-    albums=$(./clerk_helper2 getartistalbums "$(mpc current -f '%artist%')")
-    titles=$(./clerk_helper2 getartisttracks "$(mpc current -f '%artist%')")
+    albums=$(clerk_helper getartistalbums "$(mpc current -f '%artist%')")
+    titles=$(clerk_helper getartisttracks "$(mpc current -f '%artist%')")
 
     if [[ -z $(mpc current) ]]; then
         menu=$(echo -e "0 Return to Main Menu" | rofi -dmenu -p "No Music is playing")
@@ -421,9 +421,9 @@ backupPrompt () {
     }
 
     case "$(prompt "${menu[@]}")" in
-        1*) ./clerk_helper2 importalbumratings & ;;
-        2*) ./clerk_helper2 importtrackratings & ;;
-        3*) ./clerk_helper2 sendstickers & ;;
+        1*) clerk_helper importalbumratings & ;;
+        2*) clerk_helper importtrackratings & ;;
+        3*) clerk_helper sendstickers & ;;
         0*) ratingPrompt ;;
           *) exit
     esac
@@ -464,15 +464,15 @@ infoPrompt () {
 }
 
 lyrics () {
-    rm -f $HOME/.config/clerk2/current.txt
-    glyrc lyrics -a "$(mpc current --format '%artist%')" -t "$(mpc current --format '%title%')" -w "$HOME/.config/clerk2/current.txt"
-    fold "$HOME/.config/clerk2/current.txt" -w 50 -s | dmenu_t -p "$(mpc current --format '%artist% - %title%') Lyrics >"
+    rm -f $HOME/.config/clerk/current.txt
+    glyrc lyrics -a "$(mpc current --format '%artist%')" -t "$(mpc current --format '%title%')" -w "$HOME/.config/clerk/current.txt"
+    fold "$HOME/.config/clerk/current.txt" -w 50 -s | dmenu_t -p "$(mpc current --format '%artist% - %title%') Lyrics >"
 }
 
 artistinfo () {
-    rm -f $HOME/.config/clerk2/artist.txt
-    glyrc artistbio -a "$(mpc current --format '%artist%')" -w "$HOME/.config/clerk2/artist.txt"
-    fold "$HOME/.config/clerk2/artist.txt" -s -w 50 | dmenu_t -p "$(mpc current --format '%artist% - %title%') Lyrics >"
+    rm -f $HOME/.config/clerk/artist.txt
+    glyrc artistbio -a "$(mpc current --format '%artist%')" -w "$HOME/.config/clerk/artist.txt"
+    fold "$HOME/.config/clerk/artist.txt" -s -w 50 | dmenu_t -p "$(mpc current --format '%artist% - %title%') Lyrics >"
 }
 
 currentTag () {
@@ -508,7 +508,7 @@ readComments () {
         elif [[ "$line" == "" ]]; then
             return
         fi
-    done < <(echo -e "0  Return to Main Menu\n---\nShow Tags\n---\n$(mpc current --format '%file%' | ./clerk_helper2 readcomments)" | dmenu_t -p 'Current Song > ')
+    done < <(echo -e "0  Return to Main Menu\n---\nShow Tags\n---\n$(mpc current --format '%file%' | clerk_helper readcomments)" | dmenu_t -p 'Current Song > ')
 
     if [[  $seen = 0 ]]
     then
@@ -606,7 +606,7 @@ mpdSima () {
 # function to change number of random songs in config file
 optionRandomPrompt() {
     number="$(echo " " | dmenu_t -p 'Set No. of Songs for random Songs > ')"
-    $sed -i "s/value=.*/value="$number"/" $HOME/.config/clerk2/config
+    $sed -i "s/value=.*/value="$number"/" $HOME/.config/clerk/config
     export value="$number"
     dplayOptionsPrompt
 }
@@ -671,11 +671,11 @@ managePlaylists () {
 # not support custom names for urls. format of podcast in file is "Name \ URL"
 loadRSS () {
     mpc clear
-    podcast=$(echo -e "0  Return to Playlist Menu\n---\n$(cat $HOME/.config/clerk2/podcasts | cut -d '\' -f1)" | dmenu_t -p "Choose Podcast > ")
+    podcast=$(echo -e "0  Return to Playlist Menu\n---\n$(cat $HOME/.config/clerk/podcasts | cut -d '\' -f1)" | dmenu_t -p "Choose Podcast > ")
     if [[ $podcast == "0  Return to Playlist Menu" ]]; then
         managePlaylists
     else
-        mpc load $(grep "$podcast" $HOME/.config/clerk2/podcasts | cut -d '\' -f2)
+        mpc load $(grep "$podcast" $HOME/.config/clerk/podcasts | cut -d '\' -f2)
         episode=$(mpc playlist --format "%position%$separator%artist%$separator%title%" | dmenu_t -p "Choose Episode > ")
         POS=$(echo "$episode" | awk -F "$separator" '{ print $1 }')
         mpc play "$POS"
@@ -683,7 +683,7 @@ loadRSS () {
 }
 
 # suspend current playlist. playlist, song id and play-position are saved to
-# $HOME/.config/clerk2/suspend
+# $HOME/.config/clerk/suspend
 suspendPlaylist () {
     playing=$(! mpc status | grep 'playing\|paused')
     time=$(mpc status | $sed '2!d;s;/.:.*;;;s;.* ;;')
@@ -693,9 +693,9 @@ suspendPlaylist () {
     else
         mpc rm suspended
         mpc save suspended
-        rm -f $HOME/.config/clerk2/suspend
-        echo "pos="$position"" >> $HOME/.config/clerk2/suspend
-        echo "time="$time"" >> $HOME/.config/clerk2/suspend
+        rm -f $HOME/.config/clerk/suspend
+        echo "pos="$position"" >> $HOME/.config/clerk/suspend
+        echo "time="$time"" >> $HOME/.config/clerk/suspend
         if [[ "$stop_after_suspend" == yes ]]; then
             mpc stop
         else
@@ -706,11 +706,11 @@ suspendPlaylist () {
     fi
 }
 
-# read $HOME/.config/clerk2/suspend and restore playlist. Then start playing
+# read $HOME/.config/clerk/suspend and restore playlist. Then start playing
 # from same position that was saved in suspend file
 resumePlaylist () {
     http=$(! mpc current --format %file% | grep 'http://')
-    source $HOME/.config/clerk2/suspend
+    source $HOME/.config/clerk/suspend
     mpc clear
     mpc load suspended
     mpc play $pos
@@ -849,10 +849,10 @@ rateAlbum () {
                 track="01"
             fi
             disc=$(mpc current -f '%disc%')
-            export disc=${disc}; export track=${track}; ./clerk_helper2 ratealbum "${artist}" "${album}" "${date}" "${rating}"
+            export disc=${disc}; export track=${track}; clerk_helper ratealbum "${artist}" "${album}" "${date}" "${rating}"
             notify-send "clerk" "rated ${artist} - ${album} with ${rating}"
         else
-            export disc=${disc}; export track=${track}; ./clerk_helper2 ratealbum "${rateartist}" "${ratealbum}" "${ratedate}" "${rating}"
+            export disc=${disc}; export track=${track}; clerk_helper ratealbum "${rateartist}" "${ratealbum}" "${ratedate}" "${rating}"
             notify-send "clerk" "rated ${rateartist} - ${ratealbum} with ${rating}"
         fi
     fi
@@ -870,10 +870,10 @@ rateTrack () {
             ratetitle=$(mpc current -f '%title%')
             ratetrack=$(mpc current -f '%track%')
             ratealbum=$(mpc current -f '%album%')
-            ./clerk_helper2 ratetrack "${rateartist}" "${ratealbum}" "${ratetrack}" "${ratetitle}" "${rating}"
+            clerk_helper ratetrack "${rateartist}" "${ratealbum}" "${ratetrack}" "${ratetitle}" "${rating}"
             notify-send "clerk" "rated $(mpc current) with $(echo ${rating})"
         else
-            ./clerk_helper2 ratetrack "${rateartist}" "${ratealbum}" "${ratetrack}" "${ratetitle}" "${rating}"
+            clerk_helper ratetrack "${rateartist}" "${ratealbum}" "${ratetrack}" "${ratetitle}" "${rating}"
             notify-send "clerk" "rated ${rateartist} - ${ratetitle} with $(echo ${rating})"
         fi
     fi
@@ -887,7 +887,7 @@ instantRateTrack () {
      ratetrack=$(mpc current -f '%track%')
      ratealbum=$(mpc current -f '%album%')
      export rating=$1
-     ./clerk_helper2 ratetrack "${rateartist}" "${ratealbum}" "${ratetrack}" "${ratetitle}" "${rating}"
+     clerk_helper ratetrack "${rateartist}" "${ratealbum}" "${ratetrack}" "${ratetitle}" "${rating}"
      notify-send "clerk" "rated ${rateartist} - ${ratetitle} with $(echo ${rating})"
 }
 
@@ -915,7 +915,7 @@ loadRatedTracks () {
     if [ rating = "" ]; then
         exit
     else
-        cd $HOME/.config/clerk2
+        cd $HOME/.config/clerk
         mpc clear
         songs="$(mpc sticker "" find rating | awk -F 'rating=' '{ print $2 }')"
         echo "$songs" | mpc add
@@ -929,7 +929,7 @@ loadRandomRatedTracks () {
     if [ rating = "" ]; then
         exit
     else
-        cd $HOME/.config/clerk2
+        cd $HOME/.config/clerk
         mpc clear
         songs="$(mpc sticker "" find rating | grep -E "rating=$rating|rating=$(echo $(( $rating + 1 )))|rating=$(echo $(( $rating + 2 )))|rating=$(echo $(( $rating + 3 )))|rating=$(echo $(( $rating + 4 )))" | awk -F ':' '{ print $1 }')"
         echo "$songs" | $shuf -n $number | mpc add
@@ -989,7 +989,7 @@ ${line2}</span>"
 #HELP="<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate
 #${addplay}: Add &amp; Play, ${insertplay}: Insert &amp; Play</span>"
 
-TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk2/latest.cache) | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -select "$entry" -filter "$filter" -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")
+TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/latest.cache) | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -select "$entry" -filter "$filter" -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")
 
     val=$?
 
@@ -1060,7 +1060,7 @@ HELP="<span color='$help_color'>${line1}
 ${line2}</span>"
 
 
-TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk2/albums.cache) | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")
+TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/albums.cache) | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")
 
     val=$?
 
@@ -1140,7 +1140,7 @@ HELP="<span color='$help_color'>${line1}
 ${line2}</span>"
 
 
-TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk2/tracks.cache) | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "${HELP}" -p "Choose Track > ")
+TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/tracks.cache) | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "${HELP}" -p "Choose Track > ")
 
     val=$?
     TRACK="${TRACK_TEMP#*¬}"
@@ -1801,7 +1801,7 @@ saveAlbumToPlaylist() {
             artist=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
             date=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
             album=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
-            mpc search date "$date" album "$album" albumartist "$artist" | ./clerk_helper2 saveto
+            mpc search date "$date" album "$album" albumartist "$artist" | clerk_helper saveto
         fi
     done < <(echo -e "0  Return to Main Menu\n---\n$(echo "$album_temp")" | dmenu_t -dmenu -p "Save Album to Playlist > ")
 
@@ -1823,7 +1823,7 @@ saveLatestToPlaylist() {
             artist=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
             date=$(echo "$TRACK" | awk -F "$separator" '{print $1}')
             album=$(echo "$TRACK" | awk -F "$separator" '{print $3}')
-            mpc search date "$date" album "$album" albumartist "$artist" | ./clerk_helper2 saveto
+            mpc search date "$date" album "$album" albumartist "$artist" | clerk_helper saveto
         fi
     done < <(echo -e "0  Return to Main Menu\n---\n$(echo "$last_temp")" | dmenu_t -dmenu -p "Save Album to Playlist > ")
 
@@ -1845,7 +1845,7 @@ saveTrackToPlaylist() {
             track=$(echo "$TRACK" | awk -F "$separator" '{print $2}')
             album=$(echo "$TRACK" | awk -F "$separator" '{print $4}')
             title=$(echo "$TRACK" | awk -F "$separator" '{print $5}')
-            mpc search track "$track" album "$album" title "$title" albumartist "$artist" | ./clerk_helper2 saveto
+            mpc search track "$track" album "$album" title "$title" albumartist "$artist" | clerk_helper saveto
         fi
     done < <(echo -e "0  Return to Main Menu\n---\n$(echo "$tracks_temp")" | dmenu_t -dmenu -p "Save Track to Playlist > ")
 
@@ -2029,7 +2029,7 @@ while :; do
             echo "  --manage                                        manage playlists"
             echo "  --playlist <savealbum, savelast, savetrack>     save selection to playlist \"clerk\""
             echo "  --rss                                           load podcast"
-            echo "    (podcast should be placed in ~/.config/clerk2/podcasts"
+            echo "    (podcast should be placed in ~/.config/clerk/podcasts"
             echo "     with format NAME \ URL)"
             echo ""
             echo "Ratings"
