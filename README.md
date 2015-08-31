@@ -1,5 +1,6 @@
 # clerk
-#### MPD client using bash and rofi
+
+MPD client using bash and rofi
 
 # Screenshot (V3)
 ![Screenshot]
