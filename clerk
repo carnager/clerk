@@ -19,20 +19,6 @@ if [[ -f $HOME/.config/clerk/config ]]; then
     source $HOME/.config/clerk/config
 fi
 
-# check for clerk_helper config. Create if needed.
-if [[ -f $HOME/.config/clerk/helper_config ]]; then
-    :
-else
-    echo "[global]" > $HOME/.config/clerk/helper_config
-	echo "separator = " $separator "" >> $HOME/.config/clerk/helper_config
-    echo "music_path = "$music_path"" >> $HOME/.config/clerk/helper_config
-    echo " " >> $HOME/.config/clerk/helper_config
-    echo "[updater]" >> $HOME/.config/clerk/helper_config
-    echo "change_db = xxx" >> $HOME/.config/clerk/helper_config
-fi
-
-echo "$backend"
-
 # check for scrobbler
 if [[ $scrobbler == mpdas ]]; then
     export scrobbler="mpdas -d"
@@ -122,28 +108,6 @@ else
     updateCache
     echo "${date}" > "${file}"
 fi
-
-export separator="$separator"
-
-# load cache files into variables to speed up access
-loadCacheAlbums () {
-if [[ -f $HOME/.config/clerk/albums.cache ]]; then
-    album_temp=$(cat $HOME/.config/clerk/albums.cache)
-fi
-}
-
-loadCacheLatest () {
-if [[ -f $HOME/.config/clerk/latest.cache ]]; then
-    last_temp=$(cat $HOME/.config/clerk/latest.cache)
-fi
-}
-
-
-loadCacheTracks () {
-if [[ -f $HOME/.config/clerk/tracks.cache ]]; then
-    tracks_temp=$(cat $HOME/.config/clerk/tracks.cache)
-fi
-}
 
 # Use GNU coreutils on OSX
 sed=$([[ "$OSTYPE" == "darwin"* ]] && echo 'gsed' || echo 'sed')
@@ -247,7 +211,6 @@ lastFMCheck () {
 }
 
 currentMenu () {
-
     getAlbums() {
         mpc search -f '(%date%)\t%album%' artist "$(mpc current -f '%artist%')" | uniq | sed 's,^\([^\t\t]\{40\}\)[^\t]*,\1…,' | column -o $'\t' -s $'\t' -t
     }
@@ -412,18 +375,6 @@ infoPrompt () {
     esac
 }
 
-lyrics () {
-    rm -f $HOME/.config/clerk/current.txt
-    glyrc lyrics -a "$(mpc current --format '%artist%')" -t "$(mpc current --format '%title%')" -w "$HOME/.config/clerk/current.txt"
-    fold "$HOME/.config/clerk/current.txt" -w 50 -s | dmenu_t -p "$(mpc current --format '%artist% - %title%') Lyrics >"
-}
-
-artistinfo () {
-    rm -f $HOME/.config/clerk/artist.txt
-    glyrc artistbio -a "$(mpc current --format '%artist%')" -w "$HOME/.config/clerk/artist.txt"
-    fold "$HOME/.config/clerk/artist.txt" -s -w 50 | dmenu_t -p "$(mpc current --format '%artist% - %title%') Lyrics >"
-}
-
 currentTag () {
     declare -i seen=0
     while read line
@@ -554,36 +505,21 @@ mpdSima () {
 
 # function to change number of random songs in config file
 optionRandomPrompt() {
-    number="$(echo " " | dmenu_t -p 'Set No. of Songs for random Songs > ')"
+    number="$(echo -e " " | dmenu_t -p 'Set No. of Songs for random Songs > ')"
     $sed -i "s/value=.*/value="$number"/" $HOME/.config/clerk/config
     export value="$number"
     dplayOptionsPrompt
 }
 
 crossfadePrompt () {
-    menu=("0: Return to Main Menu"
-          "---"
-          "0"
-          "1"
-          "2"
-          "3"
-          "4"
-          "5")
+    menu=$(echo -e "< Return\n---\n0\n1\n2\n3\n4\n5" | rofi -dmenu_t -p "Crossfade")
 
-     prompt() {
-         printf "%s\n" "$@" | dmenu_t -p "Crossfade > "
-     }
-
-     case "$(prompt "${menu[@]}")" in
-         0) mpc crossfade 0 && dplayOptionsPrompt ;;
-         1) mpc crossfade 1 && dplayOptionsPrompt ;;
-         2) mpc crossfade 2 && dplayOptionsPrompt ;;
-         3) mpc crossfade 3 && dplayOptionsPrompt ;;
-         4) mpc crossfade 4 && dplayOptionsPrompt ;;
-         5) mpc crossfade 5 && dplayOptionsPrompt ;;
-         0:*) dplayOptionsPrompt ;;
-           *) exit
-    esac
+    if [[ $menu == "< Return" ]]; then
+        dplayOptionsPrompt
+    else
+        mpc crossfade ${menu};
+        dplayOptionsPrompt
+    fi
 }
 
 # read list of available podcasts. Not using mpd playlists, because mpd does
@@ -1222,7 +1158,7 @@ TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/t
 }
 
 browseLibPrompt() {
-    menu=("< Return to Main Menu"
+    menu=("< Return"
           "---"
           "1 Choose Albums"
           "2 Choose Track"
