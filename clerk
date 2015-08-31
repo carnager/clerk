@@ -648,7 +648,7 @@ TRACKDISPLAY=$(echo -e "< Return\n---\n$(songs)" | rofi -kb-custom-1 "${delete}"
             fi
 
         elif [[ $val -eq 0 ]]; then
-            if [[ $TRACKDISPLAY == *"Main Menu"* ]]; then
+            if [[ $TRACKDISPLAY == "< Return" ]]; then
                 dplayPrompt
             else
                 mpc play $POS;
