@@ -10,7 +10,7 @@
 
 * Play random album
 * Play x random tracks
-* Browse Library (Artist > Album > Tracks, Genre, Date, Latest Additions)
+* Add/Insert/Replace Albums/Songs
 * Manage current Queue
 * Show Albums/Tracks by currently playing Artist and add those to Queue.
 * Enable or disable scrobbling (with support for remote mpdscribble/mpdas)
@@ -20,7 +20,6 @@
 * Load rated albums/tracks
 * Play Similar Songs (based on lastfm)
 * Control mpd options (modes, replaygain, crossfade)
-* Lookup artist/album/lyrics in webbrowser
 
 Written completely functional, nearly every option is accessible
 from command line.
@@ -40,7 +39,6 @@ For this to work, you need a recent rofi build from git.
 
 # Optional Dependencies
 
-* surfraw (for lookup)
 * lastfm-mpd-cli for loving tracks (https://github.com/morendi/lastfm-mpd-cli)
   (Not needed when using mpdas instead of mpdscribble)
 * mpd-sima (for Similar Artists playback)
@@ -64,8 +62,3 @@ All your files need these tags in order for clerk to work as intended:
 * album
 * tracknumber
 * title
-
-Some software (beets, I look at you!) loves to add duplicate tags.
-For example beets adds track and tracknumber tags, no matter what file format
-is handled. MPD will return tracknumber twice for such files.
-I tried to work around most cases, but still. keep your tags clean!
