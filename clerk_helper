@@ -1,26 +1,12 @@
 #!/usr/bin/env python3
 
-from __future__ import print_function
 import sys
-from itertools import groupby
-from dateutil.parser import parse as parseISO8601
 import os
-import notify2
 import json
 import argparse
-import operator
-import fnmatch
-from pprint import pprint
 from mpd import MPDClient
-import configparser
 
 client = MPDClient()
-config = configparser.ConfigParser()
-config.sections()
-config.read(os.getenv('HOME')+'/.config/clerk/helper_config')
-change_db = (config['updater']['change_db'])
-separator = (config['global']['separator'])
-os.environ['separator'] = str(" "+separator+" ")
 
 mpd_host = 'localhost'
 mpd_port = '6600'
@@ -42,90 +28,6 @@ if 'MPD_PORT' in os.environ:
 client.connect(mpd_host, mpd_port)
 if mpd_pass:
     client.password(mpd_pass)
-
-
-def update(args):
-    db = (client.stats())
-    new_db = db.get('db_update')
-    if change_db == new_db:
-        if (os.path.isfile(os.getenv('HOME')+'/.config/clerk/latest.cache')):
-            quit()
-        else:
-            notify2.init('Clerk')
-            n = notify2.Notification("Clerk", "Updating Cache Files")
-            n.show()
-            createCache(args)
-    else:
-        notify2.init('Clerk')
-        n = notify2.Notification("Clerk", "Updating Cache Files")
-        n.show()
-        createCache(args)
-    config['updater']['change_db'] = str(new_db)
-    with open(os.getenv('HOME')+'/.config/clerk/helper_config', 'w') as configfile:
-        config.write(configfile)
-
-def reduceToFstElm(maybeList):
-    return maybeList[0] if isinstance(maybeList, list) else maybeList
-
-# sort albums by mtime
-# thanks to kuyatzu for this.
-def createRecentList(allTracks):
-    def gp(t):
-        return (t['album'], t['albumartist'], t['date'])
-
-    for t in allTracks:
-        t['date'] = reduceToFstElm(t['date'])
-        t['albumartist'] = reduceToFstElm(t['albumartist'])
-        t['cto'] = parseISO8601(t['last-modified']) # cto = comparable time object
-
-    accu = []
-    for album, tracksOfAlbum in groupby(allTracks, key=gp):
-        accu.append(sorted(tracksOfAlbum, key=lambda t: t['cto'])[-1])
-    return sorted(accu, key=lambda t: t['cto'], reverse=True)
-
-def createAlbumsList(tracks):
-    ks = ['date', 'artist', 'albumartist', 'album', 'track', 'title']
-
-    for t in tracks:
-        t.update([(k, reduceToFstElm(v)) for (k, v) in t.items() if k in ks])
-    return tracks
-
-def createCache(args):
-    # create latest.cache
-    alist=client.search('filename', " ")
-    blist=createRecentList(alist)
-   
-    with open(os.getenv('HOME')+'/.config/clerk/latest.cache', "w") as cache_file:
-        for album in blist:
-            cache_file.write(album['albumartist']+"\t("+album['date']+") - "+album['album']+'\n')
-
-    # create albums.cache
-    temp_albums=[]
-    blist=createAlbumsList(alist)
-    albumlist=createRecentList(blist)
-
-    for album in albumlist:
-        temp_albums.append(album['albumartist']+"\t("+album['date']+") - "+album['album'])
-
-    final_albumlist=set(temp_albums)
-    blub=sorted(final_albumlist)
-    
-    with open(os.getenv('HOME')+'/.config/clerk/albums.cache', "w") as cache_file:
-        for album in blub:
-            cache_file.write(album+'\n')
-
-    # create tracks.cache
-    tracklist=[]
-    for track in alist:
-        taglist = ['date', 'artist', 'albumartist', 'album', 'track', 'title', 'file']
-        track.update([(k, reduceToFstElm(v)) for (k, v) in track.items() if k in taglist])       
-
-        tracklist.append(track['track']+"\t"+track['title']+"\tby "+track['artist']+" on "+track['album']+" ("+track['date']+")\t"+track['file'])
-#
-    with open(os.getenv('HOME')+'/.config/clerk/tracks.cache', "w") as cache_file:
-        for track in tracklist:
-
-            cache_file.write(track+'\n')
 
 
 def track_sort(track_num):
@@ -406,17 +308,11 @@ subparsers = parser.add_subparsers()
 parser_prio = subparsers.add_parser('prio', help="prioritize song")
 parser_prio.set_defaults(call=prioSong)
 
-parser_update = subparsers.add_parser('update', help="update cache files")
-parser_update.set_defaults(call=update)
-
 parser_readcomments = subparsers.add_parser('readcomments', help="show all tags of current song")
 parser_readcomments.set_defaults(call=readComments)
 
 parser_saveto = subparsers.add_parser('saveto', help="save stdin to playlist \"clerk\"")
 parser_saveto.set_defaults(call=savetoPlaylist)
-
-parser_createcache = subparsers.add_parser('createcache', help="create track cache for clerk")
-parser_createcache.set_defaults(call=createCache)
 
 parser_ratealbum = subparsers.add_parser('ratealbum', help="rate current Album")
 parser_ratealbum.add_argument('artist', action="store")
