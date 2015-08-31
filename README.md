@@ -1,7 +1,7 @@
 # clerk - mpd client, based on rofi
 
-# Version 2.0
-![multi_keys branch]
+# Version 3.0
+![Screenshot]
 (images/clerk_multi_keys.jpg)
 
 #### clerk is a rofi-driven mpd client with some advanced features.
@@ -35,7 +35,6 @@ For this to work, you need a recent rofi build from git.
 * rofi (https://github.com/DaveDavenport/rofi)
 * mpc
 * python-mpd2 (https://github.com/Mic92/python-mpd2)
-* python-notify2
 
 # Optional Dependencies
 
