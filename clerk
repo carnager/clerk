@@ -82,7 +82,8 @@ updateCache () {
         | sort -nr \
         | awk '{for (i=2; i<NF; i++) printf $i " "; print $NF}' \
         | awk -F ' — ' '{ print $1 "\t" $2 " — " $3 }' \
-        | sed 's,^\([^\t]*\t[^\t]\{40\}\)[^\t]*,\1,' | column -o $'\t' -s $'\t' -t | uniq > $HOME/.config/clerk/latest.cache
+        | column -o $'\t' -s $'\t' -t > $HOME/.config/clerk/latest.cache
+#        | sed 's,^\([^\t]*\t[^\t]\{40\}\)[^\t]*,\1,' | column -o $'\t' -s $'\t' -t | uniq > $HOME/.config/clerk/latest.cache
     mpc --format '[%albumartist%|%artist%]\t(%date%) — %album%' \
         search filename '' \
         | grep -v '^ — ' \
