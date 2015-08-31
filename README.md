@@ -4,7 +4,7 @@
 
 #### clerk is a rofi-driven mpd client with some advanced features.
 
-# Functions:
+# Features:
 
 * Play random album
 * Play x random tracks
