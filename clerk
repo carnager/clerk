@@ -602,7 +602,12 @@ songs () {
         | column -o ' ' -s $'\t' -t
 }
 
-        TRACKDISPLAY=$(echo -e "< Return\n---\n$(songs)" | rofi -kb-custom-1 "${delete}" -kb-custom-2 "${rate}" -kb-custom-3 "${save}" -kb-custom-4 "${crop}" -kb-custom-5 "${clear}" -kb-custom-6 "${load}" -kb-custom-7 "${rss}" -kb-custom-8 "${suspend}" -kb-custom-9 "${resume}" -dmenu $(echo "${select}") -mesg "${HELP}" -p "Current Queue > ")
+position () {
+    current=$(mpc current -f '%position%')
+    echo $(( $current +1 ))
+}
+
+TRACKDISPLAY=$(echo -e "< Return\n---\n$(songs)" | rofi -kb-custom-1 "${delete}" -kb-custom-2 "${rate}" -kb-custom-3 "${save}" -kb-custom-4 "${crop}" -kb-custom-5 "${clear}" -kb-custom-6 "${load}" -kb-custom-7 "${rss}" -kb-custom-8 "${suspend}" -kb-custom-9 "${resume}" -dmenu $(echo "${select}") -u $(position) -mesg "${HELP}" -p "Current Queue > ")
 
         tempval=$?
         val=$tempval
