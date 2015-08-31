@@ -1,6 +1,4 @@
-# clerk - mpd client, based on rofi
-
-# Version 3.0
+# Screenshot (V3)
 ![Screenshot]
 (images/clerk_multi_keys.jpg)
 
