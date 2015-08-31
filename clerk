@@ -42,6 +42,8 @@ elif [[ $scrobbler == mpdscribble ]]; then
 fi
 
 fix_date_format() {
+    # provided by Thorsten Wißmann:
+    # https://github.com/t-wissmann/dotfiles/blob/master/menu/rofi-mpd.sh
     # reformats the date given in column $1 from format %c of locale LC_TIME=C
     # (see man strftime) to the format specified in argument $2 column indices
     # start with 1
