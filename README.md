@@ -1,8 +1,9 @@
+# clerk
+#### MPD client using bash and rofi
+
 # Screenshot (V3)
 ![Screenshot]
 (images/clerk_multi_keys.jpg)
-
-#### clerk is a rofi-driven mpd client with some advanced features.
 
 # Features:
 
