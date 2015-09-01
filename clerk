@@ -132,7 +132,7 @@ dplayPrompt () {
           "4 [ Options ]>"
           "5 [ Ratings ]>")
 
-    menu=$(printf "%s\n" "${menu[@]}" | rofi -dmenu -lines 17 -mesg "<span color='$help_color'>${toggle}: Toggle Playback, ${prev}: Prev, ${next}: Next, ${stop}: Stop</span>" -auto-select -p "Now Playing: ${song} > ")
+    menu=$(printf "%s\n" "${menu[@]}" | dmenu_t -dmenu -lines 17 -mesg "<span color='$help_color'>${toggle}: Toggle Playback, ${prev}: Prev, ${next}: Next, ${stop}: Stop</span>" -auto-select -p "Now Playing: ${song} > ")
 
     val=$?
 
@@ -221,9 +221,9 @@ currentMenu () {
     }
 
     if [[ -z $(mpc current) ]]; then
-        menu_temp=$(echo -e "< Return" | rofi -dmenu -p "No Music is playing")
+        menu_temp=$(echo -e "< Return" | dmenu_t -dmenu -p "No Music is playing")
     else
-        menu_temp=$((echo -e "< Return\n---"; getAlbums; echo -e "---"; getTracks) | rofi -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -dmenu -format "f¬s" -filter "$filter" -select "$entry" -mesg "<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace</span>" -p "Other Music by $(mpc current -f '%artist%') > ")
+        menu_temp=$((echo -e "< Return\n---"; getAlbums; echo -e "---"; getTracks) | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -dmenu -format "f¬s" -filter "$filter" -select "$entry" -mesg "<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace</span>" -p "Other Music by $(mpc current -f '%artist%') > ")
 
         # for some reason directly defining $val wasnt working. Using a
         # temporary variable instead.
@@ -513,7 +513,7 @@ optionRandomPrompt() {
 }
 
 crossfadePrompt () {
-    menu=$(echo -e "< Return\n---\n0\n1\n2\n3\n4\n5" | rofi -dmenu_t -p "Crossfade")
+    menu=$(echo -e "< Return\n---\n0\n1\n2\n3\n4\n5" | dmenu_t -p "Crossfade")
 
     if [[ $menu == "< Return" ]]; then
         dplayOptionsPrompt
@@ -606,7 +606,7 @@ position () {
     echo $(( $current +5 ))
 }
 
-TRACKDISPLAY=$(echo -e "< Return\n---\nLoad Playlist\nLoad RSS\nSave Playlist\n---\n$(songs)" | rofi -kb-custom-1 "${delete}" -kb-custom-2 "${rate}" -kb-custom-4 "${crop}" -kb-custom-5 "${clear}" -kb-custom-6 "${moveup}" -kb-custom-7 "${movedown}" -kb-custom-8 "${suspend}" -kb-custom-9 "${resume}" -dmenu $(echo "${select}") -u $(position) -mesg "${HELP}" -p "Current Queue > ")
+TRACKDISPLAY=$(echo -e "< Return\n---\nLoad Playlist\nLoad RSS\nSave Playlist\n---\n$(songs)" | dmenu_t -kb-custom-1 "${delete}" -kb-custom-2 "${rate}" -kb-custom-4 "${crop}" -kb-custom-5 "${clear}" -kb-custom-6 "${moveup}" -kb-custom-7 "${movedown}" -kb-custom-8 "${suspend}" -kb-custom-9 "${resume}" -dmenu $(echo "${select}") -u $(position) -mesg "${HELP}" -p "Current Queue > ")
 
         tempval=$?
         val=$tempval
