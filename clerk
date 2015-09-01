@@ -624,7 +624,7 @@ position () {
     echo $(( $current +5 ))
 }
 
-TRACKDISPLAY=$(echo -e "< Return\n---\nLoad Playlist\nLoad RSS\nSave Playlist\n---\n$(songs)" | dmenu_t -kb-custom-1 "${delete}" -kb-custom-2 "${rate}" -kb-custom-4 "${crop}" -kb-custom-5 "${clear}" -kb-custom-6 "${moveup}" -kb-custom-7 "${movedown}" -kb-custom-8 "${suspend}" -kb-custom-9 "${resume}" -dmenu $(echo "${select}") -u $(position) -mesg "${HELP}" -p "Current Queue > ")
+TRACKDISPLAY=$(echo -e "< Return\n---\n> Load Playlist\n> Load RSS\n> Save Playlist\n---\n$(songs)" | dmenu_t -kb-custom-1 "${delete}" -kb-custom-2 "${rate}" -kb-custom-4 "${crop}" -kb-custom-5 "${clear}" -kb-custom-6 "${moveup}" -kb-custom-7 "${movedown}" -kb-custom-8 "${suspend}" -kb-custom-9 "${resume}" -dmenu $(echo "${select}") -u $(position) -mesg "${HELP}" -p "Current Queue > ")
 
         tempval=$?
         val=$tempval
@@ -669,11 +669,11 @@ TRACKDISPLAY=$(echo -e "< Return\n---\nLoad Playlist\nLoad RSS\nSave Playlist\n-
         elif [[ $val -eq 0 ]]; then
             if [[ $TRACKDISPLAY == "< Return" ]]; then
                 dplayPrompt
-            elif [[ $TRACKDISPLAY == "Load RSS" ]]; then
+            elif [[ $TRACKDISPLAY == "> Load RSS" ]]; then
                 loadRSS
-            elif [[ $TRACKDISPLAY == "Load Playlist" ]]; then
+            elif [[ $TRACKDISPLAY == "> Load Playlist" ]]; then
                 dplayQueueLoad;
-            elif [[ $TRACKDISPLAY == "Save Playlist" ]]; then
+            elif [[ $TRACKDISPLAY == "> Save Playlist" ]]; then
                 dplayQueueSave;
             else
                 mpc play $POS;
