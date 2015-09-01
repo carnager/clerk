@@ -54,9 +54,8 @@ stop="Alt+4"
 
 # playlist menu
 # also used: rate
-delete="Alt+1"
+delete="Alt+Delete"
 crop="Alt+2"
-save="Alt+s"
 clear="Alt+c"
 suspend="Alt+9"
 resume="Alt+0"
