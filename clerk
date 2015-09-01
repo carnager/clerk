@@ -581,19 +581,15 @@ resumePlaylist () {
 # Play or delete items from current Queue
 dplayQueue () {
     while true; do
-        if [[ -z $POS ]]; then
-            re='^[0-9]+$'
-            if [[ "$POS" =~ $re ]]; then
-                POS=$(echo $(( $POS + 2 )))
-            else
-                POS=0
-            fi
-        else
+        re='^[0-9]+$'
+        if [[ "$POS" =~ $re ]]; then
             if [[ $last != $(mpc -f '%file%' playlist | tail -1) ]]; then
                 POS=$(echo $(( $POS + 5 )))
             else
                 POS=$(echo $(( $POS + 6 )))
             fi
+        else
+            POS=0
         fi
         select="-selected-row $POS"
 
