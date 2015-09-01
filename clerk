@@ -19,6 +19,18 @@ if [[ -f $HOME/.config/clerk/config ]]; then
     source $HOME/.config/clerk/config
 fi
 
+if [[ -n $mpd_host ]]; then
+    if [[ -n $mpd_password ]]; then
+        MPD_HOST="${mpd_password}@${mpd_host}"
+    else
+        MPD_HOST="${mpd_host}"
+    fi
+fi
+
+if [[ -n $mpd_port ]]; then
+    MPD_PORT="${mpd_port}"
+fi
+
 # check for scrobbler
 if [[ $scrobbler == mpdas ]]; then
     export scrobbler="mpdas -d"

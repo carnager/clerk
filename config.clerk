@@ -2,6 +2,11 @@
 # but you can override settings here.
 rofiopts="-i -no-levenshtein-sort"
 
+# custom mpd host
+mpd_host=
+mpd_port=
+mpd_password=
+
 # If you don't have physical access to your music_dir
 # set this to no. This setting will make sure that ratings files
 # will be copied to their associated album
@@ -55,5 +60,5 @@ save="Alt+s"
 clear="Alt+c"
 suspend="Alt+9"
 resume="Alt+0"
-rss="Alt+8"
-load="Alt+l"
+movedown="Alt+Down"
+moveup="Alt+Up"
