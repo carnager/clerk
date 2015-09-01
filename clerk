@@ -643,6 +643,7 @@ TRACKDISPLAY=$(echo -e "< Return\n---\n> Load Playlist\n> Load RSS\n> Save Playl
             exit
 
         elif [[ $val -eq 13 ]]; then
+            unset last
             if [[ $TRACKDISPLAY == *">"* || $TRACKDISPLAY == *"<"* || $TRACKDISPLAY == "---" ]]; then
                 mpc crop
             else
@@ -651,28 +652,35 @@ TRACKDISPLAY=$(echo -e "< Return\n---\n> Load Playlist\n> Load RSS\n> Save Playl
             fi
 
         elif [[ $val -eq 16 ]]; then
+            unset last
             mpc mv $POS $(echo $(( $POS + 1 )))
             POS=$(echo $(( $POS +1 )))
 
         elif [[ $val -eq 15 ]]; then
+            unset last
             mpc mv $POS $(echo $(( $POS - 1 )))
-            POS=$(echo $(( $POS - 1)));
+            POS=$(echo $(( $POS - 1 )));
 
         elif [[ $val -eq 17 ]]; then
+            unset last
             suspendPlaylist
 
         elif [[ $val -eq 18 ]]; then
+            unset last
             resumePlaylist
 
         elif [[ $val -eq 12 ]]; then
+            unset last
             dplayQueueSave
 
         elif [[ $val -eq 14 ]]; then
+            unset last
             if [[ $TRACKDISPLAY == *""* ]]; then
                 mpc clear
             fi
 
         elif [[ $val -eq 0 ]]; then
+            unset last
             if [[ $TRACKDISPLAY == "< Return" ]]; then
                 dplayPrompt
             elif [[ $TRACKDISPLAY == "> Load RSS" ]]; then
@@ -686,6 +694,7 @@ TRACKDISPLAY=$(echo -e "< Return\n---\n> Load Playlist\n> Load RSS\n> Save Playl
             fi
 
         elif [[ $val -eq 11 ]]; then
+            unset last
 
             filename=$(mpc playlist --format '%position%\t%file%' | grep "^${POS}" | awk -F '\t' '{ print $2 }') 
             info=$(mpc --format '%artist%\t%album%\t%date%\t%track%\t%title%' search filename "${filename}")
