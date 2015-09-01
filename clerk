@@ -596,7 +596,7 @@ HELP="<span color='$help_color'>${line1}
 ${line2}</span>"
 
 songs () {
-    mpc --format '%position%\t%title%\t(by %artist% on %album% (%date%)' playlist \
+    mpc --format '%position%\t\t%track%\t%title%\t(by %artist% on %album% (%date%))' playlist \
         | sed 's,^\([^\t]\{40\}\)[^\t]*,\1…,' \
         | column -o ' ' -s $'\t' -t
 }
