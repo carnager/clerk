@@ -585,6 +585,8 @@ dplayQueue () {
         if [[ "$POS" =~ $re ]]; then
             if [[ $last != $(mpc -f '%file%' playlist | tail -1) ]]; then
                 POS=$(echo $(( $POS + 5 )))
+            elif [[ -z $last ]]; then
+                POS=$(echo $(( $POS +2 )))
             else
                 POS=$(echo $(( $POS + 6 )))
             fi
@@ -632,11 +634,11 @@ TRACKDISPLAY=$(echo -e "< Return\n---\nLoad Playlist\nLoad RSS\nSave Playlist\n-
 
         elif [[ $val -eq 16 ]]; then
             mpc mv $POS $(echo $(( $POS + 1 )))
-            POS=$POS;
+            POS=$(echo $(( $POS +1 )))
 
         elif [[ $val -eq 15 ]]; then
             mpc mv $POS $(echo $(( $POS - 1 )))
-            POS=$(( $POS - 2));
+            POS=$(echo $(( $POS - 1)));
 
         elif [[ $val -eq 17 ]]; then
             suspendPlaylist
