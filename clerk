@@ -526,14 +526,14 @@ crossfadePrompt () {
 # read list of available podcasts. Not using mpd playlists, because mpd does
 # not support custom names for urls. format of podcast in file is "Name \ URL"
 loadRSS () {
-    mpc clear
     podcast=$(echo -e "< Return\n---\n$(cat $HOME/.config/clerk/podcasts | cut -d '\' -f1)" | dmenu_t -p "Choose Podcast > ")
     if [[ $podcast == "< Return" ]]; then
         dplayQueue
     else
+        mpc clear
         mpc load $(grep "$podcast" $HOME/.config/clerk/podcasts | cut -d '\' -f2)
-        episode=$(mpc playlist --format "%position%$separator%artist%$separator%title%" | dmenu_t -p "Choose Episode > ")
-        POS=$(echo "$episode" | awk -F "$separator" '{ print $1 }')
+        episode=$(mpc playlist --format "%position% — %artist% — %title%" | dmenu_t -p "Choose Episode > ")
+        POS=$(echo "$episode" | awk -F " — " '{ print $1 }')
         mpc play "$POS"
     fi
 }
@@ -583,15 +583,13 @@ dplayQueue () {
     while true; do
         re='^[0-9]+$'
         if [[ "$POS" =~ $re ]]; then
-            POS=$(( $POS + 2 ))
+            POS=$(( $POS + 6 ))
         else
             POS=0
         fi
         select="-selected-row $POS"
 
-        echo "$POS"
-
-        help_text=$(echo -e "${delete}: Delete - ${crop}: Crop - ${clear}: Clear - ${rate}: Rate\n${load}: Load - ${rss}: RSS - ${save}: Save - ${suspend}: Suspend - ${resume}: Resume" | column -s '-' -t)
+        help_text=$(echo -e "${delete}: Delete - ${crop}: Crop - ${clear}: Clear - ${rate}: Rate\n${moveup}: Move Up - ${movedown}: Move Down - ${suspend}: Suspend - ${resume}: Resume" | column -s '-' -t)
         line1=$(echo "${help_text}" | head -1)
         line2=$(echo "${help_text}" | tail -1)
 HELP="<span color='$help_color'>${line1}
@@ -605,10 +603,10 @@ songs () {
 
 position () {
     current=$(mpc current -f '%position%')
-    echo $(( $current +1 ))
+    echo $(( $current +5 ))
 }
 
-TRACKDISPLAY=$(echo -e "< Return\n---\n$(songs)" | rofi -kb-custom-1 "${delete}" -kb-custom-2 "${rate}" -kb-custom-3 "${save}" -kb-custom-4 "${crop}" -kb-custom-5 "${clear}" -kb-custom-6 "${load}" -kb-custom-7 "${rss}" -kb-custom-8 "${suspend}" -kb-custom-9 "${resume}" -dmenu $(echo "${select}") -u $(position) -mesg "${HELP}" -p "Current Queue > ")
+TRACKDISPLAY=$(echo -e "< Return\n---\nLoad Playlist\nLoad RSS\nSave Playlist\n---\n$(songs)" | rofi -kb-custom-1 "${delete}" -kb-custom-2 "${rate}" -kb-custom-4 "${crop}" -kb-custom-5 "${clear}" -kb-custom-6 "${moveup}" -kb-custom-7 "${movedown}" -kb-custom-8 "${suspend}" -kb-custom-9 "${resume}" -dmenu $(echo "${select}") -u $(position) -mesg "${HELP}" -p "Current Queue > ")
 
         tempval=$?
         val=$tempval
@@ -628,10 +626,12 @@ TRACKDISPLAY=$(echo -e "< Return\n---\n$(songs)" | rofi -kb-custom-1 "${delete}"
             mpc crop
 
         elif [[ $val -eq 16 ]]; then
-            loadRSS
+            mpc mv $POS $(echo $(( $POS + 1 )))
+            POS=$POS;
 
         elif [[ $val -eq 15 ]]; then
-            dplayQueueLoad
+            mpc mv $POS $(echo $(( $POS - 1 )))
+            POS=$(( $POS - 2));
 
         elif [[ $val -eq 17 ]]; then
             suspendPlaylist
@@ -650,6 +650,12 @@ TRACKDISPLAY=$(echo -e "< Return\n---\n$(songs)" | rofi -kb-custom-1 "${delete}"
         elif [[ $val -eq 0 ]]; then
             if [[ $TRACKDISPLAY == "< Return" ]]; then
                 dplayPrompt
+            elif [[ $TRACKDISPLAY == "Load RSS" ]]; then
+                loadRSS
+            elif [[ $TRACKDISPLAY == "Load Playlist" ]]; then
+                dplayQueueLoad;
+            elif [[ $TRACKDISPLAY == "Save Playlist" ]]; then
+                dplayQueueSave;
             else
                 mpc play $POS;
             fi
@@ -694,7 +700,7 @@ dplayQueueSave () {
     while read playlists
     do
         if [[ "$playlists" == "< Return" ]]; then
-            dplayPrompt
+            dplayQueue
         elif [[ "$playlists" == "Save new Playlist" ]]; then
             playlist=$(echo "" | dmenu_t -p "Type Name for Playlist > ")
             if [[ "$playlist" == "" ]]; then
