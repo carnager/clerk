@@ -643,8 +643,12 @@ TRACKDISPLAY=$(echo -e "< Return\n---\n> Load Playlist\n> Load RSS\n> Save Playl
             exit
 
         elif [[ $val -eq 13 ]]; then
-            mpc play $POS;
-            mpc crop
+            if [[ $TRACKDISPLAY == *">"* || $TRACKDISPLAY == *"<"* || $TRACKDISPLAY == "---" ]]; then
+                mpc crop
+            else
+                mpc play $POS;
+                mpc crop
+            fi
 
         elif [[ $val -eq 16 ]]; then
             mpc mv $POS $(echo $(( $POS + 1 )))
