@@ -577,7 +577,7 @@ else
     :
 fi
 
-TRACKDISPLAY=$(echo -e "< Return\n---\n$(songs)" | dmenu_t -kb-custom-1 "${delete}" -kb-custom-2 "${rate}" -kb-custom-4 "${crop}" -kb-custom-5 "${clear}" -kb-custom-6 "${moveup}" -kb-custom-7 "${movedown}" -kb-custom-8 "${suspend}" -kb-custom-9 "${resume}" -kb-custom-10 "${albumlist}" -kb-custom-11 "${tracklist}" -kb-custom-12 ${goalbum} -kb-custom-13 ${gotrack} -kb-custom-14 ${load} -kb-custom-15 ${loadrss} -kb-custom-15 ${save} -dmenu $(echo "${select}") $(echo "${highlight}") -mesg "${HELP}" -p "Current Queue > ")
+TRACKDISPLAY=$(echo -e "< Return\n---\n$(songs)" | dmenu_t -kb-custom-1 "${delete}" -kb-custom-2 "${rate}" -kb-custom-4 "${crop}" -kb-custom-5 "${clear}" -kb-custom-6 "${moveup}" -kb-custom-7 "${movedown}" -kb-custom-8 "${suspend}" -kb-custom-9 "${resume}" -kb-custom-10 "${albumlist}" -kb-custom-11 "${tracklist}" -kb-custom-12 ${goalbum} -kb-custom-13 ${gotrack} -kb-custom-14 ${load} -kb-custom-15 ${loadrss} -kb-custom-16 ${save} -dmenu $(echo "${select}") $(echo "${highlight}") -mesg "${HELP}" -p "Current Queue > ")
 
         tempval=$?
         val=$tempval
