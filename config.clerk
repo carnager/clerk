@@ -36,6 +36,11 @@ ssh_host=
 help_color="#0C73C2"
 
 # custom keybindings
+# global
+albumlist="Alt+F1"
+tracklist="Alt+F2"
+queue="Alt+F3"
+
 # Adding of songs/albums
 add="Alt+1"
 insert="Alt+2"
@@ -59,6 +64,8 @@ suspend="Alt+9"
 resume="Alt+0"
 movedown="Alt+Down"
 moveup="Alt+Up"
+album="Alt+F5"
+track="Alt+F6"
 
 # table customization
 track_width="2"
