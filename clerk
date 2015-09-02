@@ -555,7 +555,7 @@ dplayQueue () {
         fi
         select="-selected-row $POS"
 
-        help_text=$(echo -e "${delete}: Delete - ${crop}: Crop - ${clear}: Clear - ${rate}: Rate ${suspend}: Suspend - ${resume}: Resume\n${moveup}: Move Up - ${movedown}: Move Down - ${album}: Go to Album - ${track}: Go to Track" | column -s '-' -t)
+        help_text=$(echo -e "${delete}: Delete - ${crop}: Crop - ${clear}: Clear - ${suspend}: Suspend - ${resume}: Resume\n${moveup}: Move Up - ${movedown}: Move Down - ${album}: Go to Album - ${track}: Go to Track - ${rate}: Rate" | column -s '-' -t)
         line1=$(echo "${help_text}" | head -1)
         line2=$(echo "${help_text}" | tail -1)
 HELP="<span color='$help_color'>${line1}
