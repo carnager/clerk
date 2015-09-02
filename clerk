@@ -544,22 +544,24 @@ dplayQueue () {
         re='^[0-9]+$'
         if [[ "$POS" =~ $re ]]; then
             if [[ $last != $(mpc -f '%file%' playlist | tail -1) ]]; then
-                POS=$(echo $(( $POS + 5 )))
+                POS=$(echo $(( $POS + 1 )))
             elif [[ -z $last ]]; then
-                POS=$(echo $(( $POS +2 )))
+                POS=$(echo $(( $POS + 2 )))
             else
-                POS=$(echo $POS(( $POS + 6 )))
+                POS=$(echo $(( $POS + 2 )))
             fi
         else
-            POS=$(echo $(( $(mpc current -f '%position%') + 5 )))
+            POS=$(echo $(( $(mpc current -f '%position%') + 1 )))
         fi
         select="-selected-row $POS"
 
-        help_text=$(echo -e "${delete}: Delete - ${crop}: Crop - ${clear}: Clear - ${suspend}: Suspend - ${resume}: Resume\n${moveup}: Move Up - ${movedown}: Move Down - ${album}: Go to Album - ${track}: Go to Track - ${rate}: Rate" | column -s '-' -t)
+        help_text=$(echo -e "${delete}: Delete - ${crop}: Crop - ${clear}: Clear - ${suspend}: Suspend - ${resume}: Resume\n${moveup}: Move Up - ${movedown}: Move Down - ${goalbum}: Go to Album - ${gotrack}: Go to Track - ${rate}: Rate\n${load}: Load Playlist - ${loadrss}: Load RSS - ${save}: Save Playlist" | column -s '-' -t)
         line1=$(echo "${help_text}" | head -1)
-        line2=$(echo "${help_text}" | tail -1)
+        line2=$(echo "${help_text}" | head -2 | tail -1)
+        line3=$(echo "${help_text}" | tail -1)
 HELP="<span color='$help_color'>${line1}
-${line2}</span>"
+${line2}
+${line3}</span>"
 
 songs () {
     tracklist="{ printf \"%.4s\t%.${track_width}s\t%.${title_width}s\t%.${artist_width}s\t%.${date_width}s\t%.${album_width}s\n\", \$1, \$2, \$3, \$4, \$5, \$6, \$7, \$8 }"
@@ -570,12 +572,12 @@ songs () {
 
 if [[ -n $(mpc current) ]]; then
     current=$(mpc current -f '%position%')
-    highlight="-u $(echo $(( $current +5 )))"
+    highlight="-u $(echo $(( $current +1 )))"
 else
     :
 fi
 
-TRACKDISPLAY=$(echo -e "< Return\n---\n> Load Playlist\n> Load RSS\n> Save Playlist\n---\n$(songs)" | dmenu_t -kb-custom-1 "${delete}" -kb-custom-2 "${rate}" -kb-custom-4 "${crop}" -kb-custom-5 "${clear}" -kb-custom-6 "${moveup}" -kb-custom-7 "${movedown}" -kb-custom-8 "${suspend}" -kb-custom-9 "${resume}" -kb-custom-10 "${albumlist}" -kb-custom-11 "${tracklist}" -kb-custom-12 ${album} -kb-custom-13 ${track} -dmenu $(echo "${select}") $(echo "${highlight}") -mesg "${HELP}" -p "Current Queue > ")
+TRACKDISPLAY=$(echo -e "< Return\n---\n$(songs)" | dmenu_t -kb-custom-1 "${delete}" -kb-custom-2 "${rate}" -kb-custom-4 "${crop}" -kb-custom-5 "${clear}" -kb-custom-6 "${moveup}" -kb-custom-7 "${movedown}" -kb-custom-8 "${suspend}" -kb-custom-9 "${resume}" -kb-custom-10 "${albumlist}" -kb-custom-11 "${tracklist}" -kb-custom-12 ${goalbum} -kb-custom-13 ${gotrack} -kb-custom-14 ${load} -kb-custom-15 ${loadrss} -kb-custom-15 ${save} -dmenu $(echo "${select}") $(echo "${highlight}") -mesg "${HELP}" -p "Current Queue > ")
 
         tempval=$?
         val=$tempval
@@ -594,6 +596,15 @@ TRACKDISPLAY=$(echo -e "< Return\n---\n> Load Playlist\n> Load RSS\n> Save Playl
 
         elif [[ $val -eq 20 ]]; then
             AddTrackTags
+
+        elif [[ $val -eq 23 ]]; then
+            dplayQueueLoad
+
+        elif [[ $val -eq 24 ]]; then
+            loadRSS
+
+        elif [[ $val -eq 25 ]]; then
+            dplayQueueSave
 
         elif [[ $val -eq 21 ]]; then
             temp=$(mpc playlist --format '%position%\t%file%' | grep "^${POS}" | grep "${ARTIST}" | awk -F '\t' '{ print $2 }') 
@@ -656,12 +667,6 @@ TRACKDISPLAY=$(echo -e "< Return\n---\n> Load Playlist\n> Load RSS\n> Save Playl
             unset last
             if [[ $TRACKDISPLAY == "< Return" ]]; then
                 dplayPrompt
-            elif [[ $TRACKDISPLAY == "> Load RSS" ]]; then
-                loadRSS
-            elif [[ $TRACKDISPLAY == "> Load Playlist" ]]; then
-                dplayQueueLoad;
-            elif [[ $TRACKDISPLAY == "> Save Playlist" ]]; then
-                dplayQueueSave;
             else
                 mpc play $POS;
             fi

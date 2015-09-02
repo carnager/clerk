@@ -64,8 +64,11 @@ suspend="Alt+9"
 resume="Alt+0"
 movedown="Alt+Down"
 moveup="Alt+Up"
-album="Alt+F5"
-track="Alt+F6"
+goalbum="Alt+F5"
+gotrack="Alt+F6"
+load="Alt+l"
+loadrss="Alt+Control+l"
+save="Alt+s"
 
 # table customization
 track_width="2"
