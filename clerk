@@ -548,10 +548,10 @@ dplayQueue () {
             elif [[ -z $last ]]; then
                 POS=$(echo $(( $POS +2 )))
             else
-                POS=$(echo $(( $POS + 6 )))
+                POS=$(echo $POS(( $POS + 6 )))
             fi
         else
-            POS=0
+            POS=$(echo $(( $(mpc current -f '%position%') + 5 )))
         fi
         select="-selected-row $POS"
 
