@@ -8,18 +8,16 @@ MPD client using bash and rofi
 
 # Features:
 
-* Play random album
-* Play x random tracks
+* Play random Album/Tracks
 * Add/Insert/Replace Albums/Songs
 * Manage current Queue
-* Show Albums/Tracks by currently playing Artist and add those to Queue.
-* Enable or disable scrobbling (with support for remote mpdscribble/mpdas)
-* Love current song on lastfm (Using lastfm-mpd-cli or mpdas)
-* Rate albums/tracks (Stored in mpds sticker database)
- * local copies are stored, allowing a tag based search (yet to come)
-* Load rated albums/tracks
-* Play Similar Songs (based on lastfm)
-* Control mpd options (modes, replaygain, crossfade)
+* Locate Album/Track in Library
+* Toggle scrobbling
+* Love current Song on last.fm
+* Rate Albums/Tracks
+* Load rated Albums/Tracks
+* Play Similar Songs
+* Control mpd options
 
 Written completely functional, nearly every option is accessible
 from command line.
