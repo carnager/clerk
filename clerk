@@ -699,6 +699,10 @@ TRACKDISPLAY=$(echo -e "< Return\n---\n$(songs)" | dmenu_t -kb-custom-1 "${delet
 # show all mpd playlists and load them to queue
 dplayQueueLoad () {
     playlist=$(echo -e "< Return\n---\n$(mpc lsplaylists)" | dmenu_t -p "Load Playlist > ")
+    val=$?
+    if [[ $val -eq 1 ]]; then
+        exit
+    fi
     if [[ "$playlist" == "< Return" ]]; then
         dplayQueue
     else
@@ -711,6 +715,10 @@ dplayQueueLoad () {
 dplayQueueSave () {
     while read playlists
     do
+        val=$?
+        if [[ $val -eq 1 ]]; then
+            exit
+        fi
         if [[ "$playlists" == "< Return" ]]; then
             dplayQueue
         elif [[ "$playlists" == "Save new Playlist" ]]; then
