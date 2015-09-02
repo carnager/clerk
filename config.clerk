@@ -1,6 +1,6 @@
 # custom rofi settings (rofi reads settings from ~/.Xresources)
 # but you can override settings here.
-rofiopts="-i -no-levenshtein-sort"
+rofiopts="-lines 30 -width 1500 -i -no-levenshtein-sort"
 
 # custom mpd host
 mpd_host=
