@@ -222,6 +222,12 @@ lastFMCheck () {
 }
 
 currentMenu () {
+    if [[ $1 == "album" ]]; then
+        entry="${filename}" AddAlbumTags
+    elif [[ $1 == "track" ]]; then
+        entry="${filename}" AddTrackTags
+    fi
+
     menu=$(echo -e "< Return\n---\n1 [ Browse Albums ]>\n2 [ Browse Tracks ]>" | rofi -dmenu -p "Browse for $(mpc current -f '%artist%')")
     if [[ $menu == "1 [ Browse Albums ]>" ]]; then
         filter=$(mpc current -f '%artist%')
@@ -549,7 +555,7 @@ dplayQueue () {
         fi
         select="-selected-row $POS"
 
-        help_text=$(echo -e "${delete}: Delete - ${crop}: Crop - ${clear}: Clear - ${rate}: Rate\n${moveup}: Move Up - ${movedown}: Move Down - ${suspend}: Suspend - ${resume}: Resume" | column -s '-' -t)
+        help_text=$(echo -e "${delete}: Delete - ${crop}: Crop - ${clear}: Clear - ${rate}: Rate ${suspend}: Suspend - ${resume}: Resume\n${moveup}: Move Up - ${movedown}: Move Down - ${album}: Go to Album - ${track}: Go to Track" | column -s '-' -t)
         line1=$(echo "${help_text}" | head -1)
         line2=$(echo "${help_text}" | tail -1)
 HELP="<span color='$help_color'>${line1}
@@ -569,18 +575,42 @@ else
     :
 fi
 
-TRACKDISPLAY=$(echo -e "< Return\n---\n> Load Playlist\n> Load RSS\n> Save Playlist\n---\n$(songs)" | dmenu_t -kb-custom-1 "${delete}" -kb-custom-2 "${rate}" -kb-custom-4 "${crop}" -kb-custom-5 "${clear}" -kb-custom-6 "${moveup}" -kb-custom-7 "${movedown}" -kb-custom-8 "${suspend}" -kb-custom-9 "${resume}" -dmenu $(echo "${select}") $(echo "${highlight}") -mesg "${HELP}" -p "Current Queue > ")
+TRACKDISPLAY=$(echo -e "< Return\n---\n> Load Playlist\n> Load RSS\n> Save Playlist\n---\n$(songs)" | dmenu_t -kb-custom-1 "${delete}" -kb-custom-2 "${rate}" -kb-custom-4 "${crop}" -kb-custom-5 "${clear}" -kb-custom-6 "${moveup}" -kb-custom-7 "${movedown}" -kb-custom-8 "${suspend}" -kb-custom-9 "${resume}" -kb-custom-10 "${albumlist}" -kb-custom-11 "${tracklist}" -kb-custom-12 ${album} -kb-custom-13 ${track} -dmenu $(echo "${select}") $(echo "${highlight}") -mesg "${HELP}" -p "Current Queue > ")
 
         tempval=$?
         val=$tempval
 
         POS=$(echo "${TRACKDISPLAY}" | awk '{ print $1 }')
+        ARTIST=$(echo "${TRACKDISPLAY}" | awk '{ print $4 }')
 
         if [[ $val -eq 10 ]]; then
             last=$(mpc playlist -f '%file%' | tail -1)
             mpc del $POS;
             POS=$(( $POS - 1));
             dplayQueue
+
+        elif [[ $val -eq 19 ]]; then
+            AddAlbumTags
+
+        elif [[ $val -eq 20 ]]; then
+            AddTrackTags
+
+        elif [[ $val -eq 21 ]]; then
+            temp=$(mpc playlist --format '%position%\t%file%' | grep "^${POS}" | grep "${ARTIST}" | awk -F '\t' '{ print $2 }') 
+            info=$(mpc --format '%albumartist%\t%album%\t%date%\t%track%\t%title%' search filename "${temp}")
+            echo "${info}"
+
+            ARTIST=$(echo "${info}" \
+                | awk -F '\t' '{ print $1 }')
+            ALBUM=$(echo "${info}" \
+                | awk -F '\t' '{ print $2 }')
+            DATE=$(echo "${info}" \
+                | awk -F '\t' '{ print $3 }')
+
+            filename="${ARTIST} ${DATE}" currentMenu album
+
+        elif [[ $val -eq 22 ]]; then
+            filename=$(mpc playlist --format '%position%\t%file%' | grep "^${POS}" | grep "${ARTIST}" | awk -F '\t' '{ print $2 }') currentMenu track
 
         elif [[ $val -eq 1 ]]; then
             exit
@@ -639,7 +669,7 @@ TRACKDISPLAY=$(echo -e "< Return\n---\n> Load Playlist\n> Load RSS\n> Save Playl
         elif [[ $val -eq 11 ]]; then
             unset last
 
-            filename=$(mpc playlist --format '%position%\t%file%' | grep "^${POS}" | awk -F '\t' '{ print $2 }') 
+            filename=$(mpc playlist --format '%position%\t%file%' | grep "^${POS}" | grep "${ARTIST}" | awk -F '\t' '{ print $2 }') 
             info=$(mpc --format '%artist%\t%album%\t%date%\t%track%\t%title%' search filename "${filename}")
             echo "${info}"
 
@@ -994,8 +1024,8 @@ HELP="<span color='$help_color'>${line1}
 ${line2}</span>"
 
 
-TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/albums.cache) \
-    | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")
+TRACK_TEMP=$((echo -e "< Return\n---"; cat $HOME/.config/clerk/albums.cache) \
+    | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -kb-custom-6 ${tracklist} -kb-custom-7 ${queue} -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")
 
     val=$?
 
@@ -1003,9 +1033,7 @@ TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/a
     unset filter
     export filter="${TRACK_TEMP%¬*}"
 
-    if [[ "$TRACK" == "0  Return to Browse Menu" ]]; then
-        browseLibPrompt
-    elif [[ -z "$TRACK" ]]; then
+    if [[ -z "$TRACK" ]]; then
         exit
     elif [[ "$TRACK" == "${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate" ]]; then
         unset line
@@ -1030,6 +1058,12 @@ TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/a
             mpc findadd date "$date" album "$album" albumartist "$artist";
             mpc play
             entry="$TRACK"
+
+        elif [[ $val -eq 15 ]]; then
+            AddTrackTags
+
+        elif [[ $val -eq 16 ]]; then
+            dplayQueue
 
         elif [[ $val -eq 17 ]]; then
             if [[ -n $(mpc find -f '%disc%' albumartist "${artist}" album "${album}" date "${date}") ]]; then
@@ -1075,22 +1109,20 @@ HELP="<span color='$help_color'>${line1}
 ${line2}</span>"
 
 
-TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/tracks.cache) \
-    | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "${HELP}" -p "Choose Track > ")
+TRACK_TEMP=$((echo -e "< Return\n---"; cat $HOME/.config/clerk/tracks.cache) \
+    | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -kb-custom-6 ${albumlist} -kb-custom-7 ${queue} -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "${HELP}" -p "Choose Track > ")
 
     val=$?
     TRACK="${TRACK_TEMP#*¬}"
     unset filter
     export filter="$(echo ${TRACK_TEMP} | awk -F '¬' '{ print $1 }')"
 
-    if [[ "$TRACK" == "0  Return to Browse Menu" ]]
-        then browseLibPrompt
-    elif [[ -z "$TRACK" ]]; then
+    if [[ -z "$TRACK" ]]; then
         exit
     elif [[ "$TRACK" == "${add}: Add | ${insert}: Insert | ${replace}: Replace | ${rate}: Rate" ]]; then
         AddTrackTags
     else
-        filename=$(echo "$TRACK" | awk -F "\t" '{print $5}')
+        filename=$(echo "$TRACK" | awk -F "\t" '{print $6}')
 
         echo -e "artist: ${artist}\nalbum: ${album}\ntitle: ${title}\ntrack: ${track}\ndate: ${date}\ngroup1: ${group1}\ngroup2: ${group2}"
         if [[ $val -eq 11 ]]; then
@@ -1111,6 +1143,12 @@ TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/t
             mpc add "${filename}"
             mpc searchplay "${title}"
             entry="$TRACK"
+
+        elif [[ $val -eq 15 ]]; then
+            AddAlbumTags
+
+        elif [[ $val -eq 16 ]]; then
+            dplayQueue
 
         elif [[ $val -eq 14 ]]; then
             mpc insert "${filename}"
