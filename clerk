@@ -993,9 +993,9 @@ TRACK_TEMP=$((echo -e "< Return\n---"; cat $HOME/.config/clerk/latest.cache) \
             entry="$TRACK"
 
         elif [[ $val -eq 0 ]]; then
-            if [[ "$TRACK" == "< Return" ]]; then
+            if [[ "$TRACK_TEMP" == "< Return" ]]; then
                 browserLibPrompt
-            elif [[ "$TRACK" == "" ]]; then
+            elif [[ "$TRACK_TEMP" == "" ]]; then
                 addLastMod
             else
                 mpc clear;
@@ -1089,9 +1089,9 @@ TRACK_TEMP=$((echo -e "< Return\n---"; cat $HOME/.config/clerk/albums.cache) \
             entry="$TRACK"
 
         elif [[ $val -eq 0 ]]; then
-            if [[ "$TRACK" == "< Return" ]]; then
+            if [[ "$TRACK_TEMP" == "< Return" ]]; then
                 browserLibPrompt
-            elif [[ "$TRACK" == "" ]]; then
+            elif [[ "$TRACK_TEMP" == "" ]]; then
                 AddAlbumTags
             else
                 mpc clear;
@@ -1181,9 +1181,9 @@ TRACK_TEMP=$((echo -e "< Return\n---"; cat $HOME/.config/clerk/tracks.cache) \
             entry="$TRACK"
 
         elif [[ $val -eq 0 ]]; then
-            if [[ "$TRACK" == "< Return" ]]; then
+            if [[ "$TRACK_TEMP" == "< Return" ]]; then
                 browserLibPrompt
-            elif [[ "$TRACK" == "---" ]]; then
+            elif [[ "$TRACK_TEMP" == "---" ]]; then
                 AddTrackTags
             else
                 mpc add "${filename}"
