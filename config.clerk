@@ -59,3 +59,12 @@ suspend="Alt+9"
 resume="Alt+0"
 movedown="Alt+Down"
 moveup="Alt+Up"
+
+# table customization
+track_width="2"
+title_width="40"
+artist_width="40"
+date_width="6"
+# album is much longer in order to keep filename off screen
+album_width="200"
+
