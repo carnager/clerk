@@ -1485,6 +1485,8 @@ while :; do
             echo ""
             echo "LastFM"
             echo "  --lastfm <toggle, check, love>                 toggle or check last.fm status, love current track"
+            echo ""
+            echo "Hint: You can switch views with Alt+F1-F3"
             break
             ;;
         *)
