@@ -948,8 +948,8 @@ ${line2}</span>"
 #HELP="<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate
 #${addplay}: Add &amp; Play, ${insertplay}: Insert &amp; Play</span>"
 
-TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/latest.cache) \
-    | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -dmenu -select "$entry" -filter "$filter" -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")
+TRACK_TEMP=$((echo -e "< Return\n---"; cat $HOME/.config/clerk/latest.cache) \
+    | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -kb-custom-6 ${tracklist} -kb-custom-7 ${queue} -dmenu -select "$entry" -filter "$filter" -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")
 
     val=$?
 
@@ -958,9 +958,7 @@ TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/l
     export filter="${TRACK_TEMP%¬*}"
 
 
-    if [[ "$TRACK" == "0  Return to Browse Menu" ]]; then
-        browseLibPrompt
-    elif [[ -z "$TRACK" ]]; then
+    if [[ -z "$TRACK" ]]; then
         exit
     elif [[ "$TRACK" == "${add}: Add, ${insert}: Insert, ${replace}: Replace (Default)" ]]; then
         addLastMod
@@ -980,14 +978,32 @@ TRACK_TEMP=$((echo -e "0  Return to Browse Menu\n---"; cat $HOME/.config/clerk/l
             mpc search date "$date" album "$album" albumartist "$artist" | mpc insert
             entry="$TRACK"
 
-        elif [[ $val -eq 0 || $val -eq 12 ]]; then
-            echo "return code is 13"
+        elif [[ $val -eq 12 ]]; then
             mpc clear;
-            mpc searchadd date "$date" album "$album" albumartist "$artist";
+            mpc findadd date "$date" album "$album" albumartist "$artist";
             mpc play
             entry="$TRACK"
+
+        elif [[ $val -eq 0 ]]; then
+            if [[ "$TRACK" == "< Return" ]]; then
+                browserLibPrompt
+            elif [[ "$TRACK" == "" ]]; then
+                addLastMod
+            else
+                mpc clear;
+                mpc findadd date "$date" album "$album" albumartist "$artist";
+                mpc play
+                entry="${TRACK}"
+            fi
+
         elif [[ $val -eq 10 ]]; then
             mpc searchadd date "$date" album "$album" albumartist "$artist";
+
+        elif [[ $val -eq 15 ]]; then
+            AddTrackTags
+
+        elif [[ $val -eq 16 ]]; then
+            dplayQueue
 
         elif [[ $val -eq 13 ]]; then
             mpc findadd date "$date" album "$album" albumartist "$artist"
@@ -1058,11 +1074,23 @@ TRACK_TEMP=$((echo -e "< Return\n---"; cat $HOME/.config/clerk/albums.cache) \
             mpc find date "$date" album "$album" albumartist "$artist" | mpc insert
             entry="$TRACK"
 
-        elif [[ $val -eq 0 || $val -eq 12 ]]; then
+        elif [[ $val -eq 12 ]]; then
             mpc clear;
             mpc findadd date "$date" album "$album" albumartist "$artist";
             mpc play
             entry="$TRACK"
+
+        elif [[ $val -eq 0 ]]; then
+            if [[ "$TRACK" == "< Return" ]]; then
+                browserLibPrompt
+            elif [[ "$TRACK" == "" ]]; then
+                AddAlbumTags
+            else
+                mpc clear;
+                mpc findadd date "$date" album "$album" albumartist "$artist";
+                mpc play
+                entry="${TRACK}"
+            fi
 
         elif [[ $val -eq 15 ]]; then
             AddTrackTags
@@ -1140,9 +1168,19 @@ TRACK_TEMP=$((echo -e "< Return\n---"; cat $HOME/.config/clerk/tracks.cache) \
             mpc play
             entry="$TRACK"
 
-        elif [[ $val -eq 0 || $val -eq 10 ]]; then
+        elif [[ $val -eq 10 ]]; then
             mpc add "${filename}"
             entry="$TRACK"
+
+        elif [[ $val -eq 0 ]]; then
+            if [[ "$TRACK" == "< Return" ]]; then
+                browserLibPrompt
+            elif [[ "$TRACK" == "---" ]]; then
+                AddTrackTags
+            else
+                mpc add "${filename}"
+                entry="$TRACK"
+            fi
 
         elif [[ $val -eq 13 ]]; then
             mpc add "${filename}"
@@ -1186,14 +1224,14 @@ TRACK_TEMP=$((echo -e "< Return\n---"; cat $HOME/.config/clerk/tracks.cache) \
 browseLibPrompt() {
     menu=("< Return"
           "---"
-          "1 Choose Albums"
-          "2 Choose Track"
-          "3 Browse latest additions"
+          "1 [ Choose Albums ]>"
+          "2 [ Choose Track ]>"
+          "3 [ Browse Latest Additions ]>"
           "---"
-          "4 Play Random Album"
-          "5 Play Random Tracks" 
+          "4 [ Play Random Album ]"
+          "5 [ Play Random Tracks ]" 
           "---"
-          "6 Update Album/Track Cache")
+          "6 [ Update Album/Track Cache ]")
 
     prompt() {
         printf "%s\n" "$@" | dmenu_t -auto-select -p "Library Menu > "
