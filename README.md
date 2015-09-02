@@ -18,6 +18,7 @@ MPD client using bash and rofi
 * Load rated Albums/Tracks
 * Play Similar Songs
 * Control mpd options
+* Customizable Hotkeys
 
 Written completely functional, nearly every option is accessible
 from command line.
