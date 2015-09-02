@@ -222,77 +222,21 @@ lastFMCheck () {
 }
 
 currentMenu () {
-    getAlbums() {
-        mpc search -f '(%date%)\t%album%' artist "$(mpc current -f '%artist%')" | uniq | sed 's,^\([^\t\t]\{40\}\)[^\t]*,\1…,' | column -o $'\t' -s $'\t' -t
-    }
-
-    getTracks() {
-        mpc search -f '%track%\t%title%' artist "$(mpc current -f '%artist%')" | sed 's,^\([^\t\t]\{40\}\)[^\t]*,\1…,' | column -o $'\t' -s $'\t' -t
-    }
-
-    if [[ -z $(mpc current) ]]; then
-        menu_temp=$(echo -e "< Return" | dmenu_t -dmenu -p "No Music is playing")
+    menu=$(echo -e "< Return\n---\n1 [ Browse Albums ]>\n2 [ Browse Tracks ]>" | rofi -dmenu -p "Browse for $(mpc current -f '%artist%')")
+    if [[ $menu == "1 [ Browse Albums ]>" ]]; then
+        filter=$(mpc current -f '%artist%')
+        firstsong=$(mpc -f '%file%' search artist "$(mpc current -f '%artist%')" | head -1)
+        select="$firstsong" filter="$filter" AddAlbumTags
+    elif [[ $menu == "2 [ Browse Tracks ]>" ]]; then
+        filter=$(mpc current -f '%artist%')
+        firstsong=$(mpc -f '%file%' search artist "$(mpc current -f '%artist%')" | head -1)
+        select="$firstsong" filter="$filter" AddTrackTags
+    elif [[ $menu == "" ]]; then
+        dplayPrompt
+    elif [[ $menu == "< Return" ]]; then
+        dplayPrompt
     else
-        menu_temp=$((echo -e "< Return\n---"; getAlbums; echo -e "---"; getTracks) | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -dmenu -format "f¬s" -filter "$filter" -select "$entry" -mesg "<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace</span>" -p "Other Music by $(mpc current -f '%artist%') > ")
-
-        # for some reason directly defining $val wasnt working. Using a
-        # temporary variable instead.
-        tempval=$?
-        val=$tempval
-
-        menu="${menu_temp#*¬}"
-        albumartist=$(mpc current -f '%albumartist%')
-        artist=$(mpc current -f '%artist%')
-        unset filter
-        export filter="${menu_temp%¬*}"
-
-        if [[ $menu == "< Return" ]]; then
-            dplayPrompt
-        fi
-
-        if [[ $(echo "${menu}" | awk -F '\t' '{ print $1 }') == "("* ]]; then
-            item="Album"
-        elif [[ $(echo "${menu}" | awk -F '\t' '{ print $1 }') != *"(" ]]; then
-            item="Song"
-        fi
-
-        # checking for exit codes.
-        if [[ $item == "Album" ]]; then
-            if [[ $val -eq 11 ]]; then
-                mpc find album "$(echo -n "${menu}" | awk -F '\t' '{ print $2 }' | sed -e 's/[[:space:]]*$//')" artist "${artist}" | mpc insert
-                entry="$menu"
-            elif [[ $val -eq 0 || $val -eq 12 ]]; then
-                mpc clear
-                mpc find album "$(echo -n "${menu}" | awk -F '\t' '{ print $2 }' | sed -e 's/[[:space:]]*$//')" artist "${artist}" | mpc add
-                mpc play
-                entry="$menu"
-            elif [[ $val -eq 10 ]]; then
-                mpc find album "$(echo -n "${menu}" | awk -F '\t' '{ print $2 }' | sed -e 's/[[:space:]]*$//')" artist "${artist}" | mpc add
-                entry="$menu"
-            elif [[ $val -eq 1 ]]; then
-                exit
-            fi
-            currentMenu
-        elif [[ $item == "Song" ]]; then
-            if [[ $val -eq 11 ]]; then
-                mpc find track "$(echo -n "${menu}" | awk -F '\t' '{ print $1 }' | sed -e 's/[[:space:]]*$//')" title "$(echo -n "$menu" | awk -F '\t' '{ print $2 }' | sed -e 's/[[:space:]]*$//')" artist "${artist}" | mpc insert
-                title="$(echo "$menu" | awk -F '\t' '{ print $2 }')"
-                entry="$menu"
-            elif [[ $val -eq 12 ]]; then
-                mpc clear
-                mpc find track "$(echo -n "${menu}" | awk -F '\t' '{ print $1 }' | sed -e 's/[[:space:]]*$//')" title "$(echo -n "$menu" | awk -F '\t' '{ print $2 }' | sed -e 's/[[:space:]]*$//')" artist "${artist}" | mpc add
-                mpc play
-                entry="$menu"
-            elif [[ $val -eq 0 || $val -eq 10 ]]; then
-                mpc find track "$(echo -n "${menu}" | awk -F '\t' '{ print $1 }' | sed -e 's/[[:space:]]*$//')" title "$(echo -n "$menu" | awk -F '\t' '{ print $2 }' | sed -e 's/[[:space:]]*$//')" artist "${artist}" | mpc add
-                entry="$menu"
-            elif [[ $val -eq 1 ]]; then
-                exit
-            fi
-            currentMenu
-        elif [[ -z "$menu" ]]; then
-            exit
-        fi
+        :
     fi
 }
 
