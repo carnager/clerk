@@ -78,3 +78,6 @@ date_width="6"
 # album is much longer in order to keep filename off screen
 album_width="200"
 
+# custom widths for playlist
+pl_title_width="60"
+pl_artist_width="40"
