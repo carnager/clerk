@@ -133,16 +133,7 @@ dplayPrompt () {
     else
         song=$(mpc current)
     fi
-    menu=("< Exit"
-          "---"
-          "1 [ Browse Library ]>"
-          "2 [ Current Artist ]>"
-          "3 [ Current Queue ]>"
-          "---"
-          "4 [ Options ]>"
-          "5 [ Ratings ]>")
-
-    menu=$(printf "%s\n" "${menu[@]}" | dmenu_t -dmenu -lines 17 -mesg "<span color='$help_color'>${toggle}: Toggle Playback, ${prev}: Prev, ${next}: Next, ${stop}: Stop</span>" -auto-select -p "Now Playing: ${song} > ")
+    menu=$(echo -e "< Exit\n---\n1 [ Browse Library ]>\n2 [ Current Artist ]>\n3 [ Current Queue ]>\n---\n4 [ Options ]>\n5 [ Ratings ]>" | dmenu_t -dmenu -lines 17 -mesg "<span color='$help_color'>${toggle}: Toggle Playback   ${prev}: Prev   ${next}: Next   ${stop}: Stop</span>" -auto-select -p "Now Playing: ${song} > ")
 
     val=$?
 
