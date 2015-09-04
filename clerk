@@ -1098,7 +1098,7 @@ ${line2}</span>"
         elif [[ $val -eq 1 ]]; then
             exit
         fi
-        return_to
+        $(echo $(return_to))
     fi
 }
 
