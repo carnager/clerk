@@ -1024,6 +1024,7 @@ ${line2}</span>"
 
         elif [[ $val -eq 0 ]]; then
             if [[ "$TRACK" == "< Return" ]]; then
+                unset artist
                 browseLibPrompt
             elif [[ "$TRACK" == "" ]]; then
                 $(echo $(return_to))
