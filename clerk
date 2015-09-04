@@ -133,7 +133,13 @@ dplayPrompt () {
     else
         song=$(mpc current)
     fi
-    menu=$(echo -e "< Exit\n---\n1 [ Browse Library ]>\n2 [ Current Artist ]>\n3 [ Current Queue ]>\n---\n4 [ Options ]>\n5 [ Ratings ]>" | dmenu_t -dmenu -lines 17 -mesg "<span color='$help_color'>${toggle}: Toggle Playback   ${prev}: Prev   ${next}: Next   ${stop}: Stop</span>" -auto-select -p "Now Playing: ${song} > ")
+    menu=$(echo -e "< Exit\n---\n1 [ Browse Library ]>\n2 [ Current Artist ]>\n3 [ Current Queue ]>\n---\n4 [ Options ]>\n5 [ Ratings ]>" \
+       | dmenu_t \
+       -dmenu \
+       -lines 17 \
+       -mesg "<span color='$help_color'>${toggle}: Toggle Playback   ${prev}: Prev   ${next}: Next   ${stop}: Stop</span>" \
+       -auto-select \
+       -p "Now Playing: ${song} > ")
 
     val=$?
 
@@ -219,19 +225,27 @@ currentMenu () {
         entry="${filename}" addTrackTags
     fi
 
-    menu=$(echo -e "< Return\n---\n1 [ Browse Albums ]>\n2 [ Browse Tracks ]>" | rofi -dmenu -p "Browse for $(mpc current -f '%artist%')")
+    menu=$(echo -e "< Return\n---\n1 [ Browse Albums ]>\n2 [ Browse Tracks ]>" \
+        | rofi \
+        -dmenu \
+        -p "Browse for $(mpc current -f '%artist%')")
+
     if [[ $menu == "1 [ Browse Albums ]>" ]]; then
         filter=$(mpc current -f '%artist%')
         firstsong=$(mpc -f '%file%' search artist "$(mpc current -f '%artist%')" | head -1)
         select="$firstsong" filter="$filter" addAlbum alphabet
+
     elif [[ $menu == "2 [ Browse Tracks ]>" ]]; then
         filter=$(mpc current -f '%artist%')
         firstsong=$(mpc -f '%file%' search artist "$(mpc current -f '%artist%')" | head -1)
         select="$firstsong" filter="$filter" addTrackTags
+
     elif [[ $menu == "" ]]; then
         dplayPrompt
+
     elif [[ $menu == "< Return" ]]; then
         dplayPrompt
+
     else
         :
     fi
@@ -937,26 +951,37 @@ playRandomTracks () {
 
 
 addAlbum() {
+
     displaystyle () {
         mode="$1"
-help_text="$(echo -e "${add}: Add - ${insert}: Insert - ${replace}: Replace (Default)\n${rate}: Rate - ${addplay}: Add + Play - ${insertplay}: Insert + Play" | column -s '-' -t)"
-line1=$(echo "${help_text}" | head -1)
-line2=$(echo "${help_text}" | tail -1)
-HELP="<span color='$help_color'>${line1}
+        help_text="$(echo -e "${add}: Add - ${insert}: Insert - ${replace}: Replace (Default)\n${rate}: Rate - ${addplay}: Add + Play - ${insertplay}: Insert + Play" | column -s '-' -t)"
+        line1=$(echo "${help_text}" | head -1)
+        line2=$(echo "${help_text}" | tail -1)
+        HELP="<span color='$help_color'>${line1}
 ${line2}</span>"
+
         if [[ $1 == "latest" ]]; then
-            mode="latest"
-            TRACK_TEMP="$((echo -e "< Return\n---"; cat $HOME/.config/clerk/latest.cache) | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -kb-custom-6 ${tracklist} -kb-custom-7 ${queue} -dmenu -select "$entry" -filter "$filter" -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")"
-    
+            album_list="latest.cache"
         elif [[ $1 == "alphabet" ]]; then
-            mode="alphabet"
-            TRACK_TEMP=$((echo -e "< Return\n---"; cat $HOME/.config/clerk/albums.cache) | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -kb-custom-6 ${tracklist} -kb-custom-7 ${queue} -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")
+            album_list="albums.cache"
         fi
+
+        TRACK_TEMP="$((echo -e "< Return\n---"; cat $HOME/.config/clerk/${album_list}) \
+            | dmenu_t \
+            -custom-kb-1 "${add}" \
+            -custom-kb-2 "${insert}" \
+            -custom-kb-3 "${replace}" \
+            -custom-kb-8 "${rate}" \
+            -custom-kb-4 "${addplay}" \
+            -custom-kb-5 "${insertplay}" \
+            -kb-custom-6 ${tracklist} \
+            -kb-custom-7 ${queue} \
+            -dmenu -filter "$filter" \
+            -select "$entry" \
+            -format "f¬s" \
+            -mesg "${HELP}" \
+            -p "Choose Album > ")"
     }
-
-
-#HELP="<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate
-#${addplay}: Add &amp; Play, ${insertplay}: Insert &amp; Play</span>"
 
     if [[ $1 == "latest" ]]; then
         return_to="addAlbum latest"
@@ -975,8 +1000,6 @@ ${line2}</span>"
 
     if [[ -z "$TRACK" ]]; then
         exit
-    elif [[ "$TRACK" == "${add}: Add, ${insert}: Insert, ${replace}: Replace (Default)" ]]; then
-        addLastMod
     else
         artist=$(echo -en "$TRACK" \
             | awk -F '\t' '{ print $1 }' \
@@ -1060,8 +1083,8 @@ HELP="<span color='$help_color'>${line1}
 ${line2}</span>"
 
 
-TRACK_TEMP=$((echo -e "< Return\n---"; cat $HOME/.config/clerk/tracks.cache) \
-    | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -kb-custom-6 ${albumlist} -kb-custom-7 ${queue} -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "${HELP}" -p "Choose Track > ")
+TRACK_TEMP="$((echo -e "< Return\n---"; cat $HOME/.config/clerk/tracks.cache) \
+    | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -kb-custom-6 ${albumlist} -kb-custom-7 ${queue} -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "${HELP}" -p "Choose Track > ")"
 
     val=$?
     TRACK="${TRACK_TEMP#*¬}"
