@@ -69,6 +69,7 @@ gotrack="Alt+F6"
 load="Alt+l"
 loadrss="Alt+Control+l"
 save="Alt+s"
+reload="Control+r"
 
 # table customization
 track_width="2"
