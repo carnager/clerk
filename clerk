@@ -214,20 +214,20 @@ lastFMCheck () {
 
 currentMenu () {
     if [[ $1 == "album" ]]; then
-        entry="${filename}" AddAlbumTags
+        entry="${filename}" addAlbum alphabet
     elif [[ $1 == "track" ]]; then
-        entry="${filename}" AddTrackTags
+        entry="${filename}" addTrackTags
     fi
 
     menu=$(echo -e "< Return\n---\n1 [ Browse Albums ]>\n2 [ Browse Tracks ]>" | rofi -dmenu -p "Browse for $(mpc current -f '%artist%')")
     if [[ $menu == "1 [ Browse Albums ]>" ]]; then
         filter=$(mpc current -f '%artist%')
         firstsong=$(mpc -f '%file%' search artist "$(mpc current -f '%artist%')" | head -1)
-        select="$firstsong" filter="$filter" AddAlbumTags
+        select="$firstsong" filter="$filter" addAlbum alphabet
     elif [[ $menu == "2 [ Browse Tracks ]>" ]]; then
         filter=$(mpc current -f '%artist%')
         firstsong=$(mpc -f '%file%' search artist "$(mpc current -f '%artist%')" | head -1)
-        select="$firstsong" filter="$filter" AddTrackTags
+        select="$firstsong" filter="$filter" addTrackTags
     elif [[ $menu == "" ]]; then
         dplayPrompt
     elif [[ $menu == "< Return" ]]; then
@@ -581,10 +581,10 @@ TRACKDISPLAY=$(echo -e "< Return\n---\n$(songs)" | dmenu_t -kb-custom-1 "${delet
             dplayQueue
 
         elif [[ $val -eq 19 ]]; then
-            AddAlbumTags
+            addAlbum alphabet
 
         elif [[ $val -eq 20 ]]; then
-            AddTrackTags
+            addTrackTags
 
         elif [[ $val -eq 23 ]]; then
             dplayQueueLoad
@@ -935,18 +935,36 @@ playRandomTracks () {
     exit
 }
 
-addLastMod() {
-help_text=$(echo -e "${add}: Add - ${insert}: Insert - ${replace}: Replace (Default)\n${rate}: Rate - ${addplay}: Add + Play - ${insertplay}: Insert + Play" | column -s '-' -t)
+
+addAlbum() {
+    displaystyle () {
+        mode="$1"
+help_text="$(echo -e "${add}: Add - ${insert}: Insert - ${replace}: Replace (Default)\n${rate}: Rate - ${addplay}: Add + Play - ${insertplay}: Insert + Play" | column -s '-' -t)"
 line1=$(echo "${help_text}" | head -1)
 line2=$(echo "${help_text}" | tail -1)
 HELP="<span color='$help_color'>${line1}
 ${line2}</span>"
+        if [[ $1 == "latest" ]]; then
+            mode="latest"
+            TRACK_TEMP="$((echo -e "< Return\n---"; cat $HOME/.config/clerk/latest.cache) | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -kb-custom-6 ${tracklist} -kb-custom-7 ${queue} -dmenu -select "$entry" -filter "$filter" -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")"
+    
+        elif [[ $1 == "alphabet" ]]; then
+            mode="alphabet"
+            TRACK_TEMP=$((echo -e "< Return\n---"; cat $HOME/.config/clerk/albums.cache) | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -kb-custom-6 ${tracklist} -kb-custom-7 ${queue} -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")
+        fi
+    }
+
 
 #HELP="<span color='$help_color'>${add}: Add, ${insert}: Insert, ${replace}: Replace (Default), ${rate}: Rate
 #${addplay}: Add &amp; Play, ${insertplay}: Insert &amp; Play</span>"
 
-TRACK_TEMP=$((echo -e "< Return\n---"; cat $HOME/.config/clerk/latest.cache) \
-    | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -kb-custom-6 ${tracklist} -kb-custom-7 ${queue} -dmenu -select "$entry" -filter "$filter" -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")
+    if [[ $1 == "latest" ]]; then
+        return_to="addAlbum latest"
+    elif [[ $1 == "alphabet" ]]; then
+        return_to="addAlbum alphabet"
+    fi
+
+    displaystyle $1
 
     val=$?
 
@@ -985,7 +1003,7 @@ TRACK_TEMP=$((echo -e "< Return\n---"; cat $HOME/.config/clerk/latest.cache) \
             if [[ "$TRACK" == "< Return" ]]; then
                 browseLibPrompt
             elif [[ "$TRACK" == "" ]]; then
-                addLastMod
+                $(echo $(return_to))
             else
                 mpc clear;
                 mpc findadd date "$date" album "$album" albumartist "$artist";
@@ -997,7 +1015,7 @@ TRACK_TEMP=$((echo -e "< Return\n---"; cat $HOME/.config/clerk/latest.cache) \
             mpc searchadd date "$date" album "$album" albumartist "$artist";
 
         elif [[ $val -eq 15 ]]; then
-            AddTrackTags
+            addTrackTags
 
         elif [[ $val -eq 16 ]]; then
             dplayQueue
@@ -1028,105 +1046,11 @@ TRACK_TEMP=$((echo -e "< Return\n---"; cat $HOME/.config/clerk/latest.cache) \
         elif [[ $val -eq 1 ]]; then
             exit
         fi
-        addLastMod
+        return_to
     fi
 }
 
-AddAlbumTags() {
-
-help_text=$(echo -e "${add}: Add - ${insert}: Insert - ${replace}: Replace (Default)\n${rate}: Rate - ${addplay}: Add + Play - ${insertplay}: Insert + Play" | column -s '-' -t)
-
-line1=$(echo "${help_text}" | head -1)
-line2=$(echo "${help_text}" | tail -1)
-HELP="<span color='$help_color'>${line1}
-${line2}</span>"
-
-
-TRACK_TEMP=$((echo -e "< Return\n---"; cat $HOME/.config/clerk/albums.cache) \
-    | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -kb-custom-6 ${tracklist} -kb-custom-7 ${queue} -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "${HELP}" -p "Choose Album > ")
-
-    val=$?
-
-    TRACK="${TRACK_TEMP#*¬}"
-    unset filter
-    export filter="${TRACK_TEMP%¬*}"
-
-    if [[ -z "$TRACK" ]]; then
-        exit
-    else
-        artist=$(echo -en "$TRACK" \
-            | awk -F '\t' '{print $1}' \
-            | sed -e 's/[[:space:]]*$//')
-        album=$(echo "$TRACK" \
-            | awk -F "\t" '{print $3}')
-        date=$(echo "$TRACK" \
-            | awk -F "\t" '{print $2}' \
-            | awk '{print substr($0, 2, length($0) - 2)}')
-        echo -e "artist: ${artist}\ndate: ${date}\nalbum: ${album}"
-
-        if [[ $val -eq 11 ]]; then
-            mpc find date "$date" album "$album" albumartist "$artist" | mpc insert
-            entry="$TRACK"
-
-        elif [[ $val -eq 12 ]]; then
-            mpc clear;
-            mpc findadd date "$date" album "$album" albumartist "$artist";
-            mpc play
-            entry="$TRACK"
-
-        elif [[ $val -eq 0 ]]; then
-            if [[ "$TRACK" == "< Return" ]]; then
-                browseLibPrompt
-            elif [[ "$TRACK" == "" ]]; then
-                AddAlbumTags
-            else
-                mpc clear;
-                mpc findadd date "$date" album "$album" albumartist "$artist";
-                mpc play
-                entry="${TRACK}"
-            fi
-
-        elif [[ $val -eq 15 ]]; then
-            AddTrackTags
-
-        elif [[ $val -eq 16 ]]; then
-            dplayQueue
-
-        elif [[ $val -eq 17 ]]; then
-            if [[ -n $(mpc find -f '%disc%' albumartist "${artist}" album "${album}" date "${date}") ]]; then
-                disc=$(mpc find -f '%disc%' albumartist "${artist}" album "${album}" date "${date}" | head -1)
-            else
-                disc=""
-            fi
-            if [[ -n $(mpc find track "1" albumartist "${artist}" album "${album}" date "${date}") ]]; then
-                track="1"
-            else
-                track="01"
-            fi
-                disc=${disc} track=${track} rateartist="${artist}" ratealbum="${album}" ratedate="${date}" rateAlbum
-                entry="$TRACK"
-
-        elif [[ $val -eq 10 ]]; then
-            mpc searchadd date "$date" album "$album" albumartist "$artist";
-            entry="$TRACK"
-
-        elif [[ $val -eq 14 ]]; then
-            mpc findadd date "$date" album "$album" albumartist "$artist";
-            mpc searchplay "${album}"
-
-        elif [[ $val -eq 15 ]]; then
-            mpc clear;
-            mpc findadd date "$date" album "$album" albumartist "$artist";
-            mpc searchplay "${album}"
-
-        elif [[ $val -eq 1 ]]; then
-            exit
-        fi
-        AddAlbumTags
-    fi
-}
-
-AddTrackTags() {
+addTrackTags() {
     help_text=$(echo -e "${add}: Add (Default) - ${insert}: Insert - ${replace}: Replace \
         \n${rate}: Rate - ${addplay}: Add + Play - ${insertplay}: Insert + Play" \
         | column -s '-' -t)
@@ -1147,7 +1071,7 @@ TRACK_TEMP=$((echo -e "< Return\n---"; cat $HOME/.config/clerk/tracks.cache) \
     if [[ -z "$TRACK" ]]; then
         exit
     elif [[ "$TRACK" == "${add}: Add | ${insert}: Insert | ${replace}: Replace | ${rate}: Rate" ]]; then
-        AddTrackTags
+        addTrackTags
     else
         filename=$(echo "$TRACK" | awk -F "\t" '{print $6}')
 
@@ -1170,7 +1094,7 @@ TRACK_TEMP=$((echo -e "< Return\n---"; cat $HOME/.config/clerk/tracks.cache) \
             if [[ "$TRACK" == "< Return" ]]; then
                 browseLibPrompt
             elif [[ "$TRACK" == "---" ]]; then
-                AddTrackTags
+                addTrackTags
             else
                 mpc add "${filename}"
                 entry="$TRACK"
@@ -1211,7 +1135,7 @@ TRACK_TEMP=$((echo -e "< Return\n---"; cat $HOME/.config/clerk/tracks.cache) \
         elif [[ $val -eq 1 ]]; then
             exit
         fi
-        AddTrackTags
+        addTrackTags
     fi
 }
 
@@ -1232,11 +1156,11 @@ browseLibPrompt() {
     }
 
     case "$(prompt "${menu[@]}")" in
-        1*) AddAlbumTags ;;
-        2*) AddTrackTags ;;
+        1*) addAlbum alphabet ;;
+        2*) addTrackTags ;;
         6*) updateCache && browseLibPrompt ;;
         \<*) dplayPrompt ;;
-        3*) addLastMod ;;
+        3*) addAlbum latest ;;
         4*) playRandomAlbum ;;
         5*) playRandomTracks ;;
         *) exit
@@ -1351,11 +1275,11 @@ while :; do
                 echo "Missing argument for --add"
                 echo "Possible values: track, album, latest"
             elif [[ $2 == track ]]; then
-                AddTrackTags
+                addTrackTags
             elif [[ $2 == album ]]; then
-                AddAlbumTags
+                addAlbum alphabet
             elif [[ $2 == latest ]]; then
-                addLastMod
+                addAlbum latest
             fi
             break
             ;;
