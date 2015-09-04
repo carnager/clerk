@@ -1129,7 +1129,7 @@ TRACK_TEMP="$((echo -e "< Return\n---"; cat $HOME/.config/clerk/tracks.cache) \
             entry="$TRACK"
 
         elif [[ $val -eq 15 ]]; then
-            AddAlbumTags
+            addAlbum alphabet
 
         elif [[ $val -eq 16 ]]; then
             dplayQueue
