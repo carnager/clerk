@@ -137,7 +137,7 @@ dplayPrompt () {
        | dmenu_t \
        -dmenu \
        -lines 17 \
-       -mesg "<span color='$help_color'>Hint: Use ${prev} (Prev), ${toggle} (Toggle), ${stop} (Stop), ${next} (Next) and ${seek} (Seek) to control playback</span>" \
+       -mesg "<span color='$help_color'>Press ${help} to show keys that work in every menu</span>" \
        -auto-select \
        -kb-custom-1 ${prev} \
        -kb-custom-2 ${toggle} \
@@ -147,6 +147,7 @@ dplayPrompt () {
        -kb-custom-6 ${tracklist} \
        -kb-custom-7 ${queue} \
        -kb-custom-8 ${seek} \
+       -kb-custom-9 ${help} \
        -p "Now Playing: ${song} > ")
 
     val=$?
@@ -171,6 +172,8 @@ dplayPrompt () {
         dplayQueue
     elif [[ $val -eq 17 ]]; then
         seekMenu
+    elif [[ $val -eq 18 ]]; then
+        notify-send "clerk" "\nPlayback Controls:\n------\nPrev:       ${prev}\nToggle:     ${toggle}\nStop:       ${stop}\nNext:       ${next}       \n\Seek:       ${seek}\n\nViews\n------\nAlbumlist:  ${albumlist}\nTracklist:  ${tracklist}\nQueue:      ${queue}"
     fi
 
     if [[ "$menu" == "< Exit" ]]; then
