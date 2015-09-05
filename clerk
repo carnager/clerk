@@ -1363,33 +1363,36 @@ browseLibPrompt() {
 }
 
 saveAlbumToPlaylist() {
-    declare -i seen=0
-    while read TRACK
-    do
-        seen=1
-        if [[ "$TRACK" == "0  Return to Main Menu" ]]
-            then dplayPrompt
-        else
+    TRACK="$((echo -e "< Return\n---"; cat $HOME/.config/clerk/albums.cache) | dmenu_t -dmenu -p "Save Album to Playlist > ")"
+
+    val=$?
+
+    if [[ $val -eq 1 ]]; then
+        exit
+    fi
+
+    if [[ "$TRACK" == "< Return" ]]; then
+        dplayPrompt
+    elif [[ "$TRACK" == "---" ]]; then
+        saveAlbumToPlaylist
+    else
         artist=$(echo -en "$TRACK" \
             | awk -F '\t' '{ print $1 }' \
             | sed -e 's/[[:space:]]*$//')
         group2=$(echo -en "$TRACK" \
-            | awk -F '\t' '{ print $2 }' \
+            | awk -F '\t' '{ print $2 "\t" $3}' \
             | sed -e 's/[[:space:]]*$//')
-        album=$(echo "$group2" \
-            | awk -F " — " '{print $2}')
-        date=$(echo "$group2" \
-            | awk -F " — " '{print $1}' \
+        album=$(echo -en "$group2" \
+            | awk -F "\t" '{print $2}')
+        date=$(echo -en "$group2" \
+            | awk -F "\t" '{print $1}' \
             | awk '{print substr($0, 2, length($0) - 2)}')
+        clear
+        echo "${artist} ${album} ${date}"
 
             mpc search date "$date" album "$album" albumartist "$artist" | clerk_helper saveto
-        fi
-    done < <(echo -e "0  Return to Main Menu\n---\n$(cat $HOME/.config/clerk/albums.cache)" | dmenu_t -dmenu -p "Save Album to Playlist > ")
-
-    if [[  $seen = 0 ]]
-    then
-        exit
     fi
+    saveAlbumToPlaylist
 }
 
 
