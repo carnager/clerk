@@ -203,13 +203,13 @@ seekMenu () {
     if [[ $seekval == *"%" ]]; then
         mpc seek "${seekval}"
         unset seekval
-        dplayQueue
+        $*
     elif [[ $seekval == "< Return" ]]; then
         unset seekval
-        dplayQueue
+        $*
     elif [[ $seekval == "---" ]]; then
         unset seekval
-        dplayQueue
+        $*
     fi
 }
 
@@ -1063,18 +1063,24 @@ ${line2}</span>"
             -custom-kb-5 "${insertplay}" \
             -kb-custom-6 ${tracklist} \
             -kb-custom-7 ${queue} \
+            -kb-custom-9 ${prev} \
+            -kb-custom-10 ${toggle} \
+            -kb-custom-11 ${stop} \
+            -kb-custom-12 ${next} \
+            -kb-custom-13 ${seek} \
             -dmenu -filter "$filter" \
             -select "$entry" \
             -format "f¬s" \
             -mesg "${HELP}" \
             -p "Choose Album > ")"
     }
-
-    if [[ $1 == "latest" ]]; then
-        return_to="addAlbum latest"
-    elif [[ $1 == "alphabet" ]]; then
-        return_to="addAlbum alphabet"
-    fi
+    returnto () {
+        if [[ $1 == "latest" ]]; then
+            addAlbum latest
+        elif [[ $1 == "alphabet" ]]; then
+            addAlbum alphabet
+        fi
+    }
 
     displaystyle $1
 
@@ -1135,6 +1141,30 @@ ${line2}</span>"
             mpc findadd date "$date" album "$album" albumartist "$artist"
             mpc searchplay "${album}"
 
+        elif [[ $val -eq 18 ]]; then
+            mpc prev
+            entry="${TRACK}"
+            returnto
+
+        elif [[ $val -eq 19 ]]; then
+            mpc toggle
+            entry="${TRACK}"
+            returnto
+
+        elif [[ $val -eq 20 ]]; then
+            mpc stop
+            entry="${TRACK}"
+            returnto
+
+        elif [[ $val -eq 21 ]]; then
+            mpc next
+            entry="${TRACK}"
+            returnto
+
+        elif [[ $val -eq 22 ]]; then
+            entry="${TRACK}"
+            seekMenu addAlbum $1
+
         elif [[ $val -eq 17 ]]; then
             if [[ -n $(mpc find -f '%disc%' albumartist "${artist}" album "${album}" date "${date}") ]]; then
                 disc=$(mpc find -f '%disc%' albumartist "${artist}" album "${album}" date "${date}" | head -1)
@@ -1157,7 +1187,7 @@ ${line2}</span>"
         elif [[ $val -eq 1 ]]; then
             exit
         fi
-        $(echo ${return_to})
+        $(returnto $1)
     fi
 }
 
@@ -1172,7 +1202,25 @@ ${line2}</span>"
 
 
 TRACK_TEMP="$((echo -e "< Return\n---"; cat $HOME/.config/clerk/tracks.cache) \
-    | dmenu_t -custom-kb-1 "${add}" -custom-kb-2 "${insert}" -custom-kb-3 "${replace}" -custom-kb-8 "${rate}" -custom-kb-4 "${addplay}" -custom-kb-5 "${insertplay}" -kb-custom-6 ${albumlist} -kb-custom-7 ${queue} -dmenu -filter "$filter" -select "$entry" -format "f¬s" -mesg "${HELP}" -p "Choose Track > ")"
+    | dmenu_t \
+    -custom-kb-1 "${add}" \
+    -custom-kb-2 "${insert}" \
+    -custom-kb-3 "${replace}" \
+    -custom-kb-8 "${rate}" \
+    -custom-kb-4 "${addplay}" \
+    -custom-kb-5 "${insertplay}" \
+    -kb-custom-6 ${albumlist} \
+    -kb-custom-7 ${queue} \
+    -kb-custom-9 ${prev} \
+    -kb-custom-10 ${toggle} \
+    -kb-custom-11 ${stop} \
+    -kb-custom-12 ${next} \
+    -kb-custom-13 ${seek} \
+    -dmenu -filter "$filter" \
+    -select "$entry" \
+    -format "f¬s" \
+    -mesg "${HELP}" \
+    -p "Choose Track > ")"
 
     val=$?
     TRACK="${TRACK_TEMP#*¬}"
@@ -1224,6 +1272,30 @@ TRACK_TEMP="$((echo -e "< Return\n---"; cat $HOME/.config/clerk/tracks.cache) \
             mpc insert "${filename}"
             mpc searchplay "${title}"
             entry="$TRACK"
+
+        elif [[ $val -eq 18 ]]; then
+            mpc prev
+            entry="${TRACK}"
+            returnto
+
+        elif [[ $val -eq 19 ]]; then
+            mpc toggle
+            entry="${TRACK}"
+            returnto
+
+        elif [[ $val -eq 20 ]]; then
+            mpc stop
+            entry="${TRACK}"
+            returnto
+
+        elif [[ $val -eq 21 ]]; then
+            mpc next
+            entry="${TRACK}"
+            returnto
+
+        elif [[ $val -eq 22 ]]; then
+            entry="${TRACK}"
+            seekMenu addTrackTags
 
         elif [[ $val -eq 17 ]]; then
             info=$(mpc search --format '%artist%\t%album%\t%date%\t%track%\t%title%' filename "${filename}")
