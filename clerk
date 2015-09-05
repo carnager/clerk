@@ -137,24 +137,40 @@ dplayPrompt () {
        | dmenu_t \
        -dmenu \
        -lines 17 \
-       -mesg "<span color='$help_color'>${toggle}: Toggle Playback   ${prev}: Prev   ${next}: Next   ${stop}: Stop</span>" \
+       -mesg "<span color='$help_color'>Hint: Use ${prev} (Prev), ${toggle} (Toggle), ${stop} (Stop), ${next} (Next) and ${seek} (Seek) to control playback</span>" \
        -auto-select \
+       -kb-custom-1 ${prev} \
+       -kb-custom-2 ${toggle} \
+       -kb-custom-3 ${stop} \
+       -kb-custom-4 ${next} \
+       -kb-custom-5 ${albumlist} \
+       -kb-custom-6 ${tracklist} \
+       -kb-custom-7 ${queue} \
+       -kb-custom-8 ${seek} \
        -p "Now Playing: ${song} > ")
 
     val=$?
 
     if [[ $val -eq 10 ]]; then
-        mpc toggle
-        dplayPrompt
-    elif [[ $val -eq 11 ]]; then
         mpc prev
         dplayPrompt
-    elif [[ $val -eq 12 ]]; then
-        mpc next
+    elif [[ $val -eq 11 ]]; then
+        mpc toggle
         dplayPrompt
-    elif [[ $val -eq 13 ]]; then
+    elif [[ $val -eq 12 ]]; then
         mpc stop
         dplayPrompt
+    elif [[ $val -eq 13 ]]; then
+        mpc next
+        dplayPrompt
+    elif [[ $val -eq 14 ]]; then
+        addAlbum alphabet
+    elif [[ $val -eq 15 ]]; then
+        addTrackTags
+    elif [[ $val -eq 16 ]]; then
+        dplayQueue
+    elif [[ $val -eq 17 ]]; then
+        seekMenu
     fi
 
     if [[ "$menu" == "< Exit" ]]; then
@@ -173,6 +189,24 @@ dplayPrompt () {
         exit
     fi
 
+}
+
+seekMenu () {
+    seekval="$((echo -e "< Return\n---\n$(for i in $(seq 0 10 100); do echo "${i}%"; done)") \
+        | dmenu_t -dmenu \
+        -p "Seek > ")"
+
+    if [[ $seekval == *"%" ]]; then
+        mpc seek "${seekval}"
+        unset seekval
+        dplayQueue
+    elif [[ $seekval == "< Return" ]]; then
+        unset seekval
+        dplayQueue
+    elif [[ $seekval == "---" ]]; then
+        unset seekval
+        dplayQueue
+    fi
 }
 
 # start/stop scrobbler. locally or remote
@@ -565,7 +599,7 @@ dplayQueue () {
         fi
         select="-selected-row $POS"
 
-        help_text=$(echo -e "${delete}: Delete - ${crop}: Crop - ${moveup}: Move Up - ${goalbum}: Go to Album - ${suspend}: Suspend - ${load}: Load Playlist\n${clear}: Clear - ${rate}: Rate - ${movedown}: Move Down - ${gotrack}: Go to Track - ${resume}: Resume - ${save}: Save Playlist" | column -s '-' -t)
+        help_text=$(echo -e "${delete}: Delete - ${crop}: Crop - ${moveup}: Move Up - ${goalbum}: Go to Album - ${load}: Load Playlist\n${clear}: Clear - ${rate}: Rate - ${movedown}: Move Down - ${gotrack}: Go to Track - ${save}: Save Playlist" | column -s '-' -o "<span color='$help_separator_color'>|</span>" -t)
         line1=$(echo "${help_text}" | head -1)
         line2=$(echo "${help_text}" | tail -1)
 HELP="<span color='$help_color'>${line1}
@@ -593,16 +627,18 @@ songs () {
         -kb-custom-5 "${clear}" \
         -kb-custom-6 "${moveup}" \
         -kb-custom-7 "${movedown}" \
-        -kb-custom-8 "${suspend}" \
-        -kb-custom-9 "${resume}" \
+        -kb-custom-8 "${toggle}" \
+        -kb-custom-9 "${stop}" \
         -kb-custom-10 "${albumlist}" \
         -kb-custom-11 "${tracklist}" \
-        -kb-custom-12 ${goalbum} \
-        -kb-custom-13 ${gotrack} \
-        -kb-custom-14 ${load} \
-        -kb-custom-15 ${loadrss} \
-        -kb-custom-16 ${save} \
-        -kb-custom-17 ${reload} \
+        -kb-custom-12 "${goalbum}" \
+        -kb-custom-13 "${gotrack}" \
+        -kb-custom-14 "${load}" \
+        -kb-custom-15 "${next}" \
+        -kb-custom-16 "${save}" \
+        -kb-custom-18 "${stop}" \
+        -kb-custom-19 "${seek}" \
+        -kb-custom-17 "${prev}" \
         -dmenu $(echo "${select}") $(echo "${highlight}") \
         -mesg "${HELP}" \
         -p "Current Queue > ")
@@ -624,18 +660,27 @@ songs () {
 
         elif [[ $val -eq 20 ]]; then
             addTrackTags
-
+            
         elif [[ $val -eq 23 ]]; then
             dplayQueueLoad
 
         elif [[ $val -eq 24 ]]; then
-            loadRSS
+            mpc next
+            POS=$(echo $(( $POS +1 )))
+
 
         elif [[ $val -eq 25 ]]; then
             dplayQueueSave
 
         elif [[ $val -eq 26 ]]; then
-            dplayQueue
+            mpc prev
+            POS=$(echo $(( $POS -1 )))
+
+        elif [[ $val -eq 27 ]]; then
+            mpc stop
+
+        elif [[ $val -eq 28 ]]; then
+            seekMenu
 
         elif [[ $val -eq 21 ]]; then
             temp=$(mpc playlist --format '%position%\t%file%' | grep "^${POS}" | grep "${ARTIST}" | awk -F '\t' '{ print $2 }') 
@@ -678,15 +723,15 @@ songs () {
 
         elif [[ $val -eq 17 ]]; then
             unset last
-            suspendPlaylist
+            mpc toggle
 
         elif [[ $val -eq 18 ]]; then
             unset last
-            resumePlaylist
+            mpc stop
 
         elif [[ $val -eq 12 ]]; then
             unset last
-            dplayQueueSave
+            mpc next
 
         elif [[ $val -eq 14 ]]; then
             unset last
@@ -982,7 +1027,7 @@ addAlbum() {
 
     displaystyle () {
         mode="$1"
-        help_text="$(echo -e "${add}: Add - ${insert}: Insert - ${replace}: Replace (Default)\n${rate}: Rate - ${addplay}: Add + Play - ${insertplay}: Insert + Play" | column -s '-' -t)"
+        help_text="$(echo -e "${add}: Add - ${insert}: Insert - ${replace}: Replace (Default)\n${rate}: Rate - ${addplay}: Add + Play - ${insertplay}: Insert + Play" | column -s '-' -o "<span color='$help_separator_color'>|</span>" -t)"
         line1=$(echo "${help_text}" | head -1)
         line2=$(echo "${help_text}" | tail -1)
         HELP="<span color='$help_color'>${line1}
@@ -1105,7 +1150,7 @@ ${line2}</span>"
 addTrackTags() {
     help_text=$(echo -e "${add}: Add (Default) - ${insert}: Insert - ${replace}: Replace \
         \n${rate}: Rate - ${addplay}: Add + Play - ${insertplay}: Insert + Play" \
-        | column -s '-' -t)
+        | column -s '-' -o "<span color='$help_separator_color'>|</span>" -t)
     line1=$(echo "${help_text}" | head -1)
     line2=$(echo "${help_text}" | tail -1)
 HELP="<span color='$help_color'>${line1}
@@ -1190,31 +1235,45 @@ TRACK_TEMP="$((echo -e "< Return\n---"; cat $HOME/.config/clerk/tracks.cache) \
 }
 
 browseLibPrompt() {
-    menu=("< Return"
-          "---"
-          "1 [ Choose Albums ]>"
-          "2 [ Choose Track ]>"
-          "3 [ Browse Latest Additions ]>"
-          "---"
-          "4 [ Play Random Album ]"
-          "5 [ Play Random Tracks ]" 
-          "---"
-          "6 [ Update Album/Track Cache ]")
+    menu="$((echo -e "< Return\n---\n1 [ Choose Albums ]>\n2 [ Choose Track ]>\n3 [ Browse Latest Additions ]>\n---\n4 [ Play Random Album ]\n5 [ Play Random Tracks ]\n---\n6 [ Update Album/Track Cache ]") \
+        | dmenu_t \
+        -auto-select \
+        -kb-custom-1 ${albumlist} \
+        -kb-custom-2 ${tracklist} \
+        -kb-custom-3 ${queue} \
+        -kb-custom-4 ${nowplaying} \
+        -p "Library Menu >")"
 
-    prompt() {
-        printf "%s\n" "$@" | dmenu_t -auto-select -p "Library Menu > "
-    }
+    val=$?
 
-    case "$(prompt "${menu[@]}")" in
-        1*) addAlbum alphabet ;;
-        2*) addTrackTags ;;
-        6*) updateCache && browseLibPrompt ;;
-        \<*) dplayPrompt ;;
-        3*) addAlbum latest ;;
-        4*) playRandomAlbum ;;
-        5*) playRandomTracks ;;
-        *) exit
-    esac
+    if [[ $val -eq 1 ]]; then
+        exit
+    elif [[ $val -eq 10 ]]; then
+        addAlbum alphabet
+    elif [[ $val -eq 11 ]]; then
+        addTrackTags
+    elif [[ $val -eq 12 ]]; then
+        dplayQueue
+    elif [[ $val -eq 13 ]]; then
+        nowPlaying
+    fi
+
+    if [[ "${menu}" == "1 "* ]]; then
+        addAlbum alphabet
+    elif [[ "${menu}" == "2 "* ]]; then
+        addTrackTags
+    elif [[ "${menu}" == "6 "* ]]; then
+        updateCache;
+        browseLibPrompt
+    elif [[ "${menu}" == "< "* ]]; then
+        dplayPrompt
+    elif [[ "${menu}" == "3 "* ]]; then
+        addAlbum latest
+    elif [[ "${menu}" == "4 "* ]]; then
+        playRandomAlbum
+    elif [[ "${menu}" == "5 "* ]]; then
+        playRandomTracks
+    fi
 }
 
 saveAlbumToPlaylist() {
