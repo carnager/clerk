@@ -33,6 +33,14 @@ help_separator_color="#5F5F5F"
 albumlist="Alt+F1"
 tracklist="Alt+F2"
 queue="Alt+F3"
+toggle="Alt+F6"
+prev="Alt+F5"
+next="Alt+F8"
+stop="Alt+F7"
+seek="Alt+f"
+
+# main menu
+help="Alt+h"
 
 # Adding of songs/albums
 add="Alt+1"
@@ -41,13 +49,7 @@ replace="Alt+3"
 rate="Alt+r"
 addplay="Alt+4"
 insertplay="Alt+5"
-
-# playback controls
-toggle="Alt+F6"
-prev="Alt+F5"
-next="Alt+F8"
-stop="Alt+F7"
-seek="Alt+f"
+savefav="Alt+s"
 
 # playlist menu
 # also used: rate
