@@ -1619,6 +1619,8 @@ while :; do
                 saveLatestToPlaylist
             elif [[ $2 == savetrack ]]; then
                 saveTrackToPlaylist
+            elif [[ $2 == loadalbum ]]; then
+                getAlbumsFromPlaylist
             fi
             break
             ;;
