@@ -1168,7 +1168,7 @@ ${line2}</span>"
 
         elif [[ $val -eq 23 ]]; then
             entry="${TRACK}"
-            saveAlbumToPlaylist
+            TRACK="$TRACK" saveAlbumToPlaylist selection
 
         elif [[ $val -eq 17 ]]; then
             if [[ -n $(mpc find -f '%disc%' albumartist "${artist}" album "${album}" date "${date}") ]]; then
@@ -1368,7 +1368,11 @@ browseLibPrompt() {
 }
 
 saveAlbumToPlaylist() {
-    TRACK="$((echo -e "< Return\n---"; cat $HOME/.config/clerk/albums.cache) | dmenu_t -dmenu -p "Save Album to Playlist > ")"
+    if [[ $1 == "selection" ]]; then
+        TRACK="${TRACK}"
+    else
+        TRACK="$((echo -e "< Return\n---"; cat $HOME/.config/clerk/albums.cache) | dmenu_t -dmenu -p "Save Album to Playlist > ")"
+    fi
 
     val=$?
 
@@ -1432,7 +1436,7 @@ saveLatestToPlaylist() {
 }
 
 saveTrackToPlaylist() {
-    TRACK_TEMP=$((echo -e "0  Return to Main Menu\n---"; cat $HOME/.config/clerk/tracks.cache) | dmenu_t -filter "$filter" -select "$entry" -format "f¬s" -dmenu -p "Save Track to Playlist > ")
+    TRACK_TEMP="$((echo -e "0  Return to Main Menu\n---"; cat $HOME/.config/clerk/tracks.cache) | dmenu_t -filter "$filter" -select "$entry" -format "f¬s" -dmenu -p "Save Track to Playlist > ")"
 
     TRACK="${TRACK_TEMP#*¬}"
     unset filter
@@ -1463,6 +1467,27 @@ saveTrackToPlaylist() {
     fi
 }
 
+getAlbumsFromPlaylist () {
+    current=$(mpc save temp)
+    pl="clerk"
+    mpc clear
+    mpc load "${pl}"
+    list=$(mpc playlist -f '%artist% - %album% - %date%' | sort -u | rofi -dmenu)
+    val=$?
+
+    mpc clear
+    if [[ $val == 12 ]]; then
+        mpc searchadd artist "$(echo $list | awk -F ' - ' '{print $1}')" album "$(echo $list | awk -F ' - ' '{print $2}')" date "$(echo $list | awk -F ' - ' '{print $3}')"
+        mpc play
+    elif [[ $val == 11 ]]; then
+        mpc load temp
+        mpc search artist "$(echo $list | awk -F ' - ' '{print $1}')" album "$(echo $list | awk -F ' - ' '{print $2}')" date "$(echo $list | awk -F ' - ' '{print $3}')" | mpc insert
+    elif [[ $val == 10 ]]; then
+        mpc load temp
+        mpc searchadd artist "$(echo $list | awk -F ' - ' '{print $1}')" album "$(echo $list | awk -F ' - ' '{print $2}')" date "$(echo $list | awk -F ' - ' '{print $3}')"
+    fi
+    mpc rm temp
+}
 
 ################################################################################
 
