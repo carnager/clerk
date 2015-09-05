@@ -34,6 +34,7 @@ ssh_host=
 
 # color of the help messages
 help_color="#0C73C2"
+help_separator_color="#5F5F5F"
 
 # custom keybindings
 # global
@@ -50,26 +51,23 @@ addplay="Alt+4"
 insertplay="Alt+5"
 
 # playback controls
-toggle="Alt+1"
-prev="Alt+2"
-next="Alt+3"
-stop="Alt+4"
+toggle="Alt+F6"
+prev="Alt+F5"
+next="Alt+F8"
+stop="Alt+F7"
+seek="Alt+f"
 
 # playlist menu
 # also used: rate
 delete="Alt+Delete"
 crop="Alt+x"
 clear="Alt+c"
-suspend="Alt+9"
-resume="Alt+0"
 movedown="Alt+Down"
 moveup="Alt+Up"
-goalbum="Alt+F5"
-gotrack="Alt+F6"
+goalbum="Alt+a"
+gotrack="Alt+t"
 load="Alt+l"
-loadrss="Alt+Control+l"
 save="Alt+s"
-reload="Control+r"
 
 # table customization
 track_width="2"
