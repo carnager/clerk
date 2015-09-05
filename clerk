@@ -666,7 +666,10 @@ songs () {
 
         elif [[ $val -eq 24 ]]; then
             mpc next
-            POS=$(echo $(( $POS +1 )))
+            mpd_play=$(mpc status | mpc status | grep -E '\[playing\]|\[paused\]')
+            if [[ -n ${mpd_play} ]]; then
+                POS=$(echo $(( $(mpc current -f '%position%') + 0 )))
+            fi
 
 
         elif [[ $val -eq 25 ]]; then
@@ -674,7 +677,10 @@ songs () {
 
         elif [[ $val -eq 26 ]]; then
             mpc prev
-            POS=$(echo $(( $POS -1 )))
+            mpd_play=$(mpc status | mpc status | grep -E '\[playing\]|\[paused\]')
+            if [[ -n ${mpd_play} ]]; then
+                POS=$(echo $(( $(mpc current -f '%position%') + 0 )))
+            fi
 
         elif [[ $val -eq 27 ]]; then
             mpc stop
@@ -724,6 +730,10 @@ songs () {
         elif [[ $val -eq 17 ]]; then
             unset last
             mpc toggle
+            mpd_play=$(mpc status | mpc status | grep -E '\[playing\]|\[paused\]')
+            if [[ -n ${mpd_play} ]]; then
+                POS=$(echo $(( $(mpc current -f '%position%') + 0 )))
+            fi
 
         elif [[ $val -eq 18 ]]; then
             unset last
