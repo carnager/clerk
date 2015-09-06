@@ -34,7 +34,7 @@ For this to work, you need a recent rofi build from git.
 * rofi (https://github.com/DaveDavenport/rofi)
 * mpc
 * python-mpd2 (https://github.com/Mic92/python-mpd2)
-* util-linux >=2.26 (for hotkey hints)
+* a version of column with `-s` support.
 
 # Optional Dependencies
 
