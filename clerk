@@ -5,7 +5,7 @@ shopt -s globstar
 # load default settings
 # custom rofi settings (rofi reads settings from ~/.Xresources)
 # but you can override settings here.
-rofiopts="-lines 30 -width 1500 -i -no-levenshtein-sort"
+rofiopts="-lines 32 -width 1500 -i -no-levenshtein-sort"
 
 # custom mpd host
 mpd_host=
@@ -43,9 +43,6 @@ prev="Alt+F5"
 next="Alt+F8"
 stop="Alt+F7"
 seek="Alt+f"
-
-# main menu
-help="Alt+h"
 
 # Adding of songs/albums
 add="Alt+1"
@@ -158,8 +155,6 @@ fix_date_format() {
 
 
 updateCache () {
-    trackList="{ printf \"%.${track_width}s\t%.${title_width}s\t%.${artist_width}s\t%.${date_width}s\t%.${album_width}s\t%.500s\n\", \$1, \$2, \$3, \$4, \$5, \$6, \$7, \$8 }"
-    albumList="{ printf \"%.${artist_width}s\t%.${date_width}s\t%.${album_width}s\n\", \$1, \$2, \$3 }"
     notify-send "clerk" "updating cache files"
     cd $HOME/.config/clerk
     rm -f *.cache
@@ -171,19 +166,19 @@ updateCache () {
         | awk '{for (i=2; i<NF; i++) printf $i " "; print $NF}' \
         | uniq \
         | awk -F ' — ' '{ print $1 "\t" $2 "\t" $3 }' \
-        | awk -F '\t' '"${albumlist}"' \
-        | ~/column -s $'\t' -t | uniq > $HOME/.config/clerk/latest.cache
+        | awk -F '\t' '{ printf "%."'${artist_width}'"s\t%."'${date_width}'"s\t%."'${album_width}'"s\n", $1, $2, $3 }' \
+        | column -s $'\t' -t | uniq > $HOME/.config/clerk/latest.cache
 #        | sed 's,^\([^\t]*\t[^\t]\{40\}\)[^\t]*,\1,' | column -o $'\t' -s $'\t' -t | uniq > $HOME/.config/clerk/latest.cache
     mpc --format '[%albumartist%|%artist%]\t(%date%)\t%album%' \
         search filename '' \
         | sort \
         | uniq \
-        | awk -F '\t' '"${albumList}"' \
-        | ~/column -s $'\t' -t > $HOME/.config/clerk/albums.cache
+        | awk -F '\t' '{ printf "%."'${artist_width}'"s\t%."'${date_width}'"s\t%."'${album_width}'"s\n", $1, $2, $3 }' \
+        | column -s $'\t' -t > $HOME/.config/clerk/albums.cache
     mpc --format '%track%\t%title%\t%artist%\t(%date%)\t%album%\t%file%' \
         search filename '' \
-        | awk -F '\t' '"${trackList}"' \
-        | ~/column -s $'\t' -t \
+        | awk -F '\t' '{ printf "%."'${track_width}'"s\t%."'${title_width}'"s\t%."'${artist_width}'"s\t%."'${date_width}'"s\t%."'${album_width}'"s\t%.500s\n", $1, $2, $3, $4, $5, $6 }' \
+        | column -s $'\t' -t \
         > $HOME/.config/clerk/tracks.cache
     notify-send "clerk" "finished updating cache files"
 #        | awk -F '\t' '{ printf "%.2s\t%.40s\t%.40s\t%.200s\t%.500s\n", $1, $2, $3, $4, $5, $6 }' \
@@ -211,11 +206,11 @@ dplayPrompt () {
     else
         song=$(mpc current)
     fi
-    menu=$(echo -e "< Exit\n---\n1 [ Browse Library ]>\n2 [ Current Artist ]>\n3 [ Current Queue ]>\n---\n4 [ Options ]>\n5 [ Ratings ]>\n [ Help ]" \
+    menu=$(echo -e "< Exit\n---\n1 [ Browse Library ]>\n2 [ Current Artist ]>\n3 [ Current Queue ]>\n---\n4 [ Options ]>\n5 [ Ratings ]>\n6 [ Help ]" \
        | dmenu_t \
        -dmenu \
        -lines 17 \
-       -mesg "<span color='$help_color'>Press ${help} to show keys that work in every menu</span>" \
+       -mesg "<span color='$help_color'>Currently Playing: ${song}</span>" \
        -auto-select \
        -kb-custom-1 ${prev} \
        -kb-custom-2 ${toggle} \
@@ -225,8 +220,7 @@ dplayPrompt () {
        -kb-custom-6 ${tracklist} \
        -kb-custom-7 ${queue} \
        -kb-custom-8 ${seek} \
-       -kb-custom-9 ${help} \
-       -p "Now Playing: ${song} > ")
+       -p "clerk > ")
 
     val=$?
 
@@ -250,9 +244,6 @@ dplayPrompt () {
         dplayQueue
     elif [[ $val -eq 17 ]]; then
         seekMenu
-    elif [[ $val -eq 18 ]]; then
-        notify-send "clerk" "\nPlayback Controls:\n------\nPrev:       ${prev}\nToggle:     ${toggle}\nStop:       ${stop}\nNext:       ${next}       \n\Seek:       ${seek}\n\nViews\n------\nAlbumlist:  ${albumlist}\nTracklist:  ${tracklist}\nQueue:      ${queue}"
-        dplayPrompt
     fi
 
     if [[ "$menu" == "< Exit" ]]; then
@@ -274,6 +265,54 @@ dplayPrompt () {
     fi
 
 }
+
+helpMenu () {
+    showhelp=$(echo -e "< Return\n \
+---\n \
+# Global\n \
+Album List:       "${albumlist}"\n \
+Track List:       "$tracklist"\n \
+Queue:            "$queue"\n \
+Toggle Playback   "$toggle"\n \
+Previous:         "$prev"\n \
+Next:             "$next"\n \
+Stop:             "$stop"\n \
+Seek:             "$seek"\n \
+\n \
+# Adding of Songs/Albums\n \
+Add:              "$add"\n \
+Insert:           "$insert"\n \
+Replace:          "$replace"\n \
+Rate:             "$rate"\n \
+Add & Play:       "$addplay"\n \
+Insert & Play:    "$insertplay"\n \
+Save to Favs:     "$savefav"\n \
+\n \
+# Playlist Menu\n \
+Delete selected   "$delete"\n \
+Crop Playlist:    "$crop"\n \
+Clear Playlist:   "$clear"\n \
+Move Down:        "$movedown"\n \
+Move Up:          "$moveup"\n \
+Go to Album:      "$goalbum"\n \
+Go to Track:      "$gotrack"\n \
+Load Playlist:    "$load"\n \
+Save Playlist:    "$save"" | dmenu_t -dmenu -p "Hotkeys > ")
+
+    val=$?
+
+    if [[ $val -eq 1 ]]; then
+        exit
+    fi
+
+    if [[ $showhelp == "< Return" ]]; then
+        dplayPrompt
+    else
+        helpMenu
+    fi
+
+}
+
 
 seekMenu () {
     seekval="$((echo -e "< Return\n---\n$(for i in $(seq 0 10 100); do echo "${i}%"; done)") \
