@@ -41,6 +41,7 @@ For this to work, you need a recent rofi build from git.
 * lastfm-mpd-cli for loving tracks (https://github.com/morendi/lastfm-mpd-cli)
   (Not needed when using mpdas instead of mpdscribble)
 * mpd-sima (for Similar Artists playback)
+* perl
 
 # Installation
 
