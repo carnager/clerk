@@ -53,7 +53,7 @@ For arch linux there is a package in [AUR](https://aur.archlinux.org/packages/cl
 
 # Important
 
-clerk is heavily depending on a well structured database.
+clerk heavily depends on a well structured database.
 All your files need these tags in order for clerk to work as intended:
 * albumartist
 * artist
