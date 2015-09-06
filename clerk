@@ -584,6 +584,9 @@ resumePlaylist () {
 # Play or delete items from current Queue
 dplayQueue () {
     while true; do
+        if [[ $val -eq 1 ]]; then
+            exit
+        fi
         re='^[0-9]+$'
         if [[ "$POS" =~ $re ]]; then
             if [[ $last != $(mpc -f '%file%' playlist | tail -1) ]]; then
@@ -647,14 +650,16 @@ songs () {
         -mesg "${HELP}" \
         -p "Current Queue > ")
 
-        tempval=$?
-        val=$tempval
+        val=$?
 
-        TRACKDISPLAY=$(echo "${TRACKDISPLAY}" | perl -pe "s/  +/ /g")
-        POS=$(echo "${TRACKDISPLAY}" | awk '{ print $1 }')
-        ARTIST=$(echo "${TRACKDISPLAY}" | awk '{ print $4 }')
+        TRACKDISPLAY_NEW=$(echo "${TRACKDISPLAY}" | perl -pe "s/  +/\t/g")
+        POS=$(echo "${TRACKDISPLAY_NEW}" | awk -F '\t' '{ print $1 }')
+        ARTIST=$(echo "${TRACKDISPLAY_NEW}" | awk -F '\t' '{ print $4 }')
 
-        if [[ $val -eq 10 ]]; then
+        if [[ $val -eq 1 ]]; then
+            exit
+
+        elif [[ $val -eq 10 ]]; then
             last=$(mpc playlist -f '%file%' | tail -1)
             mpc del $POS;
             POS=$(( $POS - 1));
@@ -710,12 +715,9 @@ songs () {
         elif [[ $val -eq 22 ]]; then
             filename=$(mpc playlist --format '%position%\t%file%' | grep "^${POS}" | grep "${ARTIST}" | awk -F '\t' '{ print $2 }') currentMenu track
 
-        elif [[ $val -eq 1 ]]; then
-            exit
-
         elif [[ $val -eq 13 ]]; then
             unset last
-            if [[ $TRACKDISPLAY == *">"* || $TRACKDISPLAY == *"<"* || $TRACKDISPLAY == "---" ]]; then
+            if [[ $TRACKDISPLAY_NEW == *">"* || $TRACKDISPLAY_NEW == *"<"* || $TRACKDISPLAY_NEW == "---" ]]; then
                 mpc crop
             else
                 mpc play $POS;
@@ -750,13 +752,13 @@ songs () {
 
         elif [[ $val -eq 14 ]]; then
             unset last
-            if [[ $TRACKDISPLAY == *""* ]]; then
+            if [[ $TRACKDISPLAY_NEW == *""* ]]; then
                 mpc clear
             fi
 
         elif [[ $val -eq 0 ]]; then
             unset last
-            if [[ $TRACKDISPLAY == "< Return" ]]; then
+            if [[ $TRACKDISPLAY_NEW == "< Return" ]]; then
                 dplayPrompt
             else
                 mpc play $POS;
@@ -781,7 +783,7 @@ songs () {
                 | awk -F '\t' '{ print $5 }')
             rateartist="${ARTIST}" ratealbum="${ALBUM}" ratetrack="${TRACK}" ratetitle="${TITLE}" rateTrack
 
-        elif [[ $TRACKDISPLAY == "< Return" ]]; then
+        elif [[ $TRACKDISPLAY_NEW == "< Return" ]]; then
             dplayQueue
         fi
     done
@@ -1077,14 +1079,15 @@ ${line2}</span>"
             -p "Choose Album > ")"
     }
     returnto () {
-        if [[ $1 == "latest" ]]; then
+        if [[ $mode == "latest" ]]; then
             addAlbum latest
-        elif [[ $1 == "alphabet" ]]; then
+        elif [[ $mode == "alphabet" ]]; then
             addAlbum alphabet
         fi
     }
 
-    displaystyle $1
+    mode=$1
+    displaystyle $mode
 
     val=$?
 
@@ -1106,8 +1109,6 @@ ${line2}</span>"
             | awk -F "\t" '{print $2}' \
             | awk '{print substr($0, 2, length($0) - 2)}')
 
-        echo -e "${TRACK}\nartist: ${artist}\nalbum: ${album}\ndate: ${date}"
-
         if [[ $val -eq 11 ]]; then
             mpc search date "$date" album "$album" albumartist "$artist" | mpc insert
             entry="$TRACK_ORIG"
@@ -1122,8 +1123,10 @@ ${line2}</span>"
             if [[ "$TRACK" == "< Return" ]]; then
                 unset artist
                 browseLibPrompt
+
             elif [[ "$TRACK" == "" ]]; then
                 $(echo ${return_to})
+
             else
                 mpc clear;
                 mpc findadd date "$date" album "$album" albumartist "$artist";
@@ -1191,10 +1194,11 @@ ${line2}</span>"
             mpc findadd date "$date" album "$album" albumartist "$artist";
             mpc searchplay "${album}"
            entry="$TRACK_ORIG"
+
         elif [[ $val -eq 1 ]]; then
             exit
         fi
-        $(returnto $1)
+        returnto
     fi
 }
 
