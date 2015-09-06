@@ -2,19 +2,96 @@
 
 shopt -s globstar
 
-# check for config files
+# load default settings
+# custom rofi settings (rofi reads settings from ~/.Xresources)
+# but you can override settings here.
+rofiopts="-lines 30 -width 1500 -i -no-levenshtein-sort"
+
+# custom mpd host
+mpd_host=
+mpd_port=
+mpd_password=
+
+# Number of Songs to be added for "Random Tracks"
+value=20
+
+# stop on suspend?
+stop_after_suspend=no
+
+# use artist or albumartist for random tracks
+random_artist=artist
+
+# scrobbler to use. possible values: mpdscribble, mpdas
+scrobbler=mpdscribble
+
+# Fill these if scrobbler runs on a different host
+# set to 0 if mpdscribble runs locally
+ssh_lastfm=0
+ssh_host=
+
+# color of the help messages
+help_color="#0C73C2"
+help_separator_color="#5F5F5F"
+
+# custom keybindings
+# global
+albumlist="Alt+F1"
+tracklist="Alt+F2"
+queue="Alt+F3"
+toggle="Alt+F6"
+prev="Alt+F5"
+next="Alt+F8"
+stop="Alt+F7"
+seek="Alt+f"
+
+# main menu
+help="Alt+h"
+
+# Adding of songs/albums
+add="Alt+1"
+insert="Alt+2"
+replace="Alt+3"
+rate="Alt+r"
+addplay="Alt+4"
+insertplay="Alt+5"
+savefav="Alt+s"
+
+# playlist menu
+# also used: rate
+delete="Alt+Delete"
+crop="Alt+x"
+clear="Alt+c"
+movedown="Alt+Down"
+moveup="Alt+Up"
+goalbum="Alt+a"
+gotrack="Alt+t"
+load="Alt+l"
+save="Alt+s"
+
+# table customization
+track_width="2"
+title_width="40"
+artist_width="40"
+date_width="6"
+# album is much longer in order to keep filename off screen
+album_width="200"
+
+# custom widths for playlist
+pl_title_width="60"
+pl_artist_width="40"
+
+# override settings from global config file, if present
 if [[ ! -f $HOME/.config/clerk/config ]] && [[ ! -f /etc/clerk ]]; then
     echo "Error: could not find configuration file \"$HOME/.config/clerk/config\""
     echo "You can use the provided example configuration file (config.clerk), copy it to the above location and edit it to your needs."
 	exit
 fi
 
-# read global config, if present
 if [[ -f /etc/clerk.conf ]]; then
     source /etc/clerk.conf
 fi
 
-# read local config file
+# override settings from local config, if present
 if [[ -f $HOME/.config/clerk/config ]]; then
     source $HOME/.config/clerk/config
 fi
