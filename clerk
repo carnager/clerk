@@ -258,7 +258,7 @@ lastFMCheck () {
 
 currentMenu () {
     if [[ $1 == "album" ]]; then
-        entry="${filename}" addAlbum alphabet
+        album_entry="${filename}" addAlbum alphabet
     elif [[ $1 == "track" ]]; then
         entry="${filename}" addTrackTags
     fi
@@ -1056,7 +1056,7 @@ ${line2}</span>"
             album_list="albums.cache"
         fi
 
-        TRACK_TEMP="$((echo -e "< Return\n---"; cat $HOME/.config/clerk/${album_list}) \
+        ALBUM_TEMP="$((echo -e "< Return\n---"; cat $HOME/.config/clerk/${album_list}) \
             | dmenu_t \
             -custom-kb-1 "${add}" \
             -custom-kb-2 "${insert}" \
@@ -1073,7 +1073,7 @@ ${line2}</span>"
             -kb-custom-13 ${seek} \
             -kb-custom-14 ${savefav} \
             -dmenu -filter "$filter" \
-            -select "$entry" \
+            -select "$album_entry" \
             -format "f¬s" \
             -mesg "${HELP}" \
             -p "Choose Album > ")"
@@ -1091,47 +1091,47 @@ ${line2}</span>"
 
     val=$?
 
-    TRACK_ORIG="${TRACK_TEMP#*¬}"
+    ALBUM_ORIG="${ALBUM_TEMP#*¬}"
     unset filter
-    export filter="${TRACK_TEMP%¬*}"
-    TRACK=$(echo "${TRACK_ORIG}" | perl -pe "s/  +/\t/g")
+    export filter="${ALBUM_TEMP%¬*}"
+    ALBUM=$(echo "${ALBUM_ORIG}" | perl -pe "s/  +/\t/g")
 
 
-    if [[ -z "$TRACK" ]]; then
+    if [[ -z "$ALBUM" ]]; then
         exit
     else
-        artist=$(echo -en "$TRACK" \
+        artist=$(echo -en "$ALBUM" \
             | awk -F '\t' '{ print $1 }' \
             | sed -e 's/[[:space:]]*$//')
-        album=$(echo "$TRACK" \
+        album=$(echo "$ALBUM" \
             | awk -F "\t" '{print $3}')
-        date=$(echo "$TRACK" \
+        date=$(echo "$ALBUM" \
             | awk -F "\t" '{print $2}' \
             | awk '{print substr($0, 2, length($0) - 2)}')
 
         if [[ $val -eq 11 ]]; then
             mpc search date "$date" album "$album" albumartist "$artist" | mpc insert
-            entry="$TRACK_ORIG"
+            album_entry="$ALBUM_ORIG"
 
         elif [[ $val -eq 12 ]]; then
             mpc clear;
             mpc findadd date "$date" album "$album" albumartist "$artist";
             mpc play
-            entry="$TRACK_ORIG"
+            album_entry="$ALBUM_ORIG"
 
         elif [[ $val -eq 0 ]]; then
-            if [[ "$TRACK" == "< Return" ]]; then
+            if [[ "$ALBUM" == "< Return" ]]; then
                 unset artist
                 browseLibPrompt
 
-            elif [[ "$TRACK" == "" ]]; then
-                $(echo ${return_to})
+            elif [[ "$ALBUM" == "" ]]; then
+                returnto $mode
 
             else
                 mpc clear;
                 mpc findadd date "$date" album "$album" albumartist "$artist";
                 mpc play
-                entry="${TRACK_ORIG}"
+                album_entry="${ALBUM_ORIG}"
             fi
 
         elif [[ $val -eq 10 ]]; then
@@ -1149,31 +1149,31 @@ ${line2}</span>"
 
         elif [[ $val -eq 18 ]]; then
             mpc prev
-            entry="${TRACK_ORIG}"
+            album_entry="${ALBUM_ORIG}"
             returnto
 
         elif [[ $val -eq 19 ]]; then
             mpc toggle
-            entry="${TRACK_ORIG}"
+            album_entry="${ALBUM_ORIG}"
             returnto
 
         elif [[ $val -eq 20 ]]; then
             mpc stop
-            entry="${TRACK_ORIG}"
+            album_entry="${ALBUM_ORIG}"
             returnto
 
         elif [[ $val -eq 21 ]]; then
             mpc next
-            entry="${TRACK_ORIG}"
+            album_entry="${ALBUM_ORIG}"
             returnto
 
         elif [[ $val -eq 22 ]]; then
-            entry="${TRACK_ORIG}"
+            album_entry="${ALBUM_ORIG}"
             seekMenu addAlbum $1
 
         elif [[ $val -eq 23 ]]; then
-            entry="${TRACK_ORIG}"
-            TRACK="$TRACK" saveAlbumToPlaylist selection
+            album_entry="${ALBUM_ORIG}"
+            ALBUM="$ALBUM" saveAlbumToPlaylist selection
 
         elif [[ $val -eq 17 ]]; then
             if [[ -n $(mpc find -f '%disc%' albumartist "${artist}" album "${album}" date "${date}") ]]; then
@@ -1187,13 +1187,13 @@ ${line2}</span>"
                 track="01"
             fi
                 disc=${disc} track=${track} rateartist="${artist}" ratealbum="${album}" ratedate="${date}" rateAlbum
-                entry="$TRACK_ORIG"
+                album_entry="$ALBUM_ORIG"
 
         elif [[ $val -eq 14 ]]; then
             mpc clear;
             mpc findadd date "$date" album "$album" albumartist "$artist";
             mpc searchplay "${album}"
-           entry="$TRACK_ORIG"
+           album_entry="$ALBUM_ORIG"
 
         elif [[ $val -eq 1 ]]; then
             exit
