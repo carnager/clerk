@@ -163,6 +163,7 @@ updateCache () {
     notify-send "clerk" "updating cache files"
     cd $HOME/.config/clerk
     rm -f *.cache
+
     mpc --format '%mtime%\t[%albumartist%|%artist%] — (%date%) — %album%' \
         search filename '' \
         | fix_date_format 1 '%Y-%m-%d-%H:%M:%S' \
@@ -170,19 +171,19 @@ updateCache () {
         | awk '{for (i=2; i<NF; i++) printf $i " "; print $NF}' \
         | uniq \
         | awk -F ' — ' '{ print $1 "\t" $2 "\t" $3 }' \
-        | awk -F '\t' "$albumlist" \
-        | column -s $'\t' -t | uniq > $HOME/.config/clerk/latest.cache
+        | awk -F '\t' '"${albumlist}"' \
+        | ~/column -s $'\t' -t | uniq > $HOME/.config/clerk/latest.cache
 #        | sed 's,^\([^\t]*\t[^\t]\{40\}\)[^\t]*,\1,' | column -o $'\t' -s $'\t' -t | uniq > $HOME/.config/clerk/latest.cache
     mpc --format '[%albumartist%|%artist%]\t(%date%)\t%album%' \
         search filename '' \
         | sort \
         | uniq \
-        | awk -F '\t' "$albumList" \
-        | column -s $'\t' -t > $HOME/.config/clerk/albums.cache
+        | awk -F '\t' '"${albumList}"' \
+        | ~/column -s $'\t' -t > $HOME/.config/clerk/albums.cache
     mpc --format '%track%\t%title%\t%artist%\t(%date%)\t%album%\t%file%' \
         search filename '' \
-        | awk -F '\t' "$trackList" \
-        | column -s $'\t' -t \
+        | awk -F '\t' '"${trackList}"' \
+        | ~/column -s $'\t' -t \
         > $HOME/.config/clerk/tracks.cache
     notify-send "clerk" "finished updating cache files"
 #        | awk -F '\t' '{ printf "%.2s\t%.40s\t%.40s\t%.200s\t%.500s\n", $1, $2, $3, $4, $5, $6 }' \
@@ -210,7 +211,7 @@ dplayPrompt () {
     else
         song=$(mpc current)
     fi
-    menu=$(echo -e "< Exit\n---\n1 [ Browse Library ]>\n2 [ Current Artist ]>\n3 [ Current Queue ]>\n---\n4 [ Options ]>\n5 [ Ratings ]>" \
+    menu=$(echo -e "< Exit\n---\n1 [ Browse Library ]>\n2 [ Current Artist ]>\n3 [ Current Queue ]>\n---\n4 [ Options ]>\n5 [ Ratings ]>\n [ Help ]" \
        | dmenu_t \
        -dmenu \
        -lines 17 \
@@ -266,6 +267,8 @@ dplayPrompt () {
         dplayOptionsPrompt
     elif [[ "$menu" == "5 "* ]]; then
         ratingPrompt
+    elif [[ "$menu" == "6 "* ]]; then
+        helpMenu
     elif [[ -z "$menu" ]]; then
         exit
     fi
