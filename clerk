@@ -158,8 +158,8 @@ fix_date_format() {
 
 
 updateCache () {
-    tracklist="{ printf \"%.${track_width}s\t%.${title_width}s\t%.${artist_width}s\t%.${date_width}s\t%.${album_width}s\t%.500s\n\", \$1, \$2, \$3, \$4, \$5, \$6, \$7, \$8 }"
-    albumlist="{ printf \"%.${artist_width}s\t%.${date_width}s\t%.${album_width}s\n\", \$1, \$2, \$3 }"
+    trackList="{ printf \"%.${track_width}s\t%.${title_width}s\t%.${artist_width}s\t%.${date_width}s\t%.${album_width}s\t%.500s\n\", \$1, \$2, \$3, \$4, \$5, \$6, \$7, \$8 }"
+    albumList="{ printf \"%.${artist_width}s\t%.${date_width}s\t%.${album_width}s\n\", \$1, \$2, \$3 }"
     notify-send "clerk" "updating cache files"
     cd $HOME/.config/clerk
     rm -f *.cache
@@ -177,11 +177,11 @@ updateCache () {
         search filename '' \
         | sort \
         | uniq \
-        | awk -F '\t' "$albumlist" \
+        | awk -F '\t' "$albumList" \
         | column -s $'\t' -t > $HOME/.config/clerk/albums.cache
     mpc --format '%track%\t%title%\t%artist%\t(%date%)\t%album%\t%file%' \
         search filename '' \
-        | awk -F '\t' "$tracklist" \
+        | awk -F '\t' "$trackList" \
         | column -s $'\t' -t \
         > $HOME/.config/clerk/tracks.cache
     notify-send "clerk" "finished updating cache files"
