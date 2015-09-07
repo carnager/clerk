@@ -775,6 +775,7 @@ songs () {
         TRACKDISPLAY_NEW=$(echo "${TRACKDISPLAY}" | perl -pe "s/  +/\t/g")
         POS=$(echo "${TRACKDISPLAY_NEW}" | awk -F '\t' '{ print $1 }')
         ARTIST=$(echo "${TRACKDISPLAY_NEW}" | awk -F '\t' '{ print $4 }')
+        TITLE=$(echo "${TRACKDISPLAY_NEW}" | awk -F '\t' '{ print $3 }')
 
         if [[ $val -eq 1 ]]; then
             exit
@@ -819,7 +820,7 @@ songs () {
             seekMenu
 
         elif [[ $val -eq 21 ]]; then
-            temp=$(mpc playlist --format '%position%\t%file%' | grep "^${POS}" | grep "${ARTIST}" | awk -F '\t' '{ print $2 }') 
+            temp=$(mpc playlist --format '%position%\t%file%' | grep "^${POS}" | grep "${ARTIST}" | grep "${TITLE}" | awk -F '\t' '{ print $2 }') 
             info=$(mpc --format '%albumartist%\t%album%\t%date%\t%track%\t%title%' search filename "${temp}")
             echo "${info}"
 
