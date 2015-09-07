@@ -95,14 +95,14 @@ fi
 
 if [[ -n $mpd_host ]]; then
     if [[ -n $mpd_password ]]; then
-        MPD_HOST="${mpd_password}@${mpd_host}"
+        export MPD_HOST="${mpd_password}@${mpd_host}"
     else
-        MPD_HOST="${mpd_host}"
+        export MPD_HOST="${mpd_host}"
     fi
 fi
 
 if [[ -n $mpd_port ]]; then
-    MPD_PORT="${mpd_port}"
+    export MPD_PORT="${mpd_port}"
 fi
 
 # check for scrobbler
@@ -220,6 +220,7 @@ dplayPrompt () {
        -kb-custom-6 ${tracklist} \
        -kb-custom-7 ${queue} \
        -kb-custom-8 ${seek} \
+       -only-match \
        -p "clerk > ")
 
     val=$?
