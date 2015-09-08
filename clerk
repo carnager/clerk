@@ -1621,7 +1621,7 @@ getAlbumsFromPlaylist () {
 
 
 function dmenu_t () {
-    rofi -dmenu -z $(echo "$rofiopts") "$@"
+    rofi -dmenu $(echo "$rofiopts") "$@"
 }
 
 while :; do
