@@ -163,25 +163,25 @@ updateCache () {
         search filename '' \
         | fix_date_format 1 '%Y-%m-%d-%H:%M:%S' \
         | sort -nr \
-        | awk '{for (i=2; i<NF; i++) printf $i " "; print $NF}' \
+        | gawk '{for (i=2; i<NF; i++) printf $i " "; print $NF}' \
         | uniq \
-        | awk -F ' — ' '{ print $1 "\t" $2 "\t" $3 }' \
-        | awk -F '\t' '{ printf "%."'${artist_width}'"s\t%."'${date_width}'"s\t%."'${album_width}'"s\n", $1, $2, $3 }' \
+        | gawk -F ' — ' '{ print $1 "\t" $2 "\t" $3 }' \
+        | gawk -F '\t' '{ printf "%."'${artist_width}'"s\t%."'${date_width}'"s\t%."'${album_width}'"s\n", $1, $2, $3 }' \
         | column -s $'\t' -t | uniq > $HOME/.config/clerk/latest.cache
 #        | sed 's,^\([^\t]*\t[^\t]\{40\}\)[^\t]*,\1,' | column -o $'\t' -s $'\t' -t | uniq > $HOME/.config/clerk/latest.cache
     mpc --format '[%albumartist%|%artist%]\t(%date%)\t%album%' \
         search filename '' \
         | sort \
         | uniq \
-        | awk -F '\t' '{ printf "%."'${artist_width}'"s\t%."'${date_width}'"s\t%."'${album_width}'"s\n", $1, $2, $3 }' \
+        | gawk -F '\t' '{ printf "%."'${artist_width}'"s\t%."'${date_width}'"s\t%."'${album_width}'"s\n", $1, $2, $3 }' \
         | column -s $'\t' -t > $HOME/.config/clerk/albums.cache
     mpc --format '%track%\t%title%\t%artist%\t(%date%)\t%album%\t%file%' \
         search filename '' \
-        | awk -F '\t' '{ printf "%."'${track_width}'"s\t%."'${title_width}'"s\t%."'${artist_width}'"s\t%."'${date_width}'"s\t%."'${album_width}'"s\t%.500s\n", $1, $2, $3, $4, $5, $6 }' \
+        | gawk -F '\t' '{ printf "%."'${track_width}'"s\t%."'${title_width}'"s\t%."'${artist_width}'"s\t%."'${date_width}'"s\t%."'${album_width}'"s\t%.500s\n", $1, $2, $3, $4, $5, $6 }' \
         | column -s $'\t' -t \
         > $HOME/.config/clerk/tracks.cache
     notify-send "clerk" "finished updating cache files"
-#        | awk -F '\t' '{ printf "%.2s\t%.40s\t%.40s\t%.200s\t%.500s\n", $1, $2, $3, $4, $5, $6 }' \
+#        | gawk -F '\t' '{ printf "%.2s\t%.40s\t%.40s\t%.200s\t%.500s\n", $1, $2, $3, $4, $5, $6 }' \
 }
 
 date=$(mpc stats | grep 'DB Updated: ')
@@ -545,10 +545,10 @@ dplayOptionsPrompt () {
 
     # define variables to be used in menu
     export status="$(mpc status)"
-    single=$(echo "$status" | tail -1 | awk -F ':' '{ print $5 }' | cut -d ' ' -f 2)
-    random=$(echo "$status" | tail -1 | awk -F ':' '{ print $4 }' | cut -d ' ' -f 2)
-    consume=$(echo "$status" | tail -1 | awk -F ':' '{ print $6 }' | cut -d ' ' -f 2)
-    repeat=$(echo "$status" | tail -1 | awk -F ':' '{ print $3 }' | cut -d ' ' -f 2)
+    single=$(echo "$status" | tail -1 | gawk -F ':' '{ print $5 }' | cut -d ' ' -f 2)
+    random=$(echo "$status" | tail -1 | gawk -F ':' '{ print $4 }' | cut -d ' ' -f 2)
+    consume=$(echo "$status" | tail -1 | gawk -F ':' '{ print $6 }' | cut -d ' ' -f 2)
+    repeat=$(echo "$status" | tail -1 | gawk -F ':' '{ print $3 }' | cut -d ' ' -f 2)
 
     if [[ -a /tmp/mpd-sima.pid ]]; then
         export sima=on
@@ -656,7 +656,7 @@ loadRSS () {
         mpc clear
         mpc load $(grep "$podcast" $HOME/.config/clerk/podcasts | cut -d '\' -f2)
         episode=$(mpc playlist --format "%position% — %artist% — %title%" | dmenu_t -p "Choose Episode > ")
-        POS=$(echo "$episode" | awk -F " — " '{ print $1 }')
+        POS=$(echo "$episode" | gawk -F " — " '{ print $1 }')
         mpc play "$POS"
     fi
 }
@@ -734,7 +734,7 @@ ${line2}</span>"
 
 songs () {
     mpc --format '%position%\t%track%\t%title%\t%artist%\t(%date%)\t%album%' playlist \
-        | awk -F '\t' '{ printf "%.4s\t%."'${track_width}'"s\t%."'${pl_title_width}'"s\t%."'${pl_artist_width}'"s\t%."'${date_width}'"s\t%."'${album_width}'"s\n", $1, $2, $3, $4, $5, $6 }' \
+        | gawk -F '\t' '{ printf "%.4s\t%."'${track_width}'"s\t%."'${pl_title_width}'"s\t%."'${pl_artist_width}'"s\t%."'${date_width}'"s\t%."'${album_width}'"s\n", $1, $2, $3, $4, $5, $6 }' \
         | column -s $'\t' -t
 }
 
@@ -772,9 +772,9 @@ songs () {
         val=$?
 
         TRACKDISPLAY_NEW=$(echo "${TRACKDISPLAY}" | perl -pe "s/  +/\t/g")
-        POS=$(echo "${TRACKDISPLAY_NEW}" | awk -F '\t' '{ print $1 }')
-        ARTIST=$(echo "${TRACKDISPLAY_NEW}" | awk -F '\t' '{ print $4 }')
-        TITLE=$(echo "${TRACKDISPLAY_NEW}" | awk -F '\t' '{ print $3 }')
+        POS=$(echo "${TRACKDISPLAY_NEW}" | gawk -F '\t' '{ print $1 }')
+        ARTIST=$(echo "${TRACKDISPLAY_NEW}" | gawk -F '\t' '{ print $4 }')
+        TITLE=$(echo "${TRACKDISPLAY_NEW}" | gawk -F '\t' '{ print $3 }')
 
         if [[ $val -eq 1 ]]; then
             exit
@@ -819,21 +819,21 @@ songs () {
             seekMenu
 
         elif [[ $val -eq 21 ]]; then
-            temp=$(mpc playlist --format '%position%\t%file%' | grep "^${POS}" | grep "${ARTIST}" | grep "${TITLE}" | awk -F '\t' '{ print $2 }') 
+            temp=$(mpc playlist --format '%position%\t%file%' | grep "^${POS}" | grep "${ARTIST}" | grep "${TITLE}" | gawk -F '\t' '{ print $2 }') 
             info=$(mpc --format '%albumartist%\t%album%\t%date%\t%track%\t%title%' search filename "${temp}")
             echo "${info}"
 
             ARTIST=$(echo "${info}" \
-                | awk -F '\t' '{ print $1 }')
+                | gawk -F '\t' '{ print $1 }')
             ALBUM=$(echo "${info}" \
-                | awk -F '\t' '{ print $2 }')
+                | gawk -F '\t' '{ print $2 }')
             DATE=$(echo "${info}" \
-                | awk -F '\t' '{ print $3 }')
+                | gawk -F '\t' '{ print $3 }')
 
             filename="${ARTIST} ${DATE}" currentMenu album
 
         elif [[ $val -eq 22 ]]; then
-            filename=$(mpc playlist --format '%position%\t%file%' | grep "^${POS}" | grep "${ARTIST}" | awk -F '\t' '{ print $2 }') currentMenu track
+            filename=$(mpc playlist --format '%position%\t%file%' | grep "^${POS}" | grep "${ARTIST}" | gawk -F '\t' '{ print $2 }') currentMenu track
 
         elif [[ $val -eq 13 ]]; then
             unset last
@@ -887,20 +887,20 @@ songs () {
         elif [[ $val -eq 11 ]]; then
             unset last
 
-            filename=$(mpc playlist --format '%position%\t%file%' | grep "^${POS}" | grep "${ARTIST}" | awk -F '\t' '{ print $2 }') 
+            filename=$(mpc playlist --format '%position%\t%file%' | grep "^${POS}" | grep "${ARTIST}" | gawk -F '\t' '{ print $2 }') 
             info=$(mpc --format '%artist%\t%album%\t%date%\t%track%\t%title%' search filename "${filename}")
             echo "${info}"
 
             ARTIST=$(echo "${info}" \
-                | awk -F '\t' '{ print $1 }')
+                | gawk -F '\t' '{ print $1 }')
             ALBUM=$(echo "${info}" \
-                | awk -F '\t' '{ print $2 }')
+                | gawk -F '\t' '{ print $2 }')
             DATE=$(echo "${info}" \
-                | awk -F '\t' '{ print $3 }')
+                | gawk -F '\t' '{ print $3 }')
             TRACK=$(echo "${info}" \
-                | awk -F '\t' '{ print $4 }')
+                | gawk -F '\t' '{ print $4 }')
             TITLE=$(echo "${info}" \
-                | awk -F '\t' '{ print $5 }')
+                | gawk -F '\t' '{ print $5 }')
             rateartist="${ARTIST}" ratealbum="${ALBUM}" ratetrack="${TRACK}" ratetitle="${TITLE}" rateTrack
 
         elif [[ $TRACKDISPLAY_NEW == "< Return" ]]; then
@@ -972,7 +972,7 @@ outputPrompt () {
             exit
     else
         mpc toggleoutput $(echo "$menu" \
-            | awk '{print $2}');
+            | gawk '{print $2}');
 
         notify-send "MPD" "$(echo "$menu" \
             | $sed -e 's/enabled$/disabled/;ta;s/disabled$/enabled/;:a;')";
@@ -1085,7 +1085,7 @@ loadRatedTracks () {
     else
         cd $HOME/.config/clerk
         mpc clear
-        songs="$(mpc sticker "" find rating | awk -F 'rating=' '{ print $2 }')"
+        songs="$(mpc sticker "" find rating | gawk -F 'rating=' '{ print $2 }')"
         echo "$songs" | mpc add
         mpc play
     fi
@@ -1101,7 +1101,7 @@ loadRandomRatedTracks () {
         mpc clear
         songs="$(mpc sticker "" find rating \
             | grep -E "rating=$rating|rating=$(echo $(( $rating + 1 )))|rating=$(echo $(( $rating + 2 )))|rating=$(echo $(( $rating + 3 )))|rating=$(echo $(( $rating + 4 )))" \
-            | awk -F ':' '{ print $1 }')"
+            | gawk -F ':' '{ print $1 }')"
 
         echo "$songs" \
             | $shuf -n $number \
@@ -1221,13 +1221,13 @@ ${line2}</span>"
         exit
     else
         artist=$(echo -en "$ALBUM" \
-            | awk -F '\t' '{ print $1 }' \
+            | gawk -F '\t' '{ print $1 }' \
             | sed -e 's/[[:space:]]*$//')
         album=$(echo "$ALBUM" \
-            | awk -F "\t" '{print $3}')
+            | gawk -F "\t" '{print $3}')
         date=$(echo "$ALBUM" \
-            | awk -F "\t" '{print $2}' \
-            | awk '{print substr($0, 2, length($0) - 2)}')
+            | gawk -F "\t" '{print $2}' \
+            | gawk '{print substr($0, 2, length($0) - 2)}')
 
         if [[ $val -eq 11 ]]; then
             mpc search date "$date" album "$album" albumartist "$artist" | mpc insert
@@ -1357,13 +1357,13 @@ TRACK_TEMP="$((echo -e "< Return\n---"; cat $HOME/.config/clerk/tracks.cache) \
     val=$?
     TRACK_ORIG="${TRACK_TEMP#*¬}"
     unset filter
-    export filter="$(echo ${TRACK_TEMP} | awk -F '¬' '{ print $1 }')"
+    export filter="$(echo ${TRACK_TEMP} | gawk -F '¬' '{ print $1 }')"
     TRACK="$(echo "${TRACK_ORIG}" | perl -pe "s/  +/\t/g")"
 
     if [[ -z "$TRACK" ]]; then
         exit
     else
-        filename=$(echo "$TRACK" | awk -F "\t" '{print $6}')
+        filename=$(echo "$TRACK" | gawk -F "\t" '{print $6}')
 
         if [[ $val -eq 11 ]]; then
             mpc insert "${filename}"
@@ -1432,15 +1432,15 @@ TRACK_TEMP="$((echo -e "< Return\n---"; cat $HOME/.config/clerk/tracks.cache) \
         elif [[ $val -eq 17 ]]; then
             info=$(mpc search --format '%artist%\t%album%\t%date%\t%track%\t%title%' filename "${filename}")
             artist="$(echo "$info" \
-                | awk -F '\t' '{ print $1 }')"
+                | gawk -F '\t' '{ print $1 }')"
             album="$(echo "$info" \
-                | awk -F '\t' '{ print $2 }')"
+                | gawk -F '\t' '{ print $2 }')"
             date="$(echo "$info" \
-                | awk -F '\t' '{ print $3 }')"
+                | gawk -F '\t' '{ print $3 }')"
             track="$(echo "$info" \
-                | awk -F '\t' '{ print $4 }')"
+                | gawk -F '\t' '{ print $4 }')"
             title="$(echo "$info" \
-                | awk -F '\t' '{ print $5 }')"
+                | gawk -F '\t' '{ print $5 }')"
     
             echo "${artist} ${album} ${date} ${track} ${title}"
             rateartist="${artist}" ratealbum="${album}" ratetrack="${track}" ratetitle="${title}" rateTrack
@@ -1512,16 +1512,16 @@ saveAlbumToPlaylist() {
         saveAlbumToPlaylist
     else
         artist=$(echo -en "$TRACK" \
-            | awk -F '\t' '{ print $1 }' \
+            | gawk -F '\t' '{ print $1 }' \
             | sed -e 's/[[:space:]]*$//')
         group2=$(echo -en "$TRACK" \
-            | awk -F '\t' '{ print $2 "\t" $3}' \
+            | gawk -F '\t' '{ print $2 "\t" $3}' \
             | sed -e 's/[[:space:]]*$//')
         album=$(echo -en "$group2" \
-            | awk -F "\t" '{print $2}')
+            | gawk -F "\t" '{print $2}')
         date=$(echo -en "$group2" \
-            | awk -F "\t" '{print $1}' \
-            | awk '{print substr($0, 2, length($0) - 2)}')
+            | gawk -F "\t" '{print $1}' \
+            | gawk '{print substr($0, 2, length($0) - 2)}')
         clear
         echo "${artist} ${album} ${date}"
 
@@ -1540,16 +1540,16 @@ saveLatestToPlaylist() {
             then dplayPrompt
         else
         artist=$(echo -en "$TRACK" \
-            | awk -F '\t' '{ print $1 }' \
+            | gawk -F '\t' '{ print $1 }' \
             | sed -e 's/[[:space:]]*$//')
         group2=$(echo -en "$TRACK" \
-            | awk -F '\t' '{ print $2 }' \
+            | gawk -F '\t' '{ print $2 }' \
             | sed -e 's/[[:space:]]*$//')
         album=$(echo "$group2" \
-            | awk -F " — " '{print $2}')
+            | gawk -F " — " '{print $2}')
         date=$(echo "$group2" \
-            | awk -F " — " '{print $1}' \
-            | awk '{print substr($0, 2, length($0) - 2)}')
+            | gawk -F " — " '{print $1}' \
+            | gawk '{print substr($0, 2, length($0) - 2)}')
 
             mpc search date "$date" album "$album" albumartist "$artist" | clerk_helper saveto
         fi
@@ -1566,7 +1566,7 @@ saveTrackToPlaylist() {
 
     TRACK="${TRACK_TEMP#*¬}"
     unset filter
-    export filter="$(echo ${TRACK_TEMP} | awk -F '¬' '{ print $1 }')"
+    export filter="$(echo ${TRACK_TEMP} | gawk -F '¬' '{ print $1 }')"
 
     
     if [[ "$TRACK" == "0  Return to Main Menu" ]]
@@ -1574,18 +1574,18 @@ saveTrackToPlaylist() {
     elif [[ -z "$TRACK" ]]; then
         exit
     else
-        filename=$(echo "$TRACK" | awk -F "\t" '{print $3}')
+        filename=$(echo "$TRACK" | gawk -F "\t" '{print $3}')
         info=$(mpc search --format '%artist%\t%album%\t%date%\t%track%\t%title%' filename "${filename}")
         artist="$(echo "$info" \
-            | awk -F '\t' '{ print $1 }')"
+            | gawk -F '\t' '{ print $1 }')"
         album="$(echo "$info" \
-            | awk -F '\t' '{ print $2 }')"
+            | gawk -F '\t' '{ print $2 }')"
         date="$(echo "$info" \
-            | awk -F '\t' '{ print $3 }')"
+            | gawk -F '\t' '{ print $3 }')"
         track="$(echo "$info" \
-            | awk -F '\t' '{ print $4 }')"
+            | gawk -F '\t' '{ print $4 }')"
         title="$(echo "$info" \
-            | awk -F '\t' '{ print $5 }')"
+            | gawk -F '\t' '{ print $5 }')"
 
         mpc search track "$track" album "$album" title "$title" albumartist "$artist" | clerk_helper saveto
         entry="$TRACK"
@@ -1604,14 +1604,14 @@ getAlbumsFromPlaylist () {
 
     mpc clear
     if [[ $val == 12 ]]; then
-        mpc searchadd artist "$(echo $list | awk -F ' - ' '{print $1}')" album "$(echo $list | awk -F ' - ' '{print $2}')" date "$(echo $list | awk -F ' - ' '{print $3}')"
+        mpc searchadd artist "$(echo $list | gawk -F ' - ' '{print $1}')" album "$(echo $list | gawk -F ' - ' '{print $2}')" date "$(echo $list | gawk -F ' - ' '{print $3}')"
         mpc play
     elif [[ $val == 11 ]]; then
         mpc load temp
-        mpc search artist "$(echo $list | awk -F ' - ' '{print $1}')" album "$(echo $list | awk -F ' - ' '{print $2}')" date "$(echo $list | awk -F ' - ' '{print $3}')" | mpc insert
+        mpc search artist "$(echo $list | gawk -F ' - ' '{print $1}')" album "$(echo $list | gawk -F ' - ' '{print $2}')" date "$(echo $list | gawk -F ' - ' '{print $3}')" | mpc insert
     elif [[ $val == 10 ]]; then
         mpc load temp
-        mpc searchadd artist "$(echo $list | awk -F ' - ' '{print $1}')" album "$(echo $list | awk -F ' - ' '{print $2}')" date "$(echo $list | awk -F ' - ' '{print $3}')"
+        mpc searchadd artist "$(echo $list | gawk -F ' - ' '{print $1}')" album "$(echo $list | gawk -F ' - ' '{print $2}')" date "$(echo $list | gawk -F ' - ' '{print $3}')"
     fi
     mpc rm temp
 }
@@ -1656,7 +1656,7 @@ while :; do
                     instantRateTrack $3
                 fi
             elif [[ $2 == load ]]; then
-                mpc clear && mpc sticker "" find rating | grep -E "rating=6|rating=7|rating=8|rating=9|rating=10" | awk -F ':' '{print $1}' | $shuf -n $value | mpc add && mpc play
+                mpc clear && mpc sticker "" find rating | grep -E "rating=6|rating=7|rating=8|rating=9|rating=10" | gawk -F ':' '{print $1}' | $shuf -n $value | mpc add && mpc play
             fi
             break
             ;;
