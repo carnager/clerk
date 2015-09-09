@@ -220,12 +220,13 @@ dplayPrompt () {
        -kb-custom-6 ${tracklist} \
        -kb-custom-7 ${queue} \
        -kb-custom-8 ${seek} \
-       -only-match \
        -p "clerk > ")
 
     val=$?
 
-    if [[ $val -eq 10 ]]; then
+    if [[ $val -eq 1 ]]; then
+        exit
+    elif [[ $val -eq 10 ]]; then
         mpc prev
         dplayPrompt
     elif [[ $val -eq 11 ]]; then
