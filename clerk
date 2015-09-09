@@ -390,13 +390,13 @@ currentMenu () {
 
     if [[ $menu == "1 [ Browse Albums ]>" ]]; then
         filter=$(mpc current -f '%artist%')
-        firstsong=$(mpc -f '%file%' search artist "$(mpc current -f '%artist%')" | head -1)
-        select="$firstsong" filter="$filter" addAlbum alphabet
+        firstsong=$(mpc -f '%album% %album%' search artist "$(mpc current -f '%artist%')" album "$(mpc current -f '%album%')" | head -1)
+        album_entry="$firstsong" filter="$filter" addAlbum alphabet
 
     elif [[ $menu == "2 [ Browse Tracks ]>" ]]; then
         filter=$(mpc current -f '%artist%')
-        firstsong=$(mpc -f '%file%' search artist "$(mpc current -f '%artist%')" | head -1)
-        select="$firstsong" filter="$filter" addTrackTags
+        firstsong=$(mpc -f '%file%' search artist "$(mpc current -f '%artist%')" title "$(mpc current -f '%title%')" album "$(mpc current -f '%album%')" | head -1)
+        entry="$firstsong" filter="$filter" addTrackTags
 
     elif [[ $menu == "" ]]; then
         dplayPrompt
