@@ -1257,14 +1257,18 @@ ${line2}</span>"
 
         elif [[ $val -eq 10 ]]; then
             mpc searchadd date "$date" album "$album" albumartist "$artist";
+            album_entry="${ALBUM_ORIG}"
 
         elif [[ $val -eq 15 ]]; then
+            album_entry="${ALBUM_ORIG}"
             addTrackTags
 
         elif [[ $val -eq 16 ]]; then
+            album_entry="${ALBUM_ORIG}"
             dplayQueue
 
         elif [[ $val -eq 13 ]]; then
+            album_entry="${ALBUM_ORIG}"
             mpc findadd date "$date" album "$album" albumartist "$artist"
             mpc searchplay "${album}"
 
