@@ -1409,22 +1409,18 @@ TRACK_TEMP="$((echo -e "< Return\n---"; cat $HOME/.config/clerk/tracks.cache) \
         elif [[ $val -eq 18 ]]; then
             mpc prev
             entry="${TRACK_ORIG}"
-            returnto
     
         elif [[ $val -eq 19 ]]; then
             mpc toggle
             entry="${TRACK_ORIG}"
-            returnto
     
         elif [[ $val -eq 20 ]]; then
             mpc stop
             entry="${TRACK_ORIG}"
-            returnto
     
         elif [[ $val -eq 21 ]]; then
             mpc next
             entry="${TRACK_ORIG}"
-            returnto
     
         elif [[ $val -eq 22 ]]; then
             entry="${TRACK_ORIG}"
