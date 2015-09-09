@@ -1771,7 +1771,7 @@ while :; do
             ;;
         --help|-h)
             echo "---"
-            echo "clerk: rofi/dmenu based MPD Interface"
+            echo "clerk: rofi based MPD Interface"
             echo "Copyright © 2013 - 2015 Rasmus Steinke"
             echo "---"
             echo "General"
