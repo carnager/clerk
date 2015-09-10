@@ -1179,12 +1179,12 @@ ${line2}</span>"
 
         ALBUM_TEMP="$((echo -e "< Return\n---"; cat $HOME/.config/clerk/${album_list}) \
             | dmenu_t \
-            -custom-kb-1 "${add}" \
-            -custom-kb-2 "${insert}" \
-            -custom-kb-3 "${replace}" \
-            -custom-kb-8 "${rate}" \
-            -custom-kb-4 "${addplay}" \
-            -custom-kb-5 "${insertplay}" \
+            -kb-custom-1 "${add}" \
+            -kb-custom-2 "${insert}" \
+            -kb-custom-3 "${replace}" \
+            -kb-custom-8 "${rate}" \
+            -kb-custom-4 "${addplay}" \
+            -kb-custom-5 "${insertplay}" \
             -kb-custom-6 ${tracklist} \
             -kb-custom-7 ${queue} \
             -kb-custom-9 ${prev} \
@@ -1340,12 +1340,12 @@ ${line2}</span>"
 
 TRACK_TEMP="$((echo -e "< Return\n---"; cat $HOME/.config/clerk/tracks.cache) \
     | dmenu_t \
-    -custom-kb-1 "${add}" \
-    -custom-kb-2 "${insert}" \
-    -custom-kb-3 "${replace}" \
-    -custom-kb-8 "${rate}" \
-    -custom-kb-4 "${addplay}" \
-    -custom-kb-5 "${insertplay}" \
+    -kb-custom-1 "${add}" \
+    -kb-custom-2 "${insert}" \
+    -kb-custom-3 "${replace}" \
+    -kb-custom-8 "${rate}" \
+    -kb-custom-4 "${addplay}" \
+    -kb-custom-5 "${insertplay}" \
     -kb-custom-6 ${albumlist} \
     -kb-custom-7 ${queue} \
     -kb-custom-9 ${prev} \
