@@ -32,7 +32,7 @@ For this to work, you need a recent rofi build from git.
 # Dependencies:
 
 * rofi (https://github.com/DaveDavenport/rofi)
-* mpc
+* mpc (at least 0.26, for working albumlist sorted by mtime 0.27 is needed)
 * python-mpd2 (https://github.com/Mic92/python-mpd2)
 * a version of column with `-s` support.
 * perl
