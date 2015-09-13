@@ -43,6 +43,8 @@ prev="Alt+F5"
 next="Alt+F8"
 stop="Alt+F7"
 seek="Alt+f"
+nextalbum="Alt+Shift+F5"
+prevalbum="Alt+Shift+F8"
 
 # Adding of songs/albums
 add="Alt+1"
@@ -62,8 +64,7 @@ movedown="Alt+Down"
 moveup="Alt+Up"
 goalbum="Alt+a"
 gotrack="Alt+t"
-load="Alt+l"
-save="Alt+s"
+chplaylist="Alt+p"
 
 # table customization
 track_width="2"
@@ -736,7 +737,7 @@ dplayQueue () {
         fi
         select="-selected-row $POS"
 
-            help_text="$(echo -e "${delete}: Delete - ${crop}: Crop - ${moveup}: Move Up - ${goalbum}: Go to Album - ${playlist}: Load/Save\n${clear}: Clear - ${rate}: Rate - ${movedown}: Move Down - ${gotrack}: Go to Track" | column -s '-' -t | perl -pe "s/ - /<span color='$help_separator_color'\>\|\<\/span\>/g")"
+            help_text="$(echo -e "${delete}: Delete - ${crop}: Crop - ${moveup}: Move Up - ${goalbum}: Go to Album - ${chplaylist}: Load/Save\n${clear}: Clear - ${rate}: Rate - ${movedown}: Move Down - ${gotrack}: Go to Track" | column -s '-' -t | perl -pe "s/ - /<span color='$help_separator_color'\>\|\<\/span\>/g")"
         line1=$(echo "${help_text}" | head -1)
         line2=$(echo "${help_text}" | tail -1)
 HELP="<span color='$help_color'>${line1}
@@ -770,7 +771,7 @@ songs () {
         -kb-custom-11 "${tracklist}" \
         -kb-custom-12 "${goalbum}" \
         -kb-custom-13 "${gotrack}" \
-        -kb-custom-14 "${playlist}" \
+        -kb-custom-14 "${chplaylist}" \
         -kb-custom-15 "${next}" \
         -kb-custom-16 "${crop}" \
         -kb-custom-18 "${stop}" \
