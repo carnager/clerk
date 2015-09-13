@@ -220,6 +220,8 @@ dplayPrompt () {
        -kb-custom-6 ${tracklist} \
        -kb-custom-7 ${queue} \
        -kb-custom-8 ${seek} \
+       -kb-custom-9 ${nextalbum} \
+       -kb-custom-10 ${prevelbum} \
        -p "clerk > ")
 
     val=$?
@@ -246,6 +248,12 @@ dplayPrompt () {
         dplayQueue
     elif [[ $val -eq 17 ]]; then
         seekMenu
+    elif [[ $val -eq 18 ]]; then
+        skipAlbum next
+        unset IFS
+    elif [[ $val -eq 19 ]]; then
+        skipAlbum prev
+        unset IFS
     fi
 
     if [[ "$menu" == "< Exit" ]]; then
@@ -277,7 +285,9 @@ Track List:       "$tracklist"\n \
 Queue:            "$queue"\n \
 Toggle Playback   "$toggle"\n \
 Previous:         "$prev"\n \
+Previous Album:   "$prevalbum"\n \
 Next:             "$next"\n \
+Next Album:       "$nextalbum"\n \
 Stop:             "$stop"\n \
 Seek:             "$seek"\n \
 \n \
@@ -298,8 +308,7 @@ Move Down:        "$movedown"\n \
 Move Up:          "$moveup"\n \
 Go to Album:      "$goalbum"\n \
 Go to Track:      "$gotrack"\n \
-Load Playlist:    "$load"\n \
-Save Playlist:    "$save"" | dmenu_t -dmenu -p "Hotkeys > ")
+Load/Save:        "$playlist"" | dmenu_t -dmenu -p "Hotkeys > ")
 
     val=$?
 
@@ -727,7 +736,7 @@ dplayQueue () {
         fi
         select="-selected-row $POS"
 
-            help_text="$(echo -e "${delete}: Delete - ${crop}: Crop - ${moveup}: Move Up - ${goalbum}: Go to Album - ${load}: Load Playlist\n${clear}: Clear - ${rate}: Rate - ${movedown}: Move Down - ${gotrack}: Go to Track - ${save}: Save Playlist" | column -s '-' -t | perl -pe "s/ - /<span color='$help_separator_color'\>\|\<\/span\>/g")"
+            help_text="$(echo -e "${delete}: Delete - ${crop}: Crop - ${moveup}: Move Up - ${goalbum}: Go to Album - ${playlist}: Load/Save\n${clear}: Clear - ${rate}: Rate - ${movedown}: Move Down - ${gotrack}: Go to Track" | column -s '-' -t | perl -pe "s/ - /<span color='$help_separator_color'\>\|\<\/span\>/g")"
         line1=$(echo "${help_text}" | head -1)
         line2=$(echo "${help_text}" | tail -1)
 HELP="<span color='$help_color'>${line1}
@@ -750,7 +759,8 @@ songs () {
         | dmenu_t \
         -kb-custom-1 "${delete}" \
         -kb-custom-2 "${rate}" \
-        -kb-custom-4 "${crop}" \
+        -kb-custom-4 "${prevalbum}" \
+        -kb-custom-3 "${nextalbum}" \
         -kb-custom-5 "${clear}" \
         -kb-custom-6 "${moveup}" \
         -kb-custom-7 "${movedown}" \
@@ -760,9 +770,9 @@ songs () {
         -kb-custom-11 "${tracklist}" \
         -kb-custom-12 "${goalbum}" \
         -kb-custom-13 "${gotrack}" \
-        -kb-custom-14 "${load}" \
+        -kb-custom-14 "${playlist}" \
         -kb-custom-15 "${next}" \
-        -kb-custom-16 "${save}" \
+        -kb-custom-16 "${crop}" \
         -kb-custom-18 "${stop}" \
         -kb-custom-19 "${seek}" \
         -kb-custom-17 "${prev}" \
@@ -793,7 +803,16 @@ songs () {
             addTrackTags
             
         elif [[ $val -eq 23 ]]; then
-            dplayQueueLoad
+            plmenu=$(echo -e "< Return\n---\n1 [ Load Playlist ]\n2 [ Save Playlist ]" | dmenu_t -auto-select -dmenu -p "Load/Save Playlist > ")
+            if [[ $plmenu == "1"* ]]; then
+                dplayQueueLoad
+            elif [[ $plmenu == "2"* ]]; then
+                dplayQueueSave
+            elif [[ $plmenu == "< Return" ]]; then
+                dplayQueue
+            elif [[ $plmenu == "" ]]; then
+                exit
+            fi
 
         elif [[ $val -eq 24 ]]; then
             mpc next
@@ -801,10 +820,6 @@ songs () {
             if [[ -n ${mpd_play} ]]; then
                 POS=$(echo $(( $(mpc current -f '%position%') + 0 )))
             fi
-
-
-        elif [[ $val -eq 25 ]]; then
-            dplayQueueSave
 
         elif [[ $val -eq 26 ]]; then
             mpc prev
@@ -836,7 +851,7 @@ songs () {
         elif [[ $val -eq 22 ]]; then
             filename=$(mpc playlist --format '%position%\t%file%' | grep "^${POS}" | grep "${ARTIST}" | gawk -F '\t' '{ print $2 }') currentMenu track
 
-        elif [[ $val -eq 13 ]]; then
+        elif [[ $val -eq 25 ]]; then
             unset last
             if [[ $TRACKDISPLAY_NEW == *">"* || $TRACKDISPLAY_NEW == *"<"* || $TRACKDISPLAY_NEW == "---" ]]; then
                 mpc crop
@@ -869,7 +884,23 @@ songs () {
 
         elif [[ $val -eq 12 ]]; then
             unset last
-            mpc next
+            skipAlbum next
+            unset IFS
+            mpd_play=$(mpc status | mpc status | grep -E '\[playing\]|\[paused\]')
+            if [[ -n ${mpd_play} ]]; then
+                POS=$(echo $(( $(mpc current -f '%position%') + 0 )))
+            fi
+            dplayQueue
+
+        elif [[ $val -eq 13 ]]; then
+            unset last
+            skipAlbum prev
+            unset IFS
+            mpd_play=$(mpc status | mpc status | grep -E '\[playing\]|\[paused\]')
+            if [[ -n ${mpd_play} ]]; then
+                POS=$(echo $(( $(mpc current -f '%position%') + 0 )))
+            fi
+            dplayQueue
 
         elif [[ $val -eq 14 ]]; then
             unset last
@@ -910,18 +941,79 @@ songs () {
     done
 }
 
+skipAlbum () {
+IFS='
+'
+
+    _PLAYLISTTEMP=$(mpc playlist --format "%album%" | awk -F'\n' '{print "_" $1}')
+    _PLAYLIST=($_PLAYLISTTEMP)
+    ACTNR=$(mpc --format "%position%"  | head -n 1) # works >= mpc git 2009-11-28
+    ACTALBUM="_"$(mpc --format "%album%" | head -n 1)
+    SONGSANZ=${#_PLAYLIST[*]}
+    
+    case $1 in
+        next)
+        # Next album
+        for (( IDX=$ACTNR; $IDX<$SONGSANZ; IDX++ ))
+        do
+            if [ ${_PLAYLIST[$IDX]} != $ACTALBUM ]; then
+                let IDX+=1
+                mpc play $IDX
+                echo New album \(next\)  IDX: $IDX 
+                break
+            fi
+        done
+        ;;
+        prev)
+        # Previous album
+        #GETEND=FALSE 
+        ACTNRTEMP=$ACTNR
+        let ACTNRTEMP-=2
+        for (( IDX=$ACTNR-2; $IDX>=0; IDX-- ))
+        do
+        #echo TEST0  IDX $IDX
+            echo IDX: $IDX - ${_PLAYLIST[$IDX]}
+            if [ ${_PLAYLIST[$IDX]} != $ACTALBUM ]; then
+                # if [ $GETEND = TRUE ]; then
+                if [ $IDX -ne $ACTNRTEMP ]; then
+                    #echo TEST: IDX:$IDX   $ACTNRTEMP
+                    let IDX+=2
+                    mpc play $IDX
+                    echo New album \(prev\)  IDX: $IDX
+                    break
+                fi
+                ACTALBUM=${_PLAYLIST[$IDX]}
+                #echo ALBUMENDE ERKANNT BEI IDX: $IDX
+                #GETEND=TRUE
+            fi
+            if [ $IDX = 0 ]; then
+                #if [ $GETEND = FALSE ]; then 
+                #   mpc play 1
+                #   break
+                #fi 
+                mpc play 1 
+                break
+            fi
+        done
+        ;;
+        *)
+        echo "usage: $0 {prev|next}"
+        ;;
+    esac
+}
+
 # show all mpd playlists and load them to queue
 dplayQueueLoad () {
-    playlist=$(echo -e "< Return\n---\n$(mpc lsplaylists)" | dmenu_t -p "Load Playlist > ")
+    _playlist=$(echo -e "< Return\n---\n$(mpc lsplaylists)" | dmenu_t -p "Load Playlist > ")
     val=$?
     if [[ $val -eq 1 ]]; then
         exit
     fi
-    if [[ "$playlist" == "< Return" ]]; then
+    if [[ "$_playlist" == "< Return" ]]; then
         dplayQueue
     else
         mpc clear
-        mpc load "$playlist" && dplayQueue
+        mpc load "$_playlist" && dplayQueue
     fi
 }
 
@@ -1086,7 +1178,7 @@ loadRatedTracks () {
     else
         cd $HOME/.config/clerk
         mpc clear
-        songs="$(mpc sticker "" find rating | gawk -F 'rating=' '{ print $2 }')"
+        songs="$(mpc sticker "" find rating | grep "rating=$rating" | gawk -F ': rating=' '{ print $1 }')"
         echo "$songs" | mpc add
         mpc play
     fi
@@ -1193,6 +1285,8 @@ ${line2}</span>"
             -kb-custom-12 ${next} \
             -kb-custom-13 ${seek} \
             -kb-custom-14 ${savefav} \
+            -kb-custom-15 ${nextalbum} \
+            -kb-custom-16 ${prevalbum} \
             -dmenu -filter "$filter" \
             -select "$album_entry" \
             -format "f¬s" \
@@ -1300,6 +1394,18 @@ ${line2}</span>"
             album_entry="${ALBUM_ORIG}"
             ALBUM="$ALBUM" saveAlbumToPlaylist selection
 
+        elif [[ $val -eq 24 ]]; then
+            skipAlbum next
+            unset IFS
+            album_entry="${ALBUM_ORIG}" 
+            returnto
+
+        elif [[ $val -eq 25 ]]; then
+            skipAlbum prev
+            unset IFS
+            album_entry="${ALBUM_ORIG}"
+            returnto
+
         elif [[ $val -eq 17 ]]; then
             if [[ -n $(mpc find -f '%disc%' albumartist "${artist}" album "${album}" date "${date}") ]]; then
                 disc=$(mpc find -f '%disc%' albumartist "${artist}" album "${album}" date "${date}" | head -1)
@@ -1353,6 +1459,8 @@ TRACK_TEMP="$((echo -e "< Return\n---"; cat $HOME/.config/clerk/tracks.cache) \
     -kb-custom-11 ${stop} \
     -kb-custom-12 ${next} \
     -kb-custom-13 ${seek} \
+    -kb-custom-14 ${nextalbum} \
+    -kb-custom-15 ${prevalbum} \
     -dmenu -filter "$filter" \
     -select "$entry" \
     -format "f¬s" \
@@ -1430,6 +1538,16 @@ TRACK_TEMP="$((echo -e "< Return\n---"; cat $HOME/.config/clerk/tracks.cache) \
             entry="${TRACK_ORIG}"
             seekMenu addTrackTags
     
+        elif [[ $val -eq 23 ]]; then
+            skipAlbum next
+            unset IFS
+            entry="${TRACK_ORIG}"
+
+        elif [[ $val -eq 24 ]]; then
+            skipAlbum prev
+            unset IFS
+            entry"${TRACK_ORIG}"
+
         elif [[ $val -eq 17 ]]; then
             info=$(mpc search --format '%artist%\t%album%\t%date%\t%track%\t%title%' filename "${filename}")
             artist="$(echo "$info" \
