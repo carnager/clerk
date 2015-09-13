@@ -38,6 +38,8 @@ prev="Alt+F5"
 next="Alt+F8"
 stop="Alt+F7"
 seek="Alt+f"
+nextalbum="Alt+Shift+F8"
+prevalbum="Alt+Shift+F5"
 
 # main menu
 help="Alt+h"
@@ -60,8 +62,7 @@ movedown="Alt+Down"
 moveup="Alt+Up"
 goalbum="Alt+a"
 gotrack="Alt+t"
-load="Alt+l"
-save="Alt+s"
+playlist="Alt+p"
 
 # table customization
 track_width="2"
