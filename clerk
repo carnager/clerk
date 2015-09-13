@@ -1745,6 +1745,14 @@ function dmenu_t () {
 
 while :; do
     case $1 in
+        --nextalbum)
+            skipAlbum next
+            exit
+            ;;
+        --prevalbum)
+            skipAlbum prev
+            exit
+            ;;
         --add)
             if [[ ! $2 ]]; then
                 echo "Missing argument for --add"
