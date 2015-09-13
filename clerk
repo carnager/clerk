@@ -1579,7 +1579,7 @@ browseLibPrompt() {
         -kb-custom-1 ${albumlist} \
         -kb-custom-2 ${tracklist} \
         -kb-custom-3 ${queue} \
-        -p "Library Menu >")"
+        -p "Library Menu > ")"
 
     val=$?
 
