@@ -165,8 +165,9 @@ updateCache () {
         | fix_date_format 1 '%Y-%m-%d-%H:%M:%S' \
         | sort -nr \
         | gawk '{for (i=2; i<NF; i++) printf $i " "; print $NF}' \
-        | uniq \
+        | perl -ne 'print unless $seen{$_}++' \
         | gawk -F ' — ' '{ print $1 "\t" $2 "\t" $3 }' \
+        | uniq \
         | gawk -F '\t' '{ printf "%."'${artist_width}'"s\t%."'${date_width}'"s\t%."'${album_width}'"s\n", $1, $2, $3 }' \
         | column -s $'\t' -t | uniq > $HOME/.config/clerk/latest.cache
 #        | sed 's,^\([^\t]*\t[^\t]\{40\}\)[^\t]*,\1,' | column -o $'\t' -s $'\t' -t | uniq > $HOME/.config/clerk/latest.cache
