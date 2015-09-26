@@ -223,7 +223,7 @@ dplayPrompt () {
        -kb-custom-7 ${queue} \
        -kb-custom-8 ${seek} \
        -kb-custom-9 ${nextalbum} \
-       -kb-custom-10 ${prevelbum} \
+       -kb-custom-10 ${prevalbum} \
        -p "clerk > ")
 
     val=$?
