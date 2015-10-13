@@ -851,7 +851,7 @@ songs () {
             filename="${ARTIST} ${DATE}" currentMenu album
 
         elif [[ $val -eq 22 ]]; then
-            filename=$(mpc playlist --format '%position%\t%file%' | grep "^${POS}" | grep "${ARTIST}" | gawk -F '\t' '{ print $2 }') currentMenu track
+            filename=$(mpc playlist --format '%position%\t%file%' | grep -P "^${POS}\t" | grep "${ARTIST}" | gawk -F '\t' '{ print $2 }') currentMenu track
 
         elif [[ $val -eq 25 ]]; then
             unset last
