@@ -837,7 +837,7 @@ songs () {
             seekMenu
 
         elif [[ $val -eq 21 ]]; then
-            temp=$(mpc playlist --format '%position%\t%file%' | grep "^${POS}" | grep "${ARTIST}" | grep "${TITLE}" | gawk -F '\t' '{ print $2 }') 
+            temp=$(mpc playlist --format '%position%\t%file%' | grep -P "^${POS}\t" | grep "${ARTIST}" | grep "${TITLE}" | gawk -F '\t' '{ print $2 }') 
             info=$(mpc --format '%albumartist%\t%album%\t%date%\t%track%\t%title%' search filename "${temp}")
             echo "${info}"
 
