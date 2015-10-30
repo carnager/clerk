@@ -186,13 +186,17 @@ updateCache () {
 #        | gawk -F '\t' '{ printf "%.2s\t%.40s\t%.40s\t%.200s\t%.500s\n", $1, $2, $3, $4, $5, $6 }' \
 }
 
-date=$(mpc stats | grep 'DB Updated: ')
-file="$HOME/.config/clerk/.lastupdate"
-if [ "$(< $file)" = "$date" ] && [ -f "$file" ] ; then
+if [[ $1 == "--update" ]]; then
     :
 else
-    updateCache
-    echo "${date}" > "${file}"
+    date=$(mpc stats | grep 'DB Updated: ')
+    file="$HOME/.config/clerk/.lastupdate"
+    if [ "$(< $file)" = "$date" ] && [ -f "$file" ] ; then
+        :
+    else
+        updateCache
+        echo "${date}" > "${file}"
+    fi
 fi
 
 # Use GNU coreutils on OSX
