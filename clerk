@@ -186,9 +186,6 @@ updateCache () {
 #        | gawk -F '\t' '{ printf "%.2s\t%.40s\t%.40s\t%.200s\t%.500s\n", $1, $2, $3, $4, $5, $6 }' \
 }
 
-if [[ $1 == "--update" ]]; then
-    :
-else
     date=$(mpc stats | grep 'DB Updated: ')
     file="$HOME/.config/clerk/.lastupdate"
     if [ "$(< $file)" = "$date" ] && [ -f "$file" ] ; then
@@ -196,7 +193,6 @@ else
     else
         updateCache
         echo "${date}" > "${file}"
-    fi
 fi
 
 # Use GNU coreutils on OSX
@@ -852,7 +848,8 @@ songs () {
             DATE=$(echo "${info}" \
                 | gawk -F '\t' '{ print $3 }')
 
-            filename="${ARTIST} ${DATE}" currentMenu album
+            filename="${ARTIST} ${ALBUM}" currentMenu album
+
 
         elif [[ $val -eq 22 ]]; then
             filename=$(mpc playlist --format '%position%\t%file%' | grep -P "^${POS}\t" | grep "${ARTIST}" | gawk -F '\t' '{ print $2 }') currentMenu track
