@@ -253,9 +253,11 @@ dplayPrompt () {
     elif [[ $val -eq 18 ]]; then
         skipAlbum next
         unset IFS
+        dplayPrompt
     elif [[ $val -eq 19 ]]; then
         skipAlbum prev
         unset IFS
+        dplayPrompt
     fi
 
     if [[ "$menu" == "< Exit" ]]; then
