@@ -1325,8 +1325,19 @@ ${line2}</span>"
             | gawk '{print substr($0, 2, length($0) - 2)}')
 
         if [[ $val -eq 11 ]]; then
+            echo "$ALBUM" | while read line; do
+                ALBUM="$line"
+                artist=$(echo -en "$ALBUM" \
+                    | gawk -F '\t' '{ print $1 }' \
+                    | sed -e 's/[[:space:]]*$//')
+                album=$(echo "$ALBUM" \
+                    | gawk -F "\t" '{print $3}')
+                date=$(echo "$ALBUM" \
+                    | gawk -F "\t" '{print $2}' \
+                    | gawk '{print substr($0, 2, length($0) - 2)}')
             mpc search date "$date" album "$album" albumartist "$artist" | mpc insert
-            album_entry="$ALBUM_ORIG"
+        done
+        exit
 
         elif [[ $val -eq 12 ]]; then
             mpc clear;
@@ -1384,6 +1395,7 @@ ${line2}</span>"
                 date=$(echo "$ALBUM" \
                     | gawk -F "\t" '{print $2}' \
                     | gawk '{print substr($0, 2, length($0) - 2)}')
+                mpc findadd date "$date" album "$album" albumartist "$artist";
             done
             exit
 
