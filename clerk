@@ -1295,7 +1295,7 @@ ${line2}</span>"
             -dmenu -filter "$filter" \
             -select "$album_entry" \
             -mesg "${HELP}" \
-            -input "$HOME/.config/clerk/albums.cache" \
+            -input "$HOME/.config/clerk/${album_list}" \
             -p "Choose Album > ")"
     }
     returnto () {
@@ -1400,56 +1400,56 @@ ${line2}</span>"
             exit
 
         elif [[ $val -eq 15 ]]; then
-            album_entry="${ALBUM_ORIG}"
+            album_entry="${ALBUM}"
             addTrackTags
 
         elif [[ $val -eq 16 ]]; then
-            album_entry="${ALBUM_ORIG}"
+            album_entry="${ALBUM}"
             dplayQueue
 
         elif [[ $val -eq 13 ]]; then
-            album_entry="${ALBUM_ORIG}"
+            album_entry="${ALBUM}"
             mpc findadd date "$date" album "$album" albumartist "$artist"
             mpc searchplay "${album}"
 
         elif [[ $val -eq 18 ]]; then
             mpc prev
-            album_entry="${ALBUM_ORIG}"
+            album_entry="${ALBUM}"
             returnto
 
         elif [[ $val -eq 19 ]]; then
             mpc toggle
-            album_entry="${ALBUM_ORIG}"
+            album_entry="${ALBUM}"
             returnto
 
         elif [[ $val -eq 20 ]]; then
             mpc stop
-            album_entry="${ALBUM_ORIG}"
+            album_entry="${ALBUM}"
             returnto
 
         elif [[ $val -eq 21 ]]; then
             mpc next
-            album_entry="${ALBUM_ORIG}"
+            album_entry="${ALBUM}"
             returnto
 
         elif [[ $val -eq 22 ]]; then
-            album_entry="${ALBUM_ORIG}"
+            album_entry="${ALBUM}"
             seekMenu addAlbum $1
 
         elif [[ $val -eq 23 ]]; then
-            album_entry="${ALBUM_ORIG}"
+            album_entry="${ALBUM}"
             ALBUM="$ALBUM" saveAlbumToPlaylist selection
 
         elif [[ $val -eq 24 ]]; then
             skipAlbum next
             unset IFS
-            album_entry="${ALBUM_ORIG}" 
+            album_entry="${ALBUM}" 
             returnto
 
         elif [[ $val -eq 25 ]]; then
             skipAlbum prev
             unset IFS
-            album_entry="${ALBUM_ORIG}"
+            album_entry="${ALBUM}"
             returnto
 
         elif [[ $val -eq 17 ]]; then
@@ -1464,13 +1464,13 @@ ${line2}</span>"
                 track="01"
             fi
                 disc=${disc} track=${track} rateartist="${artist}" ratealbum="${album}" ratedate="${date}" rateAlbum
-                album_entry="$ALBUM_ORIG"
+                album_entry="$ALBUM"
 
         elif [[ $val -eq 14 ]]; then
             mpc clear;
             mpc findadd date "$date" album "$album" albumartist "$artist";
             mpc searchplay "${album}"
-           album_entry="$ALBUM_ORIG"
+           album_entry="$ALBUM"
 
         elif [[ $val -eq 1 ]]; then
             exit
@@ -1557,9 +1557,13 @@ TRACK="$(dmenu_t \
             fi
     
         elif [[ $val -eq 13 ]]; then
-            mpc add "${filename}"
+            title=$(echo "$TRACK" | gawk -F "\t" '{print $2}' | head -1)
+            filename=$(echo "$TRACK" | gawk -F "\t" '{print $6}')
+            echo "$filename" | while read line; do
+                mpc add "${line}"
+            done
             mpc searchplay "${title}"
-            entry="$TRACK_ORIG"
+            exit
     
         elif [[ $val -eq 15 ]]; then
             addAlbum alphabet
@@ -1568,39 +1572,42 @@ TRACK="$(dmenu_t \
             dplayQueue
     
         elif [[ $val -eq 14 ]]; then
-            mpc insert "${filename}"
+            title=$(echo "$TRACK" | gawk -F "\t" '{print $2}' | head -1)
+            filename=$(echo "$TRACK" | gawk -F "\t" '{print $6}')
+            echo "$filename" | while read line; do
+                mpc insert "${line}"
+            done
             mpc searchplay "${title}"
-            entry="$TRACK_ORIG"
+            exit
     
         elif [[ $val -eq 18 ]]; then
             mpc prev
-            entry="${TRACK_ORIG}"
     
         elif [[ $val -eq 19 ]]; then
             mpc toggle
-            entry="${TRACK_ORIG}"
+            entry="${TRACK}"
     
         elif [[ $val -eq 20 ]]; then
             mpc stop
-            entry="${TRACK_ORIG}"
+            entry="${TRACK}"
     
         elif [[ $val -eq 21 ]]; then
             mpc next
-            entry="${TRACK_ORIG}"
+            entry="${TRACK}"
     
         elif [[ $val -eq 22 ]]; then
-            entry="${TRACK_ORIG}"
+            entry="${TRACK}"
             seekMenu addTrackTags
     
         elif [[ $val -eq 23 ]]; then
             skipAlbum next
             unset IFS
-            entry="${TRACK_ORIG}"
+            entry="${TRACK}"
 
         elif [[ $val -eq 24 ]]; then
             skipAlbum prev
             unset IFS
-            entry"${TRACK_ORIG}"
+            entry"${TRACK}"
 
         elif [[ $val -eq 17 ]]; then
             info=$(mpc search --format '%artist%\t%album%\t%date%\t%track%\t%title%' filename "${filename}")
@@ -1617,7 +1624,7 @@ TRACK="$(dmenu_t \
     
             echo "${artist} ${album} ${date} ${track} ${title}"
             rateartist="${artist}" ratealbum="${album}" ratetrack="${track}" ratetitle="${title}" rateTrack
-            entry="$TRACK_ORIG"
+            entry="$TRACK"
         elif [[ $val -eq 1 ]]; then
             exit
         fi
