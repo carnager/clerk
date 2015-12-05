@@ -1274,8 +1274,7 @@ ${line2}</span>"
             album_list="albums.cache"
         fi
 
-        ALBUM="$((echo -e "< Return\n---"; cat $HOME/.config/clerk/${album_list}) \
-            | dmenu_t \
+        ALBUM="$(dmenu_t \
             -sep '\n' \
             -kb-custom-1 "${add}" \
             -kb-custom-2 "${insert}" \
@@ -1296,6 +1295,7 @@ ${line2}</span>"
             -dmenu -filter "$filter" \
             -select "$album_entry" \
             -mesg "${HELP}" \
+            -input "$HOME/.config/clerk/albums.cache" \
             -p "Choose Album > ")"
     }
     returnto () {
@@ -1490,8 +1490,7 @@ HELP="<span color='$help_color'>${line1}
 ${line2}</span>"
 
 
-TRACK_TEMP="$((echo -e "< Return\n---"; cat $HOME/.config/clerk/tracks.cache) \
-    | dmenu_t \
+TRACK="$(dmenu_t \
     -kb-custom-1 "${add}" \
     -kb-custom-2 "${insert}" \
     -kb-custom-3 "${replace}" \
@@ -1509,15 +1508,12 @@ TRACK_TEMP="$((echo -e "< Return\n---"; cat $HOME/.config/clerk/tracks.cache) \
     -kb-custom-15 ${prevalbum} \
     -dmenu -filter "$filter" \
     -select "$entry" \
-    -format "f¬s" \
     -mesg "${HELP}" \
+    -input "$HOME/.config/clerk/tracks.cache" \
     -p "Choose Track > ")"
 
     val=$?
-    TRACK_ORIG="${TRACK_TEMP#*¬}"
-    unset filter
-    export filter="$(echo ${TRACK_TEMP} | gawk -F '¬' '{ print $1 }')"
-    TRACK="$(echo "${TRACK_ORIG}" | perl -pe "s/  +/\t/g")"
+    TRACK="$(echo "${TRACK}" | perl -pe "s/  +/\t/g")"
 
     if [[ -z "$TRACK" ]]; then
         exit
@@ -1525,18 +1521,27 @@ TRACK_TEMP="$((echo -e "< Return\n---"; cat $HOME/.config/clerk/tracks.cache) \
         filename=$(echo "$TRACK" | gawk -F "\t" '{print $6}')
 
         if [[ $val -eq 11 ]]; then
-            mpc insert "${filename}"
-            entry="$TRACK_ORIG"
+        filename=$(echo "$TRACK" | gawk -F "\t" '{print $6}')
+        echo "$filename" | while read line; do
+            mpc insert "${line}"
+        done
+        exit
     
         elif [[ $val -eq 12 ]]; then
+            filename=$(echo "$TRACK" | gawk -F "\t" '{print $6}')
             mpc clear;
-            mpc add "${filename}";
+            echo "$filename" | while read line; do
+                mpc add "${line}"
+            done
             mpc play
-            entry="$TRACK_ORIG"
+            exit
     
         elif [[ $val -eq 10 ]]; then
-            mpc add "${filename}"
-            entry="$TRACK_ORIG"
+            filename=$(echo "$TRACK" | gawk -F "\t" '{print $6}')
+            echo "$filename" | while read line; do
+                mpc add "${line}"
+            done
+            exit
     
         elif [[ $val -eq 0 ]]; then
             if [[ "$TRACK" == "< Return" ]]; then
@@ -1544,8 +1549,11 @@ TRACK_TEMP="$((echo -e "< Return\n---"; cat $HOME/.config/clerk/tracks.cache) \
             elif [[ "$TRACK" == "---" ]]; then
                 addTrackTags
             else
-                mpc add "${filename}"
-                entry="$TRACK_ORIG"
+                filename=$(echo "$TRACK" | gawk -F "\t" '{print $6}')
+                echo "$filename" | while read line; do
+                    mpc add "${line}"
+                done
+                exit
             fi
     
         elif [[ $val -eq 13 ]]; then
