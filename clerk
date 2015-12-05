@@ -1559,7 +1559,7 @@ TRACK="$(dmenu_t \
         elif [[ $val -eq 13 ]]; then
             title=$(echo "$TRACK" | gawk -F "\t" '{print $2}' | head -1)
             filename=$(echo "$TRACK" | gawk -F "\t" '{print $6}')
-            echo "$filename" | while read line; do
+            echo "$filename" | uniq | while read line; do
                 mpc add "${line}"
             done
             mpc searchplay "${title}"
@@ -1574,7 +1574,7 @@ TRACK="$(dmenu_t \
         elif [[ $val -eq 14 ]]; then
             title=$(echo "$TRACK" | gawk -F "\t" '{print $2}' | head -1)
             filename=$(echo "$TRACK" | gawk -F "\t" '{print $6}')
-            echo "$filename" | while read line; do
+            echo "$filename" | uniq | while read line; do
                 mpc insert "${line}"
             done
             mpc searchplay "${title}"
