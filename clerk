@@ -1274,8 +1274,9 @@ ${line2}</span>"
             album_list="albums.cache"
         fi
 
-        ALBUM_TEMP="$((echo -e "< Return\n---"; cat $HOME/.config/clerk/${album_list}) \
+        ALBUM="$((echo -e "< Return\n---"; cat $HOME/.config/clerk/${album_list}) \
             | dmenu_t \
+            -sep '\n' \
             -kb-custom-1 "${add}" \
             -kb-custom-2 "${insert}" \
             -kb-custom-3 "${replace}" \
@@ -1294,7 +1295,6 @@ ${line2}</span>"
             -kb-custom-16 ${prevalbum} \
             -dmenu -filter "$filter" \
             -select "$album_entry" \
-            -format "f¬s" \
             -mesg "${HELP}" \
             -p "Choose Album > ")"
     }
@@ -1310,12 +1310,7 @@ ${line2}</span>"
     displaystyle $mode
 
     val=$?
-
-    ALBUM_ORIG="${ALBUM_TEMP#*¬}"
-    unset filter
-    export filter="${ALBUM_TEMP%¬*}"
-    ALBUM=$(echo "${ALBUM_ORIG}" | perl -pe "s/  +/\t/g")
-
+    ALBUM=$(echo "${ALBUM}" | perl -pe "s/  +/\t/g")
 
     if [[ -z "$ALBUM" ]]; then
         exit
@@ -1335,9 +1330,20 @@ ${line2}</span>"
 
         elif [[ $val -eq 12 ]]; then
             mpc clear;
-            mpc findadd date "$date" album "$album" albumartist "$artist";
+            echo "$ALBUM" | while read line; do
+                ALBUM="$line"
+                artist=$(echo -en "$ALBUM" \
+                    | gawk -F '\t' '{ print $1 }' \
+                    | sed -e 's/[[:space:]]*$//')
+                album=$(echo "$ALBUM" \
+                    | gawk -F "\t" '{print $3}')
+                date=$(echo "$ALBUM" \
+                    | gawk -F "\t" '{print $2}' \
+                    | gawk '{print substr($0, 2, length($0) - 2)}')
+                mpc findadd date "$date" album "$album" albumartist "$artist";
+            done
             mpc play
-            album_entry="$ALBUM_ORIG"
+            exit
 
         elif [[ $val -eq 0 ]]; then
             if [[ "$ALBUM" == "< Return" ]]; then
@@ -1349,14 +1355,37 @@ ${line2}</span>"
 
             else
                 mpc clear;
+                echo "$ALBUM" | while read line; do
+                ALBUM="$line"
+#            echo "$ALBUM" | while read line; do
+                artist=$(echo -en "$ALBUM" \
+                    | gawk -F '\t' '{ print $1 }' \
+                    | sed -e 's/[[:space:]]*$//')
+                album=$(echo "$ALBUM" \
+                    | gawk -F "\t" '{print $3}')
+                date=$(echo "$ALBUM" \
+                    | gawk -F "\t" '{print $2}' \
+                    | gawk '{print substr($0, 2, length($0) - 2)}')
                 mpc findadd date "$date" album "$album" albumartist "$artist";
-                mpc play
-                album_entry="${ALBUM_ORIG}"
+            done
+            mpc play
+            exit
             fi
 
         elif [[ $val -eq 10 ]]; then
-            mpc searchadd date "$date" album "$album" albumartist "$artist";
-            album_entry="${ALBUM_ORIG}"
+            echo "$ALBUM" | while read line; do
+            ALBUM="$line"
+#            echo "$ALBUM" | while read line; do
+                artist=$(echo -en "$ALBUM" \
+                    | gawk -F '\t' '{ print $1 }' \
+                    | sed -e 's/[[:space:]]*$//')
+                album=$(echo "$ALBUM" \
+                    | gawk -F "\t" '{print $3}')
+                date=$(echo "$ALBUM" \
+                    | gawk -F "\t" '{print $2}' \
+                    | gawk '{print substr($0, 2, length($0) - 2)}')
+            done
+            exit
 
         elif [[ $val -eq 15 ]]; then
             album_entry="${ALBUM_ORIG}"
