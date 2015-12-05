@@ -1325,7 +1325,7 @@ ${line2}</span>"
             | gawk '{print substr($0, 2, length($0) - 2)}')
 
         if [[ $val -eq 11 ]]; then
-            echo "$ALBUM" | while read line; do
+            echo "$ALBUM" | uniq | while read line; do
                 ALBUM="$line"
                 artist=$(echo -en "$ALBUM" \
                     | gawk -F '\t' '{ print $1 }' \
@@ -1341,7 +1341,7 @@ ${line2}</span>"
 
         elif [[ $val -eq 12 ]]; then
             mpc clear;
-            echo "$ALBUM" | while read line; do
+            echo "$ALBUM" | uniq | while read line; do
                 ALBUM="$line"
                 artist=$(echo -en "$ALBUM" \
                     | gawk -F '\t' '{ print $1 }' \
@@ -1366,7 +1366,7 @@ ${line2}</span>"
 
             else
                 mpc clear;
-                echo "$ALBUM" | while read line; do
+                echo "$ALBUM" | uniq | while read line; do
                 ALBUM="$line"
 #            echo "$ALBUM" | while read line; do
                 artist=$(echo -en "$ALBUM" \
@@ -1384,7 +1384,7 @@ ${line2}</span>"
             fi
 
         elif [[ $val -eq 10 ]]; then
-            echo "$ALBUM" | while read line; do
+            echo "$ALBUM" | uniq | while read line; do
             ALBUM="$line"
 #            echo "$ALBUM" | while read line; do
                 artist=$(echo -en "$ALBUM" \
@@ -1522,7 +1522,7 @@ TRACK="$(dmenu_t \
 
         if [[ $val -eq 11 ]]; then
         filename=$(echo "$TRACK" | gawk -F "\t" '{print $6}')
-        echo "$filename" | while read line; do
+        echo "$filename" | uniq | while read line; do
             mpc insert "${line}"
         done
         exit
@@ -1530,7 +1530,7 @@ TRACK="$(dmenu_t \
         elif [[ $val -eq 12 ]]; then
             filename=$(echo "$TRACK" | gawk -F "\t" '{print $6}')
             mpc clear;
-            echo "$filename" | while read line; do
+            echo "$filename" | uniq | while read line; do
                 mpc add "${line}"
             done
             mpc play
@@ -1538,7 +1538,7 @@ TRACK="$(dmenu_t \
     
         elif [[ $val -eq 10 ]]; then
             filename=$(echo "$TRACK" | gawk -F "\t" '{print $6}')
-            echo "$filename" | while read line; do
+            echo "$filename" | uniq | while read line; do
                 mpc add "${line}"
             done
             exit
@@ -1550,7 +1550,7 @@ TRACK="$(dmenu_t \
                 addTrackTags
             else
                 filename=$(echo "$TRACK" | gawk -F "\t" '{print $6}')
-                echo "$filename" | while read line; do
+                echo "$filename" | uniq | while read line; do
                     mpc add "${line}"
                 done
                 exit
