@@ -13,6 +13,9 @@ value=20
 # stop on suspend?
 stop_after_suspend=no
 
+# exit after addition of tracks/albums
+exit_after_add=no
+
 # use artist or albumartist for random tracks
 random_artist=artist
 

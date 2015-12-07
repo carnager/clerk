@@ -1256,6 +1256,13 @@ playRandomTracks () {
     exit
 }
 
+exitAfterAdd () {
+    if [[ $exit_after_add == "yes" ]]; then
+        exit
+    elif [[ $exit_after_add == "no" ]]; then
+        returnto
+    fi
+}
 
 addAlbum() {
 
@@ -1336,7 +1343,7 @@ ${line2}</span>"
                     | gawk '{print substr($0, 2, length($0) - 2)}')
             mpc search date "$date" album "$album" albumartist "$artist" | mpc insert
         done
-        exit
+        exitAfterAdd
 
         elif [[ $val -eq 12 ]]; then
             mpc clear;
@@ -1353,7 +1360,7 @@ ${line2}</span>"
                 mpc findadd date "$date" album "$album" albumartist "$artist";
             done
             mpc play
-            exit
+            exitAfterAdd
 
         elif [[ $val -eq 0 ]]; then
             if [[ "$ALBUM" == "< Return" ]]; then
@@ -1379,7 +1386,7 @@ ${line2}</span>"
                 mpc findadd date "$date" album "$album" albumartist "$artist";
             done
             mpc play
-            exit
+            exitAfterAdd
             fi
 
         elif [[ $val -eq 10 ]]; then
@@ -1396,7 +1403,7 @@ ${line2}</span>"
                     | gawk '{print substr($0, 2, length($0) - 2)}')
                 mpc findadd date "$date" album "$album" albumartist "$artist";
             done
-            exit
+            exitAfterAdd
 
         elif [[ $val -eq 15 ]]; then
             album_entry="${ALBUM}"
@@ -1524,7 +1531,7 @@ TRACK="$(dmenu_t \
         echo "$filename" | uniq | while read line; do
             mpc insert "${line}"
         done
-        exit
+        exitAfterAdd
     
         elif [[ $val -eq 12 ]]; then
             filename=$(echo "$TRACK" | gawk -F "\t" '{print $6}')
@@ -1533,14 +1540,14 @@ TRACK="$(dmenu_t \
                 mpc add "${line}"
             done
             mpc play
-            exit
+            exitAfterAdd
     
         elif [[ $val -eq 10 ]]; then
             filename=$(echo "$TRACK" | gawk -F "\t" '{print $6}')
             echo "$filename" | uniq | while read line; do
                 mpc add "${line}"
             done
-            exit
+            exitAfterAdd
     
         elif [[ $val -eq 0 ]]; then
             if [[ "$TRACK" == "< Return" ]]; then
@@ -1552,7 +1559,7 @@ TRACK="$(dmenu_t \
                 echo "$filename" | uniq | while read line; do
                     mpc add "${line}"
                 done
-                exit
+                exitAfterAdd
             fi
     
         elif [[ $val -eq 13 ]]; then
@@ -1562,7 +1569,7 @@ TRACK="$(dmenu_t \
                 mpc add "${line}"
             done
             mpc searchplay "${title}"
-            exit
+            exitAfterAdd
     
         elif [[ $val -eq 15 ]]; then
             addAlbum alphabet
@@ -1577,7 +1584,7 @@ TRACK="$(dmenu_t \
                 mpc insert "${line}"
             done
             mpc searchplay "${title}"
-            exit
+            exitAfterAdd
     
         elif [[ $val -eq 18 ]]; then
             mpc prev
