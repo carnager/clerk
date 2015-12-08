@@ -858,20 +858,38 @@ songs () {
         elif [[ $val -eq 25 ]]; then
             unset last
             if [[ $TRACKDISPLAY_NEW == *">"* || $TRACKDISPLAY_NEW == *"<"* || $TRACKDISPLAY_NEW == "---" ]]; then
-                mpc crop
+                trackids="$(echo -e "$POS\n" | sed \$d)"
+                playlist=$(mpc playlist -f '%position%')
+                echo "$trackids $playlist"
+                exit
+#                mpc del $deltracks
+#                mpc crop
             else
                 mpc play $POS;
-                mpc crop
+                trackids="$(echo -e "$POS\n" | sed \$d | sort)"
+                playlist=$(mpc playlist -f '%position%' | sort)
+                delids=$(diff <(mpc playlist -f '%position%' | sort) <(echo -e "$trackids\n") | awk '{print $2}')
+                clear
+                echo "$delids"
+                exit
             fi
 
         elif [[ $val -eq 16 ]]; then
             unset last
-            mpc mv $POS $(echo $(( $POS + 1 )))
+            trackids="$(echo -e "$POS\n" | sed \$d | tac)"
+            POS=$(echo -e "$trackids" | tail -1)
+            echo "$trackids" | while read POS2; do
+                mpc mv $POS2 $(echo $(( $POS2 + 1 )))
+            done
             POS=$(echo $(( $POS +1 )))
 
         elif [[ $val -eq 15 ]]; then
             unset last
-            mpc mv $POS $(echo $(( $POS - 1 )))
+            trackids="$(echo -e "$POS\n" | sed \$d)"
+            POS=$(echo -e "$trackids" | head -1)
+            echo "$trackids" | while read POS2; do
+                mpc mv $POS2 $(echo $(( $POS2 - 1 )))
+            done
             POS=$(echo $(( $POS - 1 )));
 
         elif [[ $val -eq 17 ]]; then
@@ -1496,7 +1514,7 @@ HELP="<span color='$help_color'>${line1}
 ${line2}</span>"
 
 
-TRACK="$(dmenu_t \
+TRACK_TEMP="$(dmenu_t \
     -kb-custom-1 "${add}" \
     -kb-custom-2 "${insert}" \
     -kb-custom-3 "${replace}" \
@@ -1514,12 +1532,16 @@ TRACK="$(dmenu_t \
     -kb-custom-15 ${prevalbum} \
     -dmenu -filter "$filter" \
     -select "$entry" \
+    -format "f¬s" \
     -mesg "${HELP}" \
     -input "$HOME/.config/clerk/tracks.cache" \
     -p "Choose Track > ")"
 
     val=$?
-    TRACK="$(echo "${TRACK}" | perl -pe "s/  +/\t/g")"
+    TRACK_ORIG="${TRACK_TEMP#*¬}"
+    unset filter
+    export filter="$(echo ${TRACK_TEMP} | gawk -F '¬' '{ print $1 }')"
+    TRACK="$(echo "${TRACK_ORIG}" | perl -pe "s/  +/\t/g")"
 
     if [[ -z "$TRACK" ]]; then
         exit
@@ -1531,6 +1553,7 @@ TRACK="$(dmenu_t \
         echo "$filename" | uniq | while read line; do
             mpc insert "${line}"
         done
+        entry="$TRACK_ORIG"
         exitAfterAdd
     
         elif [[ $val -eq 12 ]]; then
@@ -1540,6 +1563,7 @@ TRACK="$(dmenu_t \
                 mpc add "${line}"
             done
             mpc play
+            entry="$TRACK_ORIG"
             exitAfterAdd
     
         elif [[ $val -eq 10 ]]; then
@@ -1547,6 +1571,7 @@ TRACK="$(dmenu_t \
             echo "$filename" | uniq | while read line; do
                 mpc add "${line}"
             done
+            entry="$TRACK_ORIG"
             exitAfterAdd
     
         elif [[ $val -eq 0 ]]; then
@@ -1559,6 +1584,7 @@ TRACK="$(dmenu_t \
                 echo "$filename" | uniq | while read line; do
                     mpc add "${line}"
                 done
+                entry="$TRACK_ORIG"
                 exitAfterAdd
             fi
     
@@ -1569,6 +1595,7 @@ TRACK="$(dmenu_t \
                 mpc add "${line}"
             done
             mpc searchplay "${title}"
+            entry="$TRACK_ORIG"
             exitAfterAdd
     
         elif [[ $val -eq 15 ]]; then
@@ -1584,6 +1611,7 @@ TRACK="$(dmenu_t \
                 mpc insert "${line}"
             done
             mpc searchplay "${title}"
+            entry="$TRACK_ORIG"
             exitAfterAdd
     
         elif [[ $val -eq 18 ]]; then
@@ -1591,15 +1619,15 @@ TRACK="$(dmenu_t \
     
         elif [[ $val -eq 19 ]]; then
             mpc toggle
-            entry="${TRACK}"
+            entry="${TRACK_ORIG}"
     
         elif [[ $val -eq 20 ]]; then
             mpc stop
-            entry="${TRACK}"
+            entry="${TRACK_ORIG}"
     
         elif [[ $val -eq 21 ]]; then
             mpc next
-            entry="${TRACK}"
+            entry="${TRACK_ORIG}"
     
         elif [[ $val -eq 22 ]]; then
             entry="${TRACK}"
@@ -1608,12 +1636,12 @@ TRACK="$(dmenu_t \
         elif [[ $val -eq 23 ]]; then
             skipAlbum next
             unset IFS
-            entry="${TRACK}"
+            entry="${TRACK_ORIG}"
 
         elif [[ $val -eq 24 ]]; then
             skipAlbum prev
             unset IFS
-            entry"${TRACK}"
+            entry"${TRACK_ORIG}"
 
         elif [[ $val -eq 17 ]]; then
             info=$(mpc search --format '%artist%\t%album%\t%date%\t%track%\t%title%' filename "${filename}")
@@ -1630,7 +1658,7 @@ TRACK="$(dmenu_t \
     
             echo "${artist} ${album} ${date} ${track} ${title}"
             rateartist="${artist}" ratealbum="${album}" ratetrack="${track}" ratetitle="${title}" rateTrack
-            entry="$TRACK"
+            entry="$TRACK_ORIG"
         elif [[ $val -eq 1 ]]; then
             exit
         fi
