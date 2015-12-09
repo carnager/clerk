@@ -797,7 +797,8 @@ songs () {
         elif [[ $val -eq 10 ]]; then
             last=$(mpc playlist -f '%file%' | tail -1)
             mpc del $POS;
-            POS=$(( $POS - 1));
+			POS2=$(echo "$POS" | head -1)
+            POS=$(( $POS2 - 1));
             dplayQueue
 
         elif [[ $val -eq 19 ]]; then
@@ -858,39 +859,58 @@ songs () {
         elif [[ $val -eq 25 ]]; then
             unset last
             if [[ $TRACKDISPLAY_NEW == *">"* || $TRACKDISPLAY_NEW == *"<"* || $TRACKDISPLAY_NEW == "---" ]]; then
-                trackids="$(echo -e "$POS\n" | sed \$d)"
-                playlist=$(mpc playlist -f '%position%')
-                echo "$trackids $playlist"
-                exit
-#                mpc del $deltracks
-#                mpc crop
+                mpc crop
             else
                 mpc play $POS;
-                trackids="$(echo -e "$POS\n" | sed \$d | sort)"
-                playlist=$(mpc playlist -f '%position%' | sort)
-                delids=$(diff <(mpc playlist -f '%position%' | sort) <(echo -e "$trackids\n") | awk '{print $2}')
-                clear
-                echo "$delids"
-                exit
+                mpc crop
             fi
 
         elif [[ $val -eq 16 ]]; then
-            unset last
-            trackids="$(echo -e "$POS\n" | sed \$d | tac)"
-            POS=$(echo -e "$trackids" | tail -1)
-            echo "$trackids" | while read POS2; do
-                mpc mv $POS2 $(echo $(( $POS2 + 1 )))
-            done
-            POS=$(echo $(( $POS +1 )))
+            if [[ $(echo "$TRACKDISPLAY_NEW" | wc -l) -gt 1 ]]; then
+                unset last
+                posSelect=$(echo "$(songs)" | dmenu_t -dmenu -mesg "Move after >")
+                if [[ $posSelect == "" ]]; then
+                    exit;
+                else
+                    chosenPos=$(echo "$posSelect" | awk -F ' ' '{print $1}')
+                    trackids="$(echo -e "$POS\n" | sed \$d)"
+                    POS=$(echo -e "$trackids" | head -1)
+                    echo "$trackids" | while read POS2; do
+                    mpc mv $POS2 $(( $chosenPos +1 ))
+                        chosenPos="$(( $chosenPos +1 ))"
+                    done
+                    POS=$(echo "${chosenPos}");
+                fi
+            else
+                unset last
+                mpc mv $POS $(echo $(( $POS + 1 )))
+                POS=$(echo $(( $POS + 1 )));
+            fi
+
+
 
         elif [[ $val -eq 15 ]]; then
-            unset last
-            trackids="$(echo -e "$POS\n" | sed \$d)"
-            POS=$(echo -e "$trackids" | head -1)
-            echo "$trackids" | while read POS2; do
-                mpc mv $POS2 $(echo $(( $POS2 - 1 )))
-            done
-            POS=$(echo $(( $POS - 1 )));
+            if [[ $(echo "$TRACKDISPLAY_NEW" | wc -l) -gt 1 ]]; then
+                unset last
+                posSelect=$(echo "$(songs)" | dmenu_t -dmenu -mesg "Move after >")
+                if [[ $posSelect == "" ]]; then
+                    exit;
+                else
+                    chosenPos=$(echo "$posSelect" | awk -F ' ' '{print $1}')
+                    trackids="$(echo -e "$POS\n" | sed \$d)"
+                    POS=$(echo -e "$trackids" | head -1)
+                    echo "$trackids" | while read POS2; do
+                    mpc mv $POS2 $(( $chosenPos +1 ))
+                        chosenPos="$(( $chosenPos +1 ))"
+                    done
+                    POS=$(echo "${chosenPos}");
+                fi
+            else
+                unset last
+                mpc mv $POS $(echo $(( $POS - 1 )))
+                POS=$(echo $(( $POS - 1 )));
+            fi
+
 
         elif [[ $val -eq 17 ]]; then
             unset last
