@@ -114,6 +114,12 @@ elif [[ $scrobbler == mpdscribble ]]; then
     export scrobbler_kill="mpdscribble"
 fi
 
+# set help color
+if [[ $help_color == "" ]]; then
+    help_color=$(rofi -dump-xresources | grep 'rofi.color.normal' | awk -F ', ' '{ print $2 }')
+    help_separator_color=$(rofi -dump-xresources | grep 'rofi.color.normal' | awk -F ', ' '{ print $2 }')
+fi
+
 fix_date_format() {
     # provided by Thorsten Wißmann:
     # https://github.com/t-wissmann/dotfiles/blob/master/menu/rofi-mpd.sh
@@ -754,7 +760,7 @@ songs () {
 
     if [[ -n $(mpc current) ]]; then
         current=$(mpc current -f '%position%')
-        highlight="-u $(echo $(( $current +1 )))"
+        highlight="-a $(echo $(( $current +1 )))"
     else
         :
     fi
@@ -797,7 +803,8 @@ songs () {
         elif [[ $val -eq 10 ]]; then
             last=$(mpc playlist -f '%file%' | tail -1)
             mpc del $POS;
-            POS=$(( $POS - 1));
+			POS2=$(echo "$POS" | head -1)
+            POS=$(( $POS2 - 1));
             dplayQueue
 
         elif [[ $val -eq 19 ]]; then
@@ -865,14 +872,53 @@ songs () {
             fi
 
         elif [[ $val -eq 16 ]]; then
-            unset last
-            mpc mv $POS $(echo $(( $POS + 1 )))
-            POS=$(echo $(( $POS +1 )))
+            if [[ $(echo "$TRACKDISPLAY_NEW" | wc -l) -gt 1 ]]; then
+                :
+#                unset last
+#                posSelect=$(echo "$(songs)" | dmenu_t -dmenu -mesg "Move after >")
+#                if [[ $posSelect == "" ]]; then
+#                    exit;
+#                else
+#                    chosenPos=$(echo "$posSelect" | awk -F ' ' '{print $1}')
+#                    trackids="$(echo -e "$POS\n" | sed \$d)"
+#                    POS=$(echo -e "$trackids" | head -1)
+#                    echo "$trackids" | sort -n | tac | while read POS2; do
+#                    mpc mv $POS2 $chosenPos
+#                    chosenPos=$chosenPos
+#                    done
+#                    POS=$(echo "${chosenPos}");
+#                fi
+            else
+                unset last
+                mpc mv $POS $(echo $(( $POS + 1 )))
+                POS=$(echo $(( $POS + 1 )));
+            fi
+
+
 
         elif [[ $val -eq 15 ]]; then
-            unset last
-            mpc mv $POS $(echo $(( $POS - 1 )))
-            POS=$(echo $(( $POS - 1 )));
+            if [[ $(echo "$TRACKDISPLAY_NEW" | wc -l) -gt 1 ]]; then
+                :
+#                unset last
+#                posSelect=$(echo "$(songs)" | dmenu_t -dmenu -mesg "Move after >")
+#                if [[ $posSelect == "" ]]; then
+#                    exit;
+#                else
+#                    chosenPos=$(echo "$posSelect" | awk -F ' ' '{print $1}')
+#                    trackids="$(echo -e "$POS\n" | sed \$d)"
+#                    POS=$(echo -e "$trackids" | head -1)
+#                    echo "$trackids" | sort -n | tac | while read POS2; do
+#                    mpc mv $POS2 $chosenPos
+#                    chosenPos=$chosenPos
+#                    done
+#                    POS=$(echo "${chosenPos}");
+#                fi
+            else
+                unset last
+                mpc mv $POS $(echo $(( $POS - 1 )))
+                POS=$(echo $(( $POS - 1 )));
+            fi
+
 
         elif [[ $val -eq 17 ]]; then
             unset last
@@ -1260,7 +1306,7 @@ exitAfterAdd () {
     if [[ $exit_after_add == "yes" ]]; then
         exit
     elif [[ $exit_after_add == "no" ]]; then
-        returnto
+        :
     fi
 }
 
@@ -1280,7 +1326,7 @@ ${line2}</span>"
             album_list="albums.cache"
         fi
 
-        ALBUM="$(dmenu_t \
+        ALBUM_TEMP="$(dmenu_t \
             -sep '\n' \
             -kb-custom-1 "${add}" \
             -kb-custom-2 "${insert}" \
@@ -1301,6 +1347,7 @@ ${line2}</span>"
             -dmenu -filter "$filter" \
             -select "$album_entry" \
             -mesg "${HELP}" \
+            -format "f¬s" \
             -input "$HOME/.config/clerk/${album_list}" \
             -p "Choose Album > ")"
     }
@@ -1316,7 +1363,13 @@ ${line2}</span>"
     displaystyle $mode
 
     val=$?
-    ALBUM=$(echo "${ALBUM}" | perl -pe "s/  +/\t/g")
+
+    ALBUM_ORIG="${ALBUM_TEMP#*¬}"
+    firstline=$(echo "$ALBUM_ORIG" | sed 's/.*¬//g' | tail -1)
+    unset filter
+    export filter_temp="${ALBUM_TEMP%¬*}"
+    ALBUM=$(echo "${ALBUM_ORIG}" | perl -pe "s/  +/\t/g" | sed 's/.*¬//g')
+    export filter=$(echo "$filter_temp" | head -1 | sed 's/¬.*//g')
 
     if [[ -z "$ALBUM" ]]; then
         exit
@@ -1332,35 +1385,39 @@ ${line2}</span>"
 
         if [[ $val -eq 11 ]]; then
             echo "$ALBUM" | uniq | while read line; do
-                ALBUM="$line"
-                artist=$(echo -en "$ALBUM" \
+                xALBUM="$line"
+                artist=$(echo -en "$xALBUM" \
                     | gawk -F '\t' '{ print $1 }' \
                     | sed -e 's/[[:space:]]*$//')
-                album=$(echo "$ALBUM" \
+                album=$(echo "$xALBUM" \
                     | gawk -F "\t" '{print $3}')
-                date=$(echo "$ALBUM" \
+                date=$(echo "$xALBUM" \
                     | gawk -F "\t" '{print $2}' \
                     | gawk '{print substr($0, 2, length($0) - 2)}')
             mpc search date "$date" album "$album" albumartist "$artist" | mpc insert
         done
+        album_entry="$firstline"
         exitAfterAdd
+        returnto
 
         elif [[ $val -eq 12 ]]; then
             mpc clear;
             echo "$ALBUM" | uniq | while read line; do
-                ALBUM="$line"
-                artist=$(echo -en "$ALBUM" \
+                xALBUM="$line"
+                artist=$(echo -en "$xALBUM" \
                     | gawk -F '\t' '{ print $1 }' \
                     | sed -e 's/[[:space:]]*$//')
-                album=$(echo "$ALBUM" \
+                album=$(echo "$xALBUM" \
                     | gawk -F "\t" '{print $3}')
-                date=$(echo "$ALBUM" \
+                date=$(echo "$xALBUM" \
                     | gawk -F "\t" '{print $2}' \
                     | gawk '{print substr($0, 2, length($0) - 2)}')
                 mpc findadd date "$date" album "$album" albumartist "$artist";
             done
             mpc play
+            album_entry="$firstline"
             exitAfterAdd
+            returnto
 
         elif [[ $val -eq 0 ]]; then
             if [[ "$ALBUM" == "< Return" ]]; then
@@ -1373,89 +1430,94 @@ ${line2}</span>"
             else
                 mpc clear;
                 echo "$ALBUM" | uniq | while read line; do
-                ALBUM="$line"
+                xALBUM="$line"
 #            echo "$ALBUM" | while read line; do
-                artist=$(echo -en "$ALBUM" \
+                artist=$(echo -en "$xALBUM" \
                     | gawk -F '\t' '{ print $1 }' \
                     | sed -e 's/[[:space:]]*$//')
-                album=$(echo "$ALBUM" \
+                album=$(echo "$xALBUM" \
                     | gawk -F "\t" '{print $3}')
-                date=$(echo "$ALBUM" \
+                date=$(echo "$xALBUM" \
                     | gawk -F "\t" '{print $2}' \
                     | gawk '{print substr($0, 2, length($0) - 2)}')
                 mpc findadd date "$date" album "$album" albumartist "$artist";
             done
             mpc play
+            album_entry="$firstline"
             exitAfterAdd
+            returnto
             fi
 
         elif [[ $val -eq 10 ]]; then
             echo "$ALBUM" | uniq | while read line; do
-            ALBUM="$line"
+            xALBUM="$line"
 #            echo "$ALBUM" | while read line; do
-                artist=$(echo -en "$ALBUM" \
+                artist=$(echo -en "$xALBUM" \
                     | gawk -F '\t' '{ print $1 }' \
                     | sed -e 's/[[:space:]]*$//')
-                album=$(echo "$ALBUM" \
+                album=$(echo "$xALBUM" \
                     | gawk -F "\t" '{print $3}')
-                date=$(echo "$ALBUM" \
+                date=$(echo "$xALBUM" \
                     | gawk -F "\t" '{print $2}' \
                     | gawk '{print substr($0, 2, length($0) - 2)}')
                 mpc findadd date "$date" album "$album" albumartist "$artist";
             done
+            album_entry="$firstline"
             exitAfterAdd
+            returnto
 
         elif [[ $val -eq 15 ]]; then
-            album_entry="${ALBUM}"
+            album_entry="${firstline}"
             addTrackTags
+            returnto
 
         elif [[ $val -eq 16 ]]; then
-            album_entry="${ALBUM}"
+            album_entry="${firstline}"
             dplayQueue
 
         elif [[ $val -eq 13 ]]; then
-            album_entry="${ALBUM}"
+            album_entry="${firstline}"
             mpc findadd date "$date" album "$album" albumartist "$artist"
             mpc searchplay "${album}"
 
         elif [[ $val -eq 18 ]]; then
             mpc prev
-            album_entry="${ALBUM}"
+            album_entry="${firstline}"
             returnto
 
         elif [[ $val -eq 19 ]]; then
             mpc toggle
-            album_entry="${ALBUM}"
+            album_entry="${firstline}"
             returnto
 
         elif [[ $val -eq 20 ]]; then
             mpc stop
-            album_entry="${ALBUM}"
+            album_entry="${firstline}"
             returnto
 
         elif [[ $val -eq 21 ]]; then
             mpc next
-            album_entry="${ALBUM}"
+            album_entry="${firstline}"
             returnto
 
         elif [[ $val -eq 22 ]]; then
-            album_entry="${ALBUM}"
+            album_entry="${firstline}"
             seekMenu addAlbum $1
 
         elif [[ $val -eq 23 ]]; then
-            album_entry="${ALBUM}"
+            album_entry="${firstline}"
             ALBUM="$ALBUM" saveAlbumToPlaylist selection
 
         elif [[ $val -eq 24 ]]; then
             skipAlbum next
             unset IFS
-            album_entry="${ALBUM}" 
+            album_entry="${firstline}" 
             returnto
 
         elif [[ $val -eq 25 ]]; then
             skipAlbum prev
             unset IFS
-            album_entry="${ALBUM}"
+            album_entry="${firstline}"
             returnto
 
         elif [[ $val -eq 17 ]]; then
@@ -1470,13 +1532,13 @@ ${line2}</span>"
                 track="01"
             fi
                 disc=${disc} track=${track} rateartist="${artist}" ratealbum="${album}" ratedate="${date}" rateAlbum
-                album_entry="$ALBUM"
+                album_entry="$firstline"
 
         elif [[ $val -eq 14 ]]; then
             mpc clear;
             mpc findadd date "$date" album "$album" albumartist "$artist";
             mpc searchplay "${album}"
-           album_entry="$ALBUM"
+           album_entry="$firstline"
 
         elif [[ $val -eq 1 ]]; then
             exit
@@ -1496,7 +1558,7 @@ HELP="<span color='$help_color'>${line1}
 ${line2}</span>"
 
 
-TRACK="$(dmenu_t \
+TRACK_TEMP="$(dmenu_t \
     -kb-custom-1 "${add}" \
     -kb-custom-2 "${insert}" \
     -kb-custom-3 "${replace}" \
@@ -1514,12 +1576,18 @@ TRACK="$(dmenu_t \
     -kb-custom-15 ${prevalbum} \
     -dmenu -filter "$filter" \
     -select "$entry" \
+    -format "f¬s" \
     -mesg "${HELP}" \
     -input "$HOME/.config/clerk/tracks.cache" \
     -p "Choose Track > ")"
 
     val=$?
-    TRACK="$(echo "${TRACK}" | perl -pe "s/  +/\t/g")"
+    TRACK_ORIG="${TRACK_TEMP#*¬}"
+    firstline=$(echo "${TRACK_ORIG}" | sed 's/.*¬//g' | tail -1)
+    unset filter
+    export filter_temp="${TRACK_TEMP%¬*}"
+    TRACK="$(echo "${TRACK_ORIG}" | perl -pe "s/  +/\t/g" | sed 's/.*¬//g')"
+    export filter=$(echo "$filter_temp" | head -1 | sed 's/¬.*//g')
 
     if [[ -z "$TRACK" ]]; then
         exit
@@ -1531,6 +1599,7 @@ TRACK="$(dmenu_t \
         echo "$filename" | uniq | while read line; do
             mpc insert "${line}"
         done
+        entry="$firstline"
         exitAfterAdd
     
         elif [[ $val -eq 12 ]]; then
@@ -1540,6 +1609,7 @@ TRACK="$(dmenu_t \
                 mpc add "${line}"
             done
             mpc play
+            entry="$firstline"
             exitAfterAdd
     
         elif [[ $val -eq 10 ]]; then
@@ -1547,6 +1617,7 @@ TRACK="$(dmenu_t \
             echo "$filename" | uniq | while read line; do
                 mpc add "${line}"
             done
+            entry="$firstline"
             exitAfterAdd
     
         elif [[ $val -eq 0 ]]; then
@@ -1559,6 +1630,7 @@ TRACK="$(dmenu_t \
                 echo "$filename" | uniq | while read line; do
                     mpc add "${line}"
                 done
+                entry="$firstline"
                 exitAfterAdd
             fi
     
@@ -1569,6 +1641,7 @@ TRACK="$(dmenu_t \
                 mpc add "${line}"
             done
             mpc searchplay "${title}"
+            entry="$firstline"
             exitAfterAdd
     
         elif [[ $val -eq 15 ]]; then
@@ -1584,6 +1657,7 @@ TRACK="$(dmenu_t \
                 mpc insert "${line}"
             done
             mpc searchplay "${title}"
+            entry="$firstline"
             exitAfterAdd
     
         elif [[ $val -eq 18 ]]; then
@@ -1591,29 +1665,29 @@ TRACK="$(dmenu_t \
     
         elif [[ $val -eq 19 ]]; then
             mpc toggle
-            entry="${TRACK}"
+            entry="${firstline}"
     
         elif [[ $val -eq 20 ]]; then
             mpc stop
-            entry="${TRACK}"
+            entry="${firstline}"
     
         elif [[ $val -eq 21 ]]; then
             mpc next
-            entry="${TRACK}"
+            entry="${firstline}"
     
         elif [[ $val -eq 22 ]]; then
-            entry="${TRACK}"
+            entry="${firstline}"
             seekMenu addTrackTags
     
         elif [[ $val -eq 23 ]]; then
             skipAlbum next
             unset IFS
-            entry="${TRACK}"
+            entry="${firstline}"
 
         elif [[ $val -eq 24 ]]; then
             skipAlbum prev
             unset IFS
-            entry"${TRACK}"
+            entry"${firstline}"
 
         elif [[ $val -eq 17 ]]; then
             info=$(mpc search --format '%artist%\t%album%\t%date%\t%track%\t%title%' filename "${filename}")
@@ -1630,7 +1704,7 @@ TRACK="$(dmenu_t \
     
             echo "${artist} ${album} ${date} ${track} ${title}"
             rateartist="${artist}" ratealbum="${album}" ratetrack="${track}" ratetitle="${title}" rateTrack
-            entry="$TRACK"
+            entry="$firstline"
         elif [[ $val -eq 1 ]]; then
             exit
         fi
