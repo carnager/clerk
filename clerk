@@ -1402,7 +1402,14 @@ ${line2}</span>"
                 date=$(echo "$xALBUM" \
                     | gawk -F "\t" '{print $2}' \
                     | gawk '{print substr($0, 2, length($0) - 2)}')
-            mpc search date "$date" album "$album" albumartist "$artist" | mpc insert
+                disc=$(mpc find -f '%disc%' date "$date" album "$album" albumartist "$artist" | uniq)
+                if [[ $(echo "$disc" | wc -l) -gt 1 ]]; then
+                    discmenu=$(echo -e "All\n$disc" | rofi -dmenu -p "Choose Disc > ")
+                    if [[ $discmenu == "" ]]; then exit; fi
+                    mpc search date "$date" album "$album" albumartist "$artist" disc "$discmenu" | mpc insert
+                else
+                    mpc search date "$date" album "$album" albumartist "$artist" | mpc insert
+                fi
         done
         album_entry="$firstline"
         exitAfterAdd
@@ -1420,7 +1427,14 @@ ${line2}</span>"
                 date=$(echo "$xALBUM" \
                     | gawk -F "\t" '{print $2}' \
                     | gawk '{print substr($0, 2, length($0) - 2)}')
-                mpc findadd date "$date" album "$album" albumartist "$artist";
+                disc=$(mpc find -f '%disc%' date "$date" album "$album" albumartist "$artist" | uniq)
+                if [[ $(echo "$disc" | wc -l) -gt 1 ]]; then
+                    discmenu=$(echo -e "All\n$disc" | rofi -dmenu -p "Choose Disc > ")
+                    if [[ $discmenu == "" ]]; then exit; fi
+                    mpc findadd date "$date" album "$album" albumartist "$artist" disc "$discmenu";
+                else
+                    mpc findadd date "$date" album "$album" albumartist "$artist"
+                fi
             done
             mpc play
             album_entry="$firstline"
@@ -1436,7 +1450,6 @@ ${line2}</span>"
                 returnto $mode
 
             else
-                mpc clear;
                 echo "$ALBUM" | uniq | while read line; do
                 xALBUM="$line"
 #            echo "$ALBUM" | while read line; do
@@ -1448,7 +1461,16 @@ ${line2}</span>"
                 date=$(echo "$xALBUM" \
                     | gawk -F "\t" '{print $2}' \
                     | gawk '{print substr($0, 2, length($0) - 2)}')
-                mpc findadd date "$date" album "$album" albumartist "$artist";
+                disc=$(mpc find -f '%disc%' date "$date" album "$album" albumartist "$artist" | uniq)
+                if [[ $(echo "$disc" | wc -l) -gt 1 ]]; then
+                    discmenu=$(echo -e "All\n$disc" | rofi -dmenu -p "Choose Disc > ")
+                    if [[ $discmenu == "" ]]; then exit; fi
+                    mpc clear
+                    mpc findadd date "$date" album "$album" albumartist "$artist" disc "$discmenu"
+                else
+                    mpc clear
+                    mpc findadd date "$date" album "$album" albumartist "$artist";
+                fi
             done
             mpc play
             album_entry="$firstline"
@@ -1468,7 +1490,14 @@ ${line2}</span>"
                 date=$(echo "$xALBUM" \
                     | gawk -F "\t" '{print $2}' \
                     | gawk '{print substr($0, 2, length($0) - 2)}')
-                mpc findadd date "$date" album "$album" albumartist "$artist";
+                disc=$(mpc find -f '%disc%' date "$date" album "$album" albumartist "$artist" | uniq)
+                if [[ $(echo "$disc" | wc -l) -gt 1 ]]; then
+                    discmenu=$(echo -e "All\n$disc" | rofi -dmenu -p "Choose Disc > ")
+                    if [[ $discmenu == "" ]]; then exit; fi
+                    mpc findadd date "$date" album "$album" albumartist "$artist" disc "$discmenu"
+                else
+                    mpc findadd date "$date" album "$album" albumartist "$artist"
+                fi
             done
             album_entry="$firstline"
             exitAfterAdd
