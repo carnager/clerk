@@ -52,13 +52,8 @@ For this to work, you need a recent rofi build from git.
 
 For arch linux there is a package in [AUR](https://aur.archlinux.org/packages/clerk-git/)
 
-# Important
-
-clerk heavily depends on a well structured database.
-All your files need these tags in order for clerk to work as intended:
-* albumartist
-* artist
-* date
-* album
-* tracknumber
-* title
+# FAQ
+1. It's not working properly~
+..* Make sure to have your files tagged properly. You need: `albumartist`, `artist`, `album`, `date`, `tracknumber`, `title` tags.
+2. mpd says 'connection closed by server'
+..* increase your `max_output_buffer_size` in mpd.conf and feel free to request chunked protocol replies for mpd.
