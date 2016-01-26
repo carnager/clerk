@@ -199,7 +199,6 @@ updateCache () {
 
 if [[ $1 == "--update" ]]; then
     updateCache
-else
     date=$(mpc stats | grep 'DB Updated: ')
     file="$HOME/.config/clerk/.lastupdate"
     if [ "$(< $file)" = "$date" ] && [ -f "$file" ] ; then
@@ -208,7 +207,6 @@ else
         updateCache
         echo "${date}" > "${file}"
         break
-    fi
 fi
 
 # Use GNU coreutils on OSX
