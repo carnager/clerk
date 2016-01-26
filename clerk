@@ -194,10 +194,11 @@ updateCache () {
         > $HOME/.config/clerk/tracks.cache
     notify-send "clerk" "finished updating cache files"
 #        | gawk -F '\t' '{ printf "%.2s\t%.40s\t%.40s\t%.200s\t%.500s\n", $1, $2, $3, $4, $5, $6 }' \
+    exit
 }
 
 if [[ $1 == "--update" ]]; then
-    :
+    updateCache
 else
     date=$(mpc stats | grep 'DB Updated: ')
     file="$HOME/.config/clerk/.lastupdate"
@@ -206,6 +207,7 @@ else
     else
         updateCache
         echo "${date}" > "${file}"
+        break
     fi
 fi
 
@@ -2018,10 +2020,10 @@ while :; do
             fi
             break
             ;;
-        --update)
-            updateCache
-            break
-            ;;
+#        --update)
+#            updateCache
+#            break
+#            ;;
         --queue)
             if [[ ! $2 ]]; then
                 echo "Missing argument for --queue"
