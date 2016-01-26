@@ -207,6 +207,7 @@ if [[ $1 == "--update" ]]; then
         updateCache
         echo "${date}" > "${file}"
         break
+    fi
 fi
 
 # Use GNU coreutils on OSX
