@@ -823,16 +823,7 @@ songs () {
             addTrackTags
             
         elif [[ $val -eq 23 ]]; then
-            plmenu=$(echo -e "< Return\n---\n1 [ Load Playlist ]\n2 [ Save Playlist ]" | dmenu_t -auto-select -dmenu -p "Load/Save Playlist > ")
-            if [[ $plmenu == "1"* ]]; then
-                dplayQueueLoad
-            elif [[ $plmenu == "2"* ]]; then
-                dplayQueueSave
-            elif [[ $plmenu == "< Return" ]]; then
-                dplayQueue
-            elif [[ $plmenu == "" ]]; then
-                exit
-            fi
+            plMenu
 
         elif [[ $val -eq 24 ]]; then
             mpc next
@@ -998,6 +989,19 @@ songs () {
             dplayQueue
         fi
     done
+}
+
+plMenu () {
+    plmenu=$(echo -e "< Return\n---\n1 [ Load Playlist ]\n2 [ Save Playlist ]" | dmenu_t -auto-select -dmenu -p "Load/Save Playlist > ")
+        if [[ $plmenu == "1"* ]]; then
+            dplayQueueLoad
+        elif [[ $plmenu == "2"* ]]; then
+            dplayQueueSave
+        elif [[ $plmenu == "< Return" ]]; then
+            dplayQueue
+        elif [[ $plmenu == "" ]]; then
+            exit
+        fi
 }
 
 skipAlbum () {
@@ -1465,12 +1469,16 @@ ${line2}</span>"
                 disc=$(mpc find -f '%disc%' date "$date" album "$album" albumartist "$artist" | uniq)
                 if [[ $(echo "$disc" | wc -l) -gt 1 ]]; then
                     discmenu=$(echo -e "All\n$disc" | rofi -dmenu -p "Choose Disc > ")
-                    if [[ $discmenu == "" ]]; then exit; fi
-                    mpc clear
-                    mpc findadd date "$date" album "$album" albumartist "$artist" disc "$discmenu"
-                else
-                    mpc clear
-                    mpc findadd date "$date" album "$album" albumartist "$artist";
+                    if [[ $discmenu == "" ]]; then exit
+                    elif [[ $discmenu == "All" ]]; then
+                        mpc clear
+                        echo -e "All\n$disc" | tail -n +2 | while read discline; do
+                            mpc findadd date "$date" album "$album" albumartist "$artist" disc "$discline"
+                        done
+                    else
+                        mpc clear
+                        mpc findadd date "$date" album "$album" albumartist "$artist" disc "$discmenu"
+                    fi
                 fi
             done
             mpc play
@@ -2045,6 +2053,8 @@ while :; do
         --playlist)
             if [[ $2 == savealbum ]]; then
                 saveAlbumToPlaylist
+            elif [[ $2 == menu ]]; then
+                plMenu
             elif [[ $2 == savelast ]]; then
                 saveLatestToPlaylist
             elif [[ $2 == savetrack ]]; then
@@ -2077,30 +2087,30 @@ while :; do
             echo "Copyright © 2013 - 2015 Rasmus Steinke"
             echo "---"
             echo "General"
-            echo "  --help, -h                                      this help message"
-            echo "  --current                                       show currently playing track"
-            echo "  --update                                        update album/track caches"
+            echo "  --help, -h                                         this help message"
+            echo "  --current                                          show currently playing track"
+            echo "  --update                                           update album/track caches"
             echo ""
             echo "Library"
-            echo "  --add <track, album, latest>                    adds selection at the end of the queue"
-            echo "  --random <track, album>                         play random track or album"
+            echo "  --add <track, album, latest>                       adds selection at the end of the queue"
+            echo "  --random <track, album>                            play random track or album"
             echo ""
             echo "Playlist"
-            echo "  --queue <show, suspend, resume>                 manage current queue"
-            echo "  --playlist <savealbum, savelast, savetrack>     save selection to playlist \"clerk\""
-            echo "  --rss                                           load podcast"
+            echo "  --queue <show, suspend, resume>                    manage current queue"
+            echo "  --playlist <menu, savealbum, savelast, savetrack>  save selection to playlist \"clerk\""
+            echo "  --rss                                              load podcast"
             echo "    (podcast should be placed in ~/.config/clerk/podcasts"
             echo "     with format NAME \ URL)"
             echo ""
             echo "Ratings"
-            echo "  --rate <menu, track, album, load, instant ##>  rate albums or tracks"
-            echo "                                                 "load" adds random rated tracks to queue"
+            echo "  --rate <menu, track, album, load, instant ##>     rate albums or tracks"
+            echo "                                                    "load" adds random rated tracks to queue"
             echo ""
-            echo "  --backup <track, album>                        backup ratings from mpd sticker database to json file."
-            echo "  --restore <track, album>                       restore ratings back to mpd sticker database"
+            echo "  --backup <track, album>                           backup ratings from mpd sticker database to json file."
+            echo "  --restore <track, album>                          restore ratings back to mpd sticker database"
             echo ""
             echo "LastFM"
-            echo "  --lastfm <toggle, check, love>                 toggle or check last.fm status, love current track"
+            echo "  --lastfm <toggle, check, love>                    toggle or check last.fm status, love current track"
             break
             ;;
         *)
