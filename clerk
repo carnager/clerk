@@ -1418,6 +1418,8 @@ ${line2}</span>"
                     else
                         mpc search date "$date" album "$album" albumartist "$artist" disc "$discmenu" | mpc insert
                     fi
+                else
+                    mpc search date "$date" album "$album" albumartist "$artist" | mpc insert
                 fi
             done
         album_entry="$firstline"
@@ -1449,6 +1451,8 @@ ${line2}</span>"
                         mpc clear
                         mpc findadd date "$date" album "$album" albumartist "$artist" disc "$discmenu"
                     fi
+                else
+                    mpc findadd date "$date" album "$album" albumartist "$artist"
                 fi
             done
             mpc play
@@ -1489,6 +1493,8 @@ ${line2}</span>"
                         mpc clear
                         mpc findadd date "$date" album "$album" albumartist "$artist" disc "$discmenu"
                     fi
+                else
+                    mpc findadd date "$date" album "$album" albumartist "$artist"
                 fi
             done
             mpc play
