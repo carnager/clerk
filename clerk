@@ -1494,6 +1494,7 @@ ${line2}</span>"
                         mpc findadd date "$date" album "$album" albumartist "$artist" disc "$discmenu"
                     fi
                 else
+                    mpc clear
                     mpc findadd date "$date" album "$album" albumartist "$artist"
                 fi
             done
