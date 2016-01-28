@@ -2053,8 +2053,8 @@ while :; do
         --playlist)
             if [[ $2 == savealbum ]]; then
                 saveAlbumToPlaylist
-            elif [[ $2 == menu ]]; then
-                plMenu
+            elif [[ $2 == load ]]; then
+                 dplayQueueLoad
             elif [[ $2 == savelast ]]; then
                 saveLatestToPlaylist
             elif [[ $2 == savetrack ]]; then
@@ -2097,7 +2097,8 @@ while :; do
             echo ""
             echo "Playlist"
             echo "  --queue <show, suspend, resume>                    manage current queue"
-            echo "  --playlist <menu, savealbum, savelast, savetrack>  save selection to playlist \"clerk\""
+            echo "  --playlist <savealbum, savelast, savetrack>        save selection to playlist \"clerk\""
+            echo "  --playlist <load>                                  load playlist"
             echo "  --rss                                              load podcast"
             echo "    (podcast should be placed in ~/.config/clerk/podcasts"
             echo "     with format NAME \ URL)"
