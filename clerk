@@ -1521,14 +1521,14 @@ ${line2}</span>"
                     discmenu=$(echo -e "All\n$disc" | rofi -dmenu -p "Choose Disc > ")
                     if [[ $discmenu == "" ]]; then exit
                     elif [[ $discmenu == "All" ]]; then
-                        mpc clear
                         echo -e "All\n$disc" | tail -n +2 | while read discline; do
                             mpc findadd date "$date" album "$album" albumartist "$artist" disc "$discline"
                         done
                     else
-                        mpc clear
                         mpc findadd date "$date" album "$album" albumartist "$artist" disc "$discmenu"
                     fi
+                else
+                    mpc findadd date "$date" album "$album" albumartist "$artist"
                 fi
             done
             album_entry="$firstline"
