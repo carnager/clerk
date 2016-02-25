@@ -193,22 +193,25 @@ updateCache () {
         | column -s $'\t' -t \
         > $HOME/.config/clerk/tracks.cache
     notify-send "clerk" "finished updating cache files"
+    date=$(mpc stats | grep 'DB Updated: ')
+    file="$HOME/.config/clerk/.lastupdate"
+    echo "${date}" > "${file}"
 #        | gawk -F '\t' '{ printf "%.2s\t%.40s\t%.40s\t%.200s\t%.500s\n", $1, $2, $3, $4, $5, $6 }' \
-    exit
+    if [[ $forceupdate == "true" ]]; then
+        exit
+    fi
 }
 
-if [[ $1 == "--update" ]]; then
-    updateCache
     date=$(mpc stats | grep 'DB Updated: ')
     file="$HOME/.config/clerk/.lastupdate"
     if [ "$(< $file)" = "$date" ] && [ -f "$file" ] ; then
         :
     else
         updateCache
+        date=$(mpc stats | grep 'DB Updated: ')
         echo "${date}" > "${file}"
         break
     fi
-fi
 
 # Use GNU coreutils on OSX
 sed=$([[ "$OSTYPE" == "darwin"* ]] && echo 'gsed' || echo 'sed')
@@ -2050,10 +2053,6 @@ while :; do
             fi
             break
             ;;
-#        --update)
-#            updateCache
-#            break
-#            ;;
         --queue)
             if [[ ! $2 ]]; then
                 echo "Missing argument for --queue"
@@ -2103,6 +2102,9 @@ while :; do
                 fi
             fi
             break
+            ;;
+        --update)
+            forceupdate=true updateCache
             ;;
         --help|-h)
             echo "---"
