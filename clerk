@@ -210,7 +210,6 @@ updateCache () {
         updateCache
         date=$(mpc stats | grep 'DB Updated: ')
         echo "${date}" > "${file}"
-        break
     fi
 
 # Use GNU coreutils on OSX
