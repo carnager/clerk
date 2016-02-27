@@ -201,7 +201,9 @@ updateCache () {
         exit
     fi
 }
-
+if [[ $1 == "--update" ]]; then
+    :
+else
     date=$(mpc stats | grep 'DB Updated: ')
     file="$HOME/.config/clerk/.lastupdate"
     if [ "$(< $file)" = "$date" ] && [ -f "$file" ] ; then
@@ -211,6 +213,7 @@ updateCache () {
         date=$(mpc stats | grep 'DB Updated: ')
         echo "${date}" > "${file}"
     fi
+fi
 
 # Use GNU coreutils on OSX
 sed=$([[ "$OSTYPE" == "darwin"* ]] && echo 'gsed' || echo 'sed')
