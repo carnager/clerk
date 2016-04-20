@@ -684,6 +684,11 @@ crossfadePrompt () {
 # not support custom names for urls. format of podcast in file is "Name \ URL"
 loadRSS () {
     podcast=$(echo -e "< Return\n---\n$(cat $HOME/.config/clerk/podcasts | cut -d '\' -f1)" | dmenu_t -p "Choose Podcast > ")
+    val=$?
+
+    if [[ $val -eq 1 ]]; then
+        exit
+    fi
     if [[ $podcast == "< Return" ]]; then
         dplayQueue
     else
