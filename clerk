@@ -1085,7 +1085,7 @@ IFS='
 
 # show all mpd playlists and load them to queue
 dplayQueueLoad () {
-    _playlist=$(echo -e "< Return\n---\n$(mpc lsplaylists)" | dmenu_t -p "Load Playlist > ")
+    _playlist=$(echo -e "< Return\n---\n$(mpc lsplaylists | sort)" | dmenu_t -p "Load Playlist > ")
     val=$?
     if [[ $val -eq 1 ]]; then
         exit
