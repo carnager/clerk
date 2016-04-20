@@ -714,8 +714,12 @@ suspendPlaylist () {
         else
             echo " "
         fi
-            notify-send "Clerk" "Playlist suspended"
+        notify-send "Clerk" "Playlist suspended"
+        if [[ $cli == "true" ]]; then
+            exit
+        else
             dplayQueue
+        fi
     fi
 }
 
@@ -732,7 +736,11 @@ resumePlaylist () {
     mpc seek "$time"
     mpc toggle
     notify-send "Clerk" "Resumed last-suspended Playlist"
-    dplayQueue
+    if [[ $cli == "true" ]]; then
+        exit
+    else
+        dplayQueue
+    fi
 }
 
 # Play or delete items from current Queue
@@ -2064,9 +2072,9 @@ while :; do
             elif [[ $2 == delete ]]; then
                 dplayQueueDelete
             elif [[ $2 == suspend ]]; then
-                suspendPlaylist
+                cli=true suspendPlaylist
             elif [[ $2 == resume ]]; then
-                resumePlaylist
+                cli=true resumePlaylist
             fi
             break
             ;;
