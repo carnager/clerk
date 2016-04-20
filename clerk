@@ -663,7 +663,7 @@ mpdSima () {
 
 # function to change number of random songs in config file
 optionRandomPrompt() {
-    number="$(echo -e " " | dmenu_t -p 'Set No. of Songs for random Songs > ')"
+    number="$(echo -e " " | dmenu_t -p 'Set No. of random Songs > ')"
     $sed -i "s/value=.*/value="$number"/" $HOME/.config/clerk/config
     export value="$number"
     dplayOptionsPrompt
