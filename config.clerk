@@ -1,6 +1,7 @@
-# custom rofi settings (rofi reads settings from ~/.Xresources)
-# but you can override settings here.
-rofiopts="-lines 30 -width 1500 -i -no-levenshtein-sort"
+# rofi command. Make sure to have "$@" as last argument
+_rofi () {
+    rofi -i -lines 30 -width 1500 -no-levenshtein-sort "$@"
+}
 
 # custom mpd host
 mpd_host=
@@ -28,8 +29,8 @@ ssh_lastfm=0
 ssh_host=
 
 # color of the help messages
-help_color="#0C73C2"
-help_separator_color="#5F5F5F"
+# leave empty for autodetection
+help_color=""
 
 # custom keybindings
 # global

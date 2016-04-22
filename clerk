@@ -2,14 +2,13 @@
 
 shopt -s globstar
 
-function dmenu_t () {
-    rofi -dmenu $(echo "$rofiopts") "$@"
-}
 
 # load default settings
 # custom rofi settings (rofi reads settings from ~/.Xresources)
 # but you can override settings here.
-rofiopts="-lines 32 -width 1500 -i -no-levenshtein-sort"
+dmenu_t () {
+        rofi -i -lines 30 -width 1500 -no-levenshtein-sort "$@"
+    }
 
 # custom mpd host
 mpd_host=
