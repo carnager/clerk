@@ -424,7 +424,7 @@ currentMenu () {
     if [[ $menu == "1 [ Browse Albums ]>" ]]; then
         filter=$(mpc current -f '%artist%')
         firstsong=$(mpc -f '%album% %album%' search artist "$(mpc current -f '%artist%')" album "$(mpc current -f '%album%')" | head -1)
-        album_entry="$firstsong" filter="^$filter  " addAlbum alphabet
+        album_entry="$firstsong" filter="^$filter\s" addAlbum alphabet
 
     elif [[ $menu == "2 [ Browse Tracks ]>" ]]; then
         filter=$(mpc current -f '%artist%')
