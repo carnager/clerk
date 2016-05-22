@@ -58,3 +58,4 @@ For arch linux there is a package in [AUR](https://aur.archlinux.org/packages/cl
 2. mpd says 'connection closed by server'  
   increase your `max_output_buffer_size` in mpd.conf  
   I requested a chunked protocol feature [here](http://bugs.musicpd.org/view.php?id=4488)
+  (which got closed - no fixable)
