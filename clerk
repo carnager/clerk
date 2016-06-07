@@ -1462,9 +1462,12 @@ ${line2}</span>"
             dplayQueue
 
         elif [[ $val -eq 13 ]]; then
-            album_entry="${firstline}"
-            mpc findadd date "$date" album "$album" albumartist "$artist"
-            mpc searchplay "${album}"
+            currentid=$(mpc current -f "%position%")
+            echo -e "$ALBUM" | uniq | while read line; do
+                mpc add "$(echo -e "${line}" | awk -F '\t' '{ print $NF }')"
+            done
+            mpc play "$(echo "$(( $currentid + 1 ))")"
+            album_entry="$firstline"
 
         elif [[ $val -eq 18 ]]; then
             mpc prev
