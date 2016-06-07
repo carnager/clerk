@@ -1521,9 +1521,11 @@ ${line2}</span>"
                 album_entry="$firstline"
 
         elif [[ $val -eq 14 ]]; then
-            mpc clear;
-            mpc findadd date "$date" album "$album" albumartist "$artist";
-            mpc searchplay "${album}"
+            currentid=$(mpc current -f "%position%")
+            echo -e "$ALBUM" | uniq | while read line; do
+                mpc insert "$(echo -e "${line}" | awk -F '\t' '{ print $NF }')"
+            done
+            mpc play "$(echo "$(( $currentid + 1 ))")"
            album_entry="$firstline"
 
         elif [[ $val -eq 1 ]]; then
