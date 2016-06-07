@@ -169,27 +169,27 @@ updateCache () {
     cd $HOME/.config/clerk
     rm -f *.cache
 
-    mpc --format '%mtime%\t[%albumartist%|%artist%] — (%date%) — %album%' \
+    mpc --format '%mtime%\t[%albumartist%|%artist%] - (%date%) - %album% - %file%' \
         search filename '' \
         | fix_date_format 1 '%Y-%m-%d-%H:%M:%S' \
         | sort -nr \
-        | gawk '{for (i=2; i<NF; i++) printf $i " "; print $NF}' \
+        | gawk '{for (i=2; i<NF; i++) printf $i " "; print $NF }' \
         | perl -ne 'print unless $seen{$_}++' \
-        | gawk -F ' — ' '{ print $1 "\t" $2 "\t" $3 }' \
+        | sed 's:/[^/]*$::' | awk -F ' - ' '!seen[$1 $2 $3 $4]++' \
         | uniq \
-        | gawk -F '\t' '{ printf "%."'${artist_width}'"s\t%."'${date_width}'"s\t%."'${album_width}'"s\n", $1, $2, $3 }' \
-        | column -s $'\t' -t | uniq > $HOME/.config/clerk/latest.cache
-#        | sed 's,^\([^\t]*\t[^\t]\{40\}\)[^\t]*,\1,' | column -o $'\t' -s $'\t' -t | uniq > $HOME/.config/clerk/latest.cache
-    mpc --format '[%albumartist%|%artist%]\t(%date%)\t%album%' \
+        | gawk -F ' - ' '{ printf "%."'${artist_width}'"s\t%."'${date_width}'"s\t%."'${album_width}'"s\t%.300s\n", $1, $2, $3, $4 }' \
+        | column -s $'\t' -t -o $'\t' > $HOME/.config/clerk/latest.cache
+    mpc --format '[%albumartist%|%artist%]\t(%date%)\t%album%\t%file%' \
         search filename '' \
+        | sed 's:/[^/]*$::' \
+        | awk -F '\t' '!seen[$1 $2 $3 $4]++' \
         | sort \
-        | uniq \
-        | gawk -F '\t' '{ printf "%."'${artist_width}'"s\t%."'${date_width}'"s\t%."'${album_width}'"s\n", $1, $2, $3 }' \
-        | column -s $'\t' -t > $HOME/.config/clerk/albums.cache
+        | gawk -F '\t' '{ printf "%."'${artist_width}'"s\t%."'${date_width}'"s\t%."'${album_width}'"s\t%.300s\n", $1, $2, $3, $4 }' \
+        | column -t -s $'\t' -o $'\t' > $HOME/.config/clerk/albums.cache
     mpc --format '%track%\t%title%\t%artist%\t(%date%)\t%album%\t%file%' \
         search filename '' \
         | gawk -F '\t' '{ printf "%."'${track_width}'"s\t%."'${title_width}'"s\t%."'${artist_width}'"s\t%."'${date_width}'"s\t%."'${album_width}'"s\t%.500s\n", $1, $2, $3, $4, $5, $6 }' \
-        | column -s $'\t' -t \
+        | column -s $'\t' -t -o $'\t' \
         > $HOME/.config/clerk/tracks.cache
     notify-send "clerk" "finished updating cache files"
     date=$(mpc stats | grep 'DB Updated: ')
@@ -1406,40 +1406,10 @@ ${line2}</span>"
     if [[ -z "$ALBUM" ]]; then
         exit
     else
-        artist=$(echo -en "$ALBUM" \
-            | gawk -F '\t' '{ print $1 }' \
-            | sed -e 's/[[:space:]]*$//')
-        album=$(echo "$ALBUM" \
-            | gawk -F "\t" '{print $3}')
-        date=$(echo "$ALBUM" \
-            | gawk -F "\t" '{print $2}' \
-            | gawk '{print substr($0, 2, length($0) - 2)}')
-
         if [[ $val -eq 11 ]]; then
-            echo "$ALBUM" | uniq | while read line; do
-                xALBUM="$line"
-                artist=$(echo -en "$xALBUM" \
-                    | gawk -F '\t' '{ print $1 }' \
-                    | sed -e 's/[[:space:]]*$//')
-                album=$(echo "$xALBUM" \
-                    | gawk -F "\t" '{print $3}')
-                date=$(echo "$xALBUM" \
-                    | gawk -F "\t" '{print $2}' \
-                    | gawk '{print substr($0, 2, length($0) - 2)}')
-                disc=$(mpc find -f '%disc%' date "$date" album "$album" albumartist "$artist" | uniq)
-                if [[ $(echo "$disc" | wc -l) -gt 1 ]]; then
-                    discmenu=$(echo -e "All\n$disc" | _rofi -dmenu -p "Choose Disc > ")
-                    if [[ $discmenu == "" ]]; then exit
-                    elif [[ $discmenu == "All" ]]; then
-                        echo -e "All\n$disc" | tail -n +2 | while read discline; do
-                            mpc search date "$date" album "$album" albumartist "$artist" disc "$discline" | mpc insert
-                        done
-                    else
-                        mpc search date "$date" album "$album" albumartist "$artist" disc "$discmenu" | mpc insert
-                    fi
-                else
-                    mpc search date "$date" album "$album" albumartist "$artist" | mpc insert
-                fi
+            echo -e "$ALBUM" | uniq | while read line; do
+                mpc insert "$(echo -e "${line}" | awk -F '\t' '{ print $NF }')"
+                exit
             done
         album_entry="$firstline"
         exitAfterAdd
@@ -1447,32 +1417,8 @@ ${line2}</span>"
 
         elif [[ $val -eq 12 ]]; then
             mpc clear;
-            echo "$ALBUM" | uniq | while read line; do
-                xALBUM="$line"
-                artist=$(echo -en "$xALBUM" \
-                    | gawk -F '\t' '{ print $1 }' \
-                    | sed -e 's/[[:space:]]*$//')
-                album=$(echo "$xALBUM" \
-                    | gawk -F "\t" '{print $3}')
-                date=$(echo "$xALBUM" \
-                    | gawk -F "\t" '{print $2}' \
-                    | gawk '{print substr($0, 2, length($0) - 2)}')
-                disc=$(mpc find -f '%disc%' date "$date" album "$album" albumartist "$artist" | uniq)
-                if [[ $(echo "$disc" | wc -l) -gt 1 ]]; then
-                    discmenu=$(echo -e "All\n$disc" | _rofi -dmenu -p "Choose Disc > ")
-                    if [[ $discmenu == "" ]]; then exit
-                    elif [[ $discmenu == "All" ]]; then
-                        mpc clear
-                        echo -e "All\n$disc" | tail -n +2 | while read discline; do
-                            mpc findadd date "$date" album "$album" albumartist "$artist" disc "$discline"
-                        done
-                    else
-                        mpc clear
-                        mpc findadd date "$date" album "$album" albumartist "$artist" disc "$discmenu"
-                    fi
-                else
-                    mpc findadd date "$date" album "$album" albumartist "$artist"
-                fi
+            echo -e "$ALBUM" | uniq | while read line; do
+                mpc add "$(echo -e "${line}" | awk -F '\t' '{ print $NF }')"
             done
             mpc play
             album_entry="$firstline"
@@ -1488,36 +1434,11 @@ ${line2}</span>"
                 returnto $mode
 
             else
-                echo "$ALBUM" | uniq | while read line; do
-                xALBUM="$line"
-#            echo "$ALBUM" | while read line; do
-                artist=$(echo -en "$xALBUM" \
-                    | gawk -F '\t' '{ print $1 }' \
-                    | sed -e 's/[[:space:]]*$//')
-                album=$(echo "$xALBUM" \
-                    | gawk -F "\t" '{print $3}')
-                date=$(echo "$xALBUM" \
-                    | gawk -F "\t" '{print $2}' \
-                    | gawk '{print substr($0, 2, length($0) - 2)}')
-                disc=$(mpc find -f '%disc%' date "$date" album "$album" albumartist "$artist" | uniq)
-                if [[ $(echo "$disc" | wc -l) -gt 1 ]]; then
-                    discmenu=$(echo -e "All\n$disc" | _rofi -dmenu -p "Choose Disc > ")
-                    if [[ $discmenu == "" ]]; then exit
-                    elif [[ $discmenu == "All" ]]; then
-                        mpc clear
-                        echo -e "All\n$disc" | tail -n +2 | while read discline; do
-                            mpc findadd date "$date" album "$album" albumartist "$artist" disc "$discline"
-                        done
-                    else
-                        mpc clear
-                        mpc findadd date "$date" album "$album" albumartist "$artist" disc "$discmenu"
-                    fi
-                else
-                    mpc clear
-                    mpc findadd date "$date" album "$album" albumartist "$artist"
-                fi
-            done
-            mpc play
+                mpc clear
+                echo -e "$ALBUM" | uniq | while read line; do
+                    mpc add "$(echo -e "${line}" | awk -F '\t' '{ print $NF }')"
+                done
+                mpc play
             album_entry="$firstline"
             exitAfterAdd
             returnto
@@ -1525,30 +1446,7 @@ ${line2}</span>"
 
         elif [[ $val -eq 10 ]]; then
             echo "$ALBUM" | uniq | while read line; do
-            xALBUM="$line"
-#            echo "$ALBUM" | while read line; do
-                artist=$(echo -en "$xALBUM" \
-                    | gawk -F '\t' '{ print $1 }' \
-                    | sed -e 's/[[:space:]]*$//')
-                album=$(echo "$xALBUM" \
-                    | gawk -F "\t" '{print $3}')
-                date=$(echo "$xALBUM" \
-                    | gawk -F "\t" '{print $2}' \
-                    | gawk '{print substr($0, 2, length($0) - 2)}')
-                disc=$(mpc find -f '%disc%' date "$date" album "$album" albumartist "$artist" | uniq)
-                if [[ $(echo "$disc" | wc -l) -gt 1 ]]; then
-                    discmenu=$(echo -e "All\n$disc" | _rofi -dmenu -p "Choose Disc > ")
-                    if [[ $discmenu == "" ]]; then exit
-                    elif [[ $discmenu == "All" ]]; then
-                        echo -e "All\n$disc" | tail -n +2 | while read discline; do
-                            mpc findadd date "$date" album "$album" albumartist "$artist" disc "$discline"
-                        done
-                    else
-                        mpc findadd date "$date" album "$album" albumartist "$artist" disc "$discmenu"
-                    fi
-                else
-                    mpc findadd date "$date" album "$album" albumartist "$artist"
-                fi
+                mpc add "$(echo -e "${line}" | awk -F '\t' '{ print $NF }')"
             done
             album_entry="$firstline"
             exitAfterAdd
@@ -1681,10 +1579,10 @@ TRACK_TEMP="$(_rofi \
     if [[ -z "$TRACK" ]]; then
         exit
     else
-        filename=$(echo "$TRACK" | gawk -F "\t" '{print $6}')
+        filename=$(echo "$TRACK" | gawk -F '\t' '{print $NF}')
 
         if [[ $val -eq 11 ]]; then
-        filename=$(echo "$TRACK" | gawk -F "\t" '{print $6}')
+        filename=$(echo "$TRACK" | gawk -F '\t' '{print $NF}')
         echo "$filename" | uniq | while read line; do
             mpc insert "${line}"
         done
@@ -1692,7 +1590,7 @@ TRACK_TEMP="$(_rofi \
         exitAfterAdd
     
         elif [[ $val -eq 12 ]]; then
-            filename=$(echo "$TRACK" | gawk -F "\t" '{print $6}')
+            filename=$(echo "$TRACK" | gawk -F '\t' '{print $NF}')
             mpc clear;
             echo "$filename" | uniq | while read line; do
                 mpc add "${line}"
@@ -1702,7 +1600,7 @@ TRACK_TEMP="$(_rofi \
             exitAfterAdd
     
         elif [[ $val -eq 10 ]]; then
-            filename=$(echo "$TRACK" | gawk -F "\t" '{print $6}')
+            filename=$(echo "$TRACK" | gawk -F '\t' '{print $NF}')
             echo "$filename" | uniq | while read line; do
                 mpc add "${line}"
             done
@@ -1715,7 +1613,7 @@ TRACK_TEMP="$(_rofi \
             elif [[ "$TRACK" == "---" ]]; then
                 addTrackTags
             else
-                filename=$(echo "$TRACK" | gawk -F "\t" '{print $6}')
+                filename=$(echo "$TRACK" | gawk -F '\t' '{print $NF}')
                 echo "$filename" | uniq | while read line; do
                     mpc add "${line}"
                 done
@@ -1724,8 +1622,8 @@ TRACK_TEMP="$(_rofi \
             fi
     
         elif [[ $val -eq 13 ]]; then
-            title=$(echo "$TRACK" | gawk -F "\t" '{print $2}' | head -1)
-            filename=$(echo "$TRACK" | gawk -F "\t" '{print $6}')
+            title=$(echo "$TRACK" | gawk -F '\t' '{print $2}' | head -1)
+            filename=$(echo "$TRACK" | gawk -F '\t' '{print $NF}')
             echo "$filename" | uniq | while read line; do
                 mpc add "${line}"
             done
@@ -1740,8 +1638,8 @@ TRACK_TEMP="$(_rofi \
             dplayQueue
     
         elif [[ $val -eq 14 ]]; then
-            title=$(echo "$TRACK" | gawk -F "\t" '{print $2}' | head -1)
-            filename=$(echo "$TRACK" | gawk -F "\t" '{print $6}')
+            title=$(echo "$TRACK" | gawk -F '\t' '{print $2}' | head -1)
+            filename=$(echo "$TRACK" | gawk -F '\t' '{print $NF}')
             echo "$filename" | uniq | while read line; do
                 mpc insert "${line}"
             done
