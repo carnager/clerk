@@ -1397,10 +1397,10 @@ ${line2}</span>"
     val=$?
 
     ALBUM_ORIG="${ALBUM_TEMP#*¬}"
-    firstline=$(echo "$ALBUM_ORIG" | sed 's/.*¬//g' | tail -1)
+    firstline=$(echo "$ALBUM_ORIG" | sed 's/.*¬//g' | tail -1 | awk '{ print $NF }')
     unset filter
     export filter_temp="${ALBUM_TEMP%¬*}"
-    ALBUM=$(echo "${ALBUM_ORIG}" | perl -pe "s/  +/\t/g" | sed 's/.*¬//g')
+    ALBUM=$(echo "${ALBUM_ORIG}" | sed 's/.*¬//g' | awk -F '\t' '{ print $NF }')
     export filter=$(echo "$filter_temp" | head -1 | sed 's/¬.*//g')
 
     if [[ -z "$ALBUM" ]]; then
@@ -1408,7 +1408,7 @@ ${line2}</span>"
     else
         if [[ $val -eq 11 ]]; then
             echo -e "$ALBUM" | uniq | while read line; do
-                mpc insert "$(echo -e "${line}" | awk -F '\t' '{ print $NF }')"
+                mpc insert "${line}"
                 exit
             done
         album_entry="$firstline"
@@ -1418,7 +1418,7 @@ ${line2}</span>"
         elif [[ $val -eq 12 ]]; then
             mpc clear;
             echo -e "$ALBUM" | uniq | while read line; do
-                mpc add "$(echo -e "${line}" | awk -F '\t' '{ print $NF }')"
+                mpc add "${line}"
             done
             mpc play
             album_entry="$firstline"
@@ -1436,7 +1436,7 @@ ${line2}</span>"
             else
                 mpc clear
                 echo -e "$ALBUM" | uniq | while read line; do
-                    mpc add "$(echo -e "${line}" | awk -F '\t' '{ print $NF }')"
+                    mpc add "${line}"
                 done
                 mpc play
             album_entry="$firstline"
