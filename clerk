@@ -1397,7 +1397,7 @@ ${line2}</span>"
     val=$?
 
     ALBUM_ORIG="${ALBUM_TEMP#*¬}"
-    firstline=$(echo "$ALBUM_ORIG" | sed 's/.*¬//g' | tail -1 | awk '{ print $NF }')
+    firstline=$(echo "$ALBUM_ORIG" | sed 's/.*¬//g' | tail -1 | awk -F '\t' '{ print $NF }')
     unset filter
     export filter_temp="${ALBUM_TEMP%¬*}"
     ALBUM=$(echo "${ALBUM_ORIG}" | sed 's/.*¬//g' | awk -F '\t' '{ print $NF }')
