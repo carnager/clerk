@@ -169,15 +169,15 @@ updateCache () {
     cd $HOME/.config/clerk
     rm -f *.cache
 
-    mpc --format '%mtime%\t[%albumartist%|%artist%] - (%date%) - %album% [(CD %disc%)] - %file%' \
+    mpc --format '%mtime%\t[%albumartist%|%artist%] ○ (%date%) ○ %album% [(CD %disc%)] ○ %file%' \
         search filename '' \
         | fix_date_format 1 '%Y-%m-%d-%H:%M:%S' \
         | sort -nr \
         | gawk '{for (i=2; i<NF; i++) printf $i " "; print $NF }' \
         | perl -ne 'print unless $seen{$_}++' \
-        | sed 's:/[^/]*$::' | awk -F ' - ' '!seen[$1 $2 $3 $4]++' \
+        | sed 's:/[^/]*$::' | awk -F ' ○ ' '!seen[$1 $2 $3 $4]++' \
         | uniq \
-        | gawk -F ' - ' '{ printf "%."'${artist_width}'"s\t%."'${date_width}'"s\t%."'${album_width}'"s\t%.300s\n", $1, $2, $3, $4 }' \
+        | gawk -F ' ○ ' '{ printf "%."'${artist_width}'"s\t%."'${date_width}'"s\t%."'${album_width}'"s\t%.300s\n", $1, $2, $3, $4 }' \
         | column -s $'\t' -t -o $'\t' > $HOME/.config/clerk/latest.cache
     mpc --format '[%albumartist%|%artist%]\t(%date%)\t%album% [(CD %disc%)]\t%file%' \
         search filename '' \
