@@ -839,7 +839,7 @@ songs () {
 
         elif [[ $val -eq 20 ]]; then
             addTrackTags
-            
+
         elif [[ $val -eq 23 ]]; then
             plMenu
 
@@ -864,7 +864,7 @@ songs () {
             seekMenu
 
         elif [[ $val -eq 21 ]]; then
-            temp=$(mpc playlist --format '%position%\t%file%' | grep -P "^${POS}\t" | gawk -F '\t' '{ print $2 }') 
+            temp=$(mpc playlist --format '%position%\t%file%' | grep -P "^${POS}\t" | gawk -F '\t' '{ print $2 }')
             info=$(mpc --format '%albumartist%\t%album%\t%date%\t%track%\t%title%' search filename "${temp}")
 
             ARTIST=$(echo "${info}" \
@@ -987,7 +987,7 @@ songs () {
         elif [[ $val -eq 11 ]]; then
             unset last
 
-            filename=$(mpc playlist --format '%position%\t%file%' | grep "^${POS}" | grep "${ARTIST}" | gawk -F '\t' '{ print $2 }') 
+            filename=$(mpc playlist --format '%position%\t%file%' | grep "^${POS}" | grep "${ARTIST}" | gawk -F '\t' '{ print $2 }')
             info=$(mpc --format '%artist%\t%album%\t%date%\t%track%\t%title%' search filename "${filename}")
             echo "${info}"
 
@@ -1031,7 +1031,7 @@ IFS='
     ACTNR=$(mpc --format "%position%"  | head -n 1) # works >= mpc git 2009-11-28
     ACTALBUM="_"$(mpc --format "%album%" | head -n 1)
     SONGSANZ=${#_PLAYLIST[*]}
-    
+
     case $1 in
         next)
         # Next album
@@ -1040,14 +1040,14 @@ IFS='
             if [ ${_PLAYLIST[$IDX]} != $ACTALBUM ]; then
                 let IDX+=1
                 mpc play $IDX
-                echo New album \(next\)  IDX: $IDX 
+                echo New album \(next\)  IDX: $IDX
                 break
             fi
         done
         ;;
         prev)
         # Previous album
-        #GETEND=FALSE 
+        #GETEND=FALSE
         ACTNRTEMP=$ACTNR
         let ACTNRTEMP-=2
         for (( IDX=$ACTNR-2; $IDX>=0; IDX-- ))
@@ -1068,11 +1068,11 @@ IFS='
                 #GETEND=TRUE
             fi
             if [ $IDX = 0 ]; then
-                #if [ $GETEND = FALSE ]; then 
+                #if [ $GETEND = FALSE ]; then
                 #   mpc play 1
                 #   break
-                #fi 
-                mpc play 1 
+                #fi
+                mpc play 1
                 break
             fi
         done
@@ -1374,6 +1374,7 @@ ${line2}</span>"
             -kb-custom-12 ${next} \
             -kb-custom-13 ${seek} \
             -kb-custom-14 ${savefav} \
+            -kb-accept-alt "Tab" \
             -kb-custom-15 ${nextalbum} \
             -kb-custom-16 ${prevalbum} \
             -dmenu -filter "$filter" \
@@ -1500,7 +1501,7 @@ ${line2}</span>"
         elif [[ $val -eq 24 ]]; then
             skipAlbum next
             unset IFS
-            album_entry="${firstline}" 
+            album_entry="${firstline}"
             returnto
 
         elif [[ $val -eq 25 ]]; then
@@ -1541,7 +1542,7 @@ ${line2}</span>"
 addTrackTags() {
     help_text=$(echo -e "${add}: Add (Default) - ${insert}: Insert - ${replace}: Replace \
         \n${rate}: Rate - ${addplay}: Add + Play - ${insertplay}: Insert + Play" \
-        | column -s '-' -t | perl -pe "s/ - /<span color='$help_separator_color'\>\|\<\/span\>/g") 
+        | column -s '-' -t | perl -pe "s/ - /<span color='$help_separator_color'\>\|\<\/span\>/g")
     # -o "<span color='$help_separator_color'>|</span>" -t)
     line1=$(echo "${help_text}" | head -1)
     line2=$(echo "${help_text}" | tail -1)
@@ -1556,6 +1557,7 @@ TRACK_TEMP="$(_rofi \
     -kb-custom-3 "${replace}" \
     -kb-custom-8 "${rate}" \
     -kb-custom-4 "${addplay}" \
+    -kb-accept-alt "Tab" \
     -kb-custom-5 "${insertplay}" \
     -kb-custom-6 ${albumlist} \
     -kb-custom-7 ${queue} \
@@ -1593,7 +1595,7 @@ TRACK_TEMP="$(_rofi \
         done
         entry="$firstline"
         exitAfterAdd
-    
+
         elif [[ $val -eq 12 ]]; then
             filename=$(echo "$TRACK" | gawk -F '\t' '{print $NF}')
             mpc clear;
@@ -1603,7 +1605,7 @@ TRACK_TEMP="$(_rofi \
             mpc play
             entry="$firstline"
             exitAfterAdd
-    
+
         elif [[ $val -eq 10 ]]; then
             filename=$(echo "$TRACK" | gawk -F '\t' '{print $NF}')
             echo "$filename" | uniq | while read line; do
@@ -1611,7 +1613,7 @@ TRACK_TEMP="$(_rofi \
             done
             entry="$firstline"
             exitAfterAdd
-    
+
         elif [[ $val -eq 0 ]]; then
             if [[ "$TRACK" == "< Return" ]]; then
                 browseLibPrompt
@@ -1625,7 +1627,7 @@ TRACK_TEMP="$(_rofi \
                 entry="$firstline"
                 exitAfterAdd
             fi
-    
+
         elif [[ $val -eq 13 ]]; then
             title=$(echo "$TRACK" | gawk -F '\t' '{print $2}' | head -1)
             filename=$(echo "$TRACK" | gawk -F '\t' '{print $NF}')
@@ -1635,13 +1637,13 @@ TRACK_TEMP="$(_rofi \
             mpc searchplay "${title}"
             entry="$firstline"
             exitAfterAdd
-    
+
         elif [[ $val -eq 15 ]]; then
             addAlbum alphabet
-    
+
         elif [[ $val -eq 16 ]]; then
             dplayQueue
-    
+
         elif [[ $val -eq 14 ]]; then
             title=$(echo "$TRACK" | gawk -F '\t' '{print $2}' | head -1)
             filename=$(echo "$TRACK" | gawk -F '\t' '{print $NF}')
@@ -1651,26 +1653,26 @@ TRACK_TEMP="$(_rofi \
             mpc searchplay "${title}"
             entry="$firstline"
             exitAfterAdd
-    
+
         elif [[ $val -eq 18 ]]; then
             mpc prev
-    
+
         elif [[ $val -eq 19 ]]; then
             mpc toggle
             entry="${firstline}"
-    
+
         elif [[ $val -eq 20 ]]; then
             mpc stop
             entry="${firstline}"
-    
+
         elif [[ $val -eq 21 ]]; then
             mpc next
             entry="${firstline}"
-    
+
         elif [[ $val -eq 22 ]]; then
             entry="${firstline}"
             seekMenu addTrackTags
-    
+
         elif [[ $val -eq 23 ]]; then
             skipAlbum next
             unset IFS
@@ -1693,7 +1695,7 @@ TRACK_TEMP="$(_rofi \
                 | gawk -F '\t' '{ print $4 }')"
             title="$(echo "$info" \
                 | gawk -F '\t' '{ print $5 }')"
-    
+
             echo "${artist} ${album} ${date} ${track} ${title}"
             rateartist="${artist}" ratealbum="${album}" ratetrack="${track}" ratetitle="${title}" rateTrack
             entry="$firstline"
@@ -1821,7 +1823,7 @@ saveTrackToPlaylist() {
     unset filter
     export filter="$(echo ${TRACK_TEMP} | gawk -F '¬' '{ print $1 }')"
 
-    
+
     if [[ "$TRACK" == "0  Return to Main Menu" ]]
         then dplayPrompt
     elif [[ -z "$TRACK" ]]; then
