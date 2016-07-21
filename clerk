@@ -1371,6 +1371,7 @@ ${line2}</span>"
             -kb-custom-9 ${prev} \
             -kb-custom-10 ${toggle} \
             -kb-custom-11 ${stop} \
+            -multi-select \
             -kb-custom-12 ${next} \
             -kb-custom-13 ${seek} \
             -kb-custom-14 ${savefav} \
@@ -1558,6 +1559,7 @@ TRACK_TEMP="$(_rofi \
     -kb-custom-8 "${rate}" \
     -kb-custom-4 "${addplay}" \
     -kb-accept-alt "Tab" \
+    -multi-select \
     -kb-custom-5 "${insertplay}" \
     -kb-custom-6 ${albumlist} \
     -kb-custom-7 ${queue} \
