@@ -27,11 +27,11 @@ if [[ -f "$HOME/.config/clerk/clerk_fzf.conf" ]]; then
 fi
 
 if [[ -n $mpd_host ]]; then
-  ┆ if [[ -n $mpd_password ]]; then
-  ┆ ┆ ┆ export MPD_HOST="${mpd_password}@${mpd_host}"
-  ┆ else
-  ┆ ┆ ┆ export MPD_HOST="${mpd_host}"
-  ┆ fi
+  if [[ -n $mpd_password ]]; then
+    export MPD_HOST="${mpd_password}@${mpd_host}"
+  else
+    export MPD_HOST="${mpd_host}"
+  fi
 fi
  
 if [[ -n $mpd_port ]]; then
