@@ -3,6 +3,7 @@
 TMUX_TMPDIR="/tmp/clerk/tmux"
 
 screen=$(tmux list-panes -F "#W")
+
 if [[ $1 == "--create-caches" ]]; then
   tmux new-session -s notify -n 'Updating Cache Files. Please wait a moment' -d
   tmux switchc -t notify
@@ -26,6 +27,7 @@ tmux rename-session -t music2 music
 tmux switchc -t music
 tmux findw -t music ${screen}
 tmux kill-session -t music_old
+
 if [[ $1 == "--create-caches" ]]; then
   tmux kill-session -t notify
 fi
