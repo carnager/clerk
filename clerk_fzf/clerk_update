@@ -1,0 +1,31 @@
+#!/bin/bash
+
+TMUX_TMPDIR="/tmp/clerk/tmux"
+
+screen=$(tmux list-panes -F "#W")
+if [[ $1 == "--create-caches" ]]; then
+  tmux new-session -s notify -n 'Updating Cache Files. Please wait a moment' -d
+  tmux switchc -t notify
+  clerk_fzf --update &
+  pid=$!
+  tmux send-keys -t notify 'sl' C-m
+  wait $pid
+fi
+
+tmux new-session -s music2 -n albums -d
+tmux send-keys -t music2 'clerk_fzf --albums' C-m
+tmux new-window -t music2 -n tracks
+tmux send-keys -t music2 'clerk_fzf --tracks' C-m
+tmux new-window -t music2 -n latest
+tmux send-keys -t music2 'clerk_fzf --latest' C-m
+tmux new-window -t music2 -n queue
+tmux send-keys -t music2 'ncmpcpp' C-m
+
+tmux rename-session -t music music_old
+tmux rename-session -t music2 music
+tmux switchc -t music
+tmux findw -t music ${screen}
+tmux kill-session -t music_old
+if [[ $1 == "--create-caches" ]]; then
+  tmux kill-session -t notify
+fi
