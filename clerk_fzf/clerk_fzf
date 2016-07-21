@@ -2,6 +2,7 @@
 
 TMUX_TMPDIR="/tmp/clerk/tmux"
 
+# set default settings
 script="$0 $1"
 random_artist="albumartist"
 shuf=$([[ "$OSTYPE" == "darwin"* ]] && echo 'gshuf' || echo 'shuf')  
@@ -13,9 +14,13 @@ artist_width="50"
 date_width="6"
 # album is much longer in order to keep filename off screen
 album_width="200"
-
 pl_title_width="110"
 
+# read global config
+source /etc/clerk_fzf.conf
+
+# read user config
+source $HOME/.config/clerk/clerk_fzf.conf
 
 albums () {
   script="$0 --albums"
