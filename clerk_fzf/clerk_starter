@@ -8,7 +8,7 @@ fi
 
 tmux has-session -t music
 if [ $? != 0 ]; then
-  tmux -f $HOME/.config/clerk/tmux.conf new-session -s music -n albums -d
+  tmux -f /etc/clerk/tmux.conf new-session -s music -n albums -d
   tmux send-keys -t music 'clerk_fzf --albums' C-m
   tmux new-window -t music -n tracks
   tmux send-keys -t music 'clerk_fzf --tracks' C-m
