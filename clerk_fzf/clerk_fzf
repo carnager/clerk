@@ -17,10 +17,14 @@ album_width="200"
 pl_title_width="110"
 
 # read global config
-source /etc/clerk_fzf.conf
+if [[ -f "/etc/clerk_fzf.conf" ]]; then
+  source /etc/clerk_fzf.conf
+fi
 
 # read user config
-source $HOME/.config/clerk/clerk_fzf.conf
+if [[ -f "$HOME/.config/clerk/clerk_fzf.conf" ]]; then
+  source $HOME/.config/clerk/clerk_fzf.conf
+fi
 
 if [[ -n $mpd_host ]]; then
   ┆ if [[ -n $mpd_password ]]; then
