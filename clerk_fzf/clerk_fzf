@@ -21,6 +21,11 @@ if [[ -f "/etc/clerk_fzf.conf" ]]; then
   source /etc/clerk_fzf.conf
 fi
 
+# create config dir, if needed
+if [[ ! -d $HOME/.config/clerk ]]; then
+  mkdir $HOME/.config/clerk
+fi
+
 # read user config
 if [[ -f "$HOME/.config/clerk/clerk_fzf.conf" ]]; then
   source $HOME/.config/clerk/clerk_fzf.conf
