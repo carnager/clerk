@@ -34,6 +34,7 @@ bind-key -n F12 run-shell 'clerk_update'
 bind-key -n F9 run-shell 'clerk_fzf --random_album'
 bind-key -n F10 run-shell 'clerk_fzf --random_tracks'
 bind-key -n C-h run-shell 'clerk_help'
+bind-key -n C-Escape kill-session -t music
 
 
 # tmux options
@@ -51,4 +52,3 @@ set -g prefix C-a
 bind-key -t vi-copy v begin-selection
 unbind C-p
 bind C-p paste-buffer
-
