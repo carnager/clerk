@@ -2,6 +2,9 @@
 
 TMUX_TMPDIR="/tmp/clerk/tmux"
 
+# default tmux config
+tmux_config="/etc/clerk/tmux.conf"
+
 # set default settings
 script="$0 $1"
 random_artist="albumartist"
