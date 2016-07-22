@@ -1617,18 +1617,12 @@ TRACK_TEMP="$(_rofi \
             exitAfterAdd
 
         elif [[ $val -eq 0 ]]; then
-            if [[ "$TRACK" == "< Return" ]]; then
-                browseLibPrompt
-            elif [[ "$TRACK" == "---" ]]; then
-                addTrackTags
-            else
-                filename=$(echo "$TRACK" | gawk -F '\t' '{print $NF}')
-                echo "$filename" | uniq | while read line; do
-                    mpc add "${line}"
-                done
-                entry="$firstline"
-                exitAfterAdd
-            fi
+            filename=$(echo "$TRACK" | gawk -F '\t' '{print $NF}')
+            echo "$filename" | uniq | while read line; do
+                mpc add "${line}"
+            done
+            entry="$firstline"
+            exitAfterAdd
 
         elif [[ $val -eq 13 ]]; then
             title=$(echo "$TRACK" | gawk -F '\t' '{print $2}' | head -1)
