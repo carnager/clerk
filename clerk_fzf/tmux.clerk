@@ -1,75 +1,3 @@
-###########################
-#  Configuration
-###########################
-# set titles
-set -g set-titles on
-set -g set-titles-string '#T'
-
-# use 256 term for pretty colors
-set -g default-terminal "screen-256color"
-
-# increase scroll-back history
-set -g history-limit 5000
-
-# use vim key bindings
-setw -g mode-keys vi
-
-# disable mouse
-#setw -g mode-mouse off
-
-# decrease command delay (increases vim responsiveness)
-set -sg escape-time 1
-
-# increase repeat time for repeatable commands
-set -g repeat-time 1000
-
-# start window index at 1
-set -g base-index 1
-
-# start pane index at 1
-setw -g pane-base-index 1
-
-# highlight window when it has new activity
-#setw -g monitor-activity on
-#set -g visual-activity on
-
-# re-number windows when one is closed
-set -g renumber-windows on
-
-###########################
-#  Key Bindings
-###########################
-
-# tmux prefix
-unbind C-b
-set -g prefix C-a
-
-# create 'v' alias for selecting text
-bind-key -t vi-copy v begin-selection
-
-# paste
-unbind C-p
-bind C-p paste-buffer
-
-# window splitting
-unbind %
-bind | split-window -h
-unbind '"'
-bind - split-window -v
-
-# resize panes
-bind -r H resize-pane -L 5
-bind -r J resize-pane -D 5
-bind -r K resize-pane -U 5
-bind -r L resize-pane -R 5
-
-# quickly switch panes
-unbind ^J
-bind ^J select-pane -t :.+
-
-# force a reload of the config file
-## Clerk tmux configuration
-
 # Status bar
 set-option -g status-position top
 set -g status-interval 30
@@ -106,3 +34,21 @@ bind-key -n F12 run-shell 'clerk_update'
 bind-key -n F9 run-shell 'clerk_fzf --random_album'
 bind-key -n F10 run-shell 'clerk_fzf --random_tracks'
 bind-key -n C-h run-shell 'clerk_help'
+
+
+# tmux options
+set -g set-titles on
+set -g set-titles-string '#T'
+set -g default-terminal "screen-256color"
+setw -g mode-keys vi
+set -sg escape-time 1
+set -g repeat-time 1000
+set -g base-index 1
+setw -g pane-base-index 1
+set -g renumber-windows on
+unbind C-b
+set -g prefix C-a
+bind-key -t vi-copy v begin-selection
+unbind C-p
+bind C-p paste-buffer
+
