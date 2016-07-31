@@ -12,4 +12,4 @@ fi
 
 grep -A14 '^## Key Bindings' "${tmux_config}" | awk -F '-n ' '{ print $2 }' | \
   sed 's/clerk_fzf --//g; s/run-shell//g; s/findw//g; s/\x27//g; s/--quiet//g; s/mpc //g; s/clerk_update --create-caches/create caches/; s/_/ /g; s/kill-session -t music/ kill session/g; s/  /\t/g' | \
-  sed 's/clerk_update/update views/' | column -t -s $'\t'
+  sed 's/clerk update/update views/' | column -t -s $'\t'
