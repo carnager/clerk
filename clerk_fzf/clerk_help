@@ -1,26 +1,15 @@
 #!/bin/bash
 
-echo "Clerk Hotkeys"
-echo "-------------"
-echo " "
-echo "F1:        show album list"
-echo "F2:        show track list"
-echo "F3:        show latest list"
-echo "F4:        show queue"
-echo "F5:        previous track"
-echo "F6:        toggle playback"
-echo "F7:        stop playback"
-echo "F8:        next track"
-echo "F9:        play random album"
-echo "F10:       play random tracks"
-echo "F12:       reload caches"
-echo "Ctrl+F12 : re-create caches"
-echo "Ctrl+h:    this help"
-echo "Ctrl+q:    Quit"
-echo " "
-echo " "
-echo "Hotkeys for lists"
-echo "-----------------"
-echo " "
-echo "Tab:       mark selection"
-echo "Return:    show menu for selection"
+# read global config
+if [[ -f "/etc/clerk_fzf.conf" ]]; then
+  source /etc/clerk_fzf.conf
+fi
+
+# read user config
+if [[ -f "$HOME/.config/clerk/clerk_fzf.conf" ]]; then
+  source $HOME/.config/clerk/clerk_fzf.conf
+fi
+
+grep -A14 '^## Key Bindings' "${tmux_config}" | awk -F '-n ' '{ print $2 }' | \
+  sed 's/clerk_fzf --//g; s/run-shell//g; s/findw//g; s/\x27//g; s/--quiet//g; s/mpc //g; s/clerk_update --create-caches/create caches/; s/_/ /g; s/kill-session -t music/ kill session/g; s/  /\t/g' | \
+  sed 's/clerk_update/update views/'

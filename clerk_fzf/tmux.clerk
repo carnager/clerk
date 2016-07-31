@@ -19,7 +19,7 @@ setw -g window-status-attr bright
 setw -g window-status-format ' #[fg=colour243,bold]#W '
 setw -g window-status-current-format ' #[fg=yellow,bold]#[bg=colour235]#W '
 
-
+# !Dont remove this keybinding header! (used to generate help)
 ## Key Bindings
 bind-key -n F1 findw albums
 bind-key -n F2 findw tracks
