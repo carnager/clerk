@@ -25,9 +25,6 @@ if [[ -n $mpd_host ]]; then
   else
     export MPD_HOST="${mpd_host}"
   fi
-else
-  if [[ -n $MPD_HOST ]]; then
-    export
 fi
  
 if [[ -n $mpd_port ]]; then
