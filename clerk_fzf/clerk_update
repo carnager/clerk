@@ -2,6 +2,17 @@
 
 TMUX_TMPDIR="/tmp/clerk/tmux"
 
+# read global config
+if [[ -f "/etc/clerk_fzf.conf" ]]; then
+  source /etc/clerk_fzf.conf
+fi
+
+# read user config
+if [[ -f "$HOME/.config/clerk/clerk_fzf.conf" ]]; then
+  source $HOME/.config/clerk/clerk_fzf.conf
+fi
+
+
 screen=$(tmux list-panes -F "#W")
 
 if [[ $1 == "--create-caches" ]]; then
