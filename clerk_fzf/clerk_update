@@ -5,7 +5,11 @@ TMUX_TMPDIR="/tmp/clerk/tmux"
 screen=$(tmux list-panes -F "#W")
 
 if [[ $1 == "--create-caches" ]]; then
-  tmux new-session -s notify -n 'Updating Cache Files. Please wait a moment' -d 'sl'
+  if [[ $animation == "1" ]]; then
+    tmux new-session -s notify -n 'Updating Cache Files. Please wait a moment' -d 'sl'
+  else
+    tmux new-session -s notify -n 'Updating Cache Files. Please wait a moment' -d 'sh'
+  fi
   tmux switchc -t notify
   clerk_fzf --update &
   pid=$!
