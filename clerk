@@ -486,7 +486,7 @@ backupPrompt () {
           "3 Restore Ratings from File")
 
     prompt() {
-        printf "%s\n" "$@" | _rofi -p "Backup/Restore > "
+        printf "%s\n" "$@" | _rofi -dmenu -p "Backup/Restore > "
     }
 
     case "$(prompt "${menu[@]}")" in
@@ -1380,7 +1380,6 @@ ${line2}</span>"
             -kb-custom-16 ${prevalbum} \
             -dmenu -filter "$filter" \
             -select "$album_entry" \
-            -mesg "${HELP}" \
             -format "f¬s" \
             -input "$HOME/.config/clerk/${album_list}" \
             -p "Choose Album > ")"
