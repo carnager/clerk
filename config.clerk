@@ -1,6 +1,6 @@
 # rofi command. Make sure to have "$@" as last argument
 _rofi () {
-    rofi -regex -i -lines 30 -width 1500 -no-levenshtein-sort "$@"
+    rofi -i -regex -lines 30 -width 1500 -no-levenshtein-sort "$@"
 }
 
 # custom mpd host
@@ -31,6 +31,9 @@ ssh_host=
 # color of the help messages
 # leave empty for autodetection
 help_color=""
+
+# automatically save json file with track ratings
+auto_track_rating_backup=true
 
 # custom keybindings
 # global

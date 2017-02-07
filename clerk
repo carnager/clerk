@@ -1209,6 +1209,9 @@ rateTrack () {
             clerk_helper ratetrack "${rateartist}" "${ratealbum}" "${ratetrack}" "${ratetitle}" "${rating}"
             notify-send "clerk" "rated ${rateartist} - ${ratetitle} with $(echo ${rating})"
         fi
+        if [[ $auto_track_rating_backup == "true" ]]; then
+          clerk_helper importtrackratings
+        fi
     fi
 }
 
