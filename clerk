@@ -1210,6 +1210,7 @@ rateTrack () {
             notify-send "clerk" "rated ${rateartist} - ${ratetitle} with $(echo ${rating})"
         fi
         if [[ $auto_track_rating_backup == "true" ]]; then
+          rm -f $HOME/.config/clerk/trackratings.json
           clerk_helper importtrackratings
         fi
     fi
