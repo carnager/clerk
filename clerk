@@ -1210,10 +1210,19 @@ rateTrack () {
             notify-send "clerk" "rated ${rateartist} - ${ratetitle} with $(echo ${rating})"
         fi
         if [[ $auto_track_rating_backup == "true" ]]; then
-          rm -f $HOME/.config/clerk/trackratings.json
-          clerk_helper importtrackratings
+          if [[ -f $HOME/.config/clerk/.last_trackratings_backup ]]; then
+            read -r lastbackup<$HOME/.config/clerk/.last_trackratings_backup
+          else
+            lastbackup=$(date "+%s")
+          fi
+          if [[ $(date "+%s") -gt $(( $lastbackup + 3600)) ]]; then
+            rm -f $HOME/.config/clerk/trackratings.json
+            clerk_helper importtrackratings
+            rm -f $HOME/.config/clerk/.last_trackratings_backup
+          fi
+          date "+%s" > $HOME/.config/clerk/.last_trackratings_backup
         fi
-    fi
+      fi
 }
 
 # function to instantly rate a track without a submenu. rating is defined on
