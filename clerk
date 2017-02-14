@@ -1235,6 +1235,19 @@ instantRateTrack () {
      export rating=$1
      clerk_helper ratetrack "${rateartist}" "${ratealbum}" "${ratetrack}" "${ratetitle}" "${rating}"
      notify-send "clerk" "rated ${rateartist} - ${ratetitle} with $(echo ${rating})"
+     if [[ $auto_track_rating_backup == "true" ]]; then
+       if [[ -f $HOME/.config/clerk/.last_trackratings_backup ]]; then
+         read -r lastbackup<$HOME/.config/clerk/.last_trackratings_backup
+       else
+         lastbackup=$(date "+%s")
+       fi
+       if [[ $(date "+%s") -gt $(( $lastbackup + 3600)) ]]; then
+         rm -f $HOME/.config/clerk/trackratings.json
+         clerk_helper importtrackratings
+         rm -f $HOME/.config/clerk/.last_trackratings_backup
+       fi
+       date "+%s" > $HOME/.config/clerk/.last_trackratings_backup
+     fi
 }
 
 # load rated albums with minimum rating of xx
