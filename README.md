@@ -3,8 +3,7 @@
 MPD client using bash and rofi
 
 # Screenshot (V3)
-![Screenshot]
-(images/clerk_multi_keys.jpg)
+![Screenshot](images/clerk_multi_keys.jpg)
 
 # Features:
 
