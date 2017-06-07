@@ -228,7 +228,8 @@ dplayPrompt () {
         song=$(mpc current)
     fi
     menu=$(echo -e "< Exit\n---\n1 [ Browse Library ]>\n2 [ Current Artist ]>\n3 [ Current Queue ]>\n---\n4 [ Options ]>\n5 [ Ratings ]>\n6 [ Help ]" \
-       | _rofi \
+       | _rofi -kb-move-word-forward '' \
+       -kb-row-tab '' \
        -dmenu \
        -lines 17 \
        -mesg "<span color='$help_color'>Currently Playing: ${song}</span>" \
@@ -331,7 +332,7 @@ Move Down:        "$movedown"\n \
 Move Up:          "$moveup"\n \
 Go to Album:      "$goalbum"\n \
 Go to Track:      "$gotrack"\n \
-Load/Save:        "$playlist"" | _rofi -dmenu -p "Hotkeys > ")
+Load/Save:        "$playlist"" | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p "Hotkeys > ")
 
     val=$?
 
@@ -350,7 +351,7 @@ Load/Save:        "$playlist"" | _rofi -dmenu -p "Hotkeys > ")
 
 seekMenu () {
     seekval="$((echo -e "< Return\n---\n$(for i in $(seq 0 10 100); do echo "${i}%"; done)") \
-        | _rofi -dmenu \
+        | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu \
         -p "Seek > ")"
 
     if [[ $seekval == *"%" ]]; then
@@ -417,7 +418,8 @@ currentMenu () {
     fi
 
     menu=$(echo -e "< Return\n---\n1 [ Browse Albums ]>\n2 [ Browse Tracks ]>" \
-        | _rofi \
+        | _rofi -kb-move-word-forward '' \
+        -kb-row-tab '' \
         -dmenu \
         -p "Browse for $(mpc current -f '%artist%')")
 
@@ -459,7 +461,7 @@ ratingPrompt () {
           "0 Backup/Restore")
 
     prompt() {
-        printf "%s\n" "$@" | _rofi -dmenu -p "Ratings > "
+        printf "%s\n" "$@" | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p "Ratings > "
     }
 
     case "$(prompt "${menu[@]}")" in
@@ -486,7 +488,7 @@ backupPrompt () {
           "3 Restore Ratings from File")
 
     prompt() {
-        printf "%s\n" "$@" | _rofi -dmenu -p "Backup/Restore > "
+        printf "%s\n" "$@" | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p "Backup/Restore > "
     }
 
     case "$(prompt "${menu[@]}")" in
@@ -517,7 +519,7 @@ infoPrompt () {
           "4 Current Track Tags")
 
     prompt() {
-        printf "%s\n" "$@" | _rofi -dmenu -p "MPD Menu > "
+        printf "%s\n" "$@" | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p "MPD Menu > "
     }
 
     case "$(prompt "${menu[@]}")" in
@@ -544,7 +546,7 @@ currentTag () {
         elif [[ "$line" == "" ]]; then
             return
         fi
-    done < <(echo -e "0  Return to Main Menu\n---\nShow all Tags\n---\n$(mpc current --format "Artist: %artist%\nAlbum: %album%\nDate: %date%\nTrack: %track%\nTitle: %title%")" | _rofi -dmenu -p 'Current Song > ')
+    done < <(echo -e "0  Return to Main Menu\n---\nShow all Tags\n---\n$(mpc current --format "Artist: %artist%\nAlbum: %album%\nDate: %date%\nTrack: %track%\nTitle: %title%")" | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p 'Current Song > ')
 
     if [[  $seen = 0 ]]
     then
@@ -565,7 +567,7 @@ readComments () {
         elif [[ "$line" == "" ]]; then
             return
         fi
-    done < <(echo -e "0  Return to Main Menu\n---\nShow Tags\n---\n$(mpc current --format '%file%' | clerk_helper readcomments)" | _rofi -dmenu -p 'Current Song > ')
+    done < <(echo -e "0  Return to Main Menu\n---\nShow Tags\n---\n$(mpc current --format '%file%' | clerk_helper readcomments)" | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p 'Current Song > ')
 
     if [[  $seen = 0 ]]
     then
@@ -630,7 +632,7 @@ dplayOptionsPrompt () {
           "0 Number of Random Songs: $(echo $value)")
 
      prompt() {
-         printf "%s\n" "$@" | _rofi -dmenu -auto-select -p "MPD Options > "
+         printf "%s\n" "$@" | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -auto-select -p "MPD Options > "
      }
 
      case "$(prompt "${menu[@]}")" in
@@ -662,14 +664,14 @@ mpdSima () {
 
 # function to change number of random songs in config file
 optionRandomPrompt() {
-    number="$(echo -e " " | _rofi -dmenu -p 'Set No. of random Songs > ')"
+    number="$(echo -e " " | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p 'Set No. of random Songs > ')"
     $sed -i "s/value=.*/value="$number"/" $HOME/.config/clerk/config
     export value="$number"
     dplayOptionsPrompt
 }
 
 crossfadePrompt () {
-    menu=$(echo -e "< Return\n---\n0\n1\n2\n3\n4\n5" | _rofi -dmenu -p "Crossfade")
+    menu=$(echo -e "< Return\n---\n0\n1\n2\n3\n4\n5" | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p "Crossfade")
 
     if [[ $menu == "< Return" ]]; then
         dplayOptionsPrompt
@@ -682,7 +684,7 @@ crossfadePrompt () {
 # read list of available podcasts. Not using mpd playlists, because mpd does
 # not support custom names for urls. format of podcast in file is "Name \ URL"
 loadRSS () {
-    podcast=$(echo -e "< Return\n---\n$(cat $HOME/.config/clerk/podcasts | cut -d '\' -f1)" | _rofi -dmenu -p "Choose Podcast > ")
+    podcast=$(echo -e "< Return\n---\n$(cat $HOME/.config/clerk/podcasts | cut -d '\' -f1)" | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p "Choose Podcast > ")
     val=$?
 
     if [[ $val -eq 1 ]]; then
@@ -693,7 +695,7 @@ loadRSS () {
     else
         mpc clear
         mpc load $(grep "$podcast" $HOME/.config/clerk/podcasts | cut -d '\' -f2)
-        episode=$(mpc playlist --format "%position% — %artist% — %title%" | _rofi -dmenu -p "Choose Episode > ")
+        episode=$(mpc playlist --format "%position% — %artist% — %title%" | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p "Choose Episode > ")
         POS=$(echo "$episode" | gawk -F " — " '{ print $1 }')
         mpc play "$POS"
     fi
@@ -792,7 +794,8 @@ songs () {
     fi
 
     TRACKDISPLAY=$(echo -e "< Return\n---\n$(songs)" \
-        | _rofi \
+        | _rofi -kb-move-word-forward '' \
+        -kb-row-tab '' \
         -dmenu \
         -kb-custom-1 "${delete}" \
         -kb-custom-2 "${rate}" \
@@ -893,7 +896,7 @@ songs () {
             if [[ $(echo "$TRACKDISPLAY_NEW" | wc -l) -gt 1 ]]; then
                 :
 #                unset last
-#                posSelect=$(echo "$(songs)" | _rofi -dmenu -mesg "Move after >")
+#                posSelect=$(echo "$(songs)" | _rofi -kb-move-word-forward '' -dmenu -mesg "Move after >")
 #                if [[ $posSelect == "" ]]; then
 #                    exit;
 #                else
@@ -918,7 +921,7 @@ songs () {
             if [[ $(echo "$TRACKDISPLAY_NEW" | wc -l) -gt 1 ]]; then
                 :
 #                unset last
-#                posSelect=$(echo "$(songs)" | _rofi -dmenu -mesg "Move after >")
+#                posSelect=$(echo "$(songs)" | _rofi -kb-move-word-forward '' -dmenu -mesg "Move after >")
 #                if [[ $posSelect == "" ]]; then
 #                    exit;
 #                else
@@ -1010,7 +1013,7 @@ songs () {
 }
 
 plMenu () {
-    plmenu=$(echo -e "< Return\n---\n1 [ Load Playlist ]\n2 [ Save Playlist ]" | _rofi -dmenu -auto-select -dmenu -p "Load/Save Playlist > ")
+    plmenu=$(echo -e "< Return\n---\n1 [ Load Playlist ]\n2 [ Save Playlist ]" | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -auto-select -dmenu -p "Load/Save Playlist > ")
         if [[ $plmenu == "1"* ]]; then
             dplayQueueLoad
         elif [[ $plmenu == "2"* ]]; then
@@ -1085,7 +1088,7 @@ IFS='
 
 # show all mpd playlists and load them to queue
 dplayQueueLoad () {
-    _playlist=$(echo -e "< Return\n---\n$(mpc lsplaylists | sort)" | _rofi -dmenu -p "Load Playlist > ")
+    _playlist=$(echo -e "< Return\n---\n$(mpc lsplaylists | sort)" | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p "Load Playlist > ")
     val=$?
     if [[ $val -eq 1 ]]; then
         exit
@@ -1109,7 +1112,7 @@ dplayQueueSave () {
         if [[ "$playlists" == "< Return" ]]; then
             dplayQueue
         elif [[ "$playlists" == "Save new Playlist" ]]; then
-            playlist=$(echo "" | _rofi -dmenu -p "Type Name for Playlist > ")
+            playlist=$(echo "" | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p "Type Name for Playlist > ")
             if [[ "$playlist" == "" ]]; then
                 dplayQueueSave
             else
@@ -1117,12 +1120,12 @@ dplayQueueSave () {
                 dplayQueue
             fi
         else
-            playlist=$(echo -e "0  Return to Playlist Menu\n---\nYes\nNo" | _rofi -dmenu -p "Overwrite Playlist? > ")
+            playlist=$(echo -e "0  Return to Playlist Menu\n---\nYes\nNo" | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p "Overwrite Playlist? > ")
             if [[ "$playlist" == "Yes" ]]; then
                 mpc rm "$playlists"
                 mpc save "$playlists"
             elif [[ "$playlist" == "No" ]]; then
-                playlist=$(echo "" | _rofi -dmenu -p "Type Name for Playlist > ")
+                playlist=$(echo "" | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p "Type Name for Playlist > ")
                 if [[ "$playlist" == "" ]]; then
                     dplayQueue
                 else
@@ -1131,14 +1134,14 @@ dplayQueueSave () {
                 fi
             fi
         fi
-    done < <(echo -e "< Return\n---\nSave new Playlist\n---\n$(mpc lsplaylists)" | _rofi -dmenu -p "Choose Playlist > ")
+    done < <(echo -e "< Return\n---\nSave new Playlist\n---\n$(mpc lsplaylists)" | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p "Choose Playlist > ")
     exit
 }
 
 # enable/disable outputs
 outputPrompt () {
     menu="$(echo -e "0  Return to Options Menu\n---\n$(mpc outputs)" \
-        | _rofi -dmenu -p "Outputs > ")";
+        | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p "Outputs > ")";
 
     if [[ "$menu" == "0  Return to Options Menu" ]]
         then dplayOptionsPrompt;
@@ -1157,7 +1160,7 @@ outputPrompt () {
 
 # rate any album
 rateAlbum () {
-    rating="$(seq 10 | _rofi -dmenu -p "Select Album Rating: > ")"
+    rating="$(seq 10 | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p "Select Album Rating: > ")"
 
     if [[ $rating == "" ]]; then
         exit
@@ -1189,7 +1192,7 @@ rateAlbum () {
 }
 
 rateTrack () {
-    rating="$(echo -e "< Return\n---\n$(seq 10)" | _rofi -dmenu -p "Select Track Rating: > ")"
+    rating="$(echo -e "< Return\n---\n$(seq 10)" | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p "Select Track Rating: > ")"
 
     if [[ $rating == "" ]]; then
         exit
@@ -1252,7 +1255,7 @@ instantRateTrack () {
 
 # load rated albums with minimum rating of xx
 loadRatedAlbums () {
-    rating="$(seq 10 | _rofi -dmenu -p "Minimum Rating > ")"
+    rating="$(seq 10 | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p "Minimum Rating > ")"
 
     if [[ $rating == "" ]]; then
         exit
@@ -1264,7 +1267,7 @@ loadRatedAlbums () {
             | $sed 's/\/\CD.*//g' \
             | sort \
             | uniq \
-            | _rofi -dmenu -p "Choose Album > ")"
+            | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p "Choose Album > ")"
 
         if [[ $albums == "" ]]; then
             exit
@@ -1279,7 +1282,7 @@ loadRatedAlbums () {
 
 
 loadRatedTracks () {
-    rating="$(seq 10 | _rofi -dmenu -p "Rating > ")"
+    rating="$(seq 10 | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p "Rating > ")"
     if [ rating = "" ]; then
         exit
     else
@@ -1292,8 +1295,8 @@ loadRatedTracks () {
 }
 
 loadRandomRatedTracks () {
-    number="$(echo " " | _rofi -dmenu -p "Number of Songs > " | xargs echo)"
-    rating="$(seq 10 | _rofi -dmenu -p "Minimum Rating > ")"
+    number="$(echo " " | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p "Number of Songs > " | xargs echo)"
+    rating="$(seq 10 | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p "Minimum Rating > ")"
     if [ rating = "" ]; then
         exit
     else
@@ -1313,7 +1316,7 @@ loadRandomRatedTracks () {
 }
 
 loadRandomRating () {
-    rating="$(seq 10 | _rofi -dmenu -p "Minimum Rating > ")"
+    rating="$(seq 10 | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p "Minimum Rating > ")"
     if [ rating = "" ]; then
             exit
     else
@@ -1383,7 +1386,8 @@ ${line2}</span>"
             album_list="albums.cache"
         fi
 
-        ALBUM_TEMP="$(_rofi \
+        ALBUM_TEMP="$(_rofi -kb-move-word-forward '' \
+            -kb-row-tab '' \
             -dmenu \
             -sep '\n' \
             -kb-custom-1 "${add}" \
@@ -1576,7 +1580,8 @@ HELP="<span color='$help_color'>${line1}
 ${line2}</span>"
 
 
-TRACK_TEMP="$(_rofi \
+TRACK_TEMP="$(_rofi -kb-move-word-forward '' \
+    -kb-row-tab '' \
     -dmenu \
     -kb-custom-1 "${add}" \
     -kb-custom-2 "${insert}" \
@@ -1729,7 +1734,8 @@ TRACK_TEMP="$(_rofi \
 
 browseLibPrompt() {
     menu="$((echo -e "< Return\n---\n1 [ Choose Albums ]>\n2 [ Choose Track ]>\n3 [ Browse Latest Additions ]>\n---\n4 [ Play Random Album ]\n5 [ Play Random Tracks ]\n---\n6 [ Update Album/Track Cache ]") \
-        | _rofi \
+        | _rofi -kb-move-word-forward '' \
+        -kb-row-tab '' \
         -dmenu \
         -auto-select \
         -kb-custom-1 ${albumlist} \
@@ -1773,7 +1779,7 @@ saveAlbumToPlaylist() {
     if [[ $1 == "selection" ]]; then
         TRACK="${TRACK}"
     else
-        TRACK="$((echo -e "< Return\n---"; cat $HOME/.config/clerk/albums.cache) | _rofi -dmenu -p "Save Album to Playlist > ")"
+        TRACK="$((echo -e "< Return\n---"; cat $HOME/.config/clerk/albums.cache) | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p "Save Album to Playlist > ")"
     fi
 
     val=$?
@@ -1829,7 +1835,7 @@ saveLatestToPlaylist() {
 
             mpc search date "$date" album "$album" albumartist "$artist" | clerk_helper saveto
         fi
-    done < <(echo -e "0  Return to Main Menu\n---\n$(cat $HOME/.config/clerk/latest.cache)" | _rofi -dmenu -p "Save Album to Playlist > ")
+    done < <(echo -e "0  Return to Main Menu\n---\n$(cat $HOME/.config/clerk/latest.cache)" | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p "Save Album to Playlist > ")
 
     if [[  $seen = 0 ]]
     then
@@ -1838,7 +1844,7 @@ saveLatestToPlaylist() {
 }
 
 saveTrackToPlaylist() {
-    TRACK_TEMP="$((echo -e "0  Return to Main Menu\n---"; cat $HOME/.config/clerk/tracks.cache) | _rofi -dmenu -filter "$filter" -select "$entry" -format "f¬s" -dmenu -p "Save Track to Playlist > ")"
+    TRACK_TEMP="$((echo -e "0  Return to Main Menu\n---"; cat $HOME/.config/clerk/tracks.cache) | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -filter "$filter" -select "$entry" -format "f¬s" -dmenu -p "Save Track to Playlist > ")"
 
     TRACK="${TRACK_TEMP#*¬}"
     unset filter
@@ -1874,7 +1880,7 @@ getAlbumsFromPlaylist () {
     pl="clerk"
     mpc clear
     mpc load "${pl}"
-    list=$(mpc playlist -f '%artist% - %album% - %date%' | sort -u | _rofi -dmenu -mesg "${add}: Add, ${insert}: Insert, ${replace}: Replace")
+    list=$(mpc playlist -f '%artist% - %album% - %date%' | sort -u | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -mesg "${add}: Add, ${insert}: Insert, ${replace}: Replace")
 
     val=$?
 
