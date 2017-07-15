@@ -19,7 +19,7 @@ while (my $line = <>) {
 for my $line (@lines) {
 	my @parts = split(/\t/, $line);
 	my $counter = 0;
-	for (; $counter < @parts; $counter++) {
+	for (; $counter < @parts - 1; $counter++) {
 	  $parts[$counter] =~ s/\s+$//;
 		my $partlen = $width{$counter};
 		printf "%-*s\t", $partlen, $parts[$counter];
