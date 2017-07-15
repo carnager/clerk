@@ -51,7 +51,7 @@ albums () {
   tracklist="$(cat ~/.config/clerk/albums.cache | fzf --no-sort -m -e --reverse -i --with-nth=1,2,3 -d '\t' --tabstop=4 +s --ansi --bind "ctrl-a:select-all,ctrl-n:deselect-all")"
   val=$?
   if [[ $val -eq 130 ]]; then
-    exit
+    albums
   fi
   track="$(echo "${tracklist}" | gawk -F "\t" '{print $NF}')"
   actions
@@ -62,7 +62,7 @@ latest () {
   tracklist=$(cat ~/.config/clerk/latest.cache | fzf --no-sort -m -e --reverse -i --with-nth=1,2,3 -d '\t' --tabstop=4 +s --ansi --bind "ctrl-a:select-all,ctrl-n:deselect-all")
   val=$?
   if [[ $val -eq 130 ]]; then
-    exit
+    latest
   fi
   track="$(echo "${tracklist}" | gawk -F "\t" '{print $NF}')"
   actions
@@ -73,7 +73,7 @@ tracks () {
   tracklist=$(cat ~/.config/clerk/tracks.cache | fzf -m --reverse -i -e --with-nth=1,2,3,4,5 -d '\t' --tabstop=4 +s --ansi --bind "ctrl-a:select-all,ctrl-n:deselect-all")
   val=$?
   if [[ $val -eq 130 ]]; then
-    exit
+    tracks
   fi
   if [[ $tracklist == "< Go to Albumlist"* ]]; then
     latest
@@ -99,6 +99,8 @@ actions () {
     echo "${track}" | while read line; do
       mpc insert "${line}"
     done
+  elif [[ $action -eq 130 ]]; then
+    exit
   fi
   tmux findw -t music queue
   $(${script})
@@ -186,18 +188,18 @@ updateCache () {
         | sed 's:/[^/]*$::' | gawk -F ' ○ ' '!seen[$1 $2 $3 $4]++' \
         | uniq \
         | gawk -F ' ○ ' '{ printf "%."'${artist_width}'"s\t%."'${date_width}'"s\t%."'${album_width}'"s\t%.300s\n", $1, $2, $3, $4 }' \
-        | column -s $'\t' -t -o $'\t' > $HOME/.config/clerk/latest.cache
+        | clerk_column.pl > $HOME/.config/clerk/latest.cache
     mpc --format '[%albumartist%|%artist%]\t(%date%)\t%album% [(CD %disc%)]\t%file%' \
         search filename '' \
         | sed 's:/[^/]*$::' \
         | gawk -F '\t' '!seen[$1 $2 $3 $4]++' \
         | sort \
         | gawk -F '\t' '{ printf "%."'${artist_width}'"s\t%."'${date_width}'"s\t%."'${album_width}'"s\t%.300s\n", $1, $2, $3, $4 }' \
-        | column -t -s $'\t' -o $'\t' > $HOME/.config/clerk/albums.cache
+        | clerk_column.pl > $HOME/.config/clerk/albums.cache
     mpc --format '%track%\t%title%\t%artist%\t(%date%)\t%album%\t%file%' \
         search filename '' \
         | gawk -F '\t' '{ printf "%."'${track_width}'"s\t%."'${title_width}'"s\t%."'${artist_width}'"s\t%."'${date_width}'"s\t%."'${album_width}'"s\t%.500s\n", $1, $2, $3, $4, $5, $6 }' \
-        | column -s $'\t' -t -o $'\t' \
+        | clerk_column.pl \
         > $HOME/.config/clerk/tracks.cache
     date=$(mpc stats | grep 'DB Updated: ')
     file="$HOME/.config/clerk/.lastupdate"
