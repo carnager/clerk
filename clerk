@@ -178,18 +178,18 @@ updateCache () {
         | sed 's:/[^/]*$::' | awk -F ' ○ ' '!seen[$1 $2 $3 $4]++' \
         | uniq \
         | gawk -F ' ○ ' '{ printf "%."'${artist_width}'"s\t%."'${date_width}'"s\t%."'${album_width}'"s\t%.300s\n", $1, $2, $3, $4 }' \
-        | column -s $'\t' -t -o $'\t' > $HOME/.config/clerk/latest.cache
+        | clerk_column.pl > $HOME/.config/clerk/latest.cache
     mpc --format '[%albumartist%|%artist%]\t(%date%)\t%album% [(CD %disc%)]\t%file%' \
         search filename '' \
         | sed 's:/[^/]*$::' \
         | awk -F '\t' '!seen[$1 $2 $3 $4]++' \
         | sort \
         | gawk -F '\t' '{ printf "%."'${artist_width}'"s\t%."'${date_width}'"s\t%."'${album_width}'"s\t%.300s\n", $1, $2, $3, $4 }' \
-        | column -t -s $'\t' -o $'\t' > $HOME/.config/clerk/albums.cache
+        | clerk_column.pl > $HOME/.config/clerk/albums.cache
     mpc --format '%track%\t%title%\t%artist%\t(%date%)\t%album%\t%file%' \
         search filename '' \
         | gawk -F '\t' '{ printf "%."'${track_width}'"s\t%."'${title_width}'"s\t%."'${artist_width}'"s\t%."'${date_width}'"s\t%."'${album_width}'"s\t%.500s\n", $1, $2, $3, $4, $5, $6 }' \
-        | column -s $'\t' -t -o $'\t' \
+        | clerk_column.pl \
         > $HOME/.config/clerk/tracks.cache
     notify-send "clerk" "finished updating cache files"
     date=$(mpc stats | grep 'DB Updated: ')
@@ -1390,6 +1390,7 @@ ${line2}</span>"
             -kb-row-tab '' \
             -dmenu \
             -sep '\n' \
+            -matching regex \
             -kb-custom-1 "${add}" \
             -kb-custom-2 "${insert}" \
             -kb-custom-3 "${replace}" \

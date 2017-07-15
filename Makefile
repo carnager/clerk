@@ -4,6 +4,7 @@ endif
 
 install:
 	install -Dm755 clerk $(DESTDIR)$(PREFIX)/bin/clerk
+	install -Dm755 clerk_column.pl $(DESTDIR)$(PREFIX)/bin/clerk_column.pl
 	install -Dm755 clerk_helper $(DESTDIR)$(PREFIX)/bin/clerk_helper
 	install -Dm644 config.clerk $(DESTDIR)$(PREFIX)/share/doc/clerk/config.example
 	install -Dm644 config.clerk $(DESTDIR)/etc/clerk.conf
