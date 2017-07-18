@@ -1,0 +1,112 @@
+#compdef clerk
+
+local curcontext="$curcontext" state line ret=1
+typeset -A opt_args
+
+_arguments \
+  '1: :->option'\
+  '*: :->args' && ret=0
+
+case $state in
+  option)
+    _arguments -S \
+      "-h[output help message]" \
+      "--help[output help message]" \
+      "--current[show currently playing track in the clerk interface]" \
+      "--update[update album/track caches]" \
+      "--add[open clerk interface in different mode to add music to the current queue]" \
+      "--random[play random tracks or album from the cli]" \
+      "--queue[manage the current queue]" \
+      "--playlist[save selection to playlist/load playlist from the clerk interface]" \
+      "--rss[load poadcast]" \
+      "--rate[rate albums or track]" \
+      "--backup[backup ratings from mpd sticker database to json file]" \
+      "--restore[restore ratings back to mpd sticker database]" \
+      "--lastfm[last.fm operations]"
+    ret=0
+    ;;
+  args)
+    case $words[2] in
+      --add)
+        if (( CURRENT == 3 )); then
+          _values "add parameters" \
+            "track[browse music by track mode]" \
+            "album[browse music by album mode]" \
+            "latest[browse music by most recently added album mode]"
+        fi
+        ret=0
+        ;;
+      --random)
+        if (( CURRENT == 3 )); then
+          _values "random parameters" \
+            "track[some random tracks]" \
+            "album[one random album]"
+        fi
+        ret=0
+        ;;
+      --queue)
+        if (( CURRENT == 3 )); then
+          _values "queue parameters" \
+            "show[show the current queue in the clerk interface]" \
+            "suspend[freeze the current playlist and save it]" \
+            "resume[load the last suspended playlist]"
+        fi
+        ret=0
+        ;;
+      --playlist)
+        if (( CURRENT == 3 )); then
+          _values "playlist parameters" \
+            "savealbum[save album to the 'clerk' playlist]" \
+            "savetrack[save track to the 'clerk' playlist]" \
+            "savelast[save latest album to the 'clerk' playlist]" \
+            "load[choose a playlist to load]"
+        fi
+        ret=0
+        ;;
+      --rate)
+        if (( CURRENT == 3 )); then
+          _values 'rate parameters' \
+            'track[rate the current track from the clerk interface]' \
+            'album[rate the current album from the clerk interface]' \
+            'instant[rate the current track {1-10} from the cli]' \
+            'load[play random rated (6 and over) tracks]'
+          else
+            case $words[3] in
+              instant)
+                _values 'rate' '1' '2' '3' '4' '5' '6' '7' '8' '9' '10'
+                ret=0
+                ;;
+            esac
+          fi
+          ret=0
+          ;;
+      --backup)
+        if (( CURRENT == 3 )); then
+          _values "backup parameters" \
+            "album[backup album ratings]" \
+            "track[backup track ratings]"
+        fi
+        ret=0
+        ;;
+      --restore)
+        if (( CURRENT == 3 )); then
+          _values "restore parameters" \
+            "album[restore album ratings]" \
+            "track[restore track ratings]"
+        fi
+        ret=0
+        ;;
+      --lastfm)
+        if (( CURRENT == 3 )); then
+          _values "lastfm parameters" \
+            "toggle[toogle (on/off) last.fm]" \
+            "check[print last.fm status]" \
+            "love[love current playing track]"
+        fi
+        ret=0
+        ;;
+    esac
+    ;;
+esac
+
+return ret

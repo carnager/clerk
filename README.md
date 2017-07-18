@@ -51,6 +51,10 @@ For this to work, you need a recent rofi build from git.
 
 For arch linux there is a package in [AUR](https://aur.archlinux.org/packages/clerk-git/)
 
+A completion script is provided for the zsh shell. To use it, copy the
+`completion/_clerk` file of this repository somewhere in the `$fpath`
+environment variable of zsh.
+
 # FAQ
 1. It's not working properly  
   Make sure to have your files tagged properly. You need: `albumartist`, `artist`, `album`, `date`, `tracknumber`, `title` tags.
