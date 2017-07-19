@@ -90,7 +90,7 @@ def prune_fastlist(fastlist, mpdcachefile):
 
 def rateAlbum(args):
     try:
-        fastlist = load_fastlist(os.getenv('HOME')+'/.config/clerk/albumratings.json')
+        fastlist = load_fastlist(os.getenv('db_rate_album'))
         entry = get_entry(fastlist, args.artist, args.album, args.date)
         entry["rating"] = args.rating
     except KeyError:
@@ -101,7 +101,7 @@ def rateAlbum(args):
         entry = {'albumartist': args.artist, 'album': args.album, 'date': args.date, 'disc': os.getenv('disc'), 'track': os.getenv('track'), 'rating': args.rating}
         fastlist[0].append(entry)
     finally:
-        save_fastlist(os.getenv('HOME')+'/.config/clerk/albumratings.json', fastlist)
+        save_fastlist(os.getenv('db_rate_album'), fastlist)
         uri = client.find('albumartist', args.artist, 'album', args.album, 'date', args.date, 'track', os.getenv('track'), 'disc', os.getenv('disc'))
         for i in uri:
             client.sticker_set("song", i['file'], "albumrating", args.rating)
@@ -164,7 +164,7 @@ def rateTrack(args):
     sticker database
     """
     try:
-        fastlist = load_fastlistTrack(os.getenv('HOME')+'/.config/clerk/trackratings.json')
+        fastlist = load_fastlistTrack(os.getenv('db_rate_track'))
         entry = get_entryTrack(fastlist, args.artist, args.album, args.track, args.title)
         entry["rating"] = args.rating
     except KeyError:
@@ -175,7 +175,7 @@ def rateTrack(args):
         entry = {'artist': args.artist, 'album': args.album, 'track': args.track, 'title': args.title, 'rating': args.rating}
         fastlist[0].append(entry)
     finally:
-        save_fastlistTrack(os.getenv('HOME')+'/.config/clerk/trackratings.json', fastlist)
+        save_fastlistTrack(os.getenv('db_rate_track'), fastlist)
         uri = client.find('artist', args.artist, 'album', args.album, 'track', args.track, 'title', args.title)
         for i in uri:
             client.sticker_set("song", i['file'], "rating", args.rating)
@@ -183,12 +183,12 @@ def rateTrack(args):
 
 
 def cleanRatings(args):
-    fastlist = load_fastlist(os.getenv('HOME')+'/.config/clerk/albumratings.json')
-    prunedlist = prune_fastlist(fastlist, os.getenv('HOME')+'/.config/clerk/albums.cache.json')
-    save_fastlist(os.getenv('HOME')+'/.config/clerk/albumratings.json', prunedlist)
-    fastlist = load_fastlistTrack(os.getenv('HOME')+'/.config/clerk/trackratings.json')
-    prunedlist = prune_fastlistTrack(fastlist, os.getenv('HOME')+'/.config/clerk/tracks.cache.json')
-    save_fastlistTrack(os.getenv('HOME')+'/.config/clerk/trackratings.json', prunedlist)
+    fastlist = load_fastlist(os.getenv('db_rate_album'))
+    prunedlist = prune_fastlist(fastlist, os.getenv('cache_album')+'.json')
+    save_fastlist(os.getenv('db_rate_album'), prunedlist)
+    fastlist = load_fastlistTrack(os.getenv('db_rate_track'))
+    prunedlist = prune_fastlistTrack(fastlist, os.getenv('cache_track')+'.json')
+    save_fastlistTrack(os.getenv('db_rate_track'), prunedlist)
 
 
 def importTrackRatings(args):
@@ -207,7 +207,7 @@ def importTrackRatings(args):
                 track = x['track']
         entry = {'artist': artist, 'album': album, 'track': track, 'title': title, 'rating': rating}
         rated_tracks.append(entry)
-    with open(os.getenv('HOME')+'/.config/clerk/trackratings.json', 'w') as ratingfile:
+    with open(os.getenv('db_rate_track'), 'w') as ratingfile:
         json.dump(rated_tracks, ratingfile)
 
 def importAlbumRatings(args):
@@ -233,11 +233,11 @@ def importAlbumRatings(args):
                 disc = ""
         entry = {'albumartist': artist, 'track': track, 'album': album, 'date': date, 'disc': disc, 'rating': rating}
         rated_tracks.append(entry)
-    with open(os.getenv('HOME')+'/.config/clerk/albumratings.json', 'w') as ratingfile:
+    with open(os.getenv('db_rate_album'), 'w') as ratingfile:
         json.dump(rated_tracks, ratingfile)
 
 def sendStickers(args):
-    with open(os.getenv('HOME')+'/.config/clerk/trackratings.json') as cache_file:
+    with open(os.getenv('db_rate_track')) as cache_file:
         content = json.load(cache_file)
         for track in content:
             uri = client.find('artist', track['artist'], 'album', track['album'], 'title', track['title'], 'track', track['track'])
@@ -246,7 +246,7 @@ def sendStickers(args):
                 client.sticker_set('song', x['file'], 'rating', rating)
                 print("Imported Rating of "+rating+" for file "+x['file'])
 
-    with open(os.getenv('HOME')+'/.config/clerk/albumratings.json') as cache_file:
+    with open(os.getenv('db_rate_album')) as cache_file:
         content = json.load(cache_file)
         for album in content:
             uri = client.find('albumartist', album['albumartist'], 'album', album['album'], 'disc', album['disc'], 'date', album['date'], 'track', album['track'])

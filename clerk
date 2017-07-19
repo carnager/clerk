@@ -81,9 +81,39 @@ album_width="200"
 pl_title_width="60"
 pl_artist_width="40"
 
+# XDG base directory Specification
+xdg_config="${XDG_CONFIG_HOME:-$HOME/.config}"
+xdg_data="${XDG_DATA_HOME:-$HOME/.local/share}"
+
+# base clerk directories
+config_root="${xdg_config}/clerk"
+data_root="${xdg_data}/clerk"
+
+# clerk files
+config_rc="${config_root}/config"
+podcast_list="${config_root}/podcasts"
+cache_album="${data_root}/albums.cache"
+cache_track="${data_root}/tracks.cache"
+cache_latest="${data_root}/latest.cache"
+last_update="${data_root}/.lastupdate"
+suspend_state="${data_root}/suspend"
+last_track_rate_bak="${data_root}/.last_trackratings_backup"
+db_rate_track="${data_root}/trackratings.json"
+db_rate_album="${data_root}/albumratings.json"
+
+# set clerk_helper environment variable by making the herebelow variables
+# available to subprocceses (i.e. clerk_helper)
+export cache_album
+export cache_track
+export db_rate_album
+export db_rate_track
+
+# make sure the xdg user data directory for clerk exists
+mkdir -p "$data_root"
+
 # override settings from global config file, if present
-if [[ ! -f $HOME/.config/clerk/config ]] && [[ ! -f /etc/clerk ]]; then
-    echo "Error: could not find configuration file \"$HOME/.config/clerk/config\""
+if [[ ! -f $config_rc ]] && [[ ! -f /etc/clerk ]]; then
+    echo "Error: could not find configuration file \"$config_rc\""
     echo "You can use the provided example configuration file (config.clerk), copy it to the above location and edit it to your needs."
 	exit
 fi
@@ -93,8 +123,8 @@ if [[ -f /etc/clerk.conf ]]; then
 fi
 
 # override settings from local config, if present
-if [[ -f $HOME/.config/clerk/config ]]; then
-    source $HOME/.config/clerk/config
+if [[ -f $config_rc ]]; then
+    source $config_rc
 fi
 
 if [[ -n $mpd_host ]]; then
@@ -166,7 +196,7 @@ fix_date_format() {
 
 updateCache () {
     notify-send "clerk" "updating cache files"
-    cd $HOME/.config/clerk
+    cd $data_root
     rm -f *.cache
 
     mpc --format '%mtime%\t[%albumartist%|%artist%] ○ (%date%) ○ %album% [(CD %disc%)] ○ %file%' \
@@ -178,21 +208,21 @@ updateCache () {
         | sed 's:/[^/]*$::' | awk -F ' ○ ' '!seen[$1 $2 $3 $4]++' \
         | uniq \
         | gawk -F ' ○ ' '{ printf "%-"'${artist_width}'"."'${artist_width}'"s\t%-"'${date_width}'"."'${date_width}'"s\t%-"'${album_width}'"."'${album_width}'"s\t%.300s\n", $1, $2, $3, $4 }' \
-        > $HOME/.config/clerk/latest.cache
+        > $cache_latest
     mpc --format '[%albumartist%|%artist%]\t(%date%)\t%album% [(CD %disc%)]\t%file%' \
         search filename '' \
         | sed 's:/[^/]*$::' \
         | awk -F '\t' '!seen[$1 $2 $3 $4]++' \
         | sort \
         | gawk -F '\t' '{ printf "%-"'${artist_width}'"."'${artist_width}'"s\t%-"'${date_width}'"."'${date_width}'"s\t%-"'${album_width}'"."'${album_width}'"s\t%.300s\n", $1, $2, $3, $4 }' \
-        > $HOME/.config/clerk/albums.cache
+        > $cache_album
     mpc --format '%track%\t%title%\t%artist%\t(%date%)\t%album%\t%file%' \
         search filename '' \
         | gawk -F '\t' '{ printf "%-"'${track_width}'"."'${track_width}'"s\t%-"'${title_width}'"."'${title_width}'"s\t%-"'${artist_width}'"."'${artist_width}'"s\t%-"'${date_width}'"."'${date_width}'"s\t%-"'${album_width}'"."'${album_width}'"s\t%.500s\n", $1, $2, $3, $4, $5, $6 }' \
-        > $HOME/.config/clerk/tracks.cache
+        > $cache_track
     notify-send "clerk" "finished updating cache files"
     date=$(mpc stats | grep 'DB Updated: ')
-    file="$HOME/.config/clerk/.lastupdate"
+    file="$last_update"
     echo "${date}" > "${file}"
 #        | gawk -F '\t' '{ printf "%.2s\t%.40s\t%.40s\t%.200s\t%.500s\n", $1, $2, $3, $4, $5, $6 }' \
     if [[ $forceupdate == "true" ]]; then
@@ -203,7 +233,7 @@ if [[ $1 == "--update" ]]; then
     :
 else
     date=$(mpc stats | grep 'DB Updated: ')
-    file="$HOME/.config/clerk/.lastupdate"
+    file="$last_update"
     if [ "$(< $file)" = "$date" ] && [ -f "$file" ] ; then
         :
     else
@@ -664,7 +694,7 @@ mpdSima () {
 # function to change number of random songs in config file
 optionRandomPrompt() {
     number="$(echo -e " " | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p 'Set No. of random Songs > ')"
-    $sed -i "s/value=.*/value="$number"/" $HOME/.config/clerk/config
+    $sed -i "s/value=.*/value="$number"/" $config_rc
     export value="$number"
     dplayOptionsPrompt
 }
@@ -683,7 +713,7 @@ crossfadePrompt () {
 # read list of available podcasts. Not using mpd playlists, because mpd does
 # not support custom names for urls. format of podcast in file is "Name \ URL"
 loadRSS () {
-    podcast=$(echo -e "< Return\n---\n$(cat $HOME/.config/clerk/podcasts | cut -d '\' -f1)" | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p "Choose Podcast > ")
+    podcast=$(echo -e "< Return\n---\n$(cat $podcast_list | cut -d '\' -f1)" | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p "Choose Podcast > ")
     val=$?
 
     if [[ $val -eq 1 ]]; then
@@ -693,7 +723,7 @@ loadRSS () {
         dplayQueue
     else
         mpc clear
-        mpc load $(grep "$podcast" $HOME/.config/clerk/podcasts | cut -d '\' -f2)
+        mpc load $(grep "$podcast" $podcast_list | cut -d '\' -f2)
         episode=$(mpc playlist --format "%position% — %artist% — %title%" | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p "Choose Episode > ")
         POS=$(echo "$episode" | gawk -F " — " '{ print $1 }')
         mpc play "$POS"
@@ -701,7 +731,7 @@ loadRSS () {
 }
 
 # suspend current playlist. playlist, song id and play-position are saved to
-# $HOME/.config/clerk/suspend
+# $XDG_DATA_HOME:-$HOME/.local/share/clerk/suspend
 suspendPlaylist () {
     playing=$(! mpc status | grep 'playing\|paused')
     time=$(mpc status | $sed '2!d;s;/.:.*;;;s;.* ;;')
@@ -711,9 +741,9 @@ suspendPlaylist () {
     else
         mpc rm suspended
         mpc save suspended
-        rm -f $HOME/.config/clerk/suspend
-        echo "pos="$position"" >> $HOME/.config/clerk/suspend
-        echo "time="$time"" >> $HOME/.config/clerk/suspend
+        rm -f $suspend_state
+        echo "pos="$position"" >> $suspend_state
+        echo "time="$time"" >> $suspend_state
         if [[ "$stop_after_suspend" == yes ]]; then
             mpc stop
         else
@@ -728,11 +758,12 @@ suspendPlaylist () {
     fi
 }
 
-# read $HOME/.config/clerk/suspend and restore playlist. Then start playing
-# from same position that was saved in suspend file
+# read $XDG_DATA_HOME/clerk/suspend:-$HOME/.local/share/clerk/suspend and
+# restore playlist. Then start playing # from same position that was saved in
+# suspend file
 resumePlaylist () {
     http=$(! mpc current --format %file% | grep 'http://')
-    source $HOME/.config/clerk/suspend
+    source $suspend_state
     mpc clear
     mpc load suspended
     mpc play $pos
@@ -1212,17 +1243,17 @@ rateTrack () {
             notify-send "clerk" "rated ${rateartist} - ${ratetitle} with $(echo ${rating})"
         fi
         if [[ $auto_track_rating_backup == "true" ]]; then
-          if [[ -f $HOME/.config/clerk/.last_trackratings_backup ]]; then
-            read -r lastbackup<$HOME/.config/clerk/.last_trackratings_backup
+          if [[ -f $last_track_rate_bak ]]; then
+            read -r lastbackup<$last_track_rate_bak
           else
             lastbackup=$(date "+%s")
           fi
           if [[ $(date "+%s") -gt $(( $lastbackup + 3600)) ]]; then
-            rm -f $HOME/.config/clerk/trackratings.json
+            rm -f $db_rate_track
             clerk_helper importtrackratings
-            rm -f $HOME/.config/clerk/.last_trackratings_backup
+            rm -f $last_track_rate_bak
           fi
-          date "+%s" > $HOME/.config/clerk/.last_trackratings_backup
+          date "+%s" > $last_track_rate_bak
         fi
       fi
 }
@@ -1238,17 +1269,17 @@ instantRateTrack () {
      clerk_helper ratetrack "${rateartist}" "${ratealbum}" "${ratetrack}" "${ratetitle}" "${rating}"
      notify-send "clerk" "rated ${rateartist} - ${ratetitle} with $(echo ${rating})"
      if [[ $auto_track_rating_backup == "true" ]]; then
-       if [[ -f $HOME/.config/clerk/.last_trackratings_backup ]]; then
-         read -r lastbackup<$HOME/.config/clerk/.last_trackratings_backup
+       if [[ -f $last_track_rate_bak ]]; then
+         read -r lastbackup<$last_track_rate_bak
        else
          lastbackup=$(date "+%s")
        fi
        if [[ $(date "+%s") -gt $(( $lastbackup + 3600)) ]]; then
-         rm -f $HOME/.config/clerk/trackratings.json
+         rm -f $db_rate_track
          clerk_helper importtrackratings
-         rm -f $HOME/.config/clerk/.last_trackratings_backup
+         rm -f $last_track_rate_bak
        fi
-       date "+%s" > $HOME/.config/clerk/.last_trackratings_backup
+       date "+%s" > $last_track_rate_bak
      fi
 }
 
@@ -1285,7 +1316,7 @@ loadRatedTracks () {
     if [ rating = "" ]; then
         exit
     else
-        cd $HOME/.config/clerk
+        cd $config_root
         mpc clear
         songs="$(mpc sticker "" find rating | grep "rating=$rating" | gawk -F ': rating=' '{ print $1 }')"
         echo "$songs" | mpc add
@@ -1299,7 +1330,7 @@ loadRandomRatedTracks () {
     if [ rating = "" ]; then
         exit
     else
-        cd $HOME/.config/clerk
+        cd $config_root
         mpc clear
         songs="$(mpc sticker "" find rating \
             | grep -E "rating=$rating|rating=$(echo $(( $rating + 1 )))|rating=$(echo $(( $rating + 2 )))|rating=$(echo $(( $rating + 3 )))|rating=$(echo $(( $rating + 4 )))" \
@@ -1411,7 +1442,7 @@ ${line2}</span>"
             -dmenu -filter "$filter" \
             -select "$album_entry" \
             -format "f¬s" \
-            -input "$HOME/.config/clerk/${album_list}" \
+            -input "$config_root/${album_list}" \
             -p "Choose Album > ")"
     }
     returnto () {
@@ -1604,7 +1635,7 @@ TRACK_TEMP="$(_rofi -kb-move-word-forward '' \
     -select "$entry" \
     -format "f¬s" \
     -mesg "${HELP}" \
-    -input "$HOME/.config/clerk/tracks.cache" \
+    -input "$cache_track" \
     -p "Choose Track > ")"
 
     val=$?
@@ -1779,7 +1810,7 @@ saveAlbumToPlaylist() {
     if [[ $1 == "selection" ]]; then
         TRACK="${TRACK}"
     else
-        TRACK="$((echo -e "< Return\n---"; cat $HOME/.config/clerk/albums.cache) | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p "Save Album to Playlist > ")"
+        TRACK="$((echo -e "< Return\n---"; cat $cache_album) | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p "Save Album to Playlist > ")"
     fi
 
     val=$?
@@ -1835,7 +1866,7 @@ saveLatestToPlaylist() {
 
             mpc search date "$date" album "$album" albumartist "$artist" | clerk_helper saveto
         fi
-    done < <(echo -e "0  Return to Main Menu\n---\n$(cat $HOME/.config/clerk/latest.cache)" | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p "Save Album to Playlist > ")
+    done < <(echo -e "0  Return to Main Menu\n---\n$(cat $cache_latest)" | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -p "Save Album to Playlist > ")
 
     if [[  $seen = 0 ]]
     then
@@ -1844,7 +1875,7 @@ saveLatestToPlaylist() {
 }
 
 saveTrackToPlaylist() {
-    TRACK_TEMP="$((echo -e "0  Return to Main Menu\n---"; cat $HOME/.config/clerk/tracks.cache) | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -filter "$filter" -select "$entry" -format "f¬s" -dmenu -p "Save Track to Playlist > ")"
+    TRACK_TEMP="$((echo -e "0  Return to Main Menu\n---"; cat $cache_track) | _rofi -kb-move-word-forward '' -kb-row-tab '' -dmenu -filter "$filter" -select "$entry" -format "f¬s" -dmenu -p "Save Track to Playlist > ")"
 
     TRACK="${TRACK_TEMP#*¬}"
     unset filter
@@ -2075,7 +2106,7 @@ while :; do
             echo "  --playlist <savealbum, savelast, savetrack>        save selection to playlist \"clerk\""
             echo "  --playlist <load>                                  load playlist"
             echo "  --rss                                              load podcast"
-            echo "    (podcast should be placed in ~/.config/clerk/podcasts"
+            echo "    (podcast should be placed in \$XDG_CONFIG_HOME/clerk/podcasts"
             echo "     with format NAME \ URL)"
             echo ""
             echo "Ratings"

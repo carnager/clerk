@@ -45,7 +45,8 @@ For this to work, you need a recent rofi build from git.
 # Installation
 
 1. Install dependencies (each binary needs to be in your $PATH)
-2. Copy config.clerk to $HOME/.config/clerk/config and edit it.
+2. Copy config.clerk to $XDG_CONFIG_HOME/clerk/config if $XDG_CONFIG_HOME is
+   set, otherwise copy it to $HOME/.config/clerk/config and edit it.
 3. Copy clerk and clerk_helper to $PATH
 4. Run clerk
 
