@@ -89,19 +89,20 @@ def prune_fastlist(fastlist, mpdcachefile):
     return (new, newhdata)
 
 def rateAlbum(args):
-    fastlist = load_fastlist(os.getenv('HOME')+'/.config/clerk/albumratings.json')
     try:
+        fastlist = load_fastlist(os.getenv('HOME')+'/.config/clerk/albumratings.json')
         entry = get_entry(fastlist, args.artist, args.album, args.date)
         entry["rating"] = args.rating
-        save_fastlist(os.getenv('HOME')+'/.config/clerk/albumratings.json', fastlist)
-        uri = client.find('albumartist', args.artist, 'album', args.album, 'date', args.date, 'track', os.getenv('track'), 'disc', os.getenv('disc'))
-        for i in uri:
-            client.sticker_set("song", i['file'], "albumrating", args.rating)
     except KeyError:
         entry = {'albumartist': args.artist, 'album': args.album, 'date': args.date, 'disc': os.getenv('disc'), 'track': os.getenv('track'), 'rating': args.rating}
         append_entry(fastlist, entry)
+    except FileNotFoundError:
+        fastlist = ([], {})
+        entry = {'albumartist': args.artist, 'album': args.album, 'date': args.date, 'disc': os.getenv('disc'), 'track': os.getenv('track'), 'rating': args.rating}
+        fastlist[0].append(entry)
+    finally:
         save_fastlist(os.getenv('HOME')+'/.config/clerk/albumratings.json', fastlist)
-        uri = client.find('artist', args.artist, 'album', args.album, 'date', args.date, 'track', os.getenv('track'), 'disc', os.getenv('disc'))
+        uri = client.find('albumartist', args.artist, 'album', args.album, 'date', args.date, 'track', os.getenv('track'), 'disc', os.getenv('disc'))
         for i in uri:
             client.sticker_set("song", i['file'], "albumrating", args.rating)
 
