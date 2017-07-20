@@ -159,17 +159,21 @@ def prune_fastlistTrack(fastlist, mpdcachefile):
     return (new, newhdata)
 
 def rateTrack(args):
-    fastlist = load_fastlistTrack(os.getenv('HOME')+'/.config/clerk/trackratings.json')
+    """ rate a single track: create/update json track database and update mpd
+    sticker database
+    """
     try:
+        fastlist = load_fastlistTrack(os.getenv('HOME')+'/.config/clerk/trackratings.json')
         entry = get_entryTrack(fastlist, args.artist, args.album, args.track, args.title)
         entry["rating"] = args.rating
-        save_fastlistTrack(os.getenv('HOME')+'/.config/clerk/trackratings.json', fastlist)
-        uri = client.find('artist', args.artist, 'album', args.album, 'track', args.track, 'title', args.title)
-        for i in uri:
-            client.sticker_set("song", i['file'], "rating", args.rating)
     except KeyError:
         entry = {'artist': args.artist, 'album': args.album, 'track': args.track, 'title': args.title, 'rating': args.rating}
         append_entryTrack(fastlist, entry)
+    except FileNotFoundError:
+        fastlist = ([], {})
+        entry = {'artist': args.artist, 'album': args.album, 'track': args.track, 'title': args.title, 'rating': args.rating}
+        fastlist[0].append(entry)
+    finally:
         save_fastlistTrack(os.getenv('HOME')+'/.config/clerk/trackratings.json', fastlist)
         uri = client.find('artist', args.artist, 'album', args.album, 'track', args.track, 'title', args.title)
         for i in uri:
