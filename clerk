@@ -204,12 +204,14 @@ if [[ $1 == "--update" ]]; then
 else
     date=$(mpc stats | grep 'DB Updated: ')
     file="$HOME/.config/clerk/.lastupdate"
-    if [ "$(< $file)" = "$date" ] && [ -f "$file" ] ; then
-        :
-    else
+    if [[ ! -f $file ]]; then
         updateCache
-        date=$(mpc stats | grep 'DB Updated: ')
-        echo "${date}" > "${file}"
+    else
+        if [ "$(< $file)" = "$date" ]; then
+            :
+        else
+            updateCache
+        fi
     fi
 fi
 
