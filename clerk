@@ -1442,7 +1442,7 @@ ${line2}</span>"
             -dmenu -filter "$filter" \
             -select "$album_entry" \
             -format "f¬s" \
-            -input "$config_root/${album_list}" \
+            -input "$data_root/${album_list}" \
             -p "Choose Album > ")"
     }
     returnto () {
