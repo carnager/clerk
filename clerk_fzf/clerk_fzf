@@ -206,9 +206,47 @@ updateCache () {
     echo "${date}" > "${file}"
 #        | gawk -F '\t' '{ printf "%.2s\t%.40s\t%.40s\t%.200s\t%.500s\n", $1, $2, $3, $4, $5, $6 }' \
     if [[ $forceupdate == "true" ]]; then
-        exit
+      exit
     fi
 }
+
+clerk_update () {
+screen=$(tmux list-panes -F "#W")
+
+if [[ $1 == "--create-caches" ]]; then
+  if [[ $animation == "1" ]]; then
+    tmux new-session -s notify -n 'Updating Cache Files. Please wait a moment' -d 'sl'
+  else
+    tmux new-session -s notify -n 'Updating Cache Files. Please wait a moment' -d 'sh'
+  fi
+  tmux switchc -t notify
+  clerk_fzf --caches &
+  pid=$!
+  wait $pid
+fi
+
+tmux new-session -s music2 -n albums -d 'clerk_fzf --albums'
+tmux new-window -t music2 -n tracks 'clerk_fzf --tracks'
+tmux new-window -t music2 -n latest 'clerk_fzf --latest'
+tmux new-window -t music2 -n queue 'ncmpcpp'
+
+tmux rename-session -t music music_old
+tmux rename-session -t music2 music
+tmux switchc -t music
+tmux findw -t music ${screen}
+tmux kill-session -t music_old
+
+if [[ $1 == "--create-caches" ]]; then
+  tmux kill-session -t notify
+fi
+}
+
+clerk_help () {
+  grep -A14 '^## Key Bindings' "${tmux_config}" | awk -F '-n ' '{ print $2 }' | \
+  sed 's/clerk_fzf --//g; s/run-shell//g; s/findw//g; s/\x27//g; s/--quiet//g; s/mpc //g; s/clerk_update --create-caches/create caches/; s/_/ /g; s/kill-session -t music/ kill session/g; s/  /\t/g' | \
+  sed 's/clerk update/update views/' | column -t -s $'\t'
+}
+
 
 if [[ $1 == "--update" ]]; then
     :
@@ -224,6 +262,72 @@ else
     fi
 fi
 
+tmux_config="/etc/clerk/tmux.conf"
+
+# read global config
+if [[ -f "/etc/clerk_fzf.conf" ]]; then
+  source /etc/clerk_fzf.conf
+fi
+
+clerk_start () {
+# create config dir, if needed
+if [[ ! -d $HOME/.config/clerk ]]; then
+  mkdir $HOME/.config/clerk
+fi
+
+# read user config
+if [[ -f "$HOME/.config/clerk/clerk_fzf.conf" ]]; then
+  source $HOME/.config/clerk/clerk_fzf.conf
+fi
+
+# export MPD_HOST
+if [[ -n $mpd_host ]]; then
+  if [[ -n $mpd_password ]]; then
+    export MPD_HOST="${mpd_password}@${mpd_host}"
+  else
+    export MPD_HOST="${mpd_host}"
+  fi
+fi
+
+if [[ -n $mpd_port ]]; then
+  ┆ export MPD_PORT="${mpd_port}"
+fi
+
+
+export TMUX_TMPDIR="/tmp/clerk/tmux"
+
+if [[ ! -d "${TMUX_TMPDIR}" ]]; then
+  mkdir -p "${TMUX_TMPDIR}"
+fi
+main
+}
+
+main() {
+  tmux has-session -t music
+  if [ $? != 0 ]; then
+    tmux -f "${tmux_config}" new-session -s music -n albums -d 'clerk_fzf --albums'
+    tmux new-window -t music -n tracks 'clerk_fzf --tracks'
+    tmux new-window -t music -n latest 'clerk_fzf --latest'
+    tmux new-window -t music -n queue 'ncmpcpp'
+  fi
+  tmux attach -t music
+}
+
+
+if [[ $1 == "--help" || $1 == "-h" ]]; then
+  echo "clerk: MPD Interface using fzf and tmux"
+  echo "Copyright © 2016 Rasmus Steinke"
+  echo ""
+  echo "--help, -h    this help message"
+  echo "--kill        kill running clerk sessions"
+elif [[ $1 == "--kill" ]]; then
+  tmux kill-session -t music
+else
+  clerk_start
+fi
+
+
+
 
 if [[ $1 == "--albums" ]]; then
   albums
@@ -236,5 +340,9 @@ elif [[ $1 == "--random_album" ]]; then
 elif [[ $1 == "--random_tracks" ]]; then
   playRandomTracks
 elif [[ $1 == "--update" ]]; then
-  forceupdate=true updateCache
+  clerk_update --create-caches
+elif [[ $1 == "--help" ]]; then
+  clerk_help
+elif [[ $1 == "--caches" ]]; then
+  updateCache
 fi
