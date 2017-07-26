@@ -86,18 +86,18 @@ actions () {
   action=$(echo -e "1. Replace\n2. Add\n3. Insert" | fzf --reverse -i --header="Choose Action or quit with ESC" --inline-info)
 
   if [[ $action == "1. Replace" ]]; then
-    mpc clear
+    mpc clear > /dev/null
     echo "${track}" | while read line; do
-      mpc add "${line}"
+      mpc add "${line}" > /dev/null
     done
     mpc play > /dev/null
   elif [[ $action == "2. Add" ]]; then
     echo "${track}" | while read line; do
-      mpc add "${line}"
+      mpc add "${line}" > /dev/null
     done
   elif [[ $action == "3. Insert" ]]; then
     echo "${track}" | while read line; do
-      mpc insert "${line}"
+      mpc insert "${line}" > /dev/null
     done
   elif [[ $action -eq 130 ]]; then
     exit
@@ -110,7 +110,7 @@ playRandomAlbum () {
     mpc clear > /dev/null
     artist="$(mpc list "albumartist" | $shuf -n 1)"
     album="$(mpc list album "albumartist" "$artist" | $shuf -n 1)"
-    mpc findadd album "$album" "albumartist" "$artist";
+    mpc findadd album "$album" "albumartist" "$artist" > /dev/null;
     mpc play > /dev/null
     tmux findw -t music queue
 }
@@ -121,14 +121,14 @@ playRandomTracks () {
     artist="$(mpc list "$random_artist" | $shuf -n 1)"
     album="$(mpc list album "$random_artist" "$artist" | $shuf -n 1)"
     title="$(mpc list title album "$album" "$random_artist" "$artist" | $shuf -n 1)"
-    mpc findadd album "$album" "$random_artist" "$artist" title "$title";
+    mpc findadd album "$album" "$random_artist" "$artist" title "$title" > /dev/null
     mpc play > /dev/null
 
     n=0; while (( n++ < $value -1 )); do
         artist="$(mpc list "$random_artist" | $shuf -n 1)"
         album="$(mpc list album "$random_artist" "$artist" | $shuf -n 1)"
         title="$(mpc list title album "$album" "$random_artist" "$artist" | $shuf -n 1)"
-        mpc findadd album "$album" "$random_artist" "$artist" title "$title"
+        mpc findadd album "$album" "$random_artist" "$artist" title "$title" > /dev/null
     done
     mpc play > /dev/null
     tmux findw -t music queue
@@ -250,8 +250,6 @@ playlists () {
 
 
   plsmenu="$(printf '%s\n' "${pls[@]}" | fzf --no-sort -m -e --reverse -i --ansi --bind "ctrl-a:select-all,ctrl-n:deselect-all")"
-  clear
-  echo "${plsmenu}"
   val=$?
   if [[ $val -eq 130 ]]; then
     playlists
@@ -272,9 +270,9 @@ playlistactions () {
   "Delete Playlist"
   "Cancel")
 
-  plmenu="$(printf '%s\n' "${menu_content[@]}" | fzf --reverse -i --ansi)"
+  plmenu="$(printf '%s\n' "${menu_content[@]}" | fzf -m -e --reverse -i --ansi)"
   if [[ $val -eq 130 ]]; then
-    playlists
+    tmux findw -t playlists
   fi
   if [[ $plmenu == "Load Playlist" ]]; then
     mpc clear > /dev/null; mpc load "${plsmenu}" > /dev/null; mpc play > /dev/null
