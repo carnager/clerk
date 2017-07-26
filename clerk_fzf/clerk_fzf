@@ -257,7 +257,7 @@ playlists () {
     playlists
   fi
   if [[ $plsmenu == "Save current Queue as Playlist" ]]; then
-    mpc save "$(date +'%Y-%m-%d_%H:%M:%S').m3u" 
+    mpc save "$(date +'%Y-%m-%d_%H:%M:%S')" 
     tmux findw -t music queue
     $(${script})
   else
