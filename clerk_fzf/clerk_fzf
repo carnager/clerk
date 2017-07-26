@@ -229,7 +229,7 @@ tmux new-session -s music2 -n albums -d 'clerk_fzf --albums'
 tmux new-window -t music2 -n tracks 'clerk_fzf --tracks'
 tmux new-window -t music2 -n latest 'clerk_fzf --latest'
 tmux new-window -t music2 -n playlists 'clerk_fzf --playlists'
-tmux new-window -t music2 -n queue 'ncmpcpp'
+tmux new-window -t music2 -n queue "${player}"
 
 tmux rename-session -t music music_old
 tmux rename-session -t music2 music
@@ -367,7 +367,7 @@ main() {
     tmux new-window -t music -n tracks 'clerk_fzf --tracks'
     tmux new-window -t music -n latest 'clerk_fzf --latest'
     tmux new-window -t music -n playlists 'clerk_fzf --playlists'
-    tmux new-window -t music -n queue 'ncmpcpp'
+    tmux new-window -t music -n queue "${player}"
   fi
   tmux attach -t music
 }
