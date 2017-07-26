@@ -228,6 +228,7 @@ fi
 tmux new-session -s music2 -n albums -d 'clerk_fzf --albums'
 tmux new-window -t music2 -n tracks 'clerk_fzf --tracks'
 tmux new-window -t music2 -n latest 'clerk_fzf --latest'
+tmux new-window -t music2 -n playlists 'clerk_fzf --playlists'
 tmux new-window -t music2 -n queue 'ncmpcpp'
 
 tmux rename-session -t music music_old
@@ -239,6 +240,49 @@ tmux kill-session -t music_old
 if [[ $1 == "--create-caches" ]]; then
   tmux kill-session -t notify
 fi
+}
+
+playlists () {
+  pls=(
+  "$(mpc lsplaylists)"
+  "---"
+  "Save current Queue as Playlist")
+
+
+  plsmenu="$(printf '%s\n' "${pls[@]}" | fzf --no-sort -m -e --reverse -i --ansi --bind "ctrl-a:select-all,ctrl-n:deselect-all")"
+  clear
+  echo "${plsmenu}"
+  val=$?
+  if [[ $val -eq 130 ]]; then
+    playlists
+  fi
+  if [[ $plsmenu == "Save current Queue as Playlist" ]]; then
+    mpc save "$(date +'%Y-%m-%d_%H:%M:%S').m3u" 
+    tmux findw -t music queue
+  else
+    playlistactions
+  fi
+}
+
+playlistactions () {
+  menu_content=(
+  "Load Playlist"
+  "Add Playlist"
+  "Cancel")
+
+  plmenu="$(printf '%s\n' "${menu_content[@]}" | fzf --reverse -i --ansi)"
+  if [[ $val -eq 130 ]]; then
+    playlists
+  fi
+  if [[ $plmenu == "Load Playlist" ]]; then
+    mpc clear > /dev/null; mpc load "${plsmenu}" > /dev/null; mpc play > /dev/null
+    tmux findw -t music queue
+  elif [[ $plmenu == "Add Playlist" ]]; then
+    mpc load "${plsmenu}" > /dev/null
+    tmux findw -t music queue
+  elif [[ $plmenu == "Cancel" ]]; then
+    playlists
+  fi
 }
 
 clerk_help () {
@@ -308,6 +352,7 @@ main() {
     tmux -f "${tmux_config}" new-session -s music -n albums -d 'clerk_fzf --albums'
     tmux new-window -t music -n tracks 'clerk_fzf --tracks'
     tmux new-window -t music -n latest 'clerk_fzf --latest'
+    tmux new-window -t music -n playlists 'clerk_fzf --playlists'
     tmux new-window -t music -n queue 'ncmpcpp'
   fi
   tmux attach -t music
@@ -345,4 +390,6 @@ elif [[ $1 == "--help" ]]; then
   clerk_help
 elif [[ $1 == "--caches" ]]; then
   updateCache
+elif [[ $1 == "--playlists" ]]; then
+  playlists
 fi

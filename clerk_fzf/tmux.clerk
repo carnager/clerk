@@ -24,10 +24,11 @@ setw -g window-status-current-format ' #[fg=yellow,bold]#[bg=colour235]#W '
 bind-key -n F1 findw albums
 bind-key -n F2 findw tracks
 bind-key -n F3 findw latest
-bind-key -n F4 findw queue
-bind-key -n F5 run-shell 'mpc prev --quiet'
-bind-key -n F6 run-shell 'mpc toggle --quiet'
-bind-key -n F7 run-shell 'mpc stop --quiet'
+bind-key -n F4 findw playlists
+bind-key -n F5 findw queue
+bind-key -n F6 run-shell 'mpc prev --quiet'
+bind-key -n F7 run-shell 'mpc toggle --quiet'
+bind-key -n C-F7 run-shell 'mpc stop'
 bind-key -n F8 run-shell 'mpc next --quiet'
 bind-key -n C-F12 run-shell 'forceupdate="true" clerk_fzf --update'
 bind-key -n F12 run-shell 'clerk_fzf --update'
