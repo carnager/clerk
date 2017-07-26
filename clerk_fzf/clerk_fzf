@@ -268,7 +268,8 @@ playlists () {
 playlistactions () {
   menu_content=(
   "Load Playlist"
-  "Add Playlist"
+  "Append Playlist"
+  "Delete Playlist"
   "Cancel")
 
   plmenu="$(printf '%s\n' "${menu_content[@]}" | fzf --reverse -i --ansi)"
@@ -283,6 +284,18 @@ playlistactions () {
     mpc load "${plsmenu}" > /dev/null
     tmux findw -t music queue
     $(${script})
+  elif [[ $plmenu == "Delete Playlist" ]]; then
+    del_content=(
+    "Yes"
+    "No")
+
+    delmenu="$(printf '%s\n' "${del_content[@]}" | fzf --reverse -i --ansi --header="Delete Playlist ${plsmenu}?")"
+    if [[ $delmenu == "Yes" ]]; then
+      mpc rm "${plsmenu}"
+      playlists
+    elif [[ $delmenu == "No" ]]; then
+      playlists
+    fi
   elif [[ $plmenu == "Cancel" ]]; then
     playlists
   fi
