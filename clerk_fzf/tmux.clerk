@@ -28,7 +28,7 @@ bind-key -n F4 findw playlists
 bind-key -n F5 findw queue
 bind-key -n C-F5 run-shell 'mpc prev --quiet'
 bind-key -n C-F6 run-shell 'mpc toggle --quiet'
-bind-key -n C-F7 run-shell 'mpc stop'
+bind-key -n C-F7 run-shell 'mpc stop > /dev/null'
 bind-key -n C-F8 run-shell 'mpc next --quiet'
 bind-key -n C-F12 run-shell 'forceupdate="true" clerk_fzf --update'
 bind-key -n F12 run-shell 'clerk_fzf --update'
