@@ -259,6 +259,7 @@ playlists () {
   if [[ $plsmenu == "Save current Queue as Playlist" ]]; then
     mpc save "$(date +'%Y-%m-%d_%H:%M:%S').m3u" 
     tmux findw -t music queue
+    $(${script})
   else
     playlistactions
   fi
@@ -277,9 +278,11 @@ playlistactions () {
   if [[ $plmenu == "Load Playlist" ]]; then
     mpc clear > /dev/null; mpc load "${plsmenu}" > /dev/null; mpc play > /dev/null
     tmux findw -t music queue
+    $(${script})
   elif [[ $plmenu == "Add Playlist" ]]; then
     mpc load "${plsmenu}" > /dev/null
     tmux findw -t music queue
+    $(${script})
   elif [[ $plmenu == "Cancel" ]]; then
     playlists
   fi
@@ -367,14 +370,7 @@ if [[ $1 == "--help" || $1 == "-h" ]]; then
   echo "--kill        kill running clerk sessions"
 elif [[ $1 == "--kill" ]]; then
   tmux kill-session -t music
-else
-  clerk_start
-fi
-
-
-
-
-if [[ $1 == "--albums" ]]; then
+elif [[ $1 == "--albums" ]]; then
   albums
 elif [[ $1 == "--tracks" ]]; then
   tracks
@@ -392,4 +388,6 @@ elif [[ $1 == "--caches" ]]; then
   updateCache
 elif [[ $1 == "--playlists" ]]; then
   playlists
+else
+  clerk_start
 fi
