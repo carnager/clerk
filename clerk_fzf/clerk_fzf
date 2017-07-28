@@ -46,6 +46,17 @@ if [[ -n $mpd_port ]]; then
   ┆ export MPD_PORT="${mpd_port}"
 fi
 
+
+date=$(mpc stats | grep 'DB Updated: ')
+file="$HOME/.config/clerk/.lastupdate"
+if [ "$(< $file)" = "$date" ] && [ -f "$file" ] ; then
+    :
+else
+    updateCache
+    date=$(mpc stats | grep 'DB Updated: ')
+    echo "${date}" > "${file}"
+fi
+
 albums () {
   script="$0 --albums"
   tracklist="$(cat ~/.config/clerk/albums.cache | fzf --no-sort -m -e --reverse -i --with-nth=1,2,3 -d '\t' --tabstop=4 +s --ansi --bind "ctrl-a:select-all,ctrl-n:deselect-all")"
@@ -306,19 +317,6 @@ clerk_help () {
 }
 
 
-if [[ $1 == "--update" ]]; then
-    :
-else
-    date=$(mpc stats | grep 'DB Updated: ')
-    file="$HOME/.config/clerk/.lastupdate"
-    if [ "$(< $file)" = "$date" ] && [ -f "$file" ] ; then
-        :
-    else
-        updateCache
-        date=$(mpc stats | grep 'DB Updated: ')
-        echo "${date}" > "${file}"
-    fi
-fi
 
 tmux_config="/etc/clerk/tmux.conf"
 
@@ -328,30 +326,6 @@ if [[ -f "/etc/clerk_fzf.conf" ]]; then
 fi
 
 clerk_start () {
-# create config dir, if needed
-if [[ ! -d $HOME/.config/clerk ]]; then
-  mkdir $HOME/.config/clerk
-fi
-
-# read user config
-if [[ -f "$HOME/.config/clerk/clerk_fzf.conf" ]]; then
-  source $HOME/.config/clerk/clerk_fzf.conf
-fi
-
-# export MPD_HOST
-if [[ -n $mpd_host ]]; then
-  if [[ -n $mpd_password ]]; then
-    export MPD_HOST="${mpd_password}@${mpd_host}"
-  else
-    export MPD_HOST="${mpd_host}"
-  fi
-fi
-
-if [[ -n $mpd_port ]]; then
-  ┆ export MPD_PORT="${mpd_port}"
-fi
-
-
 export TMUX_TMPDIR="/tmp/clerk/tmux"
 
 if [[ ! -d "${TMUX_TMPDIR}" ]]; then
@@ -372,33 +346,26 @@ main() {
   tmux attach -t music
 }
 
+helpCmd () {
+  cat <<'EOF'
+clerk: MPD Interface using fzf and tmux
+Copyright © 2016 Rasmus Steinke
 
-if [[ $1 == "--help" || $1 == "-h" ]]; then
-  echo "clerk: MPD Interface using fzf and tmux"
-  echo "Copyright © 2016 Rasmus Steinke"
-  echo ""
-  echo "--help, -h    this help message"
-  echo "--kill        kill running clerk sessions"
-elif [[ $1 == "--kill" ]]; then
-  tmux kill-session -t music
-elif [[ $1 == "--albums" ]]; then
-  albums
-elif [[ $1 == "--tracks" ]]; then
-  tracks
-elif [[ $1 == "--latest" ]]; then
-  latest
-elif [[ $1 == "--random_album" ]]; then
-  playRandomAlbum
-elif [[ $1 == "--random_tracks" ]]; then
-  playRandomTracks
-elif [[ $1 == "--update" ]]; then
-  clerk_update --create-caches
-elif [[ $1 == "--help" ]]; then
-  clerk_help
-elif [[ $1 == "--caches" ]]; then
-  updateCache
-elif [[ $1 == "--playlists" ]]; then
-  playlists
-else
-  clerk_start
-fi
+--help, -h    this help message
+--kill        kill running clerk sessions
+EOF
+}
+
+case $1 in
+  "--help | -h") helpCmd;;
+  "--kill") tmux kill-session -t music;;
+  "--albums") albums;;
+  "--tracks") tracks;;
+  "--latest") latest;;
+  "--random_album") playRandomAlbum;;
+  "--random_tracks") playRandomTracks;;
+  "--help") clerk_help;;
+  "--caches") updateCache;;
+  "--playlists") playlists;;
+  *) clerk_start
+esac
