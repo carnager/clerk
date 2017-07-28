@@ -275,39 +275,49 @@ playlists () {
 }
 
 playlistactions () {
-  menu_content=(
-  "Load Playlist"
-  "Append Playlist"
-  "Delete Playlist"
-  "Cancel")
+  menu_content=("Load Playlist"
+                "Append Playlist"
+                "Delete Playlist"
+                "Cancel")
 
   plmenu="$(printf '%s\n' "${menu_content[@]}" | fzf -m -e --reverse -i --ansi)"
-  if [[ $val -eq 130 ]]; then
+
+  if [[ $val -eq 130 ]]
+  then
     tmux findw -t playlists
   fi
-  if [[ $plmenu == "Load Playlist" ]]; then
-    mpc clear > /dev/null; mpc load "${plsmenu}" > /dev/null; mpc play > /dev/null
-    tmux findw -t music queue
-    $(${script})
-  elif [[ $plmenu == "Add Playlist" ]]; then
-    mpc load "${plsmenu}" > /dev/null
-    tmux findw -t music queue
-    $(${script})
-  elif [[ $plmenu == "Delete Playlist" ]]; then
-    del_content=(
-    "Yes"
-    "No")
 
-    delmenu="$(printf '%s\n' "${del_content[@]}" | fzf --reverse -i --ansi --header="Delete Playlist ${plsmenu}?")"
-    if [[ $delmenu == "Yes" ]]; then
-      mpc rm "${plsmenu}"
+  case $plmenu in
+    "Load Playlist")
+      mpc clear > /dev/null; mpc load "${plsmenu}" > /dev/null; mpc play > /dev/null
+      tmux findw -t music queue
+      $(${script})
+      ;;
+    "Add Playlist")
+      mpc load "${plsmenu}" > /dev/null
+      tmux findw -t music queue
+      $(${script})
+      ;;
+    "Delete Playlist")
+      del_content=("Yes"
+                   "No")
+
+      delmenu="$(printf '%s\n' "${del_content[@]}" | fzf --reverse -i --ansi --header="Delete Playlist ${plsmenu}?")"
+
+      case $delmenu in
+        "Yes")
+          mpc rm "${plsmenu}"
+          playlists
+          ;;
+        "No")
+          playlists
+          ;;
+      esac
+      ;;
+    "Cancel")
       playlists
-    elif [[ $delmenu == "No" ]]; then
-      playlists
-    fi
-  elif [[ $plmenu == "Cancel" ]]; then
-    playlists
-  fi
+      ;;
+  esac
 }
 
 clerk_help () {
