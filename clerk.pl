@@ -1,20 +1,22 @@
 #!/usr/bin/env perl
 
-use Net::MPD;
-use v5.10;
-use File::stat;
-use Data::Dumper;
-use warnings;
-use IO::Select;
-use File::Basename;
-use strict;
-use IPC::Run qw( timeout start );
-use autodie;
-use utf8;
-use File::Slurper 'read_binary';
 binmode(STDOUT, ":utf8");
-use Data::MessagePack;
+use warnings;
+use strict;
+use utf8;
+use v5.10;
+use autodie;
 use Config::Simple;
+use Data::Dumper;
+use Data::MessagePack;
+use DDP;
+use File::Basename;
+use File::stat;
+use File::Slurper 'read_binary';
+use Getopt::Std;
+use IO::Select;
+use IPC::Run qw( timeout start );
+use Net::MPD;
 
 my $config_file = $ENV{'HOME'} . "/.config/clerk/clerk.conf";
 
@@ -39,8 +41,10 @@ my $artist_l = $columns_cfg->{artist_l};
 my $mpd = Net::MPD->connect($ENV{MPD_HOST} // $mpd_host // 'localhost');
 
 sub main {
-	create_db();
-	list_tracks();
+	my %options=();
+	getopts("ta", \%options);
+	list_tracks() if defined $options{t};
+	list_albums() if defined $options{a};
 }
 
 
@@ -70,26 +74,25 @@ sub create_db {
 	}
 }
 
-# sub backend_call {
-# 	my ($in) = @_;
-# 	my $input = join "", (@{$in});
-# 	my $out;
-# 	my %backends = (
-# 		fzf => [ qw(fzf --reverse --no-sort -m -e -i --with-nth=1,2,3 -d "\t" --tabstop=4 +s --ansi --expect=alt-v,alt-b) ],
-# 		rofi => [qw(rofi -dmenu -width 1800)]);
-# 	my $handle = run (($backends{$backend} // die('backend not found')), \$input, \$out) or die('No selection');
-# 
-# 	return $out;
-# }
-
 sub backend_call {
-	my ($in) = @_;
-	my $indicator = $_[0];
+	my ($in, $fields) = @_;
 	my $input;
 	my $out;
-	my $with_nth = $indicator? "1,2,3,4,5" : "1,2,3";
+	$fields //= "1,2,3";
 	my %backends = (
-		fzf => [ qw(fzf --reverse --no-sort -m -e -i -d "\t" --tabstop=4 +s --ansi), "--with-nth=$with_nth" ],
+		fzf => [ qw(fzf
+			--reverse
+			--no-sort
+			-m
+			-e
+			-i
+			-d
+			\t
+			--tabstop=4
+			+s
+			--ansi),
+			"--with-nth=$fields"
+		],
 		rofi => [
 			'rofi',
 			'-width',
@@ -124,7 +127,8 @@ sub unpack_msgpack {
 
 # read messagepack file and output strings
 sub list_albums {
-	my $rdb = unpack_msgpack();
+	my ($rdb) = @_;
+	$rdb //= unpack_msgpack();
 	my @album_db = do {my %seen; grep { !defined($_->{AlbumArtist}) or !defined($_->{Album}) or
 		!defined($_->{Date}) or !$seen{$_->{AlbumArtist}}{$_->{Album}}{$_->{Date}}++ } @{$rdb}};
 	my @sorted_db = sort { lc($a->{AlbumArtist}) cmp lc($b->{AlbumArtist}) } @album_db;
@@ -138,7 +142,7 @@ sub list_albums {
 		$in = sprintf "%-${albumartist_l}.${albumartist_l}s\t%-${date_l}.${date_l}s\t%-${album_l}.${album_l}s\t%s\n", $entry->{AlbumArtist},$entry->{Date}, $entry->{Album}, $album_dir;
 		push @output, $in;
 	}
-	my $out = backend_call(\@output);
+	my $out = backend_call(\@output, "1,2,3");
     print $out;
 	# call rofi function to display possible actions
 	my @action_items = ("Add\n", "Insert\n", "Replace\n");
@@ -149,29 +153,31 @@ sub list_albums {
 		my $line;
 		foreach my $line (split /\n/, $out) {
 			my $uri = (split /[\t\n]/, $line)[-1];
-			my ($artist, $date, $album) = map { s/\s+$//r } split /[\t\n]/, $line;
 			$mpd->add($uri);
 		}
 	}
 	elsif ($action eq "Replace\n") {
-		my $uri = (split /[\t\n]/, $out)[-1];
-		my ($artist, $date, $album) = map { s/\s+$//r } split /[\t\n]/, $out;
 		$mpd->clear();
-		$mpd->search_add('Artist' => $artist, 'Album' => $album, 'Date' => $date);
+		my $line;
+		foreach my $line (split /\n/, $out) {
+			my $uri = (split /[\t\n]/, $line)[-1];
+			$mpd->add($uri);
+		}
 		$mpd->play();
 	}
-	list_albums();
+	list_albums($rdb);
 }
 
 sub list_tracks {
-	my $rdb = unpack_msgpack();
+	my ($rdb) = @_;
+	$rdb //= unpack_msgpack();
 	my @output;
 	my $in;
 	for my $entry (@{$rdb}) {
 		$in = sprintf "%-${track_l}.${track_l}s\t%-${title_l}.${title_l}s\t%-${artist_l}.${artist_l}s\t%-${album_l}.${album_l}s\t%-s\n", $entry->@{qw/Track Title Artist Album uri/};
     push @output, $in;
 	}
-	my $out = backend_call(\@output, "tracks");
+	my $out = backend_call(\@output, "1,2,3,4");
 	
     my @action_items = ("Add\n", "Insert\n", "Replace\n");
     my $action = backend_call(\@action_items);
@@ -180,20 +186,19 @@ sub list_tracks {
 		my $line;
 		foreach my $line (split /\n/, $out) {
 			my $uri = (split /[\t\n]/, $line)[-1];
-			my $songinfo = $mpd->search('filename' => $uri);
-			my ($artist, $album, $title, $track, $date) = $songinfo->@{qw/Artist Album Title Track Date/};
-	    	$mpd->search_add('Artist' => $artist, 'Album' => $album, 'Title' => $title, 'Date' => $date);
+	    	$mpd->add($uri);
 		}
 	}
 	elsif ($action eq "Replace\n") {
-		my $uri = (split /[\t\n]/, $out)[-1];
-		my $songinfo = $mpd->search('filename' => $uri);
-		my ($artist, $album, $title, $track, $date) = $songinfo->@{qw/Artist Album Title Track Date/};
 		$mpd->clear();
-    	$mpd->search_add('Artist' => $artist, 'Album' => $album, 'Title' => $title, 'Date' => $date);
+		my $line;
+		foreach my $line (split /\n/, $out) {
+			my $uri = (split /[\t\n]/, $line)[-1];
+	    	$mpd->add($uri);
+		}
     	$mpd->play();
 	}
-	list_tracks()
+	list_tracks($rdb)
 }
 
 main;
