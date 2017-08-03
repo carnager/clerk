@@ -40,7 +40,7 @@ my $mpd = Net::MPD->connect($ENV{MPD_HOST} // $mpd_host // 'localhost');
 
 sub main {
 	create_db();
-	list_albums();
+	list_tracks();
 }
 
 
@@ -91,7 +91,7 @@ sub backend_call {
 	my ($in) = @_;
 	my $input;
 	my $out;
-	my %backends = ( fzf => [ qw(fzf --reverse --no-sort -m -e -i --with-nth=1,2,3 -d "\t" --tabstop=4 +s --ansi) ], rofi => ['rofi', '-width', '1300', '-dmenu', '-i', '-p', '> ']);
+	my %backends = ( fzf => [ 'fzf', '--reverse', '--no-sort', '-m', '-e', '-i', '--with-nth=1,2,3', '-d', '\t', '--tabstop=4', '+s', '--ansi' ], rofi => ['rofi', '-width', '1300', '-dmenu', '-i', '-p', '> ']);
 	my $handle = start $backends{$backend} // die('backend not found'), \$input, \$out;
 	$input = join "", (@{$in});
 	finish $handle or die "No selection";
@@ -165,18 +165,14 @@ sub list_tracks {
 	my @output;
 	my $in;
 	for my $entry (@{$rdb}) {
-		$in = sprintf "%-${track_l}.${track_l}s\t%-${title_l}.${title_l}s\t%-${artist_l}.${artist_l}s\t%-${album_l}.${album_l}s\t%-s\n", $entry->{Track},$entry->{Title}, $entry->{Artist}, $entry->{Album}, $entry->{uri};
+		$in = sprintf "%-${track_l}.${track_l}s\t%-${title_l}.${title_l}s\t%-${artist_l}.${artist_l}s\t%-${album_l}.${album_l}s\t%-s\n", $entry->@{qw/Track Title Artist Album uri/};
     push @output, $in;
 	}
 	my $out = backend_call(\@output);
 	my $uri = (split /[\t\n]/, $out)[-1];
 	my $songinfo = $mpd->search('filename' => $uri);
 
-	my $artist=$songinfo->{Artist};
-	my $album=$songinfo->{Album};
-	my $title=$songinfo->{Title};
-	my $track=$songinfo->{Track};
-	my $date=$songinfo->{Date};
+	my ($artist, $album, $title, $track, $date) = $songinfo->@{qw/Artist Album Title Track Date/};
 	print "::: Selected \"$title\" from artist \"$artist\" of album \"$album\"\n";
 
 	my @action_items = ("Add\n", "Insert\n", "Replace\n");
