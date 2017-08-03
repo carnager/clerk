@@ -53,11 +53,7 @@ sub create_db {
 	my $last_update = $mpd_stats->{db_update};
 
 	if (!-f "$db_file" || stat("$db_file")->mtime < $last_update) {
-		print STDERR "::: MPD database copy missing or out of date\n";
-		print STDERR "::: Starting database sync\n";
-		print STDERR "::: Songs in database: $songcount\n";
 		my $times = int($songcount / 1000 + 1);
-		print STDERR "==> Requesting $times chunks from MPD\n";
 		my @db;
 		# since mpd will silently fail, if response is larger than command buffer, let's split the search.
 		my $chunk_size = 1000;
@@ -72,7 +68,6 @@ sub create_db {
 		my @filtered = map { {$_->%{'Album', 'Artist', 'Date', 'AlbumArtist', 'Title', 'Track', 'uri', 'Last-Modified'}} } @db;
 		pack_msgpack(\@filtered);
 	}
-	print STDERR "::: MPD database copy up to date\n";
 }
 
 # sub backend_call {
@@ -89,9 +84,22 @@ sub create_db {
 
 sub backend_call {
 	my ($in) = @_;
+	my $indicator = $_[0];
 	my $input;
 	my $out;
-	my %backends = ( fzf => [ 'fzf', '--reverse', '--no-sort', '-m', '-e', '-i', '--with-nth=1,2,3', '-d', '\t', '--tabstop=4', '+s', '--ansi' ], rofi => ['rofi', '-width', '1300', '-dmenu', '-i', '-p', '> ']);
+	my $with_nth = $indicator? "1,2,3,4,5" : "1,2,3";
+	my %backends = (
+		fzf => [ qw(fzf --reverse --no-sort -m -e -i -d "\t" --tabstop=4 +s --ansi), "--with-nth=$with_nth" ],
+		rofi => [
+			'rofi',
+			'-width',
+			'1300',
+			'-dmenu',
+			'-i',
+			'-p',
+			' >'
+		]
+	);
 	my $handle = start $backends{$backend} // die('backend not found'), \$input, \$out;
 	$input = join "", (@{$in});
 	finish $handle or die "No selection";
@@ -116,7 +124,6 @@ sub unpack_msgpack {
 
 # read messagepack file and output strings
 sub list_albums {
-	print STDERR "::: Creating list of albums\n";
 	my $rdb = unpack_msgpack();
 	my @album_db = do {my %seen; grep { !defined($_->{AlbumArtist}) or !defined($_->{Album}) or
 		!defined($_->{Date}) or !$seen{$_->{AlbumArtist}}{$_->{Album}}{$_->{Date}}++ } @{$rdb}};
@@ -143,15 +150,12 @@ sub list_albums {
 		foreach my $line (split /\n/, $out) {
 			my $uri = (split /[\t\n]/, $line)[-1];
 			my ($artist, $date, $album) = map { s/\s+$//r } split /[\t\n]/, $line;
-			print STDERR "::: Selected album \"$album\" from \"$artist\" released in $date\n";
-			print STDERR "==> Adding selected album(s) to current playlist\n";
 			$mpd->add($uri);
 		}
 	}
 	elsif ($action eq "Replace\n") {
 		my $uri = (split /[\t\n]/, $out)[-1];
 		my ($artist, $date, $album) = map { s/\s+$//r } split /[\t\n]/, $out;
-		print STDERR "==> Replacing current playlist with selected album(s)\n";
 		$mpd->clear();
 		$mpd->search_add('Artist' => $artist, 'Album' => $album, 'Date' => $date);
 		$mpd->play();
@@ -160,7 +164,6 @@ sub list_albums {
 }
 
 sub list_tracks {
-	print STDERR "::: Creating list of tracks\n";
 	my $rdb = unpack_msgpack();
 	my @output;
 	my $in;
@@ -168,28 +171,29 @@ sub list_tracks {
 		$in = sprintf "%-${track_l}.${track_l}s\t%-${title_l}.${title_l}s\t%-${artist_l}.${artist_l}s\t%-${album_l}.${album_l}s\t%-s\n", $entry->@{qw/Track Title Artist Album uri/};
     push @output, $in;
 	}
-	my $out = backend_call(\@output);
-	my $uri = (split /[\t\n]/, $out)[-1];
-	my $songinfo = $mpd->search('filename' => $uri);
-
-	my ($artist, $album, $title, $track, $date) = $songinfo->@{qw/Artist Album Title Track Date/};
-	print "::: Selected \"$title\" from artist \"$artist\" of album \"$album\"\n";
-
-	my @action_items = ("Add\n", "Insert\n", "Replace\n");
-	my $action = backend_call(\@action_items);
-
+	my $out = backend_call(\@output, "tracks");
+	
+    my @action_items = ("Add\n", "Insert\n", "Replace\n");
+    my $action = backend_call(\@action_items);
+	
 	if ($action eq "Add\n") {
-		print "debug test text";
-    	print STDERR "==> Adding selected track to current playlist\n";
-    	$mpd->search_add('Artist' => $artist, 'Album' => $album, 'Title' => $title, 'Date' => $date);
-   }
+		my $line;
+		foreach my $line (split /\n/, $out) {
+			my $uri = (split /[\t\n]/, $line)[-1];
+			my $songinfo = $mpd->search('filename' => $uri);
+			my ($artist, $album, $title, $track, $date) = $songinfo->@{qw/Artist Album Title Track Date/};
+	    	$mpd->search_add('Artist' => $artist, 'Album' => $album, 'Title' => $title, 'Date' => $date);
+		}
+	}
 	elsif ($action eq "Replace\n") {
-    	print STDERR "==> Replacing current playlist with selected track\n";
+		my $uri = (split /[\t\n]/, $out)[-1];
+		my $songinfo = $mpd->search('filename' => $uri);
+		my ($artist, $album, $title, $track, $date) = $songinfo->@{qw/Artist Album Title Track Date/};
 		$mpd->clear();
     	$mpd->search_add('Artist' => $artist, 'Album' => $album, 'Title' => $title, 'Date' => $date);
     	$mpd->play();
-   }
+	}
+	list_tracks()
 }
-
 
 main;
