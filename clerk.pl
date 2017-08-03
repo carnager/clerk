@@ -41,6 +41,7 @@ my $artist_l = $columns_cfg->{artist_l};
 my $mpd = Net::MPD->connect($ENV{MPD_HOST} // $mpd_host // 'localhost');
 
 sub main {
+	create_db();
 	my %options=();
 	getopts("ta", \%options);
 	list_tracks() if defined $options{t};
@@ -57,7 +58,9 @@ sub create_db {
 	my $last_update = $mpd_stats->{db_update};
 
 	if (!-f "$db_file" || stat("$db_file")->mtime < $last_update) {
+		print STDERR "::: No cache found or cache file outdated\n";
 		my $times = int($songcount / 1000 + 1);
+		print STDERR "::: Requesting $times chunks from MPD\n";
 		my @db;
 		# since mpd will silently fail, if response is larger than command buffer, let's split the search.
 		my $chunk_size = 1000;
