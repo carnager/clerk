@@ -125,6 +125,17 @@ sub unpack_msgpack {
 	return $rdb;
 }
 
+sub do_action {
+	my $input;
+	my ($in, $action) = @_;
+	foreach my $line (split /\n/, $in) {
+		print "${line}x\n";
+		my $uri = (split /[\t\n]/, $line)[-1];
+		print "${uri}x\n";
+		$mpd->add($uri);
+	}
+}
+
 # read messagepack file and output strings
 sub list_albums {
 	my ($rdb) = @_;
@@ -145,24 +156,13 @@ sub list_albums {
 	my $out = backend_call(\@output, "1,2,3");
     print $out;
 	# call rofi function to display possible actions
-	my @action_items = ("Add\n", "Insert\n", "Replace\n");
+	my @action_items = ("Add\n", "Replace\n");
 	my $action = backend_call(\@action_items);
-
-	# split output into tag variables and remove possible whitespace
-	if ($action eq "Add\n") {
-		my $line;
-		foreach my $line (split /\n/, $out) {
-			my $uri = (split /[\t\n]/, $line)[-1];
-			$mpd->add($uri);
-		}
-	}
-	elsif ($action eq "Replace\n") {
+	if ($action eq "Replace\n") {
 		$mpd->clear();
-		my $line;
-		foreach my $line (split /\n/, $out) {
-			my $uri = (split /[\t\n]/, $line)[-1];
-			$mpd->add($uri);
-		}
+	}
+	do_action($out);
+	if ($action eq "Replace\n") {
 		$mpd->play();
 	}
 	list_albums($rdb);
@@ -179,24 +179,14 @@ sub list_tracks {
 	}
 	my $out = backend_call(\@output, "1,2,3,4");
 	
-    my @action_items = ("Add\n", "Insert\n", "Replace\n");
-    my $action = backend_call(\@action_items);
-	
-	if ($action eq "Add\n") {
-		my $line;
-		foreach my $line (split /\n/, $out) {
-			my $uri = (split /[\t\n]/, $line)[-1];
-	    	$mpd->add($uri);
-		}
-	}
-	elsif ($action eq "Replace\n") {
+	my @action_items = ("Add\n", "Replace\n");
+	my $action = backend_call(\@action_items);
+	if ($action eq "Replace\n") {
 		$mpd->clear();
-		my $line;
-		foreach my $line (split /\n/, $out) {
-			my $uri = (split /[\t\n]/, $line)[-1];
-	    	$mpd->add($uri);
-		}
-    	$mpd->play();
+	}
+	do_action($out);
+	if ($action eq "Replace\n") {
+		$mpd->play();
 	}
 	list_tracks($rdb)
 }
