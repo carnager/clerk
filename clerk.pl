@@ -98,9 +98,10 @@ sub backend_call {
 			'-width',
 			'1300',
 			'-dmenu',
+			'-multi-select',
 			'-i',
 			'-p',
-			' >'
+			'> '
 		]
 	);
 	my $handle = start $backends{$backend} // die('backend not found'), \$input, \$out;
@@ -131,16 +132,14 @@ sub do_action {
 	if ($action eq "Replace\n") {
 		$mpd->clear();
 	}
-	if ($action eq "Replace\n") {
-		$mpd->play();
-	}
 	my $input;
 	my ($in) = @_;
 	foreach my $line (split /\n/, $in) {
-		print "${line}x\n";
 		my $uri = (split /[\t\n]/, $line)[-1];
-		print "${uri}x\n";
 		$mpd->add($uri);
+	}
+	if ($action eq "Replace\n") {
+		$mpd->play();
 	}
 }
 
