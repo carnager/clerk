@@ -173,7 +173,7 @@ sub list_tracks {
 	my $in;
 	for my $entry (@{$rdb}) {
 		$in = sprintf "%-${track_l}.${track_l}s\t%-${title_l}.${title_l}s\t%-${artist_l}.${artist_l}s\t%-${album_l}.${album_l}s\t%-s\n", $entry->@{qw/Track Title Artist Album uri/};
-	    push @output, $in;
+		push @output, $in;
 	}
 	my $out = backend_call(\@output, "1,2,3,4");
 	do_action($out);
