@@ -126,8 +126,16 @@ sub unpack_msgpack {
 }
 
 sub do_action {
+	my @action_items = ("Add\n", "Replace\n");
+	my $action = backend_call(\@action_items);
+	if ($action eq "Replace\n") {
+		$mpd->clear();
+	}
+	if ($action eq "Replace\n") {
+		$mpd->play();
+	}
 	my $input;
-	my ($in, $action) = @_;
+	my ($in) = @_;
 	foreach my $line (split /\n/, $in) {
 		print "${line}x\n";
 		my $uri = (split /[\t\n]/, $line)[-1];
@@ -154,17 +162,7 @@ sub list_albums {
 		push @output, $in;
 	}
 	my $out = backend_call(\@output, "1,2,3");
-    print $out;
-	# call rofi function to display possible actions
-	my @action_items = ("Add\n", "Replace\n");
-	my $action = backend_call(\@action_items);
-	if ($action eq "Replace\n") {
-		$mpd->clear();
-	}
 	do_action($out);
-	if ($action eq "Replace\n") {
-		$mpd->play();
-	}
 	list_albums($rdb);
 }
 
@@ -178,16 +176,7 @@ sub list_tracks {
     push @output, $in;
 	}
 	my $out = backend_call(\@output, "1,2,3,4");
-	
-	my @action_items = ("Add\n", "Replace\n");
-	my $action = backend_call(\@action_items);
-	if ($action eq "Replace\n") {
-		$mpd->clear();
-	}
 	do_action($out);
-	if ($action eq "Replace\n") {
-		$mpd->play();
-	}
 	list_tracks($rdb)
 }
 
