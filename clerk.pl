@@ -7,6 +7,7 @@ use utf8;
 use v5.10;
 use autodie;
 use Config::Simple;
+use HTTP::Date;
 use Data::Dumper;
 use Data::MessagePack;
 use DDP;
@@ -16,6 +17,7 @@ use File::Slurper 'read_binary';
 use Getopt::Std;
 use IO::Select;
 use IPC::Run qw( timeout start );
+use List::Util qw(any);
 use Net::MPD;
 
 my $config_file = $ENV{'HOME'} . "/.config/clerk/clerk.conf";
@@ -44,8 +46,12 @@ sub main {
 	create_db();
 	my %options=();
 	getopts("ta", \%options);
-	list_tracks() if defined $options{t};
-	list_albums() if defined $options{a};
+
+	if (defined $options{t}) {
+		list_db_entries_for("Tracks");
+	} elsif (defined $options{a}) {
+		list_db_entries_for("Albums");
+	}
 }
 
 
@@ -72,7 +78,7 @@ sub create_db {
 
 		# only save relevant tags to keep messagepack file small
 		# note: maybe use a proper database instead? See list_album function.
-		my @filtered = map { {$_->%{'Album', 'Artist', 'Date', 'AlbumArtist', 'Title', 'Track', 'uri', 'Last-Modified'}} } @db;
+		my @filtered = map { $_->{mtime} = str2time($_->{'Last-Modified'}); +{$_->%{qw/Album Artist Date AlbumArtist Title Track uri mtime/}} } @db;
 		pack_msgpack(\@filtered);
 	}
 }
@@ -146,40 +152,55 @@ sub do_action {
 	}
 }
 
-# read messagepack file and output strings
-sub list_albums {
+sub formated_albums {
 	my ($rdb) = @_;
-	$rdb //= unpack_msgpack();
-	my @album_db = do {my %seen; grep { !defined($_->{AlbumArtist}) or !defined($_->{Album}) or
-		!defined($_->{Date}) or !$seen{$_->{AlbumArtist}}{$_->{Album}}{$_->{Date}}++ } @{$rdb}};
-	my @sorted_db = sort { lc($a->{AlbumArtist}) cmp lc($b->{AlbumArtist}) } @album_db;
 
-	# push list to rofi and receive selected item
-	my @output;
-	my $in;
-	for my $entry (@sorted_db) { 
-		my $album_dir = dirname($entry->{uri});
-		$album_dir =~ s/\/CD.*$//g;
-		$in = sprintf "%-${albumartist_l}.${albumartist_l}s\t%-${date_l}.${date_l}s\t%-${album_l}.${album_l}s\t%s\n", $entry->{AlbumArtist},$entry->{Date}, $entry->{Album}, $album_dir;
-		push @output, $in;
+	my %uniq_albums;
+	for my $i (@$rdb) {
+		my $newkey = join "", map { lc } $i->@{qw/AlbumArtist Album Date/};
+		if (!exists $uniq_albums{$newkey}) {
+			my $dir = (dirname($i->{uri}) =~ s/\/CD.*$//r);
+			$uniq_albums{$newkey} = {$i->%{qw/AlbumArtist Album Date mtime/}, Dir => $dir};
+		} else {
+			if ($uniq_albums{$newkey}->{'mtime'} < $i->{'mtime'}) {
+				$uniq_albums{$newkey}->{'mtime'} = $i->{'mtime'}
+			}
+		}
 	}
-	my $out = backend_call(\@output, "1,2,3");
-	do_action($out);
-	list_albums($rdb);
+
+	my @albums;
+	my $fmtstr = join "", map {"%-${_}.${_}s\t"} ($albumartist_l, $date_l, $album_l);
+	for my $k (sort keys %uniq_albums) {
+		push @albums, sprintf $fmtstr."%s\n", $uniq_albums{$k}->@{qw/AlbumArtist Date Album Dir/};
+
+	}
+
+	return \@albums;
 }
 
-sub list_tracks {
+sub formated_tracks {
 	my ($rdb) = @_;
-	$rdb //= unpack_msgpack();
-	my @output;
-	my $in;
-	for my $entry (@{$rdb}) {
-		$in = sprintf "%-${track_l}.${track_l}s\t%-${title_l}.${title_l}s\t%-${artist_l}.${artist_l}s\t%-${album_l}.${album_l}s\t%-s\n", $entry->@{qw/Track Title Artist Album uri/};
-		push @output, $in;
+	my $fmtstr = join "", map {"%-${_}.${_}s\t"} ($track_l, $title_l, $artist_l, $album_l);
+	my @tracks = map {
+		sprintf $fmtstr."%-s\n", $_->@{qw/Track Title Artist Album uri/}
+	} @{$rdb};
+
+	return \@tracks;
+}
+
+sub list_db_entries_for {
+	my ($kind) = @_;
+	die "Wrong kind" unless any {; $_ eq $kind} qw/Albums Tracks/;
+
+	my $rdb = unpack_msgpack();
+	my %fields = (Albums=> "1,2,3", Tracks => "1,2,3,4");
+	my %formater = (Albums => \&formated_albums, Tracks => \&formated_tracks);
+
+	my $output = $formater{$kind}->($rdb);
+	for (;;) {
+		my $out = backend_call($output, $fields{$kind});
+		do_action($out);
 	}
-	my $out = backend_call(\@output, "1,2,3,4");
-	do_action($out);
-	list_tracks($rdb)
 }
 
 main;
