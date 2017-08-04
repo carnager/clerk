@@ -29,6 +29,7 @@ my $general_cfg = $cfg->param(-block=>"General");
 my $mpd_host = $general_cfg->{mpd_host};
 my $db_file = $general_cfg->{database};
 my $backend = $general_cfg->{backend};
+my $chunksize = $general_cfg->{chunksize};
 
 my $columns_cfg = $cfg->param(-block=>"Columns");
 my $albumartist_l = $columns_cfg->{albumartist_l};
@@ -65,11 +66,11 @@ sub create_db {
 
 	if (!-f "$db_file" || stat("$db_file")->mtime < $last_update) {
 		print STDERR "::: No cache found or cache file outdated\n";
-		my $times = int($songcount / 1000 + 1);
+		my $times = int($songcount / $chunksize + 1);
 		print STDERR "::: Requesting $times chunks from MPD\n";
 		my @db;
 		# since mpd will silently fail, if response is larger than command buffer, let's split the search.
-		my $chunk_size = 1000;
+		my $chunk_size = $chunksize;
 		for (my $i=0;$i<=$songcount;$i+=$chunk_size) {
 			my $endnumber = $i+$chunk_size; 
 			my @temp_db = $mpd->search('filename', '', 'window', "$i:$endnumber");
