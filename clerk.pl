@@ -13,6 +13,7 @@ use Data::MessagePack;
 use DDP;
 use File::Basename;
 use File::stat;
+use File::Path qw(make_path);
 use File::Slurper 'read_binary';
 use Getopt::Std;
 use IO::Select;
@@ -22,6 +23,7 @@ use Net::MPD;
 
 $ENV{TMUX_TMPDIR}='/tmp/clerk/tmux';
 my $tmux_config='/etc/clerk/tmux.conf';
+make_path($ENV{TMUX_TMPDIR}) unless(-d $ENV{TMUX_TMPDIR});
 
 my $config_file = $ENV{'HOME'} . "/.config/clerk/clerk.conf";
 
