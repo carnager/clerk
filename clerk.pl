@@ -1,25 +1,25 @@
 #!/usr/bin/env perl
 
 binmode(STDOUT, ":utf8");
+use v5.10;
 use warnings;
 use strict;
 use utf8;
-use v5.10;
-use autodie;
 use Config::Simple;
-use HTTP::Date;
+use DDP;
 use Data::Dumper;
 use Data::MessagePack;
-use DDP;
 use File::Basename;
-use File::stat;
 use File::Path qw(make_path);
 use File::Slurper 'read_binary';
+use File::stat;
 use Getopt::Std;
+use HTTP::Date;
 use IO::Select;
 use IPC::Run qw( timeout start );
 use List::Util qw(any);
 use Net::MPD;
+use autodie;
 
 $ENV{TMUX_TMPDIR}='/tmp/clerk/tmux';
 my $tmux_config='/etc/clerk/tmux.conf';
@@ -63,21 +63,22 @@ sub main {
 			system('tmux', '-f', $tmux_config, 'new-session', '-s', 'music', '-n', 'albums', '-d', './clerk.pl', '-a');
 			system('tmux', 'new-window', '-t', 'music', '-n', 'tracks', './clerk.pl', '-t');
 	#		system('tmux', 'new-window', '-t', 'music', '-n', 'latest', './clerk_fzf', '--latest');
-	#		system('tmux', 'new-window', '-t', 'music', '-n', 'playlists', './clerk_fzf', '--playlists');
+			system('tmux', 'new-window', '-t', 'music', '-n', 'playlists', './clerk.pl', '-l');
 			system('tmux', 'new-window', '-t', 'music', '-n', 'queue', 'ncmpcpp');
 		}
 		system('tmux', 'attach', '-t', 'music');
 	}
 #	elsif ($backend eq "rofi") {
 		my %options=();
-		getopts("ta", \%options);
+		getopts("tal", \%options);
 
 		if (defined $options{t}) {
 			list_db_entries_for("Tracks");
 		} elsif (defined $options{a}) {
 			list_db_entries_for("Albums");
+		} elsif (defined $options{l}) {
+			list_playlists();
 		}
-#	}
 }
 
 
@@ -91,6 +92,7 @@ sub create_db {
 
 	if (!-f "$db_file" || stat("$db_file")->mtime < $last_update) {
 		print STDERR "::: No cache found or cache file outdated\n";
+		print STDERR "::: Chunksize set to $chunksize songs\n";
 		my $times = int($songcount / $chunksize + 1);
 		print STDERR "::: Requesting $times chunks from MPD\n";
 		my @db;
@@ -162,22 +164,37 @@ sub unpack_msgpack {
 }
 
 sub do_action {
+	my ($in, $context) = @_;
 	my @action_items = ("Add\n", "Replace\n");
 	my $action = backend_call(\@action_items);
 	if ($action eq "Replace\n") {
 		$mpd->clear();
 	}
 	my $input;
-	my ($in) = @_;
-	foreach my $line (split /\n/, $in) {
-		my $uri = (split /[\t\n]/, $line)[-1];
-		$mpd->add($uri);
+	if ($context eq "playlist") {
+		chomp $in;
+		$mpd->load("$in");
+	} elsif ($context eq "tracks") {
+		foreach my $line (split /\n/, $in) {
+			my $uri = (split /[\t\n]/, $line)[-1];
+			$mpd->add($uri);
+		}
 	}
 	if ($action eq "Replace\n") {
 		$mpd->play();
 	}
 	my @queue_cmd = ('tmux', 'findw', '-t', 'music', 'queue');
 	system(@queue_cmd);
+}
+
+sub list_playlists {
+	my @playlists = $mpd->list_playlists();
+	my $output = formated_playlists(\@playlists);
+
+	for (;;) {
+		my $out = backend_call($output);
+		do_action($out, "playlist");
+	}
 }
 
 sub formated_albums {
@@ -216,6 +233,15 @@ sub formated_tracks {
 	return \@tracks;
 }
 
+sub formated_playlists {
+    my ($rdb) = @_;
+    my @playlists = map {
+    	sprintf "%s\n", $_->{playlist}
+    } @{$rdb};
+
+    return \@playlists;
+}
+
 sub list_db_entries_for {
 	my ($kind) = @_;
 	die "Wrong kind" unless any {; $_ eq $kind} qw/Albums Tracks/;
@@ -227,7 +253,7 @@ sub list_db_entries_for {
 	my $output = $formater{$kind}->($rdb);
 	for (;;) {
 		my $out = backend_call($output, $fields{$kind});
-		do_action($out);
+		do_action($out, "tracks");
 	}
 }
 
