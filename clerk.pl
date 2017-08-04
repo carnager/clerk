@@ -20,7 +20,14 @@ use IPC::Run qw( timeout start );
 use List::Util qw(any);
 use Net::MPD;
 
+$ENV{TMUX_TMPDIR}='/tmp/clerk/tmux';
+my $tmux_config='/etc/clerk/tmux.conf';
+
 my $config_file = $ENV{'HOME'} . "/.config/clerk/clerk.conf";
+
+if ($ENV{CLERK_CONF}) {
+	$config_file = $ENV{CLERK_CONF};
+}
 
 # read configuration file
 my $cfg = new Config::Simple(filename=>"$config_file");
@@ -39,20 +46,36 @@ my $title_l = $columns_cfg->{title_l};
 my $track_l = $columns_cfg->{track_l};
 my $artist_l = $columns_cfg->{artist_l};
 
+if ($ENV{CLERK_BACKEND}) {
+	$backend = $ENV{CLERK_BACKEND};
+}
 
 # open connection to MPD
 my $mpd = Net::MPD->connect($ENV{MPD_HOST} // $mpd_host // 'localhost');
 
 sub main {
 	create_db();
-	my %options=();
-	getopts("ta", \%options);
-
-	if (defined $options{t}) {
-		list_db_entries_for("Tracks");
-	} elsif (defined $options{a}) {
-		list_db_entries_for("Albums");
+	if ($backend eq "fzf") {
+		system('tmux', 'has-session', '-t', 'music');
+		if ($? != -0) {
+			system('tmux', '-f', $tmux_config, 'new-session', '-s', 'music', '-n', 'albums', '-d', './clerk.pl', '-a');
+			system('tmux', 'new-window', '-t', 'music', '-n', 'tracks', './clerk.pl', '-t');
+	#		system('tmux', 'new-window', '-t', 'music', '-n', 'latest', './clerk_fzf', '--latest');
+	#		system('tmux', 'new-window', '-t', 'music', '-n', 'playlists', './clerk_fzf', '--playlists');
+			system('tmux', 'new-window', '-t', 'music', '-n', 'queue', 'ncmpcpp');
+		}
+		system('tmux', 'attach', '-t', 'music');
 	}
+#	elsif ($backend eq "rofi") {
+		my %options=();
+		getopts("ta", \%options);
+
+		if (defined $options{t}) {
+			list_db_entries_for("Tracks");
+		} elsif (defined $options{a}) {
+			list_db_entries_for("Albums");
+		}
+#	}
 }
 
 
@@ -151,6 +174,8 @@ sub do_action {
 	if ($action eq "Replace\n") {
 		$mpd->play();
 	}
+	my @queue_cmd = ('tmux', 'findw', '-t', 'music', 'queue');
+	system(@queue_cmd);
 }
 
 sub formated_albums {
