@@ -262,10 +262,17 @@ sub list_db_entries_for {
 	);
 
 	my $output = $formater{$kind}->($rdb);
-	for (;;) {
+	if ($backend eq "rofi") {
 		my $out = backend_call($output, $fields{$kind});
 		do_action($out, "tracks");
 	}
+	elsif ($backend eq "fzf") {
+	for (;;) {
+		my $out = backend_call($output, $fields{$kind});
+		do_action($out, "tracks");
+		}
+	}
+
 }
 
 main;
