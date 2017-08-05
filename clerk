@@ -39,6 +39,7 @@ my $mpd_host = $general_cfg->{mpd_host};
 my $tmux_config = $general_cfg->{tmux_config};
 my $db_file = $general_cfg->{database};
 my $chunksize = $general_cfg->{chunksize};
+my $player = $general_cfg->{player};
 
 my $columns_cfg = $cfg->param(-block=>"Columns");
 my $albumartist_l = $columns_cfg->{albumartist_l};
@@ -66,7 +67,7 @@ sub main {
 			system('tmux', 'new-window', '-t', 'music', '-n', 'tracks', $self, '-t', '-f');
 			system('tmux', 'new-window', '-t', 'music', '-n', 'latest', $self, '-l', '-f');
 			system('tmux', 'new-window', '-t', 'music', '-n', 'playlists', $self, '-p', '-f');
-			system('tmux', 'new-window', '-t', 'music', '-n', 'queue', 'ncmpcpp');
+			system('tmux', 'new-window', '-t', 'music', '-n', 'queue', $player);
 		}
 		system('tmux', 'attach', '-t', 'music');
 	}
