@@ -11,6 +11,8 @@ use File::Basename;
 use File::Path qw(make_path);
 use File::Slurper 'read_binary';
 use File::stat;
+use FindBin '$Bin';
+use FindBin '$Script';
 use Getopt::Std;
 use HTTP::Date;
 use IO::Select;
@@ -27,15 +29,13 @@ my $config_file = $ENV{'HOME'} . "/.config/clerk/clerk.conf";
 if ($ENV{CLERK_CONF}) {
 	$config_file = $ENV{CLERK_CONF};
 }
-
+my $backend="fzf";
 # read configuration file
 my $cfg = new Config::Simple(filename=>"$config_file");
-
 my $general_cfg = $cfg->param(-block=>"General");
 my $mpd_host = $general_cfg->{mpd_host};
 my $tmux_config = $general_cfg->{tmux_config};
 my $db_file = $general_cfg->{database};
-my $backend = $general_cfg->{backend};
 my $chunksize = $general_cfg->{chunksize};
 
 my $columns_cfg = $cfg->param(-block=>"Columns");
@@ -46,37 +46,54 @@ my $title_l = $columns_cfg->{title_l};
 my $track_l = $columns_cfg->{track_l};
 my $artist_l = $columns_cfg->{artist_l};
 
+
 # open connection to MPD
 my $mpd = Net::MPD->connect($ENV{MPD_HOST} // $mpd_host // 'localhost');
 
 sub main {
 	create_db();
 	my %options=();
-	getopts("talp", \%options);
-
-	$backend = 'rofi' if scalar %options;
-	if (defined $options{t}) {
-		list_db_entries_for("Tracks");
-	} elsif (defined $options{a}) {
-		list_db_entries_for("Albums");
-	} elsif (defined $options{p}) {
-		list_playlists();
-	} elsif (defined $options{l}) {
-		my $backend="rofi";
-		list_db_entries_for("Latest");
-	}
-	if ($backend eq "fzf") {
+	getopts("talpf", \%options);
+#	$backend = 'rofi' if scalar %options;
+#	if (! scalar @options{f}) { $backend = 'rofi' }
+#		if (defined $options{t}) {
+#			list_db_entries_for("Tracks");
+#		} elsif (defined $options{a}) {
+#			list_db_entries_for("Albums");
+#		} elsif (defined $options{p}) {
+#			list_playlists();
+#		} elsif (defined $options{l}) {
+#			list_db_entries_for("Latest");
+#		}
+#	elsif (scalar @options{f}) { $backend = 'fzf' }
+#		system('tmux', 'has-session', '-t', 'music');
+#		if ($? != -0) {
+#			system('tmux', '-f', $tmux_config, 'new-session', '-s', 'music', '-n', 'albums', '-d', 'clerk', '-a', '-f');
+#			system('tmux', 'new-window', '-t', 'music', '-n', 'tracks', 'clerk', '-t', '-f');
+#			system('tmux', 'new-window', '-t', 'music', '-n', 'latest', 'clerk', '-l', '-f');
+#			system('tmux', 'new-window', '-t', 'music', '-n', 'playlists', 'clerk', '-p', '-f');
+#			system('tmux', 'new-window', '-t', 'music', '-n', 'queue', 'ncmpcpp');
+#		}
+#	system('tmux', 'attach', '-t', 'music');
+	unless ($options{f}) { 
+		$backend = 'rofi'
+	} else { 
+		$backend = 'fzf';
 		system('tmux', 'has-session', '-t', 'music');
 		if ($? != -0) {
-			system('tmux', '-f', $tmux_config, 'new-session', '-s', 'music', '-n', 'albums', '-d', 'clerk', '-a');
-			system('tmux', 'new-window', '-t', 'music', '-n', 'tracks', 'clerk', '-t');
-			system('tmux', 'new-window', '-t', 'music', '-n', 'latest', 'clerk', '-l');
-			system('tmux', 'new-window', '-t', 'music', '-n', 'playlists', 'clerk', '-p');
+			system('tmux', '-f', $tmux_config, 'new-session', '-s', 'music', '-n', 'albums', '-d', $self, '-a', '-f');
+			system('tmux', 'new-window', '-t', 'music', '-n', 'tracks', $self, '-t', '-f');
+			system('tmux', 'new-window', '-t', 'music', '-n', 'latest', $self, '-l', '-f');
+			system('tmux', 'new-window', '-t', 'music', '-n', 'playlists', $self, '-p', '-f');
 			system('tmux', 'new-window', '-t', 'music', '-n', 'queue', 'ncmpcpp');
 		}
 		system('tmux', 'attach', '-t', 'music');
 	}
-#	elsif ($backend eq "rofi") {
+
+	if    (defined $options{t}) { list_db_entries_for("Tracks") }
+	elsif (defined $options{a}) { list_db_entries_for("Albums") }
+	elsif (defined $options{p}) { list_playlists() }
+	elsif (defined $options{l}) { list_db_entries_for("Latest") }
 }
 
 
