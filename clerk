@@ -46,11 +46,6 @@ my $title_l = $columns_cfg->{title_l};
 my $track_l = $columns_cfg->{track_l};
 my $artist_l = $columns_cfg->{artist_l};
 
-print "$tmux_config\n";
-if ($ENV{CLERK_BACKEND}) {
-	$backend = $ENV{CLERK_BACKEND};
-}
-
 # open connection to MPD
 my $mpd = Net::MPD->connect($ENV{MPD_HOST} // $mpd_host // 'localhost');
 
