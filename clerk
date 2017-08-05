@@ -15,7 +15,6 @@ use FindBin '$Bin';
 use FindBin '$Script';
 use Getopt::Std;
 use HTTP::Date;
-use IO::Select;
 use IPC::Run qw( timeout start );
 use List::Util qw(any);
 use Net::MPD;
