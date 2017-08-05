@@ -6,8 +6,6 @@ use warnings;
 use strict;
 use utf8;
 use Config::Simple;
-use DDP;
-use Data::Dumper;
 use Data::MessagePack;
 use File::Basename;
 use File::Path qw(make_path);
