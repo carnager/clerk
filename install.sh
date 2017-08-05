@@ -2,11 +2,16 @@
 
 dependencies=(
 	"Config::Simple"
-	"Data::Printer"
 	"inc::Module::Install"
 	"Data::MessagePack"
 	"File::Path"
 	"Net::MPD"
+	)
+
+repo_modules=(
+	"perl-config-simple"
+	"perl-file-slurp"
+	"perl-http-date"
 	)
 
 printf "%s\n" "This script will install needed cpan modules"
@@ -46,7 +51,7 @@ case "${deps_choice}" in
 		do
 			cpanp i "${dep}"
 		done
-		sudo pacman -S perl-config-simple perl-http-date perl-ipc-run 
+		sudo pacman -S "${repo_modules[@]}"
 		;;
 esac
 
