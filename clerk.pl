@@ -226,7 +226,9 @@ sub formated_albums {
 	}
 
 	for my $k (@skeys) {
-		push @albums, sprintf $fmtstr."%s\n", $uniq_albums{$k}->@{qw/AlbumArtist Date Album Dir/};
+		my @vals = (map { "$_" // "Unknown" } $uniq_albums{$k}->@{qw/AlbumArtist Date Album/}), $uniq_albums{$k}->{Dir};
+		my $strval = sprintf $fmtstr."%s\n", @vals;
+		push @albums, $strvals;
 
 	}
 
@@ -237,7 +239,8 @@ sub formated_tracks {
 	my ($rdb) = @_;
 	my $fmtstr = join "", map {"%-${_}.${_}s\t"} ($track_l, $title_l, $artist_l, $album_l);
 	my @tracks = map {
-		sprintf $fmtstr."%-s\n", $_->@{qw/Track Title Artist Album uri/}
+		sprintf $fmtstr."%-s\n", (map { "$_" // "unknown" } $_->@{qw/Track Title Artist Album/}), $_->{uri};
+#		sprintf $fmtstr."%-s\n", $_->@{qw/Track Title Artist Album uri/}
 	} @{$rdb};
 
 	return \@tracks;
