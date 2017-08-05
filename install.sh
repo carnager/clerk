@@ -16,7 +16,7 @@ read -e -p "Proceed? (Y/n) > " go_on
 go_on=${go_on:-y}
 
 case $go_on in
-	n) 	exit;
+	[Nn]) 	exit;
 		;;
 esac
 
@@ -25,12 +25,12 @@ cpan_arch=${cpan_arch:-y}
 
 
 case $cpan_arch in
-	y)	if [[ -z $(pacman -Qsq perl-cpanplus-dist-arch) ]]
+	[Yy])	if [[ -z $(pacman -Qsq perl-cpanplus-dist-arch) ]]
 	then
 		read -e -p "perl-cpanplus-dist-arch package not found. Install? (Y/n) > " cpanp_dist_install
 		cpanp_dist_install=${cpanp_dist_install:-y}
 		case $cpanp_dist_install in
-			y) 	yes | sudo pacman -S perl-cpanplus-dist-arch
+			[Yy]) 	yes | sudo pacman -S perl-cpanplus-dist-arch
 				;;
 		esac
 	fi
@@ -41,7 +41,7 @@ read -e -p "Install dependencies for clerk? (Y/n) > " deps_choice
 deps_choice=${deps_choice:-y}
 
 case "${deps_choice}" in
-	y) 
+	[Yy]) 
 		for dep in "${dependencies[@]}"
 		do
 			cpanp i "${dep}"
@@ -53,7 +53,7 @@ esac
 read -e -p "Set installation directory. (Default: $HOME/bin) > " foo
 foo=${foo:-$HOME/bin}
 case $foo in
-	y) 	export path="$HOME/bin";
+	[Yy]) 	export path="$HOME/bin";
 		;;
 	*)	export path="$foo";
 		;;
@@ -63,7 +63,7 @@ read -e -p "Install clerk to $path? (Y/n) > " install
 install=${install:-y}
 
 case $install in
-	y)	cp clerk $path;
+	[Yy])	cp clerk $path;
 		if [[ ! -d "${HOME}/.config/clerk" ]]
 		then
 			mkdir "${HOME}/.config/clerk"

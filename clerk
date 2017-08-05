@@ -56,6 +56,20 @@ my $mpd = Net::MPD->connect($ENV{MPD_HOST} // $mpd_host // 'localhost');
 
 sub main {
 	create_db();
+	my %options=();
+	getopts("talp", \%options);
+
+	$backend = 'rofi' if scalar %options;
+	if (defined $options{t}) {
+		list_db_entries_for("Tracks");
+	} elsif (defined $options{a}) {
+		list_db_entries_for("Albums");
+	} elsif (defined $options{p}) {
+		list_playlists();
+	} elsif (defined $options{l}) {
+		my $backend="rofi";
+		list_db_entries_for("Latest");
+	}
 	if ($backend eq "fzf") {
 		system('tmux', 'has-session', '-t', 'music');
 		if ($? != -0) {
@@ -68,18 +82,6 @@ sub main {
 		system('tmux', 'attach', '-t', 'music');
 	}
 #	elsif ($backend eq "rofi") {
-		my %options=();
-		getopts("talp", \%options);
-
-		if (defined $options{t}) {
-			list_db_entries_for("Tracks");
-		} elsif (defined $options{a}) {
-			list_db_entries_for("Albums");
-		} elsif (defined $options{p}) {
-			list_playlists();
-		} elsif (defined $options{l}) {
-			list_db_entries_for("Latest");
-		}
 }
 
 
