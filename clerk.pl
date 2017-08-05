@@ -62,22 +62,24 @@ sub main {
 		if ($? != -0) {
 			system('tmux', '-f', $tmux_config, 'new-session', '-s', 'music', '-n', 'albums', '-d', './clerk.pl', '-a');
 			system('tmux', 'new-window', '-t', 'music', '-n', 'tracks', './clerk.pl', '-t');
-	#		system('tmux', 'new-window', '-t', 'music', '-n', 'latest', './clerk_fzf', '--latest');
-			system('tmux', 'new-window', '-t', 'music', '-n', 'playlists', './clerk.pl', '-l');
+			system('tmux', 'new-window', '-t', 'music', '-n', 'latest', './clerk.pl', '-l');
+			system('tmux', 'new-window', '-t', 'music', '-n', 'playlists', './clerk.pl', '-p');
 			system('tmux', 'new-window', '-t', 'music', '-n', 'queue', 'ncmpcpp');
 		}
 		system('tmux', 'attach', '-t', 'music');
 	}
 #	elsif ($backend eq "rofi") {
 		my %options=();
-		getopts("tal", \%options);
+		getopts("talp", \%options);
 
 		if (defined $options{t}) {
 			list_db_entries_for("Tracks");
 		} elsif (defined $options{a}) {
 			list_db_entries_for("Albums");
-		} elsif (defined $options{l}) {
+		} elsif (defined $options{p}) {
 			list_playlists();
+		} elsif (defined $options{l}) {
+			list_db_entries_for("Latest");
 		}
 }
 
@@ -198,7 +200,7 @@ sub list_playlists {
 }
 
 sub formated_albums {
-	my ($rdb) = @_;
+	my ($rdb, $sorted) = @_;
 
 	my %uniq_albums;
 	for my $i (@$rdb) {
@@ -215,7 +217,15 @@ sub formated_albums {
 
 	my @albums;
 	my $fmtstr = join "", map {"%-${_}.${_}s\t"} ($albumartist_l, $date_l, $album_l);
-	for my $k (sort keys %uniq_albums) {
+
+	my @skeys;
+	if ($sorted) {
+		@skeys = sort { $uniq_albums{$b}->{mtime} <=> $uniq_albums{$a}->{mtime} } keys %uniq_albums;
+	} else {
+		@skeys = sort keys %uniq_albums;
+	}
+
+	for my $k (@skeys) {
 		push @albums, sprintf $fmtstr."%s\n", $uniq_albums{$k}->@{qw/AlbumArtist Date Album Dir/};
 
 	}
@@ -244,11 +254,15 @@ sub formated_playlists {
 
 sub list_db_entries_for {
 	my ($kind) = @_;
-	die "Wrong kind" unless any {; $_ eq $kind} qw/Albums Tracks/;
+	die "Wrong kind" unless any {; $_ eq $kind} qw/Albums Latest Tracks/;
 
 	my $rdb = unpack_msgpack();
-	my %fields = (Albums=> "1,2,3", Tracks => "1,2,3,4");
-	my %formater = (Albums => \&formated_albums, Tracks => \&formated_tracks);
+	my %fields = (Albums=> "1,2,3", Latest => "1,2,3", Tracks => "1,2,3,4");
+	my %formater = (
+		Albums => sub {formated_albums(@_, 0)},
+		Latest => sub {formated_albums(@_, 1)},
+		Tracks => \&formated_tracks
+	);
 
 	my $output = $formater{$kind}->($rdb);
 	for (;;) {
