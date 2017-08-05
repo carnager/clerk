@@ -192,7 +192,7 @@ sub do_action {
 
 sub list_playlists {
 	my @playlists = $mpd->list_playlists();
-	my $output = formated_playlists(\@playlists);
+	my $output = formatted_playlists(\@playlists);
 
 	for (;;) {
 		my $out = backend_call($output);
@@ -200,7 +200,7 @@ sub list_playlists {
 	}
 }
 
-sub formated_albums {
+sub formatted_albums {
 	my ($rdb, $sorted) = @_;
 
 	my %uniq_albums;
@@ -236,7 +236,7 @@ sub formated_albums {
 	return \@albums;
 }
 
-sub formated_tracks {
+sub formatted_tracks {
 	my ($rdb) = @_;
 	my $fmtstr = join "", map {"%-${_}.${_}s\t"} ($track_l, $title_l, $artist_l, $album_l);
 	my @tracks = map {
@@ -247,7 +247,7 @@ sub formated_tracks {
 	return \@tracks;
 }
 
-sub formated_playlists {
+sub formatted_playlists {
     my ($rdb) = @_;
     my @playlists = map {
     	sprintf "%s\n", $_->{playlist}
@@ -263,9 +263,9 @@ sub list_db_entries_for {
 	my $rdb = unpack_msgpack();
 	my %fields = (Albums=> "1,2,3", Latest => "1,2,3", Tracks => "1,2,3,4");
 	my %formater = (
-		Albums => sub {formated_albums(@_, 0)},
-		Latest => sub {formated_albums(@_, 1)},
-		Tracks => \&formated_tracks
+		Albums => sub {formatted_albums(@_, 0)},
+		Latest => sub {formatted_albums(@_, 1)},
+		Tracks => \&formatted_tracks
 	);
 
 	my $output = $formater{$kind}->($rdb);
