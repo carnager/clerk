@@ -22,7 +22,6 @@ use Net::MPD;
 use autodie;
 
 $ENV{TMUX_TMPDIR}='/tmp/clerk/tmux';
-my $tmux_config='/etc/clerk/tmux.conf';
 make_path($ENV{TMUX_TMPDIR}) unless(-d $ENV{TMUX_TMPDIR});
 
 my $config_file = $ENV{'HOME'} . "/.config/clerk/clerk.conf";
@@ -36,6 +35,7 @@ my $cfg = new Config::Simple(filename=>"$config_file");
 
 my $general_cfg = $cfg->param(-block=>"General");
 my $mpd_host = $general_cfg->{mpd_host};
+my $tmux_config = $general_cfg->{tmux_config};
 my $db_file = $general_cfg->{database};
 my $backend = $general_cfg->{backend};
 my $chunksize = $general_cfg->{chunksize};
@@ -204,7 +204,7 @@ sub formated_albums {
 
 	my %uniq_albums;
 	for my $i (@$rdb) {
-		my $newkey = join "", map { lc } $i->@{qw/AlbumArtist Album Date/};
+		my $newkey = join "", $i->@{qw/AlbumArtist Album Date/};
 		if (!exists $uniq_albums{$newkey}) {
 			my $dir = (dirname($i->{uri}) =~ s/\/CD.*$//r);
 			$uniq_albums{$newkey} = {$i->%{qw/AlbumArtist Album Date mtime/}, Dir => $dir};
