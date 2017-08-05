@@ -21,6 +21,8 @@ use List::Util qw(any);
 use Net::MPD;
 use autodie;
 
+my $self="$Bin/$Script";
+
 $ENV{TMUX_TMPDIR}='/tmp/clerk/tmux';
 make_path($ENV{TMUX_TMPDIR}) unless(-d $ENV{TMUX_TMPDIR});
 
