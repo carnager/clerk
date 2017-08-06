@@ -56,23 +56,24 @@ my $mpd = Net::MPD->connect($ENV{MPD_HOST} // $mpd_host // 'localhost');
 sub main {
 	create_db();
 	my %options=();
-	getopts("talpfrhyx", \%options);
+	getopts("talpfrhyxz", \%options);
 	unless ($options{f}) { 
 		$backend = 'rofi'
 	} else { 
 		$backend = 'fzf';
 	}
-	if ($options{t} // $options{a} // $options{p} // $options{l} // $options{r} // $options{x} // $options{y} // $options{h}) {
+	if ($options{t} // $options{a} // $options{p} // $options{l} // $options{r} // $options{x} // $options{y} // $options{h} // $options{z}) {
 		if    (defined $options{t}) { list_db_entries_for("Tracks") }
 		elsif (defined $options{a}) { list_db_entries_for("Albums") }
 		elsif (defined $options{p}) { list_playlists() }
-		elsif (defined $options{h}) { help() }
+		elsif (defined $options{z}) { help() }
+		elsif (defined $options{h}) { help_output() }
 		elsif (defined $options{x}) {
 			system('tmux', 'split-window', '-d', 'clerk', '-f', '-r');
 			system('tmux', 'select-pane', '-D');
 		}
 		elsif (defined $options{y}) {
-			system('tmux', 'split-window', '-d', 'clerk', '-f', '-h');
+			system('tmux', 'split-window', '-d', 'clerk', '-f', '-z');
 			system('tmux', 'select-pane', '-D');
 		}
 		elsif (defined $options{r}) { random() }
@@ -94,6 +95,22 @@ sub main {
 	}
 }
 
+sub help_output {
+	my @output = (
+		"Usage: clerk [[-f [options]]",
+		"clerk version 2.0",
+		"",
+		"Options:",
+		"  -f  Use fzf interface. Without other arguments",
+		"      this starts a complete tmux interface with tabs.",
+		"  -a  Add/Replace album(s) to queue.",
+		"  -l  Add/Replace album(s) to queue (sorted by mtime)",
+		"  -t  Add/Replace track(s) to queue.",
+		"  -p  Add stored playlist to queue",
+		"  -r  Replace current playlist with random songs/album");
+
+	print join("\n", @output), "\n\n";
+}
 
 sub create_db {
 	# Get database copy and save as messagepack file, if file is either missing
