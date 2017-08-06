@@ -4,13 +4,13 @@ dependencies=(
 	"Config::Simple"
 	"inc::Module::Install"
 	"Data::MessagePack"
+	"File::Slurper"
 	"File::Path"
 	"Net::MPD"
 	)
 
 repo_modules=(
 	"perl-config-simple"
-	"perl-file-slurp"
 	"perl-http-date"
 	)
 
