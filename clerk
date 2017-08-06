@@ -185,6 +185,7 @@ sub backend_call {
 			'-kb-accept-alt',
 			'Tab',
 			'-multi-select',
+			'-no-levensthein-sort',
 			'-i',
 			'-p',
 			'> '
