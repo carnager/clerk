@@ -55,6 +55,24 @@ case "${deps_choice}" in
 		;;
 esac
 
+if [[ -z $(pacman -Qqs fzf) ]]
+then
+	read -e -p "No fzf found. Install it? (Y/n)" fzf
+	case $fzf in
+		[Yy])	sudo pacman -S fzf
+			;;
+	esac
+fi
+
+if [[ -z $(pacman -Qqs tmux) ]]
+then
+	read -e -p "No tmux found. Install it? (Y/n)" fzf
+	case $fzf in
+		[Yy])	sudo pacman -S tmux
+			;;
+	esac
+fi
+
 read -e -p "Set installation directory. (Default: $HOME/bin) > " foo
 foo=${foo:-$HOME/bin}
 case $foo in
