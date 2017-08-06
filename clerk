@@ -7,7 +7,7 @@ use strict;
 use utf8;
 use Config::Simple;
 use Data::MessagePack;
-use DDP;
+#use DDP;
 use File::Basename;
 use File::Path qw(make_path);
 use File::Slurper 'read_binary';
@@ -54,7 +54,6 @@ my $artist_l = $columns_cfg->{artist_l};
 my $mpd = Net::MPD->connect($ENV{MPD_HOST} // $mpd_host // 'localhost');
 
 sub main {
-	create_db();
 	my %options=();
 	getopts("talpfrhyxz", \%options);
 	unless ($options{f}) { 
@@ -62,6 +61,7 @@ sub main {
 	} else { 
 		$backend = 'fzf';
 	}
+	create_db();
 	if ($options{t} // $options{a} // $options{p} // $options{l} // $options{r} // $options{x} // $options{y} // $options{h} // $options{z}) {
 		if    (defined $options{t}) { list_db_entries_for("Tracks") }
 		elsif (defined $options{a}) { list_db_entries_for("Albums") }
@@ -121,10 +121,15 @@ sub create_db {
 	my $last_update = $mpd_stats->{db_update};
 
 	if (!-f "$db_file" || stat("$db_file")->mtime < $last_update) {
-		print STDERR "::: No cache found or cache file outdated\n";
-		print STDERR "::: Chunksize set to $chunksize songs\n";
 		my $times = int($songcount / $chunksize + 1);
-		print STDERR "::: Requesting $times chunks from MPD\n";
+		if ($backend eq "rofi") {
+			system('notify-send', '-t', '5', 'clerk', 'Updating Cache File');
+		}
+		elsif ($backend eq "fzf") {
+			print STDERR "::: No cache found or cache file outdated\n";
+			print STDERR "::: Chunksize set to $chunksize songs\n";
+			print STDERR "::: Requesting $times chunks from MPD\n";
+		}
 		my @db;
 		# since mpd will silently fail, if response is larger than command buffer, let's split the search.
 		my $chunk_size = $chunksize;
