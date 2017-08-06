@@ -5,6 +5,7 @@ dependencies=(
 	"inc::Module::Install"
 	"Data::MessagePack"
 	"File::Slurper"
+	"IPC::Run"
 	"File::Path"
 	"Net::MPD"
 	)
