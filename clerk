@@ -219,9 +219,8 @@ sub random {
 	if ($action eq "Settings\n") {
 		my @action_items = ("5\n", "10\n", "15\n", "20\n", "25\n", "30\n");
 		my $action = backend_call(\@action_items);
-		chomp $songs;
-		$cfg->param(-block=>'General');
-		$general_cfg->{songs} = $action;
+		chomp $action;
+		$cfg->param("General.songs", $action);
 		$cfg->save();
 }
 }
