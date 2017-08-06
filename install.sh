@@ -35,7 +35,7 @@ case $cpan_arch in
 		read -e -p "perl-cpanplus-dist-arch package not found. Install? (Y/n) > " cpanp_dist_install
 		cpanp_dist_install=${cpanp_dist_install:-y}
 		case $cpanp_dist_install in
-			[Yy]) 	yes | sudo pacman -S perl-cpanplus-dist-arch
+			[Yy]) 	sudo pacman -S perl-cpanplus-dist-arch
 				;;
 		esac
 	fi
