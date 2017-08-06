@@ -7,6 +7,7 @@ use strict;
 use utf8;
 use Config::Simple;
 use Data::MessagePack;
+use DDP;
 use File::Basename;
 use File::Path qw(make_path);
 use File::Slurper 'read_binary';
@@ -37,6 +38,7 @@ my $general_cfg = $cfg->param(-block=>"General");
 my $mpd_host = $general_cfg->{mpd_host};
 my $tmux_config = $general_cfg->{tmux_config};
 my $db_file = $general_cfg->{database};
+my $songs = $general_cfg->{songs};
 my $chunksize = $general_cfg->{chunksize};
 my $player = $general_cfg->{player};
 
@@ -48,18 +50,35 @@ my $title_l = $columns_cfg->{title_l};
 my $track_l = $columns_cfg->{track_l};
 my $artist_l = $columns_cfg->{artist_l};
 
-
 # open connection to MPD
 my $mpd = Net::MPD->connect($ENV{MPD_HOST} // $mpd_host // 'localhost');
 
 sub main {
 	create_db();
 	my %options=();
-	getopts("talpf", \%options);
+	getopts("talpfrhyx", \%options);
 	unless ($options{f}) { 
 		$backend = 'rofi'
 	} else { 
 		$backend = 'fzf';
+	}
+	if ($options{t} // $options{a} // $options{p} // $options{l} // $options{r} // $options{x} // $options{y} // $options{h}) {
+		if    (defined $options{t}) { list_db_entries_for("Tracks") }
+		elsif (defined $options{a}) { list_db_entries_for("Albums") }
+		elsif (defined $options{p}) { list_playlists() }
+		elsif (defined $options{h}) { help() }
+		elsif (defined $options{x}) {
+			system('tmux', 'split-window', '-d', 'clerk', '-f', '-r');
+			system('tmux', 'select-pane', '-D');
+		}
+		elsif (defined $options{y}) {
+			system('tmux', 'split-window', '-d', 'clerk', '-f', '-h');
+			system('tmux', 'select-pane', '-D');
+		}
+		elsif (defined $options{r}) { random() }
+		elsif (defined $options{l}) { list_db_entries_for("Latest") }
+	}
+	else {
 		system('tmux', 'has-session', '-t', 'music');
 		if ($? != -0) {
 			system('tmux', '-f', $tmux_config, 'new-session', '-s', 'music', '-n', 'albums', '-d', $self, '-a', '-f');
@@ -67,14 +86,12 @@ sub main {
 			system('tmux', 'new-window', '-t', 'music', '-n', 'latest', $self, '-l', '-f');
 			system('tmux', 'new-window', '-t', 'music', '-n', 'playlists', $self, '-p', '-f');
 			system('tmux', 'new-window', '-t', 'music', '-n', 'queue', $player);
+			system('tmux', 'attach', '-t', 'music');
 		}
-		system('tmux', 'attach', '-t', 'music');
+		else {
+			system('tmux', 'attach', '-t', 'music');
+		}
 	}
-
-	if    (defined $options{t}) { list_db_entries_for("Tracks") }
-	elsif (defined $options{a}) { list_db_entries_for("Albums") }
-	elsif (defined $options{p}) { list_playlists() }
-	elsif (defined $options{l}) { list_db_entries_for("Latest") }
 }
 
 
@@ -105,6 +122,11 @@ sub create_db {
 		my @filtered = map { $_->{mtime} = str2time($_->{'Last-Modified'}); +{$_->%{qw/Album Artist Date AlbumArtist Title Track uri mtime/}} } @db;
 		pack_msgpack(\@filtered);
 	}
+}
+
+sub help {
+	system('sed', '-n', '24,35p', $tmux_config);
+	<STDIN>;
 }
 
 sub backend_call {
@@ -165,6 +187,43 @@ sub unpack_msgpack {
 	my $msgpack = read_binary("$db_file");
 	my $rdb = $mp->unpack($msgpack);
 	return $rdb;
+}
+
+sub random {
+	my @action_items = ("Album\n", "Tracks\n", "Settings\n");
+	my $action = backend_call(\@action_items);
+	if ($action eq "Album\n") {
+		$mpd->clear();
+		my @album_artists = $mpd->list('albumartist');
+		my $artist_r = $album_artists[rand @album_artists];
+		my @album = $mpd->list('album', 'albumartist', $artist_r);
+	 	my $album_r = $album[rand @album];
+	 	$mpd->search_add('albumartist', $artist_r, 'album', $album_r);
+	 	$mpd->play();
+	}
+	if ($action eq "Tracks\n") {
+		$mpd->clear();
+		for (my $i=0; $i <= $songs; $i++) {
+			my @artists = $mpd->list('artist');
+			my $artist_r = $artists[rand @artists];
+			my @albums = $mpd->list('album', 'artist', $artist_r);
+			my $album_r = $albums[rand @albums];
+			my @tracks = $mpd->search('artist', $artist_r, 'album', $album_r);
+			my $track_r = $tracks[rand @tracks];
+			my $foo = $track_r->{uri};
+			$mpd->add($foo);
+			$mpd->play();
+		}	
+		$mpd->play();
+   }
+	if ($action eq "Settings\n") {
+		my @action_items = ("5\n", "10\n", "15\n", "20\n", "25\n", "30\n");
+		my $action = backend_call(\@action_items);
+		chomp $songs;
+		$cfg->param(-block=>'General');
+		$general_cfg->{songs} = $action;
+		$cfg->save();
+}
 }
 
 sub do_action {

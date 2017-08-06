@@ -25,17 +25,13 @@ bind-key -n F1 findw albums
 bind-key -n F2 findw tracks
 bind-key -n F3 findw latest
 bind-key -n F4 findw playlists
-bind-key -n F8 findw lyrics
 bind-key -n F5 findw queue
 bind-key -n C-F5 run-shell 'mpc prev --quiet'
 bind-key -n C-F6 run-shell 'mpc toggle --quiet'
 bind-key -n C-F7 run-shell 'mpc stop > /dev/null'
 bind-key -n C-F8 run-shell 'mpc next --quiet'
-bind-key -n C-F12 run-shell 'forceupdate="true" clerk_fzf --update'
-bind-key -n F12 run-shell 'clerk_fzf --update'
-bind-key -n F9 run-shell 'clerk_fzf --random_album'
-bind-key -n F10 run-shell 'clerk_fzf --random_tracks'
-bind-key -n C-h run-shell 'clerk_fzf --help'
+bind-key -n F10 run-shell 'clerk -f -x'
+bind-ley -n C-F1 run-shell 'clerk -f -y'
 bind-key -n C-q kill-session -t music
 
 
