@@ -8,6 +8,7 @@ use utf8;
 use Config::Simple;
 use Data::MessagePack;
 #use DDP;
+use Encode qw(decode encode);
 use File::Basename;
 use File::Path qw(make_path);
 use File::Slurper 'read_binary';
@@ -261,6 +262,7 @@ sub do_action {
 	} elsif ($context eq "tracks") {
 		foreach my $line (split /\n/, $in) {
 			my $uri = (split /[\t\n]/, $line)[-1];
+			$uri = decode('UTF-8', $uri );
 			$mpd->add($uri);
 		}
 	}
