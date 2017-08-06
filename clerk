@@ -125,7 +125,7 @@ sub create_db {
 }
 
 sub help {
-	system('sed', '-n', '24,35p', $tmux_config);
+	system('grep', 'bind-key', $tmux_config);
 	<STDIN>;
 }
 
