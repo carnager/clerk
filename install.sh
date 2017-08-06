@@ -5,13 +5,13 @@ dependencies=(
 	"inc::Module::Install"
 	"Data::MessagePack"
 	"File::Slurper"
-	"IPC::Run"
 	"File::Path"
 	"Net::MPD"
 	)
 
 repo_modules=(
 	"perl-config-simple"
+	"perl-ipc-run"
 	"perl-http-date"
 	)
 
