@@ -31,7 +31,7 @@ bind-key -n C-F6 run-shell 'mpc toggle --quiet'
 bind-key -n C-F7 run-shell 'mpc stop > /dev/null'
 bind-key -n C-F8 run-shell 'mpc next --quiet'
 bind-key -n F10 run-shell 'clerk -f -x'
-bind-key -n C-F1 run-shell 'clerk -f -y'
+bind-key -n C-F1 run-shell 'clerk -f -z'
 bind-key -n C-q kill-session -t music
 
 
