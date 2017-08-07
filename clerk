@@ -148,7 +148,8 @@ sub create_db {
 }
 
 sub help {
-	system('grep', 'bind-key', $tmux_config);
+	my $help_txt = system('grep', 'bind-key', $tmux_config);
+	print "$help_txt\n";
 	<STDIN>;
 }
 
@@ -313,6 +314,7 @@ sub formatted_albums {
 	for my $k (@skeys) {
 		my @vals = ((map { $_ // "Unknown" } $uniq_albums{$k}->@{qw/AlbumArtist Date Album/}), $uniq_albums{$k}->{Dir});
 		my $strval = sprintf $fmtstr."%s\n", @vals;
+		@albums = sort @albums;
 		push @albums, $strval;
 
 	}
