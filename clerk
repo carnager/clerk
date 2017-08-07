@@ -290,7 +290,7 @@ sub formatted_albums {
 
 	my %uniq_albums;
 	for my $i (@$rdb) {
-		my $newkey = join "", $i->@{qw/AlbumArtist Album Date/};
+		my $newkey = join "", $i->@{qw/AlbumArtist Date Album/};
 		if (!exists $uniq_albums{$newkey}) {
 			my $dir = (dirname($i->{uri}) =~ s/\/CD.*$//r);
 			$uniq_albums{$newkey} = {$i->%{qw/AlbumArtist Album Date mtime/}, Dir => $dir};
@@ -314,9 +314,6 @@ sub formatted_albums {
 	for my $k (@skeys) {
 		my @vals = ((map { $_ // "Unknown" } $uniq_albums{$k}->@{qw/AlbumArtist Date Album/}), $uniq_albums{$k}->{Dir});
 		my $strval = sprintf $fmtstr."%s\n", @vals;
-		if (! $sorted) {
-			@albums = sort @albums;
-		}
 		push @albums, $strval;
 	}
 
