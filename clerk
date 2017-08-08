@@ -13,6 +13,7 @@ use File::Basename;
 use File::Path qw(make_path);
 use File::Slurper 'read_binary';
 use File::stat;
+use Try::Tiny;
 use FindBin '$Bin';
 use FindBin '$Script';
 use Getopt::Std;
@@ -366,7 +367,9 @@ sub list_db_entries_for {
 	elsif ($backend eq "fzf") {
 	for (;;) {
 		my $out = backend_call($output, $fields{$kind});
-		do_action($out, "tracks", "ignore");
+		try {
+			do_action($out, "tracks", "ignore");
+		} catch { last; }
 		}
 	}
 
