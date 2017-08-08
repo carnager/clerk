@@ -218,6 +218,7 @@ sub unpack_msgpack {
 }
 
 sub random {
+	my @queue_cmd = ('tmux', 'findw', '-t', 'music', 'queue');
 	my @action_items = ("Album\n", "Tracks\n", "Settings\n");
 	my $action = backend_call(\@action_items, "1,2,3", "cancel");
 	if ($action eq "Album\n") {
@@ -228,6 +229,7 @@ sub random {
 	 	my $album_r = $album[rand @album];
 	 	$mpd->search_add('albumartist', $artist_r, 'album', $album_r);
 	 	$mpd->play();
+		system(@queue_cmd);
 	}
 	if ($action eq "Tracks\n") {
 		$mpd->clear();
@@ -240,8 +242,10 @@ sub random {
 			my $track_r = $tracks[rand @tracks];
 			my $foo = $track_r->{uri};
 			$mpd->add($foo);
+			system(@queue_cmd);
 			$mpd->play();
-		}	
+		}
+		system(@queue_cmd);
 		$mpd->play();
    }
 	if ($action eq "Settings\n") {
