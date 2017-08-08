@@ -158,7 +158,6 @@ sub backend_call {
 	my $input;
 	my $out;
 	$random //= "ignore";
-	print "$random\n";
 	$fields //= "1,2,3";
 	my %backends = (
 		fzf => [ qw(fzf
