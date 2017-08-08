@@ -154,9 +154,11 @@ sub help {
 }
 
 sub backend_call {
-	my ($in, $fields) = @_;
+	my ($in, $fields, $random) = @_;
 	my $input;
 	my $out;
+	$random //= "ignore";
+	print "$random\n";
 	$fields //= "1,2,3";
 	my %backends = (
 		fzf => [ qw(fzf
@@ -168,9 +170,9 @@ sub backend_call {
 			-d
 			\t
 			--tabstop=4
-			--bind=esc:ignore
 			+s
 			--ansi),
+			"--bind=esc:$random",
 			"--with-nth=$fields"
 		],
 		rofi => [
@@ -217,7 +219,7 @@ sub unpack_msgpack {
 
 sub random {
 	my @action_items = ("Album\n", "Tracks\n", "Settings\n");
-	my $action = backend_call(\@action_items);
+	my $action = backend_call(\@action_items, "1,2,3", "cancel");
 	if ($action eq "Album\n") {
 		$mpd->clear();
 		my @album_artists = $mpd->list('albumartist');
@@ -282,7 +284,7 @@ sub list_playlists {
 
 	for (;;) {
 		my $out = backend_call($output);
-		do_action($out, "playlist");
+		do_action($out, "playlist", "ignore");
 	}
 }
 
@@ -356,12 +358,12 @@ sub list_db_entries_for {
 	my $output = $formater{$kind}->($rdb);
 	if ($backend eq "rofi") {
 		my $out = backend_call($output, $fields{$kind});
-		do_action($out, "tracks");
+		do_action($out, "tracks", "ignore");
 	}
 	elsif ($backend eq "fzf") {
 	for (;;) {
 		my $out = backend_call($output, $fields{$kind});
-		do_action($out, "tracks");
+		do_action($out, "tracks", "ignore");
 		}
 	}
 
