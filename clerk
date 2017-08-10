@@ -7,7 +7,8 @@ use strict;
 use utf8;
 use Config::Simple;
 use Data::MessagePack;
-#use DDP;
+use Devel::Trace::More;
+#use DDP
 use Encode qw(decode encode);
 use File::Basename;
 use File::Path qw(make_path);
@@ -155,6 +156,7 @@ sub help {
 }
 
 sub backend_call {
+	$Devel::Trace =1;
 	my ($in, $fields, $random) = @_;
 	my $input;
 	my $out;
@@ -258,6 +260,7 @@ sub random {
 }
 
 sub do_action {
+	$Devel::Trace =1;
 	my ($in, $context) = @_;
 	my @action_items = ("Add\n", "Replace\n");
 	my $action = backend_call(\@action_items);
@@ -293,6 +296,7 @@ sub list_playlists {
 }
 
 sub formatted_albums {
+	$Devel::Trace =1;
 	my ($rdb, $sorted) = @_;
 
 	my %uniq_albums;
@@ -348,6 +352,7 @@ sub formatted_playlists {
 }
 
 sub list_db_entries_for {
+	$Devel::Trace =1;
 	my ($kind) = @_;
 	die "Wrong kind" unless any {; $_ eq $kind} qw/Albums Latest Tracks/;
 
@@ -369,10 +374,9 @@ sub list_db_entries_for {
 		my $out = backend_call($output, $fields{$kind});
 		try {
 			do_action($out, "tracks", "ignore");
-		} catch { last; }
 		}
 	}
-
+}
 }
 
 main;
