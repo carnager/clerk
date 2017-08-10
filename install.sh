@@ -6,6 +6,7 @@ dependencies=(
 	"Data::MessagePack"
 	"File::Slurper"
 	"File::Path"
+	"Try::Tiny"
 	"Net::MPD"
 	)
 
