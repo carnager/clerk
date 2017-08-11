@@ -57,20 +57,20 @@ my $mpd = Net::MPD->connect($ENV{MPD_HOST} // $mpd_host // 'localhost');
 
 sub main {
 	my %options=();
-	getopts("talpfrhyxz", \%options);
+	getopts("talpfrhuyxz", \%options);
 	unless ($options{f}) { 
 		$backend = 'rofi'
 	} else { 
 		$backend = 'fzf';
 	}
-	create_db();
-	if ($options{t} // $options{a} // $options{p} // $options{l} // $options{r} // $options{x} // $options{y} // $options{h} // $options{z}) {
-		if    (defined $options{t}) { list_db_entries_for("Tracks") }
-		elsif (defined $options{a}) { list_db_entries_for("Albums") }
-		elsif (defined $options{p}) { list_playlists() }
+	if ($options{t} // $options{a} // $options{p} // $options{l} // $options{r} // $options{x} // $options{y} // $options{h} // $options{z} // $options{u}) {
+		if    (defined $options{t}) { create_db(); list_db_entries_for("Tracks") }
+		elsif (defined $options{a}) { create_db(); list_db_entries_for("Albums") }
+		elsif (defined $options{p}) { create_db(); list_playlists() }
 		elsif (defined $options{z}) { help() }
 		elsif (defined $options{h}) { help_output() }
 		elsif (defined $options{x}) {
+			create_db();
 			system('tmux', 'split-window', '-d', 'clerk', '-f', '-r');
 			system('tmux', 'select-pane', '-D');
 		}
@@ -79,9 +79,13 @@ sub main {
 			system('tmux', 'select-pane', '-D');
 		}
 		elsif (defined $options{r}) { random() }
-		elsif (defined $options{l}) { list_db_entries_for("Latest") }
+		elsif (defined $options{l}) { create_db(); list_db_entries_for("Latest") }
+		elsif (defined $options{u}) {
+			create_db();
+		}
 	}
 	else {
+		create_db();
 		system('tmux', 'has-session', '-t', 'music');
 		if ($? != -0) {
 			system('tmux', '-f', $tmux_config, 'new-session', '-s', 'music', '-n', 'albums', '-d', $self, '-a', '-f');
@@ -99,17 +103,20 @@ sub main {
 
 sub help_output {
 	my @output = (
-		"Usage: clerk [[-f [options]]",
+		"Usage: clerk [-f] [command]",
 		"clerk version 2.0",
 		"",
 		"Options:",
 		"  -f  Use fzf interface. Without other arguments",
 		"      this starts a complete tmux interface with tabs.",
+		" ",
+		"Commands:",
 		"  -a  Add/Replace album(s) to queue.",
 		"  -l  Add/Replace album(s) to queue (sorted by mtime)",
 		"  -t  Add/Replace track(s) to queue.",
 		"  -p  Add stored playlist to queue",
-		"  -r  Replace current playlist with random songs/album");
+		"  -r  Replace current playlist with random songs/album",
+		"  -u  Update caches");
 
 	print join("\n", @output), "\n\n";
 }
@@ -248,14 +255,14 @@ sub random {
 		}
 		system(@queue_cmd);
 		$mpd->play();
-   }
+	}
 	if ($action eq "Settings\n") {
 		my @action_items = ("5\n", "10\n", "15\n", "20\n", "25\n", "30\n");
 		my $action = backend_call(\@action_items);
 		chomp $action;
 		$cfg->param("General.songs", $action);
 		$cfg->save();
-}
+	}
 }
 
 sub do_action {
@@ -295,7 +302,6 @@ sub list_playlists {
 }
 
 sub formatted_albums {
-	$Devel::Trace =1;
 	my ($rdb, $sorted) = @_;
 
 	my %uniq_albums;
@@ -370,6 +376,7 @@ sub list_db_entries_for {
 	}
 	elsif ($backend eq "fzf") {
 	for (;;) {
+		create_db();
 		my $out = backend_call($output, $fields{$kind});
 		try {
 			do_action($out, "tracks", "ignore");
