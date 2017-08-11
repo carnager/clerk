@@ -162,7 +162,6 @@ sub help {
 }
 
 sub backend_call {
-	$Devel::Trace =1;
 	my ($in, $fields, $random) = @_;
 	my $input;
 	my $out;
@@ -266,7 +265,6 @@ sub random {
 }
 
 sub do_action {
-	$Devel::Trace =1;
 	my ($in, $context) = @_;
 	my @action_items = ("Add\n", "Replace\n");
 	my $action = backend_call(\@action_items);
@@ -357,7 +355,6 @@ sub formatted_playlists {
 }
 
 sub list_db_entries_for {
-	$Devel::Trace =1;
 	my ($kind) = @_;
 	die "Wrong kind" unless any {; $_ eq $kind} qw/Albums Latest Tracks/;
 
