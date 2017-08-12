@@ -228,6 +228,8 @@ sub random {
 	my @queue_cmd = ('tmux', 'findw', '-t', 'music', 'queue');
 	my @action_items = ("Album\n", "Tracks\n", "Settings\n");
 	my $action = backend_call(\@action_items, "1,2,3", "cancel");
+	try { $mpd->close(); };
+	$mpd->{socket}->close;
 	if ($action eq "Album\n") {
 		$mpd->clear();
 		my @album_artists = $mpd->list('albumartist');
@@ -268,6 +270,8 @@ sub do_action {
 	my ($in, $context) = @_;
 	my @action_items = ("Add\n", "Replace\n");
 	my $action = backend_call(\@action_items);
+	try { $mpd->close(); };
+	$mpd->{socket}->close;
 	if ($action eq "Replace\n") {
 		$mpd->clear();
 	}
