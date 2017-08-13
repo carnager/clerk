@@ -1,3 +1,17 @@
+# !Dont move this section.
+## Key Bindings
+bind-key -n F1   findw albums                      # show album list
+bind-key -n F2   findw tracks                      # show tracks
+bind-key -n F3   findw latest                      # show album list (latest first)
+bind-key -n F4   findw playlists                   # load playlist
+bind-key -n F5   findw queue                       # show queue
+bind-key -n C-F5 run-shell 'mpc prev --quiet'      # previous song
+bind-key -n C-F6 run-shell 'mpc toggle --quiet'    # toggle playback
+bind-key -n C-F7 run-shell 'mpc stop > /dev/null'  # stop playback
+bind-key -n C-F8 run-shell 'mpc next --quiet'      # next song
+bind-key -n F10  run-shell 'clerk -f -x'           # play random album/songs
+bind-key -n C-F1 run-shell 'clerk -f -y'           # show help
+bind-key -n C-q  kill-session -t music             # quit clerk
 # Status bar
 set-option -g status-position top
 set -g status-interval 30
@@ -19,20 +33,6 @@ setw -g window-status-attr bright
 setw -g window-status-format ' #[fg=colour243,bold]#W '
 setw -g window-status-current-format ' #[fg=yellow,bold]#[bg=colour235]#W '
 
-# !Dont remove this keybinding header! (used to generate help)
-## Key Bindings
-bind-key -n F1   findw albums                      # show album list
-bind-key -n F2   findw tracks                      # show tracks
-bind-key -n F3   findw latest                      # show album list (latest first)
-bind-key -n F4   findw playlists                   # load playlist
-bind-key -n F5   findw queue                       # show queue
-bind-key -n C-F5 run-shell 'mpc prev --quiet'      # previous song
-bind-key -n C-F6 run-shell 'mpc toggle --quiet'    # toggle playback
-bind-key -n C-F7 run-shell 'mpc stop > /dev/null'  # stop playback
-bind-key -n C-F8 run-shell 'mpc next --quiet'      # next song
-bind-key -n F10  run-shell 'clerk -f -x'           # play random album/songs
-bind-key -n C-F1 run-shell 'clerk -f -y'           # show help
-bind-key -n C-q  kill-session -t music             # quit clerk
 
 
 # tmux options
