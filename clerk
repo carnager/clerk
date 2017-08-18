@@ -269,7 +269,6 @@ sub random {
 
 sub do_action {
 	my ($in, $context) = @_;
-	p $context;
 	my $action;
 	try { $mpd->close(); };
 	$mpd->{socket}->close;
