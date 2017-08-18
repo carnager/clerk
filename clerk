@@ -7,7 +7,7 @@ use strict;
 use utf8;
 use Config::Simple;
 use Data::MessagePack;
-#use DDP
+#use DDP;
 use Encode qw(decode encode);
 use File::Basename;
 use File::Path qw(make_path);
@@ -21,6 +21,7 @@ use HTTP::Date;
 use IPC::Run qw( timeout start );
 use List::Util qw(any);
 use Net::MPD;
+use POSIX;
 use autodie;
 
 my $self="$Bin/$Script";
@@ -268,26 +269,42 @@ sub random {
 
 sub do_action {
 	my ($in, $context) = @_;
-	my @action_items = ("Add\n", "Replace\n");
-	my $action = backend_call(\@action_items);
+	p $context;
+	my $action;
 	try { $mpd->close(); };
 	$mpd->{socket}->close;
-	if ($action eq "Replace\n") {
-		$mpd->clear();
-	}
-	my $input;
 	if ($context eq "playlist") {
-		chomp $in;
-		$mpd->load("$in");
+		if ($in eq "Save current Queue\n") {
+			my $now = time();
+			my $filename = strftime('%Y-%m-%dT%H:%M:%SZ', gmtime($now)), "\n";
+			$mpd->save($filename);
+		} else {
+			my @action_items = ("Add\n", "Replace\n");
+			$action = backend_call(\@action_items);
+			if ($action eq "Replace\n") {
+			    $mpd->clear();
+			}
+			chomp $in;
+			$mpd->load("$in");
+			if ($action eq "Replace\n") {
+				$mpd->play();
+			}
+		}
 	} elsif ($context eq "tracks") {
+		my @action_items = ("Add\n", "Replace\n");
+		$action = backend_call(\@action_items);
+		if ($action eq "Replace\n") {
+			$mpd->clear();
+		}
+		my $input;
 		foreach my $line (split /\n/, $in) {
 			my $uri = (split /[\t\n]/, $line)[-1];
 			$uri = decode('UTF-8', $uri );
 			$mpd->add($uri);
 		}
-	}
-	if ($action eq "Replace\n") {
-		$mpd->play();
+		if ($action eq "Replace\n") {
+			$mpd->play();
+		}
 	}
 	my @queue_cmd = ('tmux', 'findw', '-t', 'music', 'queue');
 	system(@queue_cmd);
@@ -351,10 +368,14 @@ sub formatted_tracks {
 
 sub formatted_playlists {
     my ($rdb) = @_;
+    my @save = ("Save");
+    push @save, $rdb;
     my @playlists = map {
     	sprintf "%s\n", $_->{playlist}
     } @{$rdb};
-
+	@save = ("Save current Queue\n", "---\n");
+	@playlists = sort @playlists;
+	unshift @playlists, @save;
     return \@playlists;
 }
 
