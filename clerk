@@ -21,7 +21,7 @@ use HTTP::Date;
 use IPC::Run qw( timeout start );
 use List::Util qw(any);
 use Net::MPD;
-use POSIX;
+use POSIX qw(tzset);
 use autodie;
 
 my $self="$Bin/$Script";
@@ -274,19 +274,25 @@ sub do_action {
 	$mpd->{socket}->close;
 	if ($context eq "playlist") {
 		if ($in eq "Save current Queue\n") {
-			my $now = time();
-			my $filename = strftime('%Y-%m-%dT%H:%M:%SZ', gmtime($now)), "\n";
+			tzset();
+			my $filename = localtime();
 			$mpd->save($filename);
 		} else {
-			my @action_items = ("Add\n", "Replace\n");
+			my @action_items = ("Add\n", "Replace\n", "Delete\n");
 			$action = backend_call(\@action_items);
 			if ($action eq "Replace\n") {
 			    $mpd->clear();
-			}
-			chomp $in;
-			$mpd->load("$in");
-			if ($action eq "Replace\n") {
+				chomp $in;
+				$mpd->load("$in");
 				$mpd->play();
+			}
+			elsif ($action eq "Add\n") {
+				chomp $in;
+				$mpd->load("$in");
+			}
+			elsif ($action eq "Delete\n") {
+				chomp $in;
+				$mpd->rm("$in");
 			}
 		}
 	} elsif ($context eq "tracks") {
@@ -310,10 +316,9 @@ sub do_action {
 }
 
 sub list_playlists {
-	my @playlists = $mpd->list_playlists();
-	my $output = formatted_playlists(\@playlists);
-
 	for (;;) {
+		my @playlists = $mpd->list_playlists();
+		my $output = formatted_playlists(\@playlists);
 		my $out = backend_call($output);
 		do_action($out, "playlist", "ignore");
 	}
