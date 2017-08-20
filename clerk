@@ -53,12 +53,13 @@ my $title_l = $columns_cfg->{title_l};
 my $track_l = $columns_cfg->{track_l};
 my $artist_l = $columns_cfg->{artist_l};
 
+my $random;
 # open connection to MPD
 my $mpd = Net::MPD->connect($ENV{MPD_HOST} // $mpd_host // 'localhost');
 
 sub main {
 	my %options=();
-	getopts("talpfrhuyxz", \%options);
+	getopts("talpfrhuyxzAT", \%options);
 	unless ($options{f}) { 
 		$backend = 'rofi'
 	} else { 
@@ -79,7 +80,11 @@ sub main {
 			system('tmux', 'split-window', '-d', 'clerk', '-f', '-z');
 			system('tmux', 'select-pane', '-D');
 		}
-		elsif (defined $options{r}) { random() }
+		elsif (defined $options{r}) {
+			if (defined $options{T}) { random_tracks(); }
+			elsif (defined $options{A}) { random_album(); }
+			else { random() }
+		}
 		elsif (defined $options{l}) { create_db(); list_db_entries_for("Latest") }
 		elsif (defined $options{u}) {
 			create_db();
@@ -108,16 +113,16 @@ sub help_output {
 		"clerk version 2.0",
 		"",
 		"Options:",
-		"  -f  Use fzf interface. Without other arguments",
-		"      this starts a complete tmux interface with tabs.",
+		"  -f           Use fzf interface. Without other arguments",
+		"               this starts a complete tmux interface with tabs.",
 		" ",
 		"Commands:",
-		"  -a  Add/Replace album(s) to queue.",
-		"  -l  Add/Replace album(s) to queue (sorted by mtime)",
-		"  -t  Add/Replace track(s) to queue.",
-		"  -p  Add stored playlist to queue",
-		"  -r  Replace current playlist with random songs/album",
-		"  -u  Update caches");
+		"  -a           Add/Replace album(s) to queue.",
+		"  -l           Add/Replace album(s) to queue (sorted by mtime)",
+		"  -t           Add/Replace track(s) to queue.",
+		"  -p           Add stored playlist to queue",
+		"  -r [-A, -T]  Replace current playlist with random songs/album",
+		"  -u           Update caches");
 
 	print join("\n", @output), "\n\n";
 }
@@ -225,36 +230,48 @@ sub unpack_msgpack {
 	return $rdb;
 }
 
+sub random_album {
+	my @queue_cmd = ('tmux', 'findw', '-t', 'music', 'queue');
+	$mpd->clear();
+	my @album_artists = $mpd->list('albumartist');
+	my $artist_r = $album_artists[rand @album_artists];
+	my @album = $mpd->list('album', 'albumartist', $artist_r);
+ 	my $album_r = $album[rand @album];
+ 	$mpd->search_add('albumartist', $artist_r, 'album', $album_r);
+ 	$mpd->play();
+	system(@queue_cmd);
+}
+
+sub random_tracks {
+	my @queue_cmd = ('tmux', 'findw', '-t', 'music', 'queue');
+	$mpd->clear();
+	for (my $i=0; $i <= $songs; $i++) {
+		my @artists = $mpd->list('artist');
+		my $artist_r = $artists[rand @artists];
+		my @albums = $mpd->list('album', 'artist', $artist_r);
+		my $album_r = $albums[rand @albums];
+		my @tracks = $mpd->search('artist', $artist_r, 'album', $album_r);
+		my $track_r = $tracks[rand @tracks];
+		my $foo = $track_r->{uri};
+		$mpd->add($foo);
+		system(@queue_cmd);
+		$mpd->play();
+	}
+}
+
 sub random {
 	my @queue_cmd = ('tmux', 'findw', '-t', 'music', 'queue');
-	my @action_items = ("Album\n", "Tracks\n", "Settings\n");
-	my $action = backend_call(\@action_items, "1,2,3", "cancel");
 	try { $mpd->close(); };
 	$mpd->{socket}->close;
+	my @action_items = ("Album\n", "Tracks\n", "Settings\n");
+	my $action = backend_call(\@action_items, "1,2,3", "cancel");
 	if ($action eq "Album\n") {
-		$mpd->clear();
-		my @album_artists = $mpd->list('albumartist');
-		my $artist_r = $album_artists[rand @album_artists];
-		my @album = $mpd->list('album', 'albumartist', $artist_r);
-	 	my $album_r = $album[rand @album];
-	 	$mpd->search_add('albumartist', $artist_r, 'album', $album_r);
-	 	$mpd->play();
+		random_album();
 		system(@queue_cmd);
+		$mpd->play();
 	}
 	if ($action eq "Tracks\n") {
-		$mpd->clear();
-		for (my $i=0; $i <= $songs; $i++) {
-			my @artists = $mpd->list('artist');
-			my $artist_r = $artists[rand @artists];
-			my @albums = $mpd->list('album', 'artist', $artist_r);
-			my $album_r = $albums[rand @albums];
-			my @tracks = $mpd->search('artist', $artist_r, 'album', $album_r);
-			my $track_r = $tracks[rand @tracks];
-			my $foo = $track_r->{uri};
-			$mpd->add($foo);
-			system(@queue_cmd);
-			$mpd->play();
-		}
+		random_tracks();
 		system(@queue_cmd);
 		$mpd->play();
 	}
@@ -268,6 +285,7 @@ sub random {
 }
 
 sub do_action {
+	my @queue_cmd = ('tmux', 'findw', '-t', 'music', 'queue');
 	my ($in, $context) = @_;
 	my $action;
 	try { $mpd->close(); };
@@ -285,6 +303,7 @@ sub do_action {
 				chomp $in;
 				$mpd->load("$in");
 				$mpd->play();
+				system(@queue_cmd);
 			}
 			elsif ($action eq "Add\n") {
 				chomp $in;
@@ -309,10 +328,9 @@ sub do_action {
 		}
 		if ($action eq "Replace\n") {
 			$mpd->play();
+			system(@queue_cmd);
 		}
 	}
-	my @queue_cmd = ('tmux', 'findw', '-t', 'music', 'queue');
-	system(@queue_cmd);
 }
 
 sub list_playlists {
