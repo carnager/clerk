@@ -73,11 +73,11 @@ sub main {
 		elsif (defined $options{h}) { help_output() }
 		elsif (defined $options{x}) {
 			create_db();
-			system('tmux', 'split-window', '-d', 'clerk', '-f', '-r');
+			system('tmux', 'split-window', '-d', $self, '-f', '-r');
 			system('tmux', 'select-pane', '-D');
 		}
 		elsif (defined $options{y}) {
-			system('tmux', 'split-window', '-d', 'clerk', '-f', '-z');
+			system('tmux', 'split-window', '-d', $self, '-f', '-z');
 			system('tmux', 'select-pane', '-D');
 		}
 		elsif (defined $options{r}) {
@@ -109,20 +109,21 @@ sub main {
 
 sub help_output {
 	my @output = (
-		"Usage: clerk [-f] [command]",
+		"Usage: clerk [command] [-f]",
 		"clerk version 2.0",
 		"",
-		"Options:",
-		"  -f           Use fzf interface. Without other arguments",
-		"               this starts a complete tmux interface with tabs.",
-		" ",
 		"Commands:",
 		"  -a           Add/Replace album(s) to queue.",
 		"  -l           Add/Replace album(s) to queue (sorted by mtime)",
 		"  -t           Add/Replace track(s) to queue.",
 		"  -p           Add stored playlist to queue",
 		"  -r [-A, -T]  Replace current playlist with random songs/album",
-		"  -u           Update caches");
+		"  -u           Update caches",
+		"",
+		"Options:",
+		"  -f           Use fzf interface",
+		" ",
+		"Without further arguments, clerk starts a tabbed tmux interface");
 
 	print join("\n", @output), "\n\n";
 }
