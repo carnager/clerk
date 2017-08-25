@@ -180,13 +180,14 @@ sub backend_call {
 			--no-sort
 			-m
 			-e
+			--no-hscroll
 			-i
 			-d
 			\t
 			--tabstop=4
 			+s
 			--ansi),
-			"--bind=esc:$random",
+			"--bind=esc:$random,alt-a:toggle-all,alt-n:deselect-all",
 			"--with-nth=$fields"
 		],
 		rofi => [
@@ -326,10 +327,10 @@ sub do_action {
 			my $uri = (split /[\t\n]/, $line)[-1];
 			$uri = decode('UTF-8', $uri );
 			$mpd->add($uri);
+			system(@queue_cmd);
 		}
 		if ($action eq "Replace\n") {
 			$mpd->play();
-			system(@queue_cmd);
 		}
 	}
 }
