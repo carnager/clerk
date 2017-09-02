@@ -13,6 +13,7 @@ repo_modules=(
 	"perl-config-simple"
 	"perl-ipc-run"
 	"perl-http-date"
+	"perl-local-lib"
 	)
 
 printf "%s\n" "This script will install needed cpan modules"
