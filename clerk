@@ -100,9 +100,11 @@ sub main {
 			system('tmux', 'new-window', '-t', 'music', '-n', 'playlists', $self, '-p', '-f');
 			system('tmux', 'new-window', '-t', 'music', '-n', 'queue', $player);
 			system('tmux', 'attach', '-t', 'music');
+			system('tmux', 'select-window', '-t', 'queue')
 		}
 		else {
 			system('tmux', 'attach', '-t', 'music');
+			system('tmux', 'select-window', '-t', 'queue')
 		}
 	}
 }

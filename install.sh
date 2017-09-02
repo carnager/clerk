@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 dependencies=(
-	"Config::Simple"
 	"inc::Module::Install"
 	"Data::MessagePack"
 	"File::Slurper"
