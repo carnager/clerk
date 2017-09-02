@@ -1,4 +1,4 @@
-#!/usr/bin/env perl
+#!/usr/bin/perl
 
 binmode(STDOUT, ":utf8");
 use v5.10;
