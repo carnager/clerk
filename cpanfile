@@ -1,0 +1,15 @@
+requires 'Config::Simple', '4.5.8';
+requires 'Data::MessagePack::PP';
+requires 'Encode';
+requires 'File::Basename';
+requires 'File::Path';
+requires 'File::Slurper', '0.009';
+requires 'File::stat';
+requires 'Try::Tiny', '0.28';
+requires 'FindBin';
+requires 'Getopt::Std';
+requires 'HTTP::Date', '6.02';
+requires 'IPC::Run';
+requires 'List::Util';
+requires 'Net::MPD', '0.06';
+requires 'POSIX';
