@@ -1,5 +1,5 @@
 requires 'Config::Simple', '4.5.8';
-requires 'Data::MessagePack::PP';
+requires 'Data::MessagePack';
 requires 'Encode';
 requires 'File::Basename';
 requires 'File::Path';
