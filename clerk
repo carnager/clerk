@@ -6,6 +6,7 @@ use warnings;
 use strict;
 use utf8;
 use Config::Simple;
+use Time::HiRes qw (sleep);
 use Data::MessagePack;
 #use DDP;
 use Encode qw(decode encode);
@@ -41,6 +42,7 @@ my $general_cfg = $cfg->param(-block=>"General");
 my $mpd_host = $general_cfg->{mpd_host};
 my $tmux_config = $general_cfg->{tmux_config};
 my $db_file = $general_cfg->{database};
+my $rofi_theme = $general_cfg->{rofi_theme};
 my $songs = $general_cfg->{songs};
 my $chunksize = $general_cfg->{chunksize};
 my $player = $general_cfg->{player};
@@ -49,13 +51,13 @@ my $columns_cfg = $cfg->param(-block=>"Columns");
 my $albumartist_l = $columns_cfg->{albumartist_l};
 my $album_l = $columns_cfg->{album_l};
 my $date_l = $columns_cfg->{date_l};
+my $rating_l = $columns_cfg->{rating_l};
 my $title_l = $columns_cfg->{title_l};
 my $track_l = $columns_cfg->{track_l};
 my $artist_l = $columns_cfg->{artist_l};
 
 my $random;
 # open connection to MPD
-my $mpd = Net::MPD->connect($ENV{MPD_HOST} // $mpd_host // 'localhost');
 
 sub main {
 	my %options=();
@@ -131,9 +133,12 @@ sub help_output {
 }
 
 sub create_db {
+	my $mpd = Net::MPD->connect($ENV{MPD_HOST} // $mpd_host // 'localhost');
 	# Get database copy and save as messagepack file, if file is either missing
 	# or older than latest mpd database update.
 	# get number of songs to calculate number of searches needed to copy mpd database
+	my @track_ratings = $mpd->sticker_find("song", "rating");
+	my %track_ratings = map {$_->{file} => $_->{sticker}} @track_ratings;
 	my $mpd_stats = $mpd->stats();
 	my $songcount = $mpd_stats->{songs};
 	my $last_update = $mpd_stats->{db_update};
@@ -159,7 +164,8 @@ sub create_db {
 
 		# only save relevant tags to keep messagepack file small
 		# note: maybe use a proper database instead? See list_album function.
-		my @filtered = map { $_->{mtime} = str2time($_->{'Last-Modified'}); +{$_->%{qw/Album Artist Date AlbumArtist Title Track uri mtime/}} } @db;
+		my @filtered = map { $_->{mtime} = str2time($_->{'Last-Modified'}); $_->{rating} = $track_ratings{$_->{uri}}; +{$_->%{qw/Album Artist Date AlbumArtist Title Track rating uri mtime/}} } @db;
+#		my @filtered = map { $_->{mtime} = str2time($_->{'Last-Modified'}); +{$_->%{qw/Album Artist Date AlbumArtist Title Track uri mtime/}} } @db;
 		pack_msgpack(\@filtered);
 	}
 }
@@ -175,7 +181,7 @@ sub backend_call {
 	my $input;
 	my $out;
 	$random //= "ignore";
-	$fields //= "1,2,3";
+	$fields //= "1,2,3,4";
 	my %backends = (
 		fzf => [ qw(fzf
 			--reverse
@@ -192,25 +198,7 @@ sub backend_call {
 			"--bind=esc:$random,alt-a:toggle-all,alt-n:deselect-all",
 			"--with-nth=$fields"
 		],
-		rofi => [
-			'rofi',
-			'-width',
-			'1300',
-			'-dmenu',
-			'-kb-row-tab',
-			'',
-			'-kb-move-word-forward',
-			'',
-			'-kb-row-tab',
-			'',
-			'-kb-accept-alt',
-			'Tab',
-			'-multi-select',
-			'-no-levensthein-sort',
-			'-i',
-			'-p',
-			'> '
-		]
+		rofi => [ "rofi", "-width", "1300", "-matching", "regex", "-dmenu", "-kb-row-tab", "", "-kb-move-word-forward", "", "-kb-accept-alt", "Tab", "-multi-select", "-no-levensthein-sort", "-i", "-p", "> " ]
 	);
 	my $handle = start $backends{$backend} // die('backend not found'), \$input, \$out;
 	$input = join "", (@{$in});
@@ -235,18 +223,20 @@ sub unpack_msgpack {
 }
 
 sub random_album {
+	my $mpd = Net::MPD->connect($ENV{MPD_HOST} // $mpd_host // 'localhost');
 	my @queue_cmd = ('tmux', 'findw', '-t', 'music', 'queue');
 	$mpd->clear();
 	my @album_artists = $mpd->list('albumartist');
 	my $artist_r = $album_artists[rand @album_artists];
 	my @album = $mpd->list('album', 'albumartist', $artist_r);
  	my $album_r = $album[rand @album];
- 	$mpd->search_add('albumartist', $artist_r, 'album', $album_r);
+ 	$mpd->find_add('albumartist', $artist_r, 'album', $album_r);
  	$mpd->play();
 	system(@queue_cmd);
 }
 
 sub random_tracks {
+	my $mpd = Net::MPD->connect($ENV{MPD_HOST} // $mpd_host // 'localhost');
 	my @queue_cmd = ('tmux', 'findw', '-t', 'music', 'queue');
 	$mpd->clear();
 	for (my $i=0; $i <= $songs; $i++) {
@@ -254,7 +244,7 @@ sub random_tracks {
 		my $artist_r = $artists[rand @artists];
 		my @albums = $mpd->list('album', 'artist', $artist_r);
 		my $album_r = $albums[rand @albums];
-		my @tracks = $mpd->search('artist', $artist_r, 'album', $album_r);
+		my @tracks = $mpd->find('artist', $artist_r, 'album', $album_r);
 		my $track_r = $tracks[rand @tracks];
 		my $foo = $track_r->{uri};
 		$mpd->add($foo);
@@ -264,6 +254,7 @@ sub random_tracks {
 }
 
 sub random {
+	my $mpd = Net::MPD->connect($ENV{MPD_HOST} // $mpd_host // 'localhost');
 	my @queue_cmd = ('tmux', 'findw', '-t', 'music', 'queue');
 	try { $mpd->close(); };
 	$mpd->{socket}->close;
@@ -289,6 +280,7 @@ sub random {
 }
 
 sub do_action {
+	my $mpd = Net::MPD->connect($ENV{MPD_HOST} // $mpd_host // 'localhost');
 	my @queue_cmd = ('tmux', 'findw', '-t', 'music', 'queue');
 	my ($in, $context) = @_;
 	my $action;
@@ -338,6 +330,7 @@ sub do_action {
 }
 
 sub list_playlists {
+	my $mpd = Net::MPD->connect($ENV{MPD_HOST} // $mpd_host // 'localhost');
 	for (;;) {
 		my @playlists = $mpd->list_playlists();
 		my $output = formatted_playlists(\@playlists);
@@ -381,11 +374,17 @@ sub formatted_albums {
 	return \@albums;
 }
 
+sub formatted_ratings {
+	my ($rating) = @_;
+	my $rating_fmt = "r=$rating";
+	return($rating_fmt);
+}
+
 sub formatted_tracks {
 	my ($rdb) = @_;
-	my $fmtstr = join "", map {"%-${_}.${_}s\t"} ($track_l, $title_l, $artist_l, $album_l);
+	my $fmtstr = join "", map {"%-${_}.${_}s\t"} ($track_l, $title_l, $artist_l, $album_l, $rating_l);
 	my @tracks = map {
-		sprintf $fmtstr."%-s\n", (map { $_ // "Unknown" } $_->@{qw/Track Title Artist Album/}), $_->{uri};
+		sprintf $fmtstr."%-s\n", (map { $_ // "-" } $_->@{qw/Track Title Artist Album/}), formatted_ratings($_->{rating} // 0), $_->{uri};
 #		sprintf $fmtstr."%-s\n", $_->@{qw/Track Title Artist Album uri/}
 	} @{$rdb};
 
@@ -410,7 +409,7 @@ sub list_db_entries_for {
 	die "Wrong kind" unless any {; $_ eq $kind} qw/Albums Latest Tracks/;
 
 	my $rdb = unpack_msgpack();
-	my %fields = (Albums=> "1,2,3", Latest => "1,2,3", Tracks => "1,2,3,4");
+	my %fields = (Albums=> "1,2,3", Latest => "1,2,3", Tracks => "1,2,3,4,5");
 	my %formater = (
 		Albums => sub {formatted_albums(@_, 0)},
 		Latest => sub {formatted_albums(@_, 1)},
