@@ -291,6 +291,7 @@ sub do_action {
 			tzset();
 			my $filename = localtime();
 			$mpd->save($filename);
+			system(@queue_cmd);
 		} else {
 			my @action_items = ("Add\n", "Replace\n", "Delete\n");
 			$action = backend_call(\@action_items);
