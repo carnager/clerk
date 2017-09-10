@@ -12,6 +12,8 @@ bind-key -n C-F8 run-shell 'mpc next --quiet'      # next song
 bind-key -n F10  run-shell 'clerk -f -x'           # play random album/songs
 bind-key -n C-F1 run-shell 'clerk -f -y'           # show help
 bind-key -n C-q  kill-session -t music             # quit clerk
+
+
 # Status bar
 set-option -g status-position top
 set -g status-interval 30

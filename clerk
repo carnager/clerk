@@ -42,7 +42,6 @@ my $general_cfg = $cfg->param(-block=>"General");
 my $mpd_host = $general_cfg->{mpd_host};
 my $tmux_config = $general_cfg->{tmux_config};
 my $db_file = $general_cfg->{database};
-my $rofi_theme = $general_cfg->{rofi_theme};
 my $songs = $general_cfg->{songs};
 my $chunksize = $general_cfg->{chunksize};
 my $player = $general_cfg->{player};
@@ -198,7 +197,7 @@ sub backend_call {
 			"--bind=esc:$random,alt-a:toggle-all,alt-n:deselect-all",
 			"--with-nth=$fields"
 		],
-		rofi => [ "rofi", "-width", "1300", "-matching", "regex", "-dmenu", "-kb-row-tab", "", "-kb-move-word-forward", "", "-kb-accept-alt", "Tab", "-multi-select", "-no-levensthein-sort", "-i", "-p", "> " ]
+		rofi => [ "rofi", "-width", "1300", "-matching", "regex", "-dmenu", "-kb-row-tab", "", "-kb-move-word-forward", "", "-kb-accept-alt", "Tab", "-multi-select", "-no-levensthein-sort", "-i", "-p", "> "  ]
 	);
 	my $handle = start $backends{$backend} // die('backend not found'), \$input, \$out;
 	$input = join "", (@{$in});
