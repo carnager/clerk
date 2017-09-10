@@ -88,6 +88,7 @@ sub main {
 		}
 		elsif (defined $options{l}) { create_db(); list_db_entries_for("Latest") }
 		elsif (defined $options{u}) {
+			unlink $db_file;
 			create_db();
 		}
 	}
