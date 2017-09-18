@@ -8,7 +8,7 @@ use utf8;
 use Config::Simple;
 use Time::HiRes qw (sleep);
 use Data::MessagePack;
-#use DDP;
+use DDP;
 use Encode qw(decode encode);
 use File::Basename;
 use File::Path qw(make_path);
@@ -17,6 +17,7 @@ use File::stat;
 use Try::Tiny;
 use FindBin '$Bin';
 use FindBin '$Script';
+use List::UtilsBy;
 use Getopt::Std;
 use HTTP::Date;
 use IPC::Run qw( timeout start );
@@ -28,6 +29,7 @@ use autodie;
 my $self="$Bin/$Script";
 
 $ENV{TMUX_TMPDIR}='/tmp/clerk/tmux';
+my $minimal = "";
 make_path($ENV{TMUX_TMPDIR}) unless(-d $ENV{TMUX_TMPDIR});
 
 my $config_file = $ENV{'HOME'} . "/.config/clerk/clerk.conf";
@@ -60,18 +62,19 @@ my $random;
 
 sub main {
 	my %options=();
-	getopts("talpfrhuyxzAT", \%options);
+	getopts("talpfrhuyxzATRZ", \%options);
 	unless ($options{f}) { 
 		$backend = 'rofi'
 	} else { 
 		$backend = 'fzf';
 	}
-	if ($options{t} // $options{a} // $options{p} // $options{l} // $options{r} // $options{x} // $options{y} // $options{h} // $options{z} // $options{u}) {
+	if ($options{t} // $options{a} // $options{p} // $options{l} // $options{R} // $options{Z} // $options{r} // $options{x} // $options{y} // $options{h} // $options{z} // $options{u}) {
 		if    (defined $options{t}) { create_db(); list_db_entries_for("Tracks") }
 		elsif (defined $options{a}) { create_db(); list_db_entries_for("Albums") }
 		elsif (defined $options{p}) { create_db(); list_playlists() }
 		elsif (defined $options{z}) { help() }
 		elsif (defined $options{h}) { help_output() }
+		elsif (defined $options{R}) { rating() }
 		elsif (defined $options{x}) {
 			create_db();
 			system('tmux', 'split-window', '-d', $self, '-f', '-r');
@@ -79,6 +82,10 @@ sub main {
 		}
 		elsif (defined $options{y}) {
 			system('tmux', 'split-window', '-d', $self, '-f', '-z');
+			system('tmux', 'select-pane', '-D');
+		}
+		elsif (defined $options{Z}) {
+			system('tmux', 'split-window', '-d', $self, '-f', '-R');
 			system('tmux', 'select-pane', '-D');
 		}
 		elsif (defined $options{r}) {
@@ -198,7 +205,7 @@ sub backend_call {
 			"--bind=esc:$random,alt-a:toggle-all,alt-n:deselect-all",
 			"--with-nth=$fields"
 		],
-		rofi => [ "rofi", "-width", "1300", "-matching", "regex", "-dmenu", "-kb-row-tab", "", "-kb-move-word-forward", "", "-kb-accept-alt", "Tab", "-multi-select", "-no-levensthein-sort", "-i", "-p", "> "  ]
+		rofi => [ "rofi", "-width", "1800", "-matching", "regex", "-dmenu", "-kb-row-tab", "", "-kb-move-word-forward", "", "-kb-accept-alt", "Tab", "-multi-select", "-no-levensthein-sort", "-i", "-p", "> " , "-filter", $minimal ]
 	);
 	my $handle = start $backends{$backend} // die('backend not found'), \$input, \$out;
 	$input = join "", (@{$in});
@@ -279,7 +286,20 @@ sub random {
 	}
 }
 
+sub rating {
+	my $mpd = Net::MPD->connect($ENV{MPD_HOST} // $mpd_host // 'localhost');
+	my @queue_cmd = ('tmux', 'findw', '-t', 'music', 'queue');
+	try { $mpd->close(); };
+	$mpd->{socket}->close;
+	my @action_items = ("1\n", "2\n", "3\n", "4\n", "5\n", "6\n", "7\n", "8\n", "9\n", "10\n");
+	my $minimal_rating = backend_call(\@action_items, "1,2,3", "cancel");
+	chomp $minimal_rating;
+	$minimal = "$minimal_rating";
+	list_db_entries_for("Ratings");
+}
+
 sub do_action {
+	$minimal = "";
 	my $mpd = Net::MPD->connect($ENV{MPD_HOST} // $mpd_host // 'localhost');
 	my @queue_cmd = ('tmux', 'findw', '-t', 'music', 'queue');
 	my ($in, $context) = @_;
@@ -383,12 +403,23 @@ sub formatted_ratings {
 
 sub formatted_tracks {
 	my ($rdb) = @_;
-	my $fmtstr = join "", map {"%-${_}.${_}s\t"} ($track_l, $title_l, $artist_l, $album_l, $rating_l);
+	my $fmtstr = join "", map {"%-${_}.${_}s\t"} ($track_l, $title_l, $artist_l, $date_l, $album_l, $rating_l);
 	my @tracks = map {
-		sprintf $fmtstr."%-s\n", (map { $_ // "-" } $_->@{qw/Track Title Artist Album/}), formatted_ratings($_->{rating} // 0), $_->{uri};
+		sprintf $fmtstr."%-s\n", (map { $_ // "-" } $_->@{qw/Track Title Artist Date Album/}), formatted_ratings($_->{rating} // 0), $_->{uri};
 #		sprintf $fmtstr."%-s\n", $_->@{qw/Track Title Artist Album uri/}
 	} @{$rdb};
 
+	return \@tracks;
+}
+
+sub formatted_rating {
+	my ($rdb) = @_;
+	my @rating_rdb = grep { ($_->{rating} // 0) > $minimal } @$rdb;
+	$minimal = "";
+	my $fmtstr = join "", map {"%-${_}.${_}s\t"} ($track_l, $title_l, $artist_l, $date_l, $album_l, $rating_l);
+	my @tracks = map {
+		sprintf $fmtstr."%-s\n", (map { $_ // "-" } $_->@{qw/Track Title Artist Date Album/}), formatted_ratings($_->{rating} // 0), $_->{uri};
+	} @rating_rdb;
 	return \@tracks;
 }
 
@@ -407,14 +438,15 @@ sub formatted_playlists {
 
 sub list_db_entries_for {
 	my ($kind) = @_;
-	die "Wrong kind" unless any {; $_ eq $kind} qw/Albums Latest Tracks/;
+	die "Wrong kind" unless any {; $_ eq $kind} qw/Albums Latest Tracks Ratings/;
 
 	my $rdb = unpack_msgpack();
-	my %fields = (Albums=> "1,2,3", Latest => "1,2,3", Tracks => "1,2,3,4,5");
+	my %fields = (Albums=> "1,2,3", Latest => "1,2,3", Tracks => "1,2,3,4,5,6", Ratings =>  "1,2,3,4,5,6");
 	my %formater = (
 		Albums => sub {formatted_albums(@_, 0)},
 		Latest => sub {formatted_albums(@_, 1)},
-		Tracks => \&formatted_tracks
+		Tracks => \&formatted_tracks,
+		Ratings => \&formatted_rating
 	);
 
 	my $output = $formater{$kind}->($rdb);
@@ -428,6 +460,9 @@ sub list_db_entries_for {
 		my $out = backend_call($output, $fields{$kind});
 		try {
 			do_action($out, "tracks", "ignore");
+			if($kind eq "Ratings") {
+				system('tmux', 'kill-pane');
+			}
 		}
 	}
 }
