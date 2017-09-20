@@ -127,7 +127,7 @@ sub help_output {
 		"  -a           Add/Replace album(s) to queue.",
 		"  -l           Add/Replace album(s) to queue (sorted by mtime)",
 		"  -t           Add/Replace track(s) to queue.",
-		"  -R           Add/Replace rated track(s) to queue."
+		"  -R           Add/Replace rated track(s) to queue.",
 		"  -p           Add stored playlist to queue",
 		"  -r [-A, -T]  Replace current playlist with random songs/album",
 		"  -u           Update caches",
