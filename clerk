@@ -62,13 +62,13 @@ my $random;
 
 sub main {
 	my %options=();
-	getopts("talpfrhuyxzATRZ", \%options);
+	getopts("talpfrhuyxzATRZN", \%options);
 	unless ($options{f}) { 
 		$backend = 'rofi'
 	} else { 
 		$backend = 'fzf';
 	}
-	if ($options{t} // $options{a} // $options{p} // $options{l} // $options{R} // $options{Z} // $options{r} // $options{x} // $options{y} // $options{h} // $options{z} // $options{u}) {
+	if ($options{t} // $options{a} // $options{p} // $options{l} // $options{N} // $options{R} // $options{Z} // $options{r} // $options{x} // $options{y} // $options{h} // $options{z} // $options{u}) {
 		if    (defined $options{t}) { create_db(); list_db_entries_for("Tracks") }
 		elsif (defined $options{a}) { create_db(); list_db_entries_for("Albums") }
 		elsif (defined $options{p}) { create_db(); list_playlists() }
@@ -91,6 +91,7 @@ sub main {
 		elsif (defined $options{r}) {
 			if (defined $options{T}) { random_tracks(); }
 			elsif (defined $options{A}) { random_album(); }
+			elsif (defined $options{N}) { random_rated_tracks(); }
 			else { random() }
 		}
 		elsif (defined $options{l}) { create_db(); list_db_entries_for("Latest") }
@@ -124,16 +125,16 @@ sub help_output {
 		"clerk version 2.0",
 		"",
 		"Commands:",
-		"  -a           Add/Replace album(s) to queue.",
-		"  -l           Add/Replace album(s) to queue (sorted by mtime)",
-		"  -t           Add/Replace track(s) to queue.",
-		"  -R           Add/Replace rated track(s) to queue.",
-		"  -p           Add stored playlist to queue",
-		"  -r [-A, -T]  Replace current playlist with random songs/album",
-		"  -u           Update caches",
+		"  -a               Add/Replace album(s) to queue.",
+		"  -l               Add/Replace album(s) to queue (sorted by mtime)",
+		"  -t               Add/Replace track(s) to queue.",
+		"  -R               Add/Replace rated track(s) to queue.",
+		"  -p               Add stored playlist to queue",
+		"  -r [-A, -T, -N]  Replace current playlist with random songs/album",
+		"  -u               Update caches",
 		"",
 		"Options:",
-		"  -f           Use fzf interface",
+		"  -f               Use fzf interface",
 		" ",
 		"Without further arguments, clerk starts a tabbed tmux interface");
 
@@ -261,6 +262,21 @@ sub random_tracks {
 	}
 }
 
+sub random_rated_tracks {
+	my $mpd = Net::MPD->connect($ENV{MPD_HOST} // $mpd_host // 'localhost');
+	my @queue_cmd = ('tmux', 'findw', '-t', 'music', 'queue');
+	try { $mpd->close(); };
+	$mpd->{socket}->close;
+	my @result;
+	my @action_items = ("1\n", "2\n", "3\n", "4\n", "5\n", "6\n", "7\n", "8\n", "9\n", "10\n");
+	my $minimal_rating = backend_call(\@action_items, "1,2,3", "cancel");
+	chomp $minimal_rating;
+	$minimal = "$minimal_rating";
+	my $rdb = unpack_msgpack();
+	my @rating_rdb = grep { ($_->{rating} // 0) >= $minimal } @$rdb;
+	$mpd->add($_->{uri}) for (splice(@rating_rdb, -min($#rating_rdb, $songs)));
+}
+
 sub random {
 	my $mpd = Net::MPD->connect($ENV{MPD_HOST} // $mpd_host // 'localhost');
 	my @queue_cmd = ('tmux', 'findw', '-t', 'music', 'queue');
@@ -279,14 +295,9 @@ sub random {
 		$mpd->play();
 	}
 	if ($action eq "Rated Tracks\n") {
-		my @result;
-		my @action_items = ("1\n", "2\n", "3\n", "4\n", "5\n", "6\n", "7\n", "8\n", "9\n", "10\n");
-		my $minimal_rating = backend_call(\@action_items, "1,2,3", "cancel");
-		chomp $minimal_rating;
-		$minimal = "$minimal_rating";
-		my $rdb = unpack_msgpack();
-		my @rating_rdb = grep { ($_->{rating} // 0) >= $minimal } @$rdb;
-		$mpd->add($_->{uri}) for (splice(@rating_rdb, -min($#rating_rdb, $songs)));
+		random_rated_tracks();
+		system(@queue_cmd);
+		$mpd-play();
 	}
 	if ($action eq "Settings\n") {
 		my @action_items = ("5\n", "10\n", "15\n", "20\n", "25\n", "30\n");
