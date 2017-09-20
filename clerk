@@ -17,6 +17,7 @@ use File::stat;
 use Try::Tiny;
 use FindBin '$Bin';
 use FindBin '$Script';
+use List::Util qw(min);
 use Getopt::Std;
 use HTTP::Date;
 use IPC::Run qw( timeout start );
@@ -204,7 +205,7 @@ sub backend_call {
 			"--bind=esc:$random,alt-a:toggle-all,alt-n:deselect-all",
 			"--with-nth=$fields"
 		],
-		rofi => [ "rofi", "-width", "1800", "-matching", "regex", "-dmenu", "-kb-row-tab", "", "-kb-move-word-forward", "", "-kb-accept-alt", "Tab", "-multi-select", "-no-levensthein-sort", "-i", "-p", "> " , "-filter", $minimal ]
+		rofi => [ "rofi", "-width", "2400", "-lines", "40", "-matching", "regex", "-dmenu", "-kb-row-tab", "", "-kb-move-word-forward", "", "-kb-accept-alt", "Tab", "-multi-select", "-no-levensthein-sort", "-i", "-p", "> " , "-filter", $minimal ]
 	);
 	my $handle = start $backends{$backend} // die('backend not found'), \$input, \$out;
 	$input = join "", (@{$in});
@@ -264,7 +265,7 @@ sub random {
 	my @queue_cmd = ('tmux', 'findw', '-t', 'music', 'queue');
 	try { $mpd->close(); };
 	$mpd->{socket}->close;
-	my @action_items = ("Album\n", "Tracks\n", "Settings\n");
+	my @action_items = ("Album\n", "Tracks\n", "Rated Tracks\n", "Settings\n");
 	my $action = backend_call(\@action_items, "1,2,3", "cancel");
 	if ($action eq "Album\n") {
 		random_album();
@@ -275,6 +276,16 @@ sub random {
 		random_tracks();
 		system(@queue_cmd);
 		$mpd->play();
+	}
+	if ($action eq "Rated Tracks\n") {
+		my @result;
+		my @action_items = ("1\n", "2\n", "3\n", "4\n", "5\n", "6\n", "7\n", "8\n", "9\n", "10\n");
+		my $minimal_rating = backend_call(\@action_items, "1,2,3", "cancel");
+		chomp $minimal_rating;
+		$minimal = "$minimal_rating";
+		my $rdb = unpack_msgpack();
+		my @rating_rdb = grep { ($_->{rating} // 0) >= $minimal } @$rdb;
+		$mpd->add($_->{uri}) for (splice(@rating_rdb, -min($#rating_rdb, $songs)));
 	}
 	if ($action eq "Settings\n") {
 		my @action_items = ("5\n", "10\n", "15\n", "20\n", "25\n", "30\n");
@@ -413,7 +424,7 @@ sub formatted_tracks {
 
 sub formatted_rating {
 	my ($rdb) = @_;
-	my @rating_rdb = grep { ($_->{rating} // 0) > $minimal } @$rdb;
+	my @rating_rdb = grep { ($_->{rating} // 0) >= $minimal } @$rdb;
 	$minimal = "";
 	my $fmtstr = join "", map {"%-${_}.${_}s\t"} ($track_l, $title_l, $artist_l, $date_l, $album_l, $rating_l);
 	my @tracks = map {
