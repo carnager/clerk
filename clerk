@@ -17,11 +17,10 @@ use File::stat;
 use Try::Tiny;
 use FindBin '$Bin';
 use FindBin '$Script';
-use List::Util qw(min);
+use List::Util qw(min any shuffle);
 use Getopt::Std;
 use HTTP::Date;
 use IPC::Run qw( timeout start );
-use List::Util qw(any);
 use Net::MPD;
 use POSIX qw(tzset);
 use autodie;
@@ -274,7 +273,8 @@ sub random_rated_tracks {
 	$minimal = "$minimal_rating";
 	my $rdb = unpack_msgpack();
 	my @rating_rdb = grep { ($_->{rating} // 0) >= $minimal } @$rdb;
-	$mpd->add($_->{uri}) for (splice(@rating_rdb, -min($#rating_rdb, $songs)));
+	my @random_rated_tracks = shuffle @rating_rdb;
+	$mpd->add($_->{uri}) for (splice(@random_rated_tracks, -min($#random_rated_tracks, $songs)));
 }
 
 sub random {
