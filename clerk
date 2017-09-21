@@ -354,17 +354,31 @@ sub do_action {
 			}
 		}
 	} elsif ($context eq "tracks") {
-		my @action_items = ("Add\n", "Replace\n");
+		my @action_items = ("Add\n", "Replace\n", "Rate\n");
 		$action = backend_call(\@action_items);
 		if ($action eq "Replace\n") {
 			$mpd->clear();
 		}
-		my $input;
-		foreach my $line (split /\n/, $in) {
-			my $uri = (split /[\t\n]/, $line)[-1];
-			$uri = decode('UTF-8', $uri );
-			$mpd->add($uri);
-			system(@queue_cmd);
+		if ($action eq "Rate\n") {
+			my @rating_value = ("1\n", "2\n", "3\n", "4\n", "5\n", "6\n", "7\n", "8\n", "9\n", "10\n");
+			my $rating;
+			$rating = backend_call(\@rating_value);
+			chomp $rating;
+			my $input;
+			foreach my $line (split /\n/, $in) {
+				my $uri = (split /[\t\n]/, $line)[-1];
+				$uri = decode('UTF-8', $uri );
+				$mpd->sticker_value("song", "$uri", "rating", "$rating")
+			}
+		}
+		elsif ($action eq "Add\n" // $action eq "Replace\n") {
+			my $input;
+			foreach my $line (split /\n/, $in) {
+				my $uri = (split /[\t\n]/, $line)[-1];
+				$uri = decode('UTF-8', $uri );
+				$mpd->add($uri);
+				system(@queue_cmd);
+			}
 		}
 		if ($action eq "Replace\n") {
 			$mpd->play();
