@@ -353,7 +353,7 @@ sub do_action {
 				$mpd->rm("$in");
 			}
 		}
-	} elsif ($context eq "tracks") {
+	} elsif ($context eq "Tracks") {
 		my @action_items = ("Add\n", "Replace\n", "Rate Track\n");
 		$action = backend_call(\@action_items);
 		if ($action eq "Replace\n") {
@@ -379,6 +379,22 @@ sub do_action {
 				$mpd->add($uri);
 				system(@queue_cmd);
 			}
+		}
+		if ($action eq "Replace\n") {
+			$mpd->play();
+		}
+	} elsif ($context eq "Albums" || $context eq "Latest") {
+		my @action_items = ("Add\n", "Replace\n");
+		$action = backend_call(\@action_items);
+		if ($action eq "Replace\n") {
+			$mpd->clear();
+		}
+		my $input;
+		foreach my $line (split /\n/, $in) {
+			my $uri = (split /[\t\n]/, $line)[-1];
+			$uri = decode('UTF-8', $uri );
+			$mpd->add($uri);
+			system(@queue_cmd);
 		}
 		if ($action eq "Replace\n") {
 			$mpd->play();
@@ -488,14 +504,14 @@ sub list_db_entries_for {
 	my $output = $formater{$kind}->($rdb);
 	if ($backend eq "rofi") {
 		my $out = backend_call($output, $fields{$kind});
-		do_action($out, "tracks", "ignore");
+		do_action($out, $kind, "ignore");
 	}
 	elsif ($backend eq "fzf") {
 	for (;;) {
 		create_db();
 		my $out = backend_call($output, $fields{$kind});
 		try {
-			do_action($out, "tracks", "ignore");
+			do_action($out, $kind, "ignore");
 			if($kind eq "Ratings") {
 				system('tmux', 'kill-pane');
 			}
