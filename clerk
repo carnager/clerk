@@ -206,7 +206,7 @@ sub backend_call {
 			"--bind=esc:$random,alt-a:toggle-all,alt-n:deselect-all",
 			"--with-nth=$fields"
 		],
-		rofi => [ "rofi", "-width", "2400", "-lines", "40", "-matching", "regex", "-dmenu", "-kb-row-tab", "", "-kb-move-word-forward", "", "-kb-accept-alt", "Tab", "-multi-select", "-no-levensthein-sort", "-i", "-p", "> " , "-filter", $minimal ]
+		rofi => [ "rofi", "-width", "1300", "-matching", "regex", "-dmenu", "-kb-row-tab", "", "-kb-move-word-forward", "", "-kb-accept-alt", "Tab", "-multi-select", "-no-levensthein-sort", "-i", "-p", "> " , "-filter", $minimal ]
 	);
 	my $handle = start $backends{$backend} // die('backend not found'), \$input, \$out;
 	$input = join "", (@{$in});
@@ -354,12 +354,12 @@ sub do_action {
 			}
 		}
 	} elsif ($context eq "tracks") {
-		my @action_items = ("Add\n", "Replace\n", "Rate\n");
+		my @action_items = ("Add\n", "Replace\n", "Rate Track\n");
 		$action = backend_call(\@action_items);
 		if ($action eq "Replace\n") {
 			$mpd->clear();
 		}
-		if ($action eq "Rate\n") {
+		if ($action eq "Rate Track\n") {
 			my @rating_value = ("1\n", "2\n", "3\n", "4\n", "5\n", "6\n", "7\n", "8\n", "9\n", "10\n");
 			my $rating;
 			$rating = backend_call(\@rating_value);
@@ -371,7 +371,7 @@ sub do_action {
 				$mpd->sticker_value("song", "$uri", "rating", "$rating")
 			}
 		}
-		elsif ($action eq "Add\n" // $action eq "Replace\n") {
+		elsif ($action eq "Add\n" || $action eq "Replace\n") {
 			my $input;
 			foreach my $line (split /\n/, $in) {
 				my $uri = (split /[\t\n]/, $line)[-1];
