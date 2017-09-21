@@ -297,7 +297,7 @@ sub random {
 	if ($action eq "Rated Tracks\n") {
 		random_rated_tracks();
 		system(@queue_cmd);
-		$mpd-play();
+		$mpd->play();
 	}
 	if ($action eq "Settings\n") {
 		my @action_items = ("5\n", "10\n", "15\n", "20\n", "25\n", "30\n");
