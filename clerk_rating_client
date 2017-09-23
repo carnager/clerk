@@ -5,6 +5,7 @@ use v5.10;
 use warnings;
 use Array::Utils qw(:all);
 #use DDP;
+use Try::Tiny;
 use Config::Simple;
 use File::Spec;
 use strict;
@@ -44,6 +45,8 @@ sub subscribe_ratings_channel {
 
 sub track_rating {
     while(1) {
+        try { $mpd->close(); };
+        $mpd->{socket}->close;
     	$mpd->idle('message');
     	my @blub = $mpd->read_messages;
         foreach (@blub) {
