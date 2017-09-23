@@ -74,7 +74,7 @@ sub track_rating {
                 } elsif ($mode eq "ALBUMRATING") {
                     print ":: tagging track \"${title}\" by \"${albumartist}\" with albumrating of \"${rating}\"\n";
                 }
-                system('mid3v2', "--TXXX:${mode}:${rating}", "${music_root}/${uri}");
+                system('mid3v2', "--TXXX", "${mode}:${rating}", "${music_root}/${uri}");
             }
             elsif ($uri =~ /.*.ogg$/) {
                 print "!! OGG files not supported, yet\n";
@@ -122,7 +122,7 @@ sub tag_from_sticker {
             system('metaflac', "--set-tag=RATING=$rating", "${music_root}/${uri}");
         }
         elsif ($uri =~ /.*.mp3$/) {
-            system('mid3v2', "--TXXX:RATING:${rating}", "${music_root}/${uri}");
+            system('mid3v2', "--TXXX", "RATING:${rating}", "${music_root}/${uri}");
         }
         elsif ($uri =~ /.*.ogg$/) {
             print "!! OGG files not supported, yet\n";
