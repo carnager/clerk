@@ -5,6 +5,7 @@ use v5.10;
 use warnings;
 use Array::Utils qw(:all);
 #use DDP;
+use Config::Simple;
 use File::Spec;
 use strict;
 use utf8;
@@ -13,9 +14,18 @@ use File::Find;
 use Getopt::Std;
 use Net::MPD;
 
-my $mpd_host = "tauron";
+my $config_file = $ENV{'HOME'} . "/.config/clerk/clerk.conf";
+
+if ($ENV{CLERK_CONF}) {
+    $config_file = $ENV{CLERK_CONF};
+}
+
+my $cfg = new Config::Simple(filename=>"$config_file");
+my $general_cfg = $cfg->param(-block=>"General");
+my $mpd_host = $general_cfg->{mpd_host};
+my $music_root = $general_cfg->{music_root};
+
 my $mpd = Net::MPD->connect($ENV{MPD_HOST} // $mpd_host // 'localhost');
-my $music_root = "/mnt/raid/Audio/Rips";
 
 sub main {
     my %options=();
