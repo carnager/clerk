@@ -4,7 +4,7 @@ binmode(STDOUT, ":utf8");
 use v5.10;
 use warnings;
 use Array::Utils qw(:all);
-use DDP;
+#use DDP;
 use File::Spec;
 use strict;
 use utf8;
