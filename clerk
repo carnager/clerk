@@ -8,7 +8,7 @@ use utf8;
 use Config::Simple;
 use Time::HiRes qw (sleep);
 use Data::MessagePack;
-#use DDP;
+use DDP;
 use Encode qw(decode encode);
 use File::Basename;
 use File::Path qw(make_path);
@@ -44,6 +44,7 @@ my $mpd_host = $general_cfg->{mpd_host};
 my $tmux_config = $general_cfg->{tmux_config};
 my $db_file = $general_cfg->{database};
 my $songs = $general_cfg->{songs};
+my $tagging = $general_cfg->{tagging};
 my $chunksize = $general_cfg->{chunksize};
 my $player = $general_cfg->{player};
 
@@ -354,7 +355,7 @@ sub do_action {
 			}
 		}
 	} elsif ($context eq "Tracks") {
-		my @action_items = ("Add\n", "Replace\n", "Rate Track\n");
+		my @action_items = ("Add\n", "Replace\n", "---\n", "Rate Track\n");
 		$action = backend_call(\@action_items);
 		if ($action eq "Replace\n") {
 			$mpd->clear();
@@ -368,7 +369,10 @@ sub do_action {
 			foreach my $line (split /\n/, $in) {
 				my $uri = (split /[\t\n]/, $line)[-1];
 				$uri = decode('UTF-8', $uri );
-				$mpd->sticker_value("song", "$uri", "rating", "$rating")
+				if ($tagging eq "true") {
+					$mpd->sticker_value("song", "$uri", "rating", "$rating");
+				}
+				$mpd->send_message('rating', "$uri\tRATING\t${rating}");
 			}
 		}
 		elsif ($action eq "Add\n" || $action eq "Replace\n") {
@@ -384,17 +388,45 @@ sub do_action {
 			$mpd->play();
 		}
 	} elsif ($context eq "Albums" || $context eq "Latest") {
-		my @action_items = ("Add\n", "Replace\n");
+		my @action_items = ("Add\n", "Replace\n", "---\n", "Rate Album\n");
 		$action = backend_call(\@action_items);
+		if ($action eq "Rate Album\n") {
+			my @rating_value = ("1\n", "2\n", "3\n", "4\n", "5\n", "6\n", "7\n", "8\n", "9\n", "10\n");
+			my $rating;
+			$rating = backend_call(\@rating_value);
+			chomp $rating;
+			my $input;
+			foreach my $line (split /\n/, $in) {
+				my $song_tags;
+				my $uri = (split /[\t\n]/, $line)[-1];
+				$uri = decode('UTF-8', $uri );
+				my @files = $mpd->search('filename', $uri);
+				my @song_tags = $files[0];
+				my $artist = $song_tags[0]->{AlbumArtist};
+				my $album = $song_tags[0]->{Album};
+				my $date = $song_tags[0]->{Date};
+				my @songs_to_tag = $mpd->search('albumartist', $artist, 'album', $album, 'date', $date);
+				foreach my $songs (@songs_to_tag) {
+					my $filename = $songs->{uri};
+					$mpd->sticker_value("song", $filename, "albumrating", "$rating");
+					if ($tagging eq "true") {
+						$mpd->send_message('rating', "$filename\tALBUMRATING\t${rating}");
+					}
+				}
+			}
+		}
+
 		if ($action eq "Replace\n") {
 			$mpd->clear();
 		}
-		my $input;
-		foreach my $line (split /\n/, $in) {
-			my $uri = (split /[\t\n]/, $line)[-1];
-			$uri = decode('UTF-8', $uri );
-			$mpd->add($uri);
-			system(@queue_cmd);
+		if ($action eq "Add\n" || $action eq "Replace\n") {
+			my $input;
+			foreach my $line (split /\n/, $in) {
+				my $uri = (split /[\t\n]/, $line)[-1];
+				$uri = decode('UTF-8', $uri );
+				$mpd->add($uri);
+				system(@queue_cmd);
+			}
 		}
 		if ($action eq "Replace\n") {
 			$mpd->play();
