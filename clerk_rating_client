@@ -40,13 +40,14 @@ sub main {
 }
 
 sub subscribe_ratings_channel {
+    try { $mpd->close(); };
+    $mpd->{socket}->close;    
     $mpd->subscribe('rating');
 }
 
 sub track_rating {
     while(1) {
-        try { $mpd->close(); };
-        $mpd->{socket}->close;
+        subscribe_ratings_channel();
     	$mpd->idle('message');
     	my @blub = $mpd->read_messages;
         foreach (@blub) {
