@@ -207,7 +207,7 @@ sub backend_call {
 			"--bind=esc:$random,alt-a:toggle-all,alt-n:deselect-all",
 			"--with-nth=$fields"
 		],
-		rofi => [ "rofi", "-width", "1300", "-matching", "regex", "-dmenu", "-kb-row-tab", "", "-kb-move-word-forward", "", "-kb-accept-alt", "Tab", "-multi-select", "-no-levensthein-sort", "-i", "-p", "> " , "-filter", $minimal ]
+		rofi => [ "rofi", "-matching", "regex", "-dmenu", "-multi-select", "-i", "-p", "> " , "-filter", $minimal ]
 	);
 	my $handle = start $backends{$backend} // die('backend not found'), \$input, \$out;
 	$input = join "", (@{$in});
