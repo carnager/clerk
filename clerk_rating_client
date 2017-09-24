@@ -47,7 +47,6 @@ sub track_rating {
     while(1) {
     	$mpd->idle('message');
     	my @blub = $mpd->read_messages;
-        p @blub;
         foreach (@blub) {
         	my $string = $_->{message};
         	my @array = split("\t", $string);
