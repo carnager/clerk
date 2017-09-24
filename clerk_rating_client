@@ -4,7 +4,7 @@ binmode(STDOUT, ":utf8");
 use v5.10;
 use warnings;
 use Array::Utils qw(:all);
-#use DDP;
+use DDP;
 use Try::Tiny;
 use Config::Simple;
 use File::Spec;
@@ -40,16 +40,14 @@ sub main {
 }
 
 sub subscribe_ratings_channel {
-    try { $mpd->close(); };
-    $mpd->{socket}->close;    
     $mpd->subscribe('rating');
 }
 
 sub track_rating {
     while(1) {
-        subscribe_ratings_channel();
     	$mpd->idle('message');
     	my @blub = $mpd->read_messages;
+        p @blub;
         foreach (@blub) {
         	my $string = $_->{message};
         	my @array = split("\t", $string);
