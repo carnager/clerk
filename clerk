@@ -372,7 +372,7 @@ sub do_action {
 				if ($tagging eq "true") {
 					$mpd->sticker_value("song", "$uri", "rating", "$rating");
 				}
-				$mpd->send_message('rating', "$uri\tRATING\t${rating}");
+				$mpd->send_message('rating', encode('UTF-8', "${uri}\tRATING\t${rating}"));
 			}
 		}
 		elsif ($action eq "Add\n" || $action eq "Replace\n") {
@@ -410,7 +410,7 @@ sub do_action {
 					my $filename = $songs->{uri};
 					$mpd->sticker_value("song", $filename, "albumrating", "$rating");
 					if ($tagging eq "true") {
-						$mpd->send_message('rating', "$filename\tALBUMRATING\t${rating}");
+						$mpd->send_message('rating', encode('UTF-8', "${filename}\tALBUMRATING\t${rating}"));
 					}
 				}
 			}
