@@ -17,8 +17,9 @@ use Try::Tiny;
 use FindBin qw($Bin $Script);
 use Getopt::Long qw(:config no_ignore_case bundling);
 use HTTP::Date;
+use Scalar::Util qw(looks_like_number);
 use IPC::Run qw( timeout start );
-use List::Util qw(any max);
+use List::Util qw(any max maxstr);
 use Net::MPD;
 use Pod::Usage qw(pod2usage);
 use POSIX qw(tzset);
@@ -61,6 +62,7 @@ sub parse_config {
 		songs       => $g->{songs},
 		chunksize   => $g->{chunksize},
 		player      => $g->{player},
+		tagging     => $g->{tagging},
 		jump_query  => $g->{jump_query}
 	);
 
@@ -477,8 +479,8 @@ sub action_db_tracks {
 	mpd_reachable();
 	{
 		local $_ = $action;
-		if    (/^Add/)     { mpd_add_items(\@sel) }
-		elsif (/^Replace/) { mpd_replace_with_items(\@sel) }
+		if    (/^Add/)                { mpd_add_items(\@sel) }
+		elsif (/^Replace/)            { mpd_replace_with_items(\@sel) }
 		elsif (/^Rate Track\(s\)/)    { mpd_rate_with_tracks(\@sel) }
 	}
 }
@@ -507,8 +509,8 @@ sub action_random {
 	mpd_reachable();
 	{
 		local $_ = $out;
-		if    (/^Track/) { random_tracks() }
-		elsif (/^Album/) { random_album() }
+		if    (/^Track/)    { random_tracks() }
+		elsif (/^Album/)    { random_album() }
 		elsif (/^Settings/) { action_settings(ask_to_pick_settings()) }
 	}
 }
@@ -535,6 +537,9 @@ sub mpd_rate_items {
 	my ($sel, $rating, $mode) = @_;
 	chomp $rating;
 	$rating = undef if $rating =~ /^Delete Rating/;
+	if ($tagging eq "true") {
+		$mpd->send_message('rating', "$uri\t$mode\t${rating}");
+	}
 	$mpd->sticker_value("song", $_, $mode, $rating) for @{$_[0]};
 }
 
@@ -558,12 +563,20 @@ sub mpd_rate_with_albums {
 		}
 	}
 	push @final_list, [ @list_of_files ];
-	mpd_rate_items(@final_list, $rating, "albumrating");
+	if ($rating eq "---\n") {
+		#noop
+	} else {
+		mpd_rate_items(@final_list, $rating, "albumrating");
+	}
 }
 
 sub mpd_rate_with_tracks {
 	my $rating = ask_to_pick_ratings();
-	mpd_rate_items(@_, $rating, "rating");
+	if ($rating eq "---\n") {
+		#noop
+	} else {
+		mpd_rate_items(@_, $rating, "rating");
+	}
 }
 
 sub mpd_save_cur_playlist {
