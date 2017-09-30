@@ -57,13 +57,14 @@ sub parse_config {
 
 	my $g = $cfg->param(-block=>'General');
 	%rvar = (%rvar,
-		mpd_host    => $g->{mpd_host},
-		tmux_config => $g->{tmux_config},
-		songs       => $g->{songs},
-		chunksize   => $g->{chunksize},
-		player      => $g->{player},
-		tagging     => $g->{tagging},
-		jump_query  => $g->{jump_query}
+		mpd_host     => $g->{mpd_host},
+		tmux_config  => $g->{tmux_config},
+		songs        => $g->{songs},
+		chunksize    => $g->{chunksize},
+		player       => $g->{player},
+		tagging      => $g->{tagging},
+		randomartist => $g->{randomartist},
+		jump_query   => $g->{jump_query}
 	);
 
 	my $c = $cfg->param(-block=>'Columns');
@@ -115,7 +116,6 @@ sub parse_options {
 		'f'         => sub { $rvar{backend} = 'fzf'; },
 
 		# action
-		'update|u'    => $parse_act,
 		'tracks|t'    => $parse_act,
 		'albums|a'    => $parse_act,
 		'playlists|p' => $parse_act,
@@ -134,6 +134,7 @@ sub parse_options {
 
 	$rvar{tmux_ui} = (
 		$rvar{action} ||
+		$rvar{renewdb} ||
 		$rvar{instaact} ||
 		(defined $rvar{tmux_ui} && !$rvar{tmux_ui})
 	)? 0 : 1;
@@ -306,7 +307,7 @@ sub random_tracks {
 	mpd_reachable();
 	$mpd->clear();
 	for (my $i=0; $i <= $rvar{songs}; $i++) {
-		my @artists = $mpd->list('artist');
+		my @artists = $mpd->list($rvar{randomartist});
 		my $artist_r = $artists[rand @artists];
 		my @albums = $mpd->list('album', 'artist', $artist_r);
 		my $album_r = $albums[rand @albums];
