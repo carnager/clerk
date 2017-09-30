@@ -306,7 +306,7 @@ sub random_album {
 sub random_tracks {
 	mpd_reachable();
 	$mpd->clear();
-	for (my $i=0; $i <= $rvar{songs}; $i++) {
+	for (my $i=1; $i <= $rvar{songs}; $i++) {
 		my @artists = $mpd->list($rvar{randomartist});
 		my $artist_r = $artists[rand @artists];
 		my @albums = $mpd->list('album', 'artist', $artist_r);
