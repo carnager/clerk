@@ -446,12 +446,17 @@ sub ask_to_pick_playlists {
 }
 
 sub ask_to_pick_random {
-	return backend_call(["Tracks\n", "Albums\n", "Settings\n"]);
+	return backend_call(["Tracks\n", "Albums\n", "---\n", "Mode: $rvar{randomartist}\n", "Number of Songs: $rvar{songs}\n"]);
 }
 
-sub ask_to_pick_settings {
+sub ask_to_pick_song_number {
 	return backend_call([map { $_ . "\n" } qw/5 10 15 20 25 30/]);
 }
+
+sub ask_to_pick_track_settings {
+	return backend_call(["artist\n", "albumartist\n"]);
+}
+
 
 sub ask_to_pick_ratings {
 	return backend_call([map { $_ . "\n" } (qw/1 2 3 4 5 6 7 8 9 10 ---/), "Delete Rating"]);
@@ -511,18 +516,28 @@ sub action_random {
 	mpd_reachable();
 	{
 		local $_ = $out;
-		if    (/^Track/)    { random_tracks() }
-		elsif (/^Album/)    { random_album() }
-		elsif (/^Settings/) { action_settings(ask_to_pick_settings()) }
+		if    (/^Track/)                         { random_tracks() }
+		elsif (/^Album/)                         { random_album() }
+		elsif (/^Mode: $rvar{randomartist}/)     { action_track_mode(ask_to_pick_track_settings()) }
+		elsif (/^Number of Songs: $rvar{songs}/) { action_song_number(ask_to_pick_song_number()) }
 	}
 }
 
-sub action_settings {
+sub action_song_number {
 	my ($out) = @_;
 
 	$rvar{songs} = max map { split /[\t\n]/ } (split /\n/, $out);
 
 	$cfg->param("General.songs", $rvar{songs});
+	$cfg->save();
+}
+
+sub action_track_mode {
+	my ($out) = $_[0];
+	chomp $out;
+	$rvar{randomartist} = $out;
+
+	$cfg->param("General.randomartist", $rvar{randomartist});
 	$cfg->save();
 }
 
