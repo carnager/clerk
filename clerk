@@ -163,11 +163,11 @@ sub do_instarand {
 
 sub select_action {
 	local $_ = $rvar{action} // '';
-	if    (/tracks/)    { return sub { action_db_entries(ask_to_pick_tracks()) } } 
-	elsif (/albums/)    { return sub { action_db_entries(ask_to_pick_albums()) } }
+	if    (/tracks/)    { return sub { action_db_tracks(ask_to_pick_tracks()) } } 
+	elsif (/albums/)    { return sub { action_db_albums(ask_to_pick_albums()) } }
 	elsif (/playlists/) { return sub { action_playlist(ask_to_pick_playlists()) } }
 	elsif (/randoms/)   { return sub { action_random(ask_to_pick_random()) } }
-	elsif (/latests/)   { return sub { action_db_entries(ask_to_pick_latests()) } }
+	elsif (/latests/)   { return sub { action_db_albums(ask_to_pick_latests()) } }
 
 	return sub {};
 }
@@ -453,18 +453,33 @@ sub ask_to_pick_ratings {
 	return backend_call([map { $_ . "\n" } (qw/1 2 3 4 5 6 7 8 9 10 ---/), "Delete Rating"]);
 }
 
-sub action_db_entries {
+sub action_db_albums {
 	my ($out) = @_;
 
 	my @sel = util_parse_selection($out);
 
-	my $action = backend_call(["Add\n", "Replace\n", "---\n", "Rate\n"]);
+	my $action = backend_call(["Add\n", "Replace\n", "---\n", "Rate Album(s)\n"]);
+	mpd_reachable();
+	{
+		local $_ = $action;
+		if    (/^Add/)                { mpd_add_items(\@sel) }
+		elsif (/^Replace/)            { mpd_replace_with_items(\@sel) }
+		elsif (/^Rate Album\(s\)/)    { mpd_rate_with_albums(\@sel) }
+	}
+}
+
+sub action_db_tracks {
+	my ($out) = @_;
+
+	my @sel = util_parse_selection($out);
+
+	my $action = backend_call(["Add\n", "Replace\n", "---\n", "Rate Track(s)\n"]);
 	mpd_reachable();
 	{
 		local $_ = $action;
 		if    (/^Add/)     { mpd_add_items(\@sel) }
 		elsif (/^Replace/) { mpd_replace_with_items(\@sel) }
-		elsif (/^Rate/)    { mpd_rate_with_items(\@sel) }
+		elsif (/^Rate Track\(s\)/)    { mpd_rate_with_tracks(\@sel) }
 	}
 }
 
@@ -517,13 +532,10 @@ sub mpd_add_items {
 }
 
 sub mpd_rate_items {
-	my $rating = $_[1];
+	my ($sel, $rating, $mode) = @_;
 	chomp $rating;
-	if ($rating eq "Delete Rating") {
-		$mpd->sticker_value("song", "$_", "rating", undef) for @{$_[0]};
-	} else {
-		$mpd->sticker_value("song", "$_", "rating", "$rating") for @{$_[0]};
-	}
+	$rating = undef if $rating =~ /^Delete Rating/;
+	$mpd->sticker_value("song", $_, $mode, $rating) for @{$_[0]};
 }
 
 sub mpd_replace_with_items {
@@ -532,9 +544,26 @@ sub mpd_replace_with_items {
 	$mpd->play;
 }
 
-sub mpd_rate_with_items {
+sub mpd_rate_with_albums {
+	my @list_of_files;
 	my $rating = ask_to_pick_ratings();
-	mpd_rate_items(@_, $rating);
+	chomp $rating;
+	my @final_list;
+	foreach my $album_rate (@{$_[0]}) {
+		my @files = $mpd->search('filename', $album_rate);
+		my @song_tags = $files[0];
+		my @songs_to_tag = $mpd->search('albumartist', $song_tags[0]->{AlbumArtist}, 'album', $song_tags[0]->{Album}, 'date', $song_tags[0]->{Date});
+		foreach my $songs (@songs_to_tag) {
+			push @list_of_files, $songs->{uri};
+		}
+	}
+	push @final_list, [ @list_of_files ];
+	mpd_rate_items(@final_list, $rating, "albumrating");
+}
+
+sub mpd_rate_with_tracks {
+	my $rating = ask_to_pick_ratings();
+	mpd_rate_items(@_, $rating, "rating");
 }
 
 sub mpd_save_cur_playlist {
