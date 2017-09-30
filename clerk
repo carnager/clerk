@@ -563,7 +563,7 @@ sub mpd_rate_with_albums {
 		}
 	}
 	push @final_list, [ @list_of_files ];
-	if ($rating eq "---\n") {
+	if ($rating eq "---") {
 		#noop
 	} else {
 		mpd_rate_items(@final_list, $rating, "albumrating");
