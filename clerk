@@ -517,10 +517,9 @@ sub mpd_add_items {
 }
 
 sub mpd_rate_items {
-	my $rating = @_[1];
+	my $rating = $_[1];
 	chomp $rating;
 	if ($rating eq "Delete Rating") {
-		print "$rating\n";
 		$mpd->sticker_value("song", "$_", "rating", undef) for @{$_[0]};
 	} else {
 		$mpd->sticker_value("song", "$_", "rating", "$rating") for @{$_[0]};
