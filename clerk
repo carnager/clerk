@@ -115,6 +115,7 @@ sub parse_options {
 		'f'         => sub { $rvar{backend} = 'fzf'; },
 
 		# action
+		'update|u'    => $parse_act,
 		'tracks|t'    => $parse_act,
 		'albums|a'    => $parse_act,
 		'playlists|p' => $parse_act,
