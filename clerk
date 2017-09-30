@@ -450,7 +450,7 @@ sub ask_to_pick_settings {
 }
 
 sub ask_to_pick_ratings {
-	return backend_call([map { $_ . "\n" } qw/1 2 3 4 5 6 7 8 9 10/]);
+	return backend_call([map { $_ . "\n" } (qw/1 2 3 4 5 6 7 8 9 10 ---/), "Delete Rating"]);
 }
 
 sub action_db_entries {
@@ -519,7 +519,12 @@ sub mpd_add_items {
 sub mpd_rate_items {
 	my $rating = @_[1];
 	chomp $rating;
-	$mpd->sticker_value("song", "$_", "rating", "$rating") for @{$_[0]};
+	if ($rating eq "Delete Rating") {
+		print "$rating\n";
+		$mpd->sticker_value("song", "$_", "rating", undef) for @{$_[0]};
+	} else {
+		$mpd->sticker_value("song", "$_", "rating", "$rating") for @{$_[0]};
+	}
 }
 
 sub mpd_replace_with_items {
@@ -559,7 +564,7 @@ sub mpd_reachable {
 		$mpd->ping;
 	} catch {
 		$mpd->_connect;
-	};
+	}
 }
 
 main;
