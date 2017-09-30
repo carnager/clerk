@@ -563,7 +563,7 @@ sub mpd_reachable {
 		$mpd->ping;
 	} catch {
 		$mpd->_connect;
-	}
+	};
 }
 
 main;
