@@ -1,18 +1,17 @@
 # !Dont move this section.
 ## Key Bindings
-bind-key -n F1   findw albums                      # show album list
-bind-key -n F2   findw tracks                      # show tracks
-bind-key -n F3   findw latest                      # show album list (latest first)
-bind-key -n F4   findw playlists                   # load playlist
-bind-key -n F5   findw queue                       # show queue
-bind-key -n C-F5 run-shell 'mpc prev --quiet'      # previous song
-bind-key -n C-F6 run-shell 'mpc toggle --quiet'    # toggle playback
-bind-key -n C-F7 run-shell 'mpc stop > /dev/null'  # stop playback
-bind-key -n C-F8 run-shell 'mpc next --quiet'      # next song
-bind-key -n F10  run-shell 'clerk -f -x'           # play random album/songs
-bind-key -n C-F1 run-shell 'clerk -f -y'           # show help
-bind-key -n F9 run-shell 'clerk -f -Z'             # show rating menu
-bind-key -n C-q  kill-session -t music             # quit clerk
+bind-key -n F1   findw albums                               # show album list
+bind-key -n F2   findw tracks                               # show tracks
+bind-key -n F3   findw latest                               # show album list (latest first)
+bind-key -n F4   findw playlists                            # load playlist
+bind-key -n F5   findw queue                                # show queue
+bind-key -n C-F5 run-shell 'mpc prev --quiet'               # previous song
+bind-key -n C-F6 run-shell 'mpc toggle --quiet'             # toggle playback
+bind-key -n C-F7 run-shell 'mpc stop > /dev/null'           # stop playback
+bind-key -n C-F8 run-shell 'mpc next --quiet'               # next song
+bind-key -n F10  run-shell '$CLERKBIN --instaact=rand_pane' # play random album/songs
+bind-key -n C-F1 run-shell '$CLERKBIN --instaact=help_pane' # show help
+bind-key -n C-q  kill-session -t music                      # quit clerk
 
 
 # Status bar
