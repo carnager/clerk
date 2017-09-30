@@ -537,8 +537,8 @@ sub mpd_rate_items {
 	my ($sel, $rating, $mode) = @_;
 	chomp $rating;
 	$rating = undef if $rating =~ /^Delete Rating/;
-	if ($tagging eq "true") {
-		$mpd->send_message('rating', "$uri\t$mode\t${rating}");
+	if ($rvar{tagging} eq "true") {
+		$mpd->send_message('rating', "$_\t$mode\t${rating}") for @{$_[0]};;
 	}
 	$mpd->sticker_value("song", $_, $mode, $rating) for @{$_[0]};
 }
