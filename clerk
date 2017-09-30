@@ -7,7 +7,7 @@ use strict;
 use utf8;
 use Config::Simple;
 use Data::MessagePack;
-#use DDP;
+use DDP;
 use Encode qw(decode encode);
 use File::Basename;
 use File::Path qw(make_path);
@@ -449,17 +449,22 @@ sub ask_to_pick_settings {
 	return backend_call([map { $_ . "\n" } qw/5 10 15 20 25 30/]);
 }
 
+sub ask_to_pick_ratings {
+	return backend_call([map { $_ . "\n" } qw/1 2 3 4 5 6 7 8 9 10/]);
+}
+
 sub action_db_entries {
 	my ($out) = @_;
 
 	my @sel = util_parse_selection($out);
 
-	my $action = backend_call(["Add\n", "Replace\n"]);
+	my $action = backend_call(["Add\n", "Replace\n", "---\n", "Rate\n"]);
 	mpd_reachable();
 	{
 		local $_ = $action;
 		if    (/^Add/)     { mpd_add_items(\@sel) }
 		elsif (/^Replace/) { mpd_replace_with_items(\@sel) }
+		elsif (/^Rate/)    { mpd_rate_with_items(\@sel) }
 	}
 }
 
@@ -511,10 +516,21 @@ sub mpd_add_items {
 	$mpd->add($_) for @{$_[0]};
 }
 
+sub mpd_rate_items {
+	my $rating = @_[1];
+	chomp $rating;
+	$mpd->sticker_value("song", "$_", "rating", "$rating") for @{$_[0]};
+}
+
 sub mpd_replace_with_items {
 	$mpd->clear;
 	mpd_add_items(@_);
 	$mpd->play;
+}
+
+sub mpd_rate_with_items {
+	my $rating = ask_to_pick_ratings();
+	mpd_rate_items(@_, $rating);
 }
 
 sub mpd_save_cur_playlist {
