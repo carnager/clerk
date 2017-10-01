@@ -7,7 +7,7 @@ use strict;
 use utf8;
 use Config::Simple;
 use Data::MessagePack;
-use DDP;
+#use DDP;
 use Encode qw(decode encode);
 use File::Basename;
 use File::Path qw(make_path);
