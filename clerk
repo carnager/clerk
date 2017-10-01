@@ -64,7 +64,7 @@ sub parse_config {
 		player       => $g->{player},
 		tagging      => $g->{tagging},
 		randomartist => $g->{randomartist},
-		jump_query   => $g->{jump_query}
+		jump_queue   => $g->{jump_queue}
 	);
 
 	my $c = $cfg->param(-block=>'Columns');
@@ -393,7 +393,7 @@ sub tmux {
 }
 
 sub tmux_jump_to_queue_maybe {
-	tmux qw/findw -t music queue/ if $rvar{jump_queue};
+	tmux qw/findw -t music queue/ if ($rvar{jump_queue} eq "true");
 }
 
 sub tmux_spawn_random_pane {
