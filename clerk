@@ -297,9 +297,9 @@ sub random_album {
 	my @album_artists = $mpd->list('albumartist');
 	my $artist_r = $album_artists[rand @album_artists];
 	my @album = $mpd->list('album', 'albumartist', $artist_r);
- 	my $album_r = $album[rand @album];
- 	$mpd->find_add('albumartist', $artist_r, 'album', $album_r);
- 	$mpd->play();
+	my $album_r = $album[rand @album];
+	$mpd->find_add('albumartist', $artist_r, 'album', $album_r);
+	$mpd->play();
 	tmux_jump_to_queue_maybe();
 }
 
@@ -370,16 +370,16 @@ sub formatted_tracks {
 }
 
 sub formatted_playlists {
-    my ($rdb) = @_;
-    my @save = ("Save");
-    push @save, $rdb;
-    my @playlists = map {
-    	sprintf "%s\n", $_->{playlist}
-    } @{$rdb};
+	my ($rdb) = @_;
+	my @save = ("Save");
+	push @save, $rdb;
+	my @playlists = map {
+		sprintf "%s\n", $_->{playlist}
+	} @{$rdb};
 	@save = ("Save current Queue\n", "---\n");
 	@playlists = sort @playlists;
 	unshift @playlists, @save;
-    return \@playlists;
+	return \@playlists;
 }
 
 sub tmux_prerequisites {
