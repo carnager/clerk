@@ -2,7 +2,7 @@
 
 MPD client using rofi or fzf
 
-# Screenshot (V3)
+# Screenshot (V4)
 ![Screenshot](https://pic.53280.de/clerk.png)
 
 # Features:
