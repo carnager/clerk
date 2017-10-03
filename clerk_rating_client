@@ -60,7 +60,7 @@ sub track_rating {
 			my $artist = $song_tags[0]->{Artist};
 			my $title = $song_tags[0]->{Title};
 			my $album = $song_tags[0]->{Album};
-			if ($uri =~ /.*.flac$/) {
+			if ($uri =~ /\.flac$/) {
 				if ($mode eq "rating") {
 					print ":: tagging track \"${title}\" by \"${artist}\" with rating of \"${rating}\"\n";
 					system('metaflac', '--remove-tag=RATING', "${music_root}/${uri}");
@@ -71,7 +71,7 @@ sub track_rating {
 					system('metaflac', "--set-tag=ALBUMRATING=${rating}", "${music_root}/${uri}");
 				}
 			}
-			elsif ($uri =~ /.*.mp3$/) {
+			elsif ($uri =~ /\.mp3$/) {
 				if ($mode eq "rating") {
 					print ":: tagging track \"${title}\" by \"${artist}\" with rating of \"${rating}\"\n";
 					system('mid3v2', "--TXXX", "RATING:${rating}", "${music_root}/${uri}");
@@ -80,7 +80,7 @@ sub track_rating {
 					system('mid3v2', "--TXXX", "ALBUMRATING:${rating}", "${music_root}/${uri}");
 				}
 			}
-			elsif ($uri =~ /.*.ogg$/) {
+			elsif ($uri =~ /\.ogg$/) {
 				print "!! OGG files not supported, yet\n";
 			}
 		}
@@ -121,14 +121,14 @@ sub tag_from_sticker {
 	foreach my $rated_song (@available_stickers) {
 		my $uri = $rated_song->{file};
 		my $rating = $rated_song->{sticker};
-		if ($uri =~ /.*.flac$/) {
+		if ($uri =~ /\.flac$/) {
 			system('metaflac', '--remove-tag=RATING', "${music_root}/${uri}");
 			system('metaflac', "--set-tag=RATING=$rating", "${music_root}/${uri}");
 		}
-		elsif ($uri =~ /.*.mp3$/) {
+		elsif ($uri =~ /\.mp3$/) {
 			system('mid3v2', "--TXXX", "RATING:${rating}", "${music_root}/${uri}");
 		}
-		elsif ($uri =~ /.*.ogg$/) {
+		elsif ($uri =~ /\.ogg$/) {
 			print "!! OGG files not supported, yet\n";
 		}
 	}
