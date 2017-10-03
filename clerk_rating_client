@@ -19,7 +19,7 @@ use Net::MPD;
 my $config_file = $ENV{'HOME'} . "/.config/clerk/clerk.conf";
 
 if ($ENV{CLERK_CONF}) {
-    $config_file = $ENV{CLERK_CONF};
+	$config_file = $ENV{CLERK_CONF};
 }
 
 my $cfg = new Config::Simple(filename=>"$config_file");
@@ -30,14 +30,13 @@ my $music_root = $general_cfg->{music_root};
 my $mpd = Net::MPD->connect($ENV{MPD_HOST} // $mpd_host // 'localhost');
 
 sub main {
-    my %options=();
-    getopts("rst", \%options);
-
-    if ($options{r} // $options{s} // $options{t}) {
-        if    (defined $options{r}) { subscribe_ratings_channel(); track_rating(); }
-        elsif (defined $options{s}) { subscribe_ratings_channel(); sync_ratings(); }
-        elsif (defined $options{t}) { tag_from_sticker(); }
-    }   else { subscribe_ratings_channel(); track_rating(); };
+	my %options=();
+	getopts("rst", \%options);
+	if ($options{r} // $options{s} // $options{t}) {
+		if    (defined $options{r}) { subscribe_ratings_channel(); track_rating(); }
+		elsif (defined $options{s}) { subscribe_ratings_channel(); sync_ratings(); }
+		elsif (defined $options{t}) { tag_from_sticker(); }
+	}   else { subscribe_ratings_channel(); track_rating(); };
 }
 
 sub subscribe_ratings_channel {
@@ -45,63 +44,62 @@ sub subscribe_ratings_channel {
 }
 
 sub track_rating {
-    while(1) {
-    	$mpd->idle('message');
-    	my @blub = $mpd->read_messages;
-        foreach (@blub) {
-        	my $string = $_->{message};
-        	my @array = split("\t", $string);
-        	my $uri = $array[0];
-        	my $mode = $array[1];
-        	my $rating = $array[2];
-            $uri = decode('UTF-8', $uri );
-            my @files = $mpd->search('filename', $uri);
-            my @song_tags = $files[0];
-            my $albumartist = $song_tags[0]->{AlbumArtist};
-            my $artist = $song_tags[0]->{Artist};
-            my $title = $song_tags[0]->{Title};
-            my $album = $song_tags[0]->{Album};
-            if ($uri =~ /.*.flac$/) {
-                if ($mode eq "rating") {
-                    print ":: tagging track \"${title}\" by \"${artist}\" with rating of \"${rating}\"\n";
-                    system('metaflac', '--remove-tag=RATING', "${music_root}/${uri}");
-                    system('metaflac', "--set-tag=RATING=${rating}", "${music_root}/${uri}");
-                } elsif ($mode eq "albumrating") {
-                    print ":: tagging track \"${title}\" by \"${albumartist}\" with albumrating of \"${rating}\"\n";
-                    system('metaflac', '--remove-tag=ALBUMRATING', "${music_root}/${uri}");
-                    system('metaflac', "--set-tag=ALBUMRATING=${rating}", "${music_root}/${uri}");
-                }
-            }
-            elsif ($uri =~ /.*.mp3$/) {
-                if ($mode eq "rating") {
-                    print ":: tagging track \"${title}\" by \"${artist}\" with rating of \"${rating}\"\n";
-                    system('mid3v2', "--TXXX", "RATING:${rating}", "${music_root}/${uri}");
-
-                } elsif ($mode eq "albumrating") {
-                    print ":: tagging track \"${title}\" by \"${albumartist}\" with albumrating of \"${rating}\"\n";
-                    system('mid3v2', "--TXXX", "ALBUMRATING:${rating}", "${music_root}/${uri}");
-                }
-            }
-            elsif ($uri =~ /.*.ogg$/) {
-                print "!! OGG files not supported, yet\n";
-            }
-        }
-    }
+	while(1) {
+		$mpd->idle('message');
+		my @blub = $mpd->read_messages;
+		foreach (@blub) {
+			my $string = $_->{message};
+			my @array = split("\t", $string);
+			my $uri = $array[0];
+			my $mode = $array[1];
+			my $rating = $array[2];
+			$uri = decode('UTF-8', $uri );
+			my @files = $mpd->search('filename', $uri);
+			my @song_tags = $files[0];
+			my $albumartist = $song_tags[0]->{AlbumArtist};
+			my $artist = $song_tags[0]->{Artist};
+			my $title = $song_tags[0]->{Title};
+			my $album = $song_tags[0]->{Album};
+			if ($uri =~ /.*.flac$/) {
+				if ($mode eq "rating") {
+					print ":: tagging track \"${title}\" by \"${artist}\" with rating of \"${rating}\"\n";
+					system('metaflac', '--remove-tag=RATING', "${music_root}/${uri}");
+					system('metaflac', "--set-tag=RATING=${rating}", "${music_root}/${uri}");
+				} elsif ($mode eq "albumrating") {
+					print ":: tagging track \"${title}\" by \"${albumartist}\" with albumrating of \"${rating}\"\n";
+					system('metaflac', '--remove-tag=ALBUMRATING', "${music_root}/${uri}");
+					system('metaflac', "--set-tag=ALBUMRATING=${rating}", "${music_root}/${uri}");
+				}
+			}
+			elsif ($uri =~ /.*.mp3$/) {
+				if ($mode eq "rating") {
+					print ":: tagging track \"${title}\" by \"${artist}\" with rating of \"${rating}\"\n";
+					system('mid3v2', "--TXXX", "RATING:${rating}", "${music_root}/${uri}");
+				} elsif ($mode eq "albumrating") {
+					print ":: tagging track \"${title}\" by \"${albumartist}\" with albumrating of \"${rating}\"\n";
+					system('mid3v2', "--TXXX", "ALBUMRATING:${rating}", "${music_root}/${uri}");
+				}
+			}
+			elsif ($uri =~ /.*.ogg$/) {
+				print "!! OGG files not supported, yet\n";
+			}
+		}
+	}
 }
 
 sub sync_ratings {
 	my @sticker_uris;
 	my @actual_uris;
-    my @available_stickers = $mpd->sticker_find('song', 'rating', '');
-    foreach my $rated_song (@available_stickers) {
-    	push @sticker_uris, "$rated_song->{file}";
-    }
+	my @available_stickers = $mpd->sticker_find('song', 'rating', '');
+	foreach my $rated_song (@available_stickers) {
+		push @sticker_uris, "$rated_song->{file}";
+	}
 
 	my @absolute;
 	find({
-    wanted   => sub { push @absolute, $_ if -f and -r },
-    no_chdir => 1,
-	}, $music_root);
+			wanted   => sub { push @absolute, $_ if -f and -r },
+			no_chdir => 1,
+		}, $music_root);
 	my @relative = map { File::Spec->abs2rel($_, $music_root) } @absolute;
 	push @actual_uris, $_ for @relative;
 	
@@ -119,20 +117,20 @@ sub sync_ratings {
 }
 
 sub tag_from_sticker {
-    my @available_stickers = $mpd->sticker_find('song', 'rating', '');
-    foreach my $rated_song (@available_stickers) {
+	my @available_stickers = $mpd->sticker_find('song', 'rating', '');
+	foreach my $rated_song (@available_stickers) {
 		my $uri = $rated_song->{file};
 		my $rating = $rated_song->{sticker};
-        if ($uri =~ /.*.flac$/) {
-            system('metaflac', '--remove-tag=RATING', "${music_root}/${uri}");
-            system('metaflac', "--set-tag=RATING=$rating", "${music_root}/${uri}");
-        }
-        elsif ($uri =~ /.*.mp3$/) {
-            system('mid3v2', "--TXXX", "RATING:${rating}", "${music_root}/${uri}");
-        }
-        elsif ($uri =~ /.*.ogg$/) {
-            print "!! OGG files not supported, yet\n";
-        }
+		if ($uri =~ /.*.flac$/) {
+			system('metaflac', '--remove-tag=RATING', "${music_root}/${uri}");
+			system('metaflac', "--set-tag=RATING=$rating", "${music_root}/${uri}");
+		}
+		elsif ($uri =~ /.*.mp3$/) {
+			system('mid3v2', "--TXXX", "RATING:${rating}", "${music_root}/${uri}");
+		}
+		elsif ($uri =~ /.*.ogg$/) {
+			print "!! OGG files not supported, yet\n";
+		}
 	}
 }
 
