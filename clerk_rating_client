@@ -64,12 +64,12 @@ sub track_rating {
             if ($uri =~ /.*.flac$/) {
                 if ($mode eq "rating") {
                     print ":: tagging track \"${title}\" by \"${artist}\" with rating of \"${rating}\"\n";
-                	system('metaflac', '--remove-tag=RATING', "${music_root}/${uri}");
-                	system('metaflac', "--set-tag=RATING=${rating}", "${music_root}/${uri}");
+                    system('metaflac', '--remove-tag=RATING', "${music_root}/${uri}");
+                    system('metaflac', "--set-tag=RATING=${rating}", "${music_root}/${uri}");
                 } elsif ($mode eq "albumrating") {
                     print ":: tagging track \"${title}\" by \"${albumartist}\" with albumrating of \"${rating}\"\n";
-                	system('metaflac', '--remove-tag=ALBUMRATING', "${music_root}/${uri}");
-                	system('metaflac', "--set-tag=ALBUMRATING=${rating}", "${music_root}/${uri}");
+                    system('metaflac', '--remove-tag=ALBUMRATING', "${music_root}/${uri}");
+                    system('metaflac', "--set-tag=ALBUMRATING=${rating}", "${music_root}/${uri}");
                 }
             }
             elsif ($uri =~ /.*.mp3$/) {
@@ -95,7 +95,7 @@ sub sync_ratings {
     my @available_stickers = $mpd->sticker_find('song', 'rating', '');
     foreach my $rated_song (@available_stickers) {
     	push @sticker_uris, "$rated_song->{file}";
-	}
+    }
 
 	my @absolute;
 	find({
