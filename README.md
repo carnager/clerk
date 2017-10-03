@@ -53,4 +53,4 @@ For this to work, simply set `tagging=true` in clerk.conf file and set your musi
 
 It’s even possible to tag files not on the same machine (On MPD setups with remote clients).
 Simply copy your clerk.conf and clerk_rating_client to the machine hosting your audio files and
-make it sure it runs there.
+make sure it runs there.
