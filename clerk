@@ -557,7 +557,7 @@ sub mpd_rate_items {
 	if ($rvar{tagging} eq "true") {
 		$mpd->send_message('rating', "$_\t$mode\t${rating}") for @{$_[0]};;
 	}
-	$mpd->sticker_value("song", encode('UTF-8', "${$_}, $mode, $rating) for @{$_[0]};
+	$mpd->sticker_value("song", encode('UTF-8', $_), $mode, $rating) for @{$_[0]};
 }
 
 sub mpd_replace_with_items {
