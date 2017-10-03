@@ -1,9 +1,9 @@
 # clerk
 
-MPD client using bash and rofi
+MPD client using rofi or fzf
 
 # Screenshot (V3)
-![Screenshot](images/clerk_multi_keys.jpg)
+![Screenshot](https://pic.53280.de/clerk.png)
 
 # Features:
 
