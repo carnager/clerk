@@ -75,11 +75,11 @@ sub track_rating {
             elsif ($uri =~ /.*.mp3$/) {
                 if ($mode eq "rating") {
                     print ":: tagging track \"${title}\" by \"${artist}\" with rating of \"${rating}\"\n";
-                	system('mid3v2', "--TXXX", "RATING:${rating}", "${music_root}/${uri}");
+                    system('mid3v2', "--TXXX", "RATING:${rating}", "${music_root}/${uri}");
 
                 } elsif ($mode eq "albumrating") {
                     print ":: tagging track \"${title}\" by \"${albumartist}\" with albumrating of \"${rating}\"\n";
-                	system('mid3v2', "--TXXX", "ALBUMRATING:${rating}", "${music_root}/${uri}");
+                    system('mid3v2', "--TXXX", "ALBUMRATING:${rating}", "${music_root}/${uri}");
                 }
             }
             elsif ($uri =~ /.*.ogg$/) {
