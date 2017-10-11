@@ -393,7 +393,7 @@ sub tmux {
 }
 
 sub tmux_jump_to_queue_maybe {
-	tmux qw/findw -t music queue/ if ($rvar{jump_queue} eq "true");
+	tmux qw/selectw -t :=queue/ if ($rvar{jump_queue} eq "true");
 }
 
 sub tmux_spawn_random_pane {
