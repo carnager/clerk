@@ -1,10 +1,10 @@
 # !Dont move this section.
 ## Key Bindings
-bind-key -n F1   selectw -t :=albums                               # show album list                
-bind-key -n F2   selectw -t :=tracks                               # show tracks
-bind-key -n F3   selectw -t :=latest                               # show album list (latest first)
-bind-key -n F4   selectw -t :=playlists                            # load playlist
-bind-key -n F5   selectw -t :=queue                                # show queue
+bind-key -n F1   selectw -t :=albums                        # show album list                
+bind-key -n F2   selectw -t :=tracks                        # show tracks
+bind-key -n F3   selectw -t :=latest                        # show album list (latest first)
+bind-key -n F4   selectw -t :=playlists                     # load playlist
+bind-key -n F5   selectw -t :=queue                         # show queue
 bind-key -n C-F5 run-shell 'mpc prev --quiet'               # previous song
 bind-key -n C-F6 run-shell 'mpc toggle --quiet'             # toggle playback
 bind-key -n C-F7 run-shell 'mpc stop > /dev/null'           # stop playback
