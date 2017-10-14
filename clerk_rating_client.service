@@ -1,0 +1,10 @@
+[Unit]
+Description=Clerk Rating Daemon
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/clerk_rating_client
+
+[Install]
+WantedBy=default.target
