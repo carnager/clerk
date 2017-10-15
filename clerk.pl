@@ -292,15 +292,17 @@ sub get_rdb {
 }
 
 sub random_album {
-	mpd_reachable();
-	$mpd->clear();
-	my @album_artists = $mpd->list('albumartist');
-	my $artist_r = $album_artists[rand @album_artists];
-	my @album = $mpd->list('album', 'albumartist', $artist_r);
-	my $album_r = $album[rand @album];
-	$mpd->find_add('albumartist', $artist_r, 'album', $album_r);
-	$mpd->play();
-	tmux_jump_to_queue_maybe();
+    mpd_reachable();
+    $mpd->clear();
+    my @album_artists = $mpd->list('albumartist');
+    my $artist_r = $album_artists[rand @album_artists];
+    my @album = $mpd->list('album', 'albumartist', $artist_r);
+    my $album_r = $album[rand @album];
+    my @date = $mpd->list('date', 'albumartist', $artist_r, 'album', $album_r);
+    my $date_r = $date[rand @date];
+    $mpd->find_add('albumartist', $artist_r, 'album', $album_r, 'date', $date_r);
+    $mpd->play();
+    tmux_jump_to_queue_maybe();
 }
 
 sub random_tracks {
