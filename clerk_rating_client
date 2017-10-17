@@ -55,7 +55,7 @@ sub song_handler {
 	for my $msg (@messages) {
 		my ($uri, $mode, $rating) = get_info_from_message($msg->{message});
 		my ($albumartist, $artist, $title, $album) = get_track_tags($uri);
-
+		
 		if ($uri =~ /\.flac$/) {
 			tag_flacs($uri, $mode, $rating, $artist, $albumartist, $title, $album);
 		}
@@ -78,7 +78,6 @@ sub get_info_from_message {
 
 sub get_track_tags {
     my ($uri) = @_;
-    print Dumper($uri);
 	my @files = $mpd->search('filename', $uri);
 	my @song_tags = $files[0];
 	my ($albumartist, $artist, $title, $album) = $song_tags[0]->@{qw/AlbumArtist Artist Title Album/};
