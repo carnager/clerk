@@ -53,7 +53,7 @@ sub idle_loop {
 sub song_handler {
 	my @messages = $mpd->read_messages;
 	for my $msg (@messages) {
-		my ($uri, $mode, $rating) = get_info_from_message($msg);
+		my ($uri, $mode, $rating) = get_info_from_message($msg->{message});
 		my ($albumartist, $artist, $title, $album) = get_track_tags($uri);
 
 		if ($uri =~ /\.flac$/) {
