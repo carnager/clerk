@@ -22,16 +22,13 @@ see `clerk -h` for all default arguments.
 * rofi (https://github.com/DaveDavenport/rofi)
 * fzf
 * tmux
-* perl-inc-latest
 * perl-net-mpd
 * perl-data-messagepack
 * perl-file-slurper
-* perl-file-path
 * perl-config-simple
 * perl-try-tiny
 * perl-ipc-run
 * perl-http-date
-* perl-local-lib
 
 For Archlinux you can install it from [AUR](https://aur.archlinux.org/packages/clerk-git/)
 
