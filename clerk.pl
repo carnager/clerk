@@ -311,9 +311,9 @@ sub random_tracks {
 	for (my $i=1; $i <= $rvar{songs}; $i++) {
 		my @artists = $mpd->list($rvar{randomartist});
 		my $artist_r = $artists[rand @artists];
-		my @albums = $mpd->list('album', 'artist', $artist_r);
+		my @albums = $mpd->list('album', $rvar{randomartist}, $artist_r);
 		my $album_r = $albums[rand @albums];
-		my @tracks = $mpd->find('artist', $artist_r, 'album', $album_r);
+		my @tracks = $mpd->find($rvar{randomartist}, $artist_r, 'album', $album_r);
 		my $track_r = $tracks[rand @tracks];
 		my $foo = $track_r->{uri};
 		$mpd->add($foo);

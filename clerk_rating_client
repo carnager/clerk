@@ -109,7 +109,19 @@ sub tag_mp3s {
 }
 
 sub tag_oggs {
-	print STDERR "!! OGG files not supported, yet\n";
+	my ($uri, $mode, $rating, $artist, $albumartist, $title, $album) = @_;
+	my @values = `vorbiscomment $uri`;
+	if ($mode eq "rating") {
+		print ":: tagging track \"${title}\" by \"${artist}\" with rating of \"${rating}\"\n";
+		@values = map {/^RATING/? "RATING=$rating" : $_ } @values;
+	} elsif ($mode eq "albumrating") {
+		print ":: tagging track \"${title}\" by \"${albumartist}\" with albumrating of \"${rating}\"\n";
+		@values = map {/^ALBUMRATING/? "ALBUMRATING=$rating" : $_ } @values;
+	}
+	system('vorbiscomment', '-c', '/dev/null', '-w', $uri);
+	for my $vorbiscomment (@values) {
+		system('vorbiscomment', '-a', '-t', $vorbiscomment, $uri);
+	}
 }
 
 sub sync_ratings {
