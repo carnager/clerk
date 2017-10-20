@@ -45,7 +45,7 @@ Clerk can rate albums and tracks, which will be saved in MPDs sticker database a
 Track ratings should be compatible with all other MPD clients that support them.
 Albumratings are a unique feature to clerk, as far as I know.
 
-It's also possible to store ratings in file tags. Currently this is supported for flac and mp3 files.
+It's also possible to store ratings in file tags. Currently this is supported for flac, ogg and mp3 files.
 For this to work, simply set `tagging=true` in clerk.conf file and set your music_path.
 
 It’s even possible to tag files not on the same machine (On MPD setups with remote clients).
