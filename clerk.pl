@@ -395,7 +395,7 @@ sub tmux {
 }
 
 sub tmux_jump_to_queue_maybe {
-	tmux qw/selectw -t :=queue/ if ($rvar{jump_queue} eq "true");
+	tmux qw/selectw -t :=queue/ if ($rvar{jump_queue} eq "true" && $rvar{tmux_ui});
 }
 
 sub tmux_spawn_random_pane {
