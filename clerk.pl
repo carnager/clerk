@@ -395,11 +395,12 @@ sub tmux {
 }
 
 sub tmux_jump_to_queue_maybe {
-	tmux qw/selectw -t :=queue/ if ($rvar{jump_queue} eq "true");
+	tmux qw/selectw -t :=queue/ if ($rvar{jump_queue} eq "true" && $rvar{tmux_ui});
+	#tmux qw/selectw -t :=queue/ if ($rvar{jump_queue} eq "true");
 }
 
 sub tmux_spawn_random_pane {
-	tmux 'splitw', '-d', $self, '--backend=fzf', '--randoms';
+	tmux 'splitw', '-d', '-l', '8', $self, '--backend=fzf', '--randoms';
 	tmux qw/select-pane -D/;
 }
 
