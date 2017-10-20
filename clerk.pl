@@ -395,8 +395,7 @@ sub tmux {
 }
 
 sub tmux_jump_to_queue_maybe {
-	tmux qw/selectw -t :=queue/ if ($rvar{jump_queue} eq "true" && $rvar{tmux_ui});
-	#tmux qw/selectw -t :=queue/ if ($rvar{jump_queue} eq "true");
+	tmux qw/selectw -t :=queue/ if $ENV{CLERK_JUMP_QUEUE};
 }
 
 sub tmux_spawn_random_pane {
@@ -419,6 +418,7 @@ sub tmux_ui {
 	unless (tmux_has_session('music')) {
 		my @win = qw/neww -t music -n/;
 		my @clerk = ($self, '--backend=fzf', '--endless');
+		$ENV{CLERK_JUMP_QUEUE} = 1 if ($rvar{jump_queue} // '') eq 'true';
 		tmux '-f', $rvar{tmux_config}, qw/new -s music -n albums -d/, @clerk, '-a';
 		tmux @win, 'tracks', @clerk, '-t';
 		tmux @win, 'latest', @clerk, '-l';
