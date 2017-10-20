@@ -654,7 +654,7 @@ clerk [command] [-f]
 
   Without further arguments, clerk starts a tabbed tmux interface
 
-clerk version 2.0
+clerk version 4.0
 
 =cut
 
