@@ -121,8 +121,6 @@ sub tag_oggs {
 		print ":: tagging track \"${title}\" by \"${albumartist}\" with albumrating of \"${rating}\"\n";
         push (@values, "ALBUMRATING=$rating");
 	}
-    print Dumper($music_root);
-    print Dumper($uri);
     open(my $CMD, '|-', 'vorbiscomment', '-a', "$music_root/$uri");
 	for my $vorbiscomment (@values) {
 		print $CMD "${vorbiscomment}";
