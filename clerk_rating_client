@@ -9,6 +9,7 @@ use Data::Dumper;
 use Try::Tiny;
 use Config::Simple;
 use File::Spec;
+use IPC::Run;
 use strict;
 use utf8;
 use Encode qw(decode encode);
@@ -98,8 +99,8 @@ sub tag_flacs {
 }
 
 sub tag_mp3s {
-	my ($uri, $mode, $rating, $artist, $albumartist, $title, $album) = @_;
-	if ($mode eq "rating") {
+    my ($uri, $mode, $rating, $artist, $albumartist, $title, $album) = @_;
+    if ($mode eq "rating") {
 		print ":: tagging track \"${title}\" by \"${artist}\" with rating of \"${rating}\"\n";
 		system('mid3v2', "--TXXX", "RATING:${rating}", "${music_root}/${uri}");
 	} elsif ($mode eq "albumrating") {
@@ -109,8 +110,7 @@ sub tag_mp3s {
 }
 
 sub tag_oggs {
-	my ($uri, $mode, $rating, $artist, $albumartist, $title, $album) = @_;
-    print "$uri\n$rating\n";
+    my ($uri, $mode, $rating, $artist, $albumartist, $title, $album) = @_;
     my @values = `vorbiscomment "${music_root}/${uri}"`;   
 	if ($mode eq "rating") {
     	@values = grep !/^RATING=?$/, @values;
@@ -121,10 +121,13 @@ sub tag_oggs {
 		print ":: tagging track \"${title}\" by \"${albumartist}\" with albumrating of \"${rating}\"\n";
         push (@values, "ALBUMRATING=$rating");
 	}
-	system('vorbiscomment', '-c', '/dev/null', '-w', "${music_root}/${uri}");
+    print Dumper($music_root);
+    print Dumper($uri);
+    open(my $CMD, '|-', 'vorbiscomment', '-a', "$music_root/$uri");
 	for my $vorbiscomment (@values) {
-		system('vorbiscomment', '-a', '-t', $vorbiscomment, "${music_root}/${uri}");
+		print $CMD "${vorbiscomment}";
 	}
+	close($CMD);
 }
 
 sub sync_ratings {
