@@ -654,6 +654,7 @@ clerk [command] [-f]
     -f           Use fzf interface
 
   Without further arguments, clerk starts a tabbed tmux interface
+  Hotkeys for tmux interface can be set in $HOME/.config/clerk/clerk.tmux
 
 clerk version 4.0
 

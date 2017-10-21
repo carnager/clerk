@@ -63,7 +63,7 @@ sub song_handler {
 			tag_mp3s($uri, $mode, $rating, $artist, $albumartist, $title, $album);
 		}
 		elsif ($uri =~ /\.ogg$/) {
-			tag_ogg();
+			tag_oggs($uri, $mode, $rating, $artist, $albumartist, $title, $album);
 		}
 	}
 }
@@ -110,17 +110,18 @@ sub tag_mp3s {
 
 sub tag_oggs {
 	my ($uri, $mode, $rating, $artist, $albumartist, $title, $album) = @_;
-	my @values = `vorbiscomment $uri`;
+    print "$uri\n$rating\n";
+    my @values = grep !/^RATING=?$/, `vorbiscomment "${music_root}/${uri}"`;   
 	if ($mode eq "rating") {
 		print ":: tagging track \"${title}\" by \"${artist}\" with rating of \"${rating}\"\n";
-		@values = map {/^RATING/? "RATING=$rating" : $_ } @values;
+        push (@values, "RATING=$rating");        
 	} elsif ($mode eq "albumrating") {
 		print ":: tagging track \"${title}\" by \"${albumartist}\" with albumrating of \"${rating}\"\n";
 		@values = map {/^ALBUMRATING/? "ALBUMRATING=$rating" : $_ } @values;
 	}
-	system('vorbiscomment', '-c', '/dev/null', '-w', $uri);
+	system('vorbiscomment', '-c', '/dev/null', '-w', "${music_root}/${uri}");
 	for my $vorbiscomment (@values) {
-		system('vorbiscomment', '-a', '-t', $vorbiscomment, $uri);
+		system('vorbiscomment', '-a', '-t', $vorbiscomment, "${music_root}/${uri}");
 	}
 }
 
