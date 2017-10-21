@@ -111,13 +111,15 @@ sub tag_mp3s {
 sub tag_oggs {
 	my ($uri, $mode, $rating, $artist, $albumartist, $title, $album) = @_;
     print "$uri\n$rating\n";
-    my @values = grep !/^RATING=?$/, `vorbiscomment "${music_root}/${uri}"`;   
+    my @values = `vorbiscomment "${music_root}/${uri}"`;   
 	if ($mode eq "rating") {
+    	@values = grep !/^RATING=?$/, @values;
 		print ":: tagging track \"${title}\" by \"${artist}\" with rating of \"${rating}\"\n";
         push (@values, "RATING=$rating");        
 	} elsif ($mode eq "albumrating") {
+    	@values = grep !/^ALBUMRATING=?$/, @values;
 		print ":: tagging track \"${title}\" by \"${albumartist}\" with albumrating of \"${rating}\"\n";
-		@values = map {/^ALBUMRATING/? "ALBUMRATING=$rating" : $_ } @values;
+        push (@values, "ALBUMRATING=$rating");
 	}
 	system('vorbiscomment', '-c', '/dev/null', '-w', "${music_root}/${uri}");
 	for my $vorbiscomment (@values) {
