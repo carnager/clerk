@@ -30,6 +30,11 @@ see `clerk -h` for all default arguments.
 * perl-ipc-run
 * perl-http-date
 
+for the tagging_client:
+* metaflac (flac)
+* vorbiscomment (vorbis-tools)
+* mid3v2 (mutagen)
+
 For Archlinux you can install it from [AUR](https://aur.archlinux.org/packages/clerk-git/)
 
 # Installation
@@ -51,3 +56,6 @@ For this to work, simply set `tagging=true` in clerk.conf file and set your musi
 It’s even possible to tag files not on the same machine (On MPD setups with remote clients).
 Simply copy your clerk.conf and clerk_rating_client to the machine hosting your audio files and
 make sure it runs there.
+
+For the moment I use metaflac, mid3v2 and vorbiscomment to tag files, because I haven't found a good perl library
+for tagging.
