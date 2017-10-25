@@ -355,7 +355,6 @@ sub formatted_albums {
 		my $strval = sprintf $fmtstr."%s\n", @vals;
 		push @albums, $strval;
 	}
-	print Dumper(@albums);
 	return \@albums;
 }
 
@@ -471,18 +470,28 @@ sub action_db_albums {
 	my ($out) = @_;
 
 	my @sel = util_parse_selection($out);
-	print Dumper(@sel);
-	#@sel = $rvar{db}{ref}->[$_];
-
+	@sel = map { $rvar{db}{ref}->[$_] } @sel;
+	my (@uris, @tracks);
+	for my $album (@sel) {
+		push @tracks, lookup_album_tags($album->{AlbumArtist}, $album->{Album}, $album->{Date});
+	}
+	foreach (@tracks) {
+		push @uris, $_->{uri};
+	}
 
 	my $action = backend_call(["Add\n", "Replace\n", "---\n", "Rate Album(s)\n"]);
 	mpd_reachable();
 	{
 		local $_ = $action;
-		if    (/^Add/)                { mpd_add_items(\@sel) }
-		elsif (/^Replace/)            { mpd_replace_with_items(\@sel) }
-		elsif (/^Rate Album\(s\)/)    { mpd_rate_with_albums(\@sel) }
+		if    (/^Add/)                { mpd_add_items(\@uris) }
+		elsif (/^Replace/)            { mpd_replace_with_items(\@uris) }
+		elsif (/^Rate Album\(s\)/)    { mpd_rate_with_albums(\@uris) }
 	}
+}
+
+sub lookup_album_tags {
+	my ($albumartist, $album, $date) = @_;
+	return grep { $albumartist eq $_->{AlbumArtist} && $album eq $_->{Album} && $date eq $_->{Date} } $rvar{db}{ref}->@*;
 }
 
 sub get_tags_from_rdb {
@@ -554,7 +563,7 @@ sub action_track_mode {
 
 sub util_parse_selection {
 	my ($sel) = @_;
-	map { (split /[\t\n]/, $_)[-1] } (split /\n/);
+	map { (split /[\t\n]/, $_)[-1] } (split /\n/, $sel);
 }
 
 sub mpd_add_items {
