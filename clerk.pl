@@ -4,6 +4,7 @@ binmode(STDOUT, ":utf8");
 use v5.10;
 use warnings;
 use strict;
+use Data::Dumper;
 use utf8;
 use Config::Simple;
 use Data::MessagePack;
@@ -326,16 +327,17 @@ sub formatted_albums {
 	my ($rdb, $sorted) = @_;
 
 	my %uniq_albums;
+	my $index = 0;
 	for my $i (@$rdb) {
 		my $newkey = join "", $i->@{qw/AlbumArtist Date Album/};
 		if (!exists $uniq_albums{$newkey}) {
-			my $dir = (dirname($i->{uri}) =~ s/\/CD.*$//r);
-			$uniq_albums{$newkey} = {$i->%{qw/AlbumArtist Album Date mtime/}, Dir => $dir};
+			$uniq_albums{$newkey} = {$i->%{qw/AlbumArtist Album Date mtime/}, Index => $index};
 		} else {
 			if ($uniq_albums{$newkey}->{'mtime'} < $i->{'mtime'}) {
 				$uniq_albums{$newkey}->{'mtime'} = $i->{'mtime'}
 			}
 		}
+	$index++;;
 	}
 
 	my @albums;
@@ -349,11 +351,11 @@ sub formatted_albums {
 	}
 
 	for my $k (@skeys) {
-		my @vals = ((map { $_ // "Unknown" } $uniq_albums{$k}->@{qw/AlbumArtist Date Album/}), $uniq_albums{$k}->{Dir});
+		my @vals = ((map { $_ // "Unknown" } $uniq_albums{$k}->@{qw/AlbumArtist Date Album/}), $uniq_albums{$k}->{Index});
 		my $strval = sprintf $fmtstr."%s\n", @vals;
 		push @albums, $strval;
 	}
-
+	print Dumper(@albums);
 	return \@albums;
 }
 
@@ -469,6 +471,9 @@ sub action_db_albums {
 	my ($out) = @_;
 
 	my @sel = util_parse_selection($out);
+	print Dumper(@sel);
+	#@sel = $rvar{db}{ref}->[$_];
+
 
 	my $action = backend_call(["Add\n", "Replace\n", "---\n", "Rate Album(s)\n"]);
 	mpd_reachable();
@@ -478,6 +483,9 @@ sub action_db_albums {
 		elsif (/^Replace/)            { mpd_replace_with_items(\@sel) }
 		elsif (/^Rate Album\(s\)/)    { mpd_rate_with_albums(\@sel) }
 	}
+}
+
+sub get_tags_from_rdb {
 }
 
 sub action_db_tracks {
@@ -546,7 +554,7 @@ sub action_track_mode {
 
 sub util_parse_selection {
 	my ($sel) = @_;
-	map { (split /[\t\n]/, $_)[-1] } (split /\n/, decode('UTF-8', $sel));
+	map { (split /[\t\n]/, $_)[-1] } (split /\n/);
 }
 
 sub mpd_add_items {
