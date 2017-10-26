@@ -244,21 +244,7 @@ sub backend_call {
 	$random //= "ignore";
 	$fields //= "1,2,3,4";
 	my %backends = (
-		fzf => [ qw(fzf
-			--reverse
-			--no-sort
-			-m
-			-e
-			--no-hscroll
-			-i
-			-d
-			\t
-			--tabstop=4
-			+s
-			--ansi),
-			"--bind=esc:$random,alt-a:toggle-all,alt-n:deselect-all",
-			"--with-nth=$fields"
-		],
+		fzf => [ "fzf", "--reverse", "--no-sort", "-m", "-e", "--no-hscroll", "-i", "-d", "\t", "--tabstop=4", "+s", "--ansi", "--bind=esc:$random,alt-a:toggle-all,alt-n:deselect-all", "--with-nth=$fields" ],
 		rofi => [ "rofi", "-matching", "regex", "-dmenu", "-kb-row-tab", "", "-kb-move-word-forward", "", "-kb-accept-alt", "Tab", "-multi-select", "-no-levensthein-sort", "-i", "-p", "> "  ]
 	);
 	my $handle = start $backends{$rvar{backend}} // die('backend not found'), \$input, \$out;
