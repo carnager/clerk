@@ -4,7 +4,7 @@ binmode(STDOUT, ":utf8");
 use v5.10;
 use warnings;
 use strict;
-use Data::Dumper;
+#use Data::Dumper;
 use utf8;
 use Config::Simple;
 use Data::MessagePack;
