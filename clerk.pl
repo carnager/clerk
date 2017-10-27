@@ -4,7 +4,7 @@ binmode(STDOUT, ":utf8");
 use v5.10;
 use warnings;
 use strict;
-#use Data::Dumper;
+use Data::Dumper;
 use utf8;
 use Config::Simple;
 use Data::MessagePack;
@@ -348,11 +348,13 @@ sub formatted_tracks {
 	my ($rdb) = @_;
 	my $fmtstr = join "", map {"%-${_}.${_}s\t"} ($rvar{max_width}->@{qw/track title artist album rating/});
 	$fmtstr .= "%-s\n";
-	my @tracks = map {
+	my $i = 0;
+	my @tracks;
+	@tracks = map {
 		sprintf $fmtstr,
 		        (map { $_ // "-" } $_->@{qw/Track Title Artist Album/}),
 				"r=" . ($_->{rating} // '0'),
-				$_->{uri};
+				$i++;
 	} @{$rdb};
 
 	return \@tracks;
@@ -485,16 +487,22 @@ sub get_tags_from_rdb {
 
 sub action_db_tracks {
 	my ($out) = @_;
-
+ 
 	my @sel = util_parse_selection($out);
+	@sel = map { $rvar{db}{ref}->[$_] } @sel;
+	my (@uris);
+
+	foreach (@sel) {
+		push @uris, $_->{uri};
+	}
 
 	my $action = backend_call(["Add\n", "Replace\n", "---\n", "Rate Track(s)\n"]);
 	mpd_reachable();
 	{
 		local $_ = $action;
-		if    (/^Add/)                { mpd_add_items(\@sel) }
-		elsif (/^Replace/)            { mpd_replace_with_items(\@sel) }
-		elsif (/^Rate Track\(s\)/)    { mpd_rate_with_tracks(\@sel) }
+		if    (/^Add/)                { mpd_add_items(\@uris) }
+		elsif (/^Replace/)            { mpd_replace_with_items(\@uris) }
+		elsif (/^Rate Track\(s\)/)    { mpd_rate_with_tracks(\@uris) }
 	}
 }
 
