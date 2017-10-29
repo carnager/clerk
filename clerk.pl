@@ -189,7 +189,10 @@ sub renew_db {
 	# get number of songs to calculate number of searches needed to copy mpd database
 	mpd_reachable();
 	my @track_ratings = $mpd->sticker_find("song", "rating");
+	my @album_ratings = $mpd->sticker_find("song", "albumrating");
 	my %track_ratings = map {$_->{file} => $_->{sticker}} @track_ratings;
+	my %album_ratings = map {$_->{file} => $_->{sticker}} @album_ratings;
+	
 
 	my $mpd_stats = $mpd->stats();
 	my $songcount = $mpd_stats->{songs};
@@ -218,7 +221,8 @@ sub renew_db {
 	my @filtered = map {
 		$_->{mtime} = str2time($_->{'Last-Modified'});
 		$_->{rating} = $track_ratings{$_->{uri}};
-		+{$_->%{qw/Album Artist Date AlbumArtist Title Track rating uri mtime/}}
+		$_->{albumrating} = $album_ratings{$_->{uri}};
+		+{$_->%{qw/Album Artist Date AlbumArtist Title Track rating albumrating uri mtime/}}
 	} @db;
 	pack_msgpack(\@filtered);
 }
@@ -317,7 +321,7 @@ sub formatted_albums {
 	for my $i (@$rdb) {
 		my $newkey = join "", $i->@{qw/AlbumArtist Date Album/};
 		if (!exists $uniq_albums{$newkey}) {
-			$uniq_albums{$newkey} = {$i->%{qw/AlbumArtist Album Date mtime/}, Index => $index};
+			$uniq_albums{$newkey} = {$i->%{qw/AlbumArtist Album Date albumrating mtime/}, Index => $index};
 		} else {
 			if ($uniq_albums{$newkey}->{'mtime'} < $i->{'mtime'}) {
 				$uniq_albums{$newkey}->{'mtime'} = $i->{'mtime'}
@@ -327,7 +331,7 @@ sub formatted_albums {
 	}
 
 	my @albums;
-	my $fmtstr = join "", map {"%-${_}.${_}s\t"} ($rvar{max_width}->@{qw/albumartist date album/});
+	my $fmtstr = join "", map {"%-${_}.${_}s\t"} ($rvar{max_width}->@{qw/albumartist date album rating/});
 
 	my @skeys;
 	if ($sorted) {
@@ -337,7 +341,7 @@ sub formatted_albums {
 	}
 
 	for my $k (@skeys) {
-		my @vals = ((map { $_ // "Unknown" } $uniq_albums{$k}->@{qw/AlbumArtist Date Album/}), $uniq_albums{$k}->{Index});
+		my @vals = ((map { $_ // "Unknown" } $uniq_albums{$k}->@{qw/AlbumArtist Date Album/}), "r=" . ($uniq_albums{$k}->{albumrating} // '0'), $uniq_albums{$k}->{Index});
 		my $strval = sprintf $fmtstr."%s\n", @vals;
 		push @albums, $strval;
 	}
@@ -581,23 +585,14 @@ sub mpd_replace_with_items {
 }
 
 sub mpd_rate_with_albums {
-	my @list_of_files;
+	my @list_of_files = @_;
 	my $rating = ask_to_pick_ratings();
 	chomp $rating;
-	my @final_list;
-	foreach my $album_rate (@{$_[0]}) {
-		my @files = $mpd->search('filename', $album_rate);
-		my @song_tags = $files[0];
-		my @songs_to_tag = $mpd->search('albumartist', $song_tags[0]->{AlbumArtist}, 'album', $song_tags[0]->{Album}, 'date', $song_tags[0]->{Date});
-		foreach my $songs (@songs_to_tag) {
-			push @list_of_files, $songs->{uri};
-		}
-	}
-	push @final_list, [ @list_of_files ];
+
 	if ($rating eq "---") {
 		#noop
 	} else {
-		mpd_rate_items(@final_list, $rating, "albumrating");
+		mpd_rate_items(@list_of_files, $rating, "albumrating");
 	}
 }
 
