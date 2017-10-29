@@ -10,7 +10,7 @@ MPD client using rofi or fzf
 * Play random album/tracks
 * Add/Replace albums/songs
 * Rate albums/tracks
-* Load rated albums/tracks
+* Filter lists by rating
 * Customizable hotkeys
 * Rofi and fzf interfaces
 * Optional tmux interface for fzf mode
@@ -59,3 +59,8 @@ make sure it runs there.
 
 For the moment I use metaflac, mid3v2 and vorbiscomment to tag files, because I haven't found a good perl library
 for tagging.
+
+## Filtering
+
+clerk integrates ratings fully into its database and exposes the ratings in track and album lists.
+To filter by a specific rating use "r=n" as part of your input.
