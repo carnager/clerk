@@ -90,11 +90,15 @@ Usage:
 
 # Hotkeys
 
+```
 Tab:   select item(s)
 Enter: perform action on item
 
+```
+
 ## Hotkeys for tmux interface
 
+```
 F1:    albums view
 F2:    tracks view
 F3:    albums view (sorted by mtime)
@@ -107,5 +111,6 @@ C-F7:  stop playback
 C-F8:  next song
 C-F1:  show hotkeys
 C-q:   quit clerk tmux interface
+```
 
 All tmux hotkeys can be changed in clerk.tmux file.
