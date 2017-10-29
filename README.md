@@ -64,3 +64,48 @@ for tagging.
 
 clerk integrates ratings fully into its database and exposes the ratings in track and album lists.
 To filter by a specific rating use "r=n" as part of your input.
+
+# Usage
+
+```
+Usage:
+    clerk [command] [-f]
+
+      Commands:
+        -a           Add/Replace album(s) to queue.
+        -l           Add/Replace album(s) to queue (sorted by mtime)
+        -t           Add/Replace track(s) to queue.
+        -p           Add stored playlist to queue
+        -r [-A, -T]  Replace current playlist with random songs/album
+        -u           Update caches
+
+      Options:
+        -f           Use fzf interface
+
+      Without further arguments, clerk starts a tabbed tmux interface
+      Hotkeys for tmux interface can be set in $HOME/.config/clerk/clerk.tmux
+
+    clerk version 4.0
+```
+
+# Hotkeys
+
+Tab:   select item(s)
+Enter: perform action on item
+
+## Hotkeys for tmux interface
+
+F1:    albums view
+F2:    tracks view
+F3:    albums view (sorted by mtime)
+F4:    playlist view
+F5:    queue view (uses ncmpcpp by default, can be changed in clerk.conf)
+F10:   random pane
+C-F5:  previous song
+C-F6:  toggle playback
+C-F7:  stop playback
+C-F8:  next song
+C-F1:  show hotkeys
+C-q:   quit clerk tmux interface
+
+All tmux hotkeys can be changed in clerk.tmux file.
