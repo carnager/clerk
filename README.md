@@ -77,6 +77,8 @@ clerk integrates ratings fully into its database and exposes the ratings in trac
 To filter by a specific rating use "r=n" as part of your input. Sadly filtering for "r=1" will also show "r=10"
 in rofi interface you can work around this by filtering for "r=1\s". in fzf interface "r=1$" works.
 
+If you don't like to see ratings in your track/album listings, simply increase the album_l setting in config.
+
 ## Usage
 
 ```
