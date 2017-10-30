@@ -130,8 +130,8 @@ All tmux hotkeys can be changed in clerk.tmux file.
 
 ## Files and Variables
 
-clerk Uses $XDG_CONFIG_HOME to store it's files. Normally this variable is not set
-and defaults to $HOME/.config.
+clerk Uses `$XDG_CONFIG_HOME` to store it's files. Normally this variable is not set
+and defaults to `$HOME/.config`.
 
 Files used:
 
