@@ -16,8 +16,6 @@ MPD client using rofi or fzf
 * Rate albums/tracks
 * Optionally store ratings in file tags.
 
-see `clerk -h` for all default arguments.
-
 ## Dependencies:
 
 * rofi (https://github.com/DaveDavenport/rofi)
