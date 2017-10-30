@@ -50,8 +50,8 @@ for the tagging_client:
 ### Others
 
 * Install dependencies
-* Copy clerk.conf and clerk.tmux to $HOME/.config/clerk/config and edit paths to database file and clerk.tmux
-* Copy clerk and clerk_rating_client scripts to $PATH and make them executable.
+* Copy `clerk.conf` and `clerk.tmux` to `$HOME/.config/clerk/config` and edit paths to database file and clerk.tmux
+* Copy `clerk` and `clerk_rating_client` scripts to $PATH and make them executable.
 * Run clerk
 
 ## Ratings
@@ -66,8 +66,8 @@ It's also possible to store ratings in file tags. Currently this is supported fo
 For this to work, simply set `tagging=true` in clerk.conf file and set your music_path.
 
 It’s even possible to tag files not on the same machine (On MPD setups with remote clients).
-Simply copy your clerk.conf and clerk_rating_client to the machine hosting your audio files, edit music_path,
-if needed and start clerk_rating_client. A systemd user service is available.
+Simply copy your `clerk.conf` and `clerk_rating_client` to the machine hosting your audio files, edit `music_path`
+in config and start `clerk_rating_client`. A systemd user service is available.
 
 For the moment I use metaflac, mid3v2 and vorbiscomment to tag files, because I haven't found a good perl library
 for this task.
