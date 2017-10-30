@@ -23,7 +23,7 @@ MPD client using rofi or fzf
 * tmux
 * perl-net-mpd
 * perl-data-messagepack
-* perl-data-sections-simple
+* perl-data-section-simple
 * perl-file-slurper
 * perl-config-simple
 * perl-try-tiny
