@@ -43,7 +43,7 @@ for the tagging_client:
 * install [clerk-git from AUR](https://aur.archlinux.org/packages/clerk-git/)
 * run clerk_setup as user
 
-## Debian/Ubunutu
+## Debian/Ubuntu
 
 * install deb package from [release page](https://github.com/carnager/clerk/releases)
 * run clerk_setup as user
