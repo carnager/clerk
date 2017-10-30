@@ -32,6 +32,7 @@ my ($cfg, $mpd);
 my %rvar; # runtime variables
 
 my $xdg_config_home = $ENV{'XDG_CONFIG_HOME'} || "$ENV{'HOME'}/.config";
+my $xdg_data_home = $ENV{'XDG_DATA_HOME'} || "$ENV{'HOME'}/.local/share";
 
 sub main {
 	create_files_if_needed();
@@ -66,6 +67,10 @@ sub create_files_if_needed {
 		die "Unable to create \"$xdg_config_home/clerk\"\n";
 	}
 
+	unless(-e "$xdg_data_home/clerk" or mkdir "$xdg_data_home/clerk") {
+		die "Unable to create \"$xdg_data_home/clerk\"\n";
+	}
+
 	if (! -f $clerk_conf_file) {
 		open my $fh, ">", $clerk_conf_file;
 		print {$fh} $clerk_conf_content;
@@ -93,7 +98,7 @@ sub parse_config {
 	                  // "$xdg_config_home/clerk/clerk.tmux";
 
 	$rvar{db} = $ENV{CLERK_DATABASE}
-	                  // "$xdg_config_home/clerk/database.mpk";
+	                  // "$xdg_data_home/clerk/database.mpk";
 
 	$cfg //= Config::Simple->new(filename=>$rvar{config_file});
 	
