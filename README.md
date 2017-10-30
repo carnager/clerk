@@ -127,12 +127,12 @@ C-F1:  show hotkeys
 C-q:   quit clerk tmux interface
 ```
 
-All tmux hotkeys can be changed in clerk.tmux file.
+All tmux hotkeys can be changed in `clerk.tmux` file.
 
 ## Files and Variables
 
 clerk uses `$XDG_CONFIG_HOME` and `$XDG_DATA_HOME` for its files. Both variables are usally unset
-and default to `$HOME/.config` and `$HOME/local/share`. These files are stored by clerk:
+and default to `$HOME/.config` and `$HOME/.local/share`. These files are stored by clerk:
 
 ### XDG_CONFIG_HOME
 
