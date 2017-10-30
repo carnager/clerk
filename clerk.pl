@@ -8,6 +8,7 @@ use Data::Dumper;
 use utf8;
 use Config::Simple;
 use Data::MessagePack;
+use Data::Section::Simple qw(get_data_section);
 #use DDP;
 use Encode qw(decode encode);
 use File::Basename;
@@ -30,7 +31,10 @@ my $self="$Bin/$Script";
 my ($cfg, $mpd);
 my %rvar; # runtime variables
 
+my $xdg_config_home = $ENV{'XDG_CONFIG_HOME'} || "$ENV{'HOME'}/.config";
+
 sub main {
+	create_files_if_needed();
 	parse_config();
 	parse_options(@ARGV);
 	tmux_prerequisites();
@@ -51,15 +55,52 @@ sub main {
 	}
 }
 
+sub create_files_if_needed {
+	my $clerk_conf_content = get_data_section('clerk.conf');
+	my $clerk_tmux_content = get_data_section('clerk.tmux');
+	
+	my $clerk_conf_file = "$xdg_config_home/clerk/clerk.conf";
+	my $clerk_tmux_file = "$xdg_config_home/clerk/clerk.tmux";
+
+	unless(-e "$xdg_config_home/clerk" or mkdir "$xdg_config_home/clerk") {
+		die "Unable to create \"$xdg_config_home/clerk\"\n";
+	}
+
+	if (! -f $clerk_conf_file) {
+		open my $fh, ">", $clerk_conf_file;
+		print {$fh} $clerk_conf_content;
+		close $fh;
+	}
+	if (! -f $clerk_conf_file) {
+		open my $fh, ">", $clerk_conf_file;
+		print {$fh} $clerk_conf_content;
+		close $fh;
+	}
+
+	if (! -f $clerk_tmux_file) {
+		open my $fh, ">", $clerk_tmux_file;
+		print {$fh} $clerk_tmux_content;
+		close $fh;
+	}
+}
+
 sub parse_config {
 	$rvar{config_file} = $ENV{CLERK_CONF}
-	                  // $ENV{HOME} . '/.config/clerk/clerk.conf';
+	                  // "$xdg_config_home/clerk/clerk.conf";
 	$cfg //= Config::Simple->new(filename=>$rvar{config_file});
+
+	$rvar{tmux_config} = $ENV{CLERK_TMUX}
+	                  // "$xdg_config_home/clerk/clerk.tmux";
+
+	$rvar{db} = $ENV{CLERK_DATABASE}
+	                  // "$xdg_config_home/clerk/database.mpk";
+
+	$cfg //= Config::Simple->new(filename=>$rvar{config_file});
+	
 
 	my $g = $cfg->param(-block=>'General');
 	%rvar = (%rvar,
 		mpd_host     => $g->{mpd_host},
-		tmux_config  => $g->{tmux_config},
 		songs        => $g->{songs},
 		chunksize    => $g->{chunksize},
 		player       => $g->{player},
@@ -79,7 +120,7 @@ sub parse_config {
 		albumartist => $c->{albumartist_l}
 	};
 
-	$rvar{db} = { file => $g->{database}, mtime => 0 };
+	$rvar{db} = { file => $rvar{db}, mtime => 0 };
 }
 
 sub parse_options {
@@ -665,3 +706,101 @@ clerk [command] [-f]
 clerk version 4.0
 
 =cut
+
+__DATA__
+
+@@ clerk.conf
+[General]
+# MPD_HOST will override this
+mpd_host=localhost
+
+# music root for rating_client
+music_root=/mnt/Music
+
+# define file paths
+database=PLACEHOLDER/.config/clerk/database.mpk
+
+# player for queue tab
+player=ncmpcpp
+
+# number of songs clerk will get at once for creating its cache files
+songs=20
+
+# if mpd drops the connection while updating, reduce this.
+chunksize=30000
+
+# enable this to jump to queue after adding songs in tmux ui.
+jump_queue=true
+
+# Use albumartist or artist for random tracks?
+randomartist=albumartist
+
+# write tags to audio files. Needs running clerk_rating_client on machine with audio files
+# ratings will always be written to sticker database.
+tagging=false
+
+[Columns]
+# width of columns
+albumartist_l=50
+album_l=118
+artist_l=66
+date_l=6
+title_l=50
+track_l=2
+rating_l=4
+
+@@ clerk.tmux
+# !Dont move this section.
+## Key Bindings
+bind-key -n F1   selectw -t :=albums                        # show album list                
+bind-key -n F2   selectw -t :=tracks                        # show tracks
+bind-key -n F3   selectw -t :=latest                        # show album list (latest first)
+bind-key -n F4   selectw -t :=playlists                     # load playlist
+bind-key -n F5   selectw -t :=queue                         # show queue
+bind-key -n C-F5 run-shell 'mpc prev --quiet'               # previous song
+bind-key -n C-F6 run-shell 'mpc toggle --quiet'             # toggle playback
+bind-key -n C-F7 run-shell 'mpc stop > /dev/null'           # stop playback
+bind-key -n C-F8 run-shell 'mpc next --quiet'               # next song
+bind-key -n F10  run-shell '$CLERKBIN --instaact=rand_pane' # play random album/songs
+bind-key -n C-F1 run-shell '$CLERKBIN --instaact=help_pane' # show help
+bind-key -n C-q  kill-session -t music                      # quit clerk
+
+
+# Status bar
+set-option -g status-position top
+set -g status-interval 30
+set -g status-justify centre
+set -g status-left-length 40
+set -g status-left ''
+set -g status-right ''
+
+
+# Colors
+set -g status-bg colour235
+set -g status-fg default
+setw -g window-status-current-bg default
+setw -g window-status-current-fg default
+setw -g window-status-current-attr dim
+setw -g window-status-bg default
+setw -g window-status-fg white
+setw -g window-status-attr bright
+setw -g window-status-format ' #[fg=colour243,bold]#W '
+setw -g window-status-current-format ' #[fg=yellow,bold]#[bg=colour235]#W '
+
+
+
+# tmux options
+set -g set-titles on
+set -g set-titles-string '#T'
+set -g default-terminal "screen-256color"
+setw -g mode-keys vi
+set -sg escape-time 1
+set -g repeat-time 1000
+set -g base-index 1
+setw -g pane-base-index 1
+set -g renumber-windows on
+unbind C-b
+set -g prefix C-a
+unbind C-p
+bind C-p paste-buffer
+
