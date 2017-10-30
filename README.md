@@ -135,8 +135,8 @@ and defaults to $HOME/.config.
 
 Files used:
 
-`clerk.conf`:   config file.
-`clerk.tmux`:   clerk's tmux config
-`database.mpk`: clerk's local database
+* `clerk.conf`:   config file.
+* `clerk.tmux`:   clerk's tmux config
+* `database.mpk`: clerk's local database
 
 Use `CLERK_CONF`, `CLERK_TMUX` and `CLERK_DATABASE` variables to override file locations.
