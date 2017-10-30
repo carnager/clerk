@@ -14,7 +14,7 @@ MPD client using rofi or fzf
 * Rofi and fzf interfaces
 * Optional tmux interface for fzf mode
 * Rate albums/tracks
-** Optionally store ratings in file tags.
+* Optionally store ratings in file tags.
 
 see `clerk -h` for all default arguments.
 
