@@ -246,7 +246,7 @@ sub backend_call {
 	my $input;
 	my $out;
 	$random //= "ignore";
-	$fields //= "1,2,3,4";
+	$fields //= "1,2,3,4,5";
 	my %backends = (
 		fzf => [ "fzf", "--reverse", "--no-sort", "-m", "-e", "--no-hscroll", "-i", "-d", "\t", "--tabstop=4", "+s", "--ansi", "--bind=esc:$random,alt-a:toggle-all,alt-n:deselect-all", "--with-nth=$fields" ],
 		rofi => [ "rofi", "-matching", "regex", "-dmenu", "-kb-row-tab", "", "-kb-move-word-forward", "", "-kb-accept-alt", "Tab", "-multi-select", "-no-levensthein-sort", "-i", "-p", "> "  ]
@@ -424,15 +424,15 @@ sub tmux_ui {
 }
 
 sub ask_to_pick_tracks {
-	return backend_call(formatted_tracks(get_rdb()), "1,2,3,4");
+	return backend_call(formatted_tracks(get_rdb()), "1,2,3,4,5");
 }
 
 sub ask_to_pick_albums {
-	return backend_call(formatted_albums(get_rdb(), 0), "1,2,3");
+	return backend_call(formatted_albums(get_rdb(), 0), "1,2,3,4");
 }
 
 sub ask_to_pick_latests {
-	return backend_call(formatted_albums(get_rdb(), 1), "1,2,3");
+	return backend_call(formatted_albums(get_rdb(), 1), "1,2,3,4");
 }
 
 sub ask_to_pick_playlists {
