@@ -51,7 +51,7 @@ for the tagging_client:
 
 * Install dependencies
 * Copy clerk.conf and clerk.tmux to $HOME/.config/clerk/config and edit paths to database file and clerk.tmux
-* Copy clerk script to $PATH and make it executable.
+* Copy clerk and clerk_rating_client scripts to $PATH and make them executable.
 * Run clerk
 
 ## Ratings
