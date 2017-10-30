@@ -744,8 +744,8 @@ tagging=false
 [Columns]
 # width of columns
 albumartist_l=50
-album_l=118
-artist_l=66
+album_l=50
+artist_l=50
 date_l=6
 title_l=50
 track_l=2
