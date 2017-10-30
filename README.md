@@ -2,10 +2,10 @@
 
 MPD client using rofi or fzf
 
-# Screenshot (V4)
+## Screenshot (V4)
 ![Screenshot](https://pic.53280.de/clerk.png)
 
-# Features:
+## Features:
 
 * Play random album/tracks
 * Add/Replace albums/songs
@@ -17,7 +17,7 @@ MPD client using rofi or fzf
 
 see `clerk -h` for all default arguments.
 
-# Dependencies:
+## Dependencies:
 
 * rofi (https://github.com/DaveDavenport/rofi)
 * fzf
@@ -36,7 +36,7 @@ for the tagging_client:
 * mid3v2 (mutagen)
 
 
-# Installation
+## Installation
 
 ### Arch Linux
 
@@ -55,7 +55,7 @@ for the tagging_client:
 * Copy clerk script to $PATH and make it executable.
 * Run clerk
 
-# Ratings
+## Ratings
 
 Clerk can rate albums and tracks, which will be saved in MPDs sticker database as rating or albumrating.
 Track ratings should be compatible with all other MPD clients that support them.
@@ -76,7 +76,7 @@ for tagging.
 clerk integrates ratings fully into its database and exposes the ratings in track and album lists.
 To filter by a specific rating use "r=n" as part of your input.
 
-# Usage
+## Usage
 
 ```
 Usage:
@@ -99,7 +99,7 @@ Usage:
     clerk version 4.0
 ```
 
-# Hotkeys
+## Hotkeys
 
 ### Global
 
