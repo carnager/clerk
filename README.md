@@ -38,17 +38,17 @@ for the tagging_client:
 
 # Installation
 
-## Arch Linux
+### Arch Linux
 
 * install [clerk-git from AUR](https://aur.archlinux.org/packages/clerk-git/)
 * run clerk_setup as user
 
-## Debian/Ubuntu
+### Debian/Ubuntu
 
 * install deb package from [release page](https://github.com/carnager/clerk/releases)
 * run clerk_setup as user
 
-## Others
+### Others
 
 * Install dependencies
 * Copy clerk.conf and clerk.tmux to $HOME/.config/clerk/config and edit paths to database file and clerk.tmux
@@ -101,13 +101,15 @@ Usage:
 
 # Hotkeys
 
+### Global
+
 ```
 Tab:   select item(s)
 Enter: perform action on item
 
 ```
 
-## Hotkeys for tmux interface
+### Hotkeys for tmux interface
 
 ```
 F1:    albums view
