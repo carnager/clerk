@@ -717,9 +717,6 @@ mpd_host=localhost
 # music root for rating_client
 music_root=/mnt/Music
 
-# define file paths
-database=PLACEHOLDER/.config/clerk/database.mpk
-
 # player for queue tab
 player=ncmpcpp
 
