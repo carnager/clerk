@@ -35,14 +35,25 @@ for the tagging_client:
 * vorbiscomment (vorbis-tools)
 * mid3v2 (mutagen)
 
-For Archlinux you can install it from [AUR](https://aur.archlinux.org/packages/clerk-git/)
 
 # Installation
 
-1. Install dependencies
-2. Copy clerk.conf and clerk.tmux to $HOME/.config/clerk/config and edit paths to database file and clerk.tmux
-3. Copy clerk script to $PATH and make it executable.
-4. Run clerk
+## Arch Linux
+
+* install [clerk-git from AUR](https://aur.archlinux.org/packages/clerk-git/)
+* run clerk_setup as user
+
+## Debian/Ubunutu
+
+* install deb package from [release page](https://github.com/carnager/clerk/releases)
+* run clerk_setup as user
+
+## Others
+
+* Install dependencies
+* Copy clerk.conf and clerk.tmux to $HOME/.config/clerk/config and edit paths to database file and clerk.tmux
+* Copy clerk script to $PATH and make it executable.
+* Run clerk
 
 # Ratings
 
