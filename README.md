@@ -14,7 +14,7 @@ MPD client using rofi or fzf
 * Rofi and fzf interfaces
 * Optional tmux interface for fzf mode
 * Rate albums/tracks
-* Optionally store ratings in file tags.
+* Optionally store ratings in file tags
 
 ## Dependencies:
 
@@ -70,7 +70,7 @@ Simply copy your clerk.conf and clerk_rating_client to the machine hosting your 
 if needed and start clerk_rating_client. A systemd user service is available.
 
 For the moment I use metaflac, mid3v2 and vorbiscomment to tag files, because I haven't found a good perl library
-for tagging.
+for this task.
 
 ### Filtering
 
@@ -110,7 +110,6 @@ Usage:
 ```
 Tab:   select item(s)
 Enter: perform action on item
-
 ```
 
 ### Hotkeys for tmux interface
