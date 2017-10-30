@@ -392,7 +392,7 @@ sub tmux_jump_to_queue_maybe {
 }
 
 sub tmux_spawn_random_pane {
-	tmux 'splitw', '-d', '-l', '8', $self, '--backend=fzf', '--randoms';
+	tmux 'splitw', '-d', '-l', '10', $self, '--backend=fzf', '--randoms';
 	tmux qw/select-pane -D/;
 }
 
@@ -442,7 +442,7 @@ sub ask_to_pick_playlists {
 }
 
 sub ask_to_pick_random {
-	return backend_call(["Tracks\n", "Albums\n", "---\n", "Mode: $rvar{randomartist}\n", "Number of Songs: $rvar{songs}\n"]);
+	return backend_call(["Tracks\n", "Albums\n", "---\n", "Mode: $rvar{randomartist}\n", "Number of Songs: $rvar{songs}\n", "---\n", "Cancel\n"]);
 }
 
 sub ask_to_pick_song_number {
