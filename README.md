@@ -9,11 +9,12 @@ MPD client using rofi or fzf
 
 * Play random album/tracks
 * Add/Replace albums/songs
-* Rate albums/tracks
 * Filter lists by rating
 * Customizable hotkeys
 * Rofi and fzf interfaces
 * Optional tmux interface for fzf mode
+* Rate albums/tracks
+** Optionally store ratings in file tags.
 
 see `clerk -h` for all default arguments.
 
