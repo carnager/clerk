@@ -522,7 +522,7 @@ sub action_db_albums {
 	{
 		local $_ = $action;
 		if    (/^Add/)                { mpd_add_items(\@uris) }
-		elsif (/^Insert/)             { mpd_insert_items(\@uris) }
+		elsif (/^Insert/)             { mpd_insert_albums(\@uris) }
 		elsif (/^Replace/)            { mpd_replace_with_items(\@uris) }
 		elsif (/^Rate Album\(s\)/)    { mpd_rate_with_albums(\@uris) }
 	}
@@ -552,7 +552,7 @@ sub action_db_tracks {
 	{
 		local $_ = $action;
 		if    (/^Add/)                { mpd_add_items(\@uris) }
-		elsif (/^Insert/)             { mpd_insert_items(\@uris) }
+		elsif (/^Insert/)             { mpd_insert_tracks(\@uris) }
 		elsif (/^Replace/)            { mpd_replace_with_items(\@uris) }
 		elsif (/^Rate Track\(s\)/)    { mpd_rate_with_tracks(\@uris) }
 	}
@@ -616,14 +616,25 @@ sub mpd_add_items {
     $mpd->add($_) for @{$_[0]};
 }
 
-sub mpd_insert_items {
+sub mpd_insert_tracks {
     my $song;
     my $bla = $mpd->playlist_info();
     my $pos = ($mpd->current_song->{Pos} +1);
-    my $prio = "10";
+    my $prio = "255";
     foreach $song (reverse(@{$_[0]})) {
-        my $id = $mpd->add_id($song, $pos);
-        $mpd->prio_id($prio, $id);
+        $mpd->prio_id($prio, $mpd->add_id($song, $pos));
+        $prio--;
+        $pos++;
+    }
+}
+
+sub mpd_insert_albums {
+    my $song;
+    my $bla = $mpd->playlist_info();
+    my $pos = ($mpd->current_song->{Pos} +1);
+    my $prio = "255";
+    foreach $song (@{$_[0]}) {
+        $mpd->prio_id($prio, $mpd->add_id($song, $pos));
         $prio--;
         $pos++;
     }
