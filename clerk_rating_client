@@ -121,7 +121,7 @@ sub tag_mp3s {
 		print ":: tagging track \"${title}\" by \"${albumartist}\" with albumrating of \"${rating}\"\n";
 		system('mid3v2', "--TXXX", "ALBUMRATING:${rating}", "${music_root}/${uri}");
 	}
-    set_timestamp($uri, $atime, $mtime);
+    set_timestamp("${music_root}/$uri", $atime, $mtime);
 }
 
 sub tag_oggs {
@@ -141,7 +141,7 @@ sub tag_oggs {
 		print $CMD "${vorbiscomment}";
 	}
 	close($CMD);
-    set_timestamp($uri, $atime, $mtime);
+    set_timestamp("${music_root}/$uri", $atime, $mtime);
 }
 
 sub sync_ratings {
