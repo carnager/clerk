@@ -517,11 +517,12 @@ sub action_db_albums {
 		push @uris, $_->{uri};
 	}
 
-	my $action = backend_call(["Add\n", "Replace\n", "---\n", "Rate Album(s)\n"]);
+	my $action = backend_call(["Add\n", "Insert\n", "Replace\n", "---\n", "Rate Album(s)\n"]);
 	mpd_reachable();
 	{
 		local $_ = $action;
 		if    (/^Add/)                { mpd_add_items(\@uris) }
+		elsif (/^Insert/)             { mpd_insert_items(\@uris) }
 		elsif (/^Replace/)            { mpd_replace_with_items(\@uris) }
 		elsif (/^Rate Album\(s\)/)    { mpd_rate_with_albums(\@uris) }
 	}
@@ -546,11 +547,12 @@ sub action_db_tracks {
 		push @uris, $_->{uri};
 	}
 
-	my $action = backend_call(["Add\n", "Replace\n", "---\n", "Rate Track(s)\n"]);
+	my $action = backend_call(["Add\n", "Insert\n", "Replace\n", "---\n", "Rate Track(s)\n"]);
 	mpd_reachable();
 	{
 		local $_ = $action;
 		if    (/^Add/)                { mpd_add_items(\@uris) }
+		elsif (/^Insert/)             { mpd_insert_items(\@uris) }
 		elsif (/^Replace/)            { mpd_replace_with_items(\@uris) }
 		elsif (/^Rate Track\(s\)/)    { mpd_rate_with_tracks(\@uris) }
 	}
@@ -611,7 +613,12 @@ sub util_parse_selection {
 }
 
 sub mpd_add_items {
-	$mpd->add($_) for @{$_[0]};
+    $mpd->add($_) for @{$_[0]};
+}
+
+sub mpd_insert_items {
+    my $current_song = $mpd->current_song->{Pos};
+    $mpd->add_id($_, ($current_song + 1)) for reverse(@{$_[0]});
 }
 
 sub mpd_rate_items {
@@ -708,7 +715,7 @@ clerk [command] [-f]
   Without further arguments, clerk starts a tabbed tmux interface
   Hotkeys for tmux interface can be set in $HOME/.config/clerk/clerk.tmux
 
-clerk version 4.0
+clerk version 4.0.5
 
 =cut
 
