@@ -95,7 +95,7 @@ sub get_timestamp {
 
 sub set_timestamp {
     my ($file_name, $atime, $mtime) = (@_);
-    utime($atime, $mtime, "${music_root}/$file_name}");
+    utime($atime, $mtime, $file_name);
 }
 
 sub tag_flacs {
@@ -109,7 +109,7 @@ sub tag_flacs {
 		system('metaflac', '--remove-tag=ALBUMRATING', "${music_root}/${uri}");
 		system('metaflac', "--set-tag=ALBUMRATING=${rating}", "${music_root}/${uri}");
 	}
-    set_timestamp($uri, $atime, $mtime);
+    set_timestamp("${music_root}/$uri", $atime, $mtime);
 }
 
 sub tag_mp3s {
