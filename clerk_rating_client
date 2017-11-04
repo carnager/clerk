@@ -6,6 +6,7 @@ use warnings;
 use Array::Utils qw(:all);
 #use DDP { show_unicode => 1 };
 use Data::Dumper;
+use File::stat;
 use Try::Tiny;
 use Config::Simple;
 use File::Spec;
@@ -85,8 +86,20 @@ sub get_track_tags {
 	return($albumartist, $artist, $title, $album);
 }
 
+sub get_timestamp {
+    my $file_name = $_[0];
+    return my $stats = stat("${music_root}/$file_name");
+}
+
+sub set_timestamp {
+    my ($file_name, $atime, $mtime) = (@_);
+    utime($atime, $mtime, "${music_root}/$file_name}");
+}
+
 sub tag_flacs {
 	my ($uri, $mode, $rating, $artist, $albumartist, $title, $album) = @_;
+    my ($stats) = get_timestamp($uri);
+    my ($atime, $mtime) = ($stats->atime, $stats->mtime);
 	if ($mode eq "rating") {
 		print ":: tagging track \"${title}\" by \"${artist}\" with rating of \"${rating}\"\n";
 		system('metaflac', '--remove-tag=RATING', "${music_root}/${uri}");
@@ -96,10 +109,13 @@ sub tag_flacs {
 		system('metaflac', '--remove-tag=ALBUMRATING', "${music_root}/${uri}");
 		system('metaflac', "--set-tag=ALBUMRATING=${rating}", "${music_root}/${uri}");
 	}
+    set_timestamp($uri, $atime, $mtime);
 }
 
 sub tag_mp3s {
     my ($uri, $mode, $rating, $artist, $albumartist, $title, $album) = @_;
+    my ($stats) = get_timestamp($uri);
+    my ($atime, $mtime) = ($stats->atime, $stats->mtime);
     if ($mode eq "rating") {
 		print ":: tagging track \"${title}\" by \"${artist}\" with rating of \"${rating}\"\n";
 		system('mid3v2', "--TXXX", "RATING:${rating}", "${music_root}/${uri}");
@@ -107,11 +123,14 @@ sub tag_mp3s {
 		print ":: tagging track \"${title}\" by \"${albumartist}\" with albumrating of \"${rating}\"\n";
 		system('mid3v2', "--TXXX", "ALBUMRATING:${rating}", "${music_root}/${uri}");
 	}
+    set_timestamp($uri, $atime, $mtime);
 }
 
 sub tag_oggs {
     my ($uri, $mode, $rating, $artist, $albumartist, $title, $album) = @_;
     my @values = `vorbiscomment "${music_root}/${uri}"`;   
+    my ($stats) = get_timestamp($uri);
+    my ($atime, $mtime) = ($stats->atime, $stats->mtime);
 	if ($mode eq "rating") {
     	@values = grep !/^RATING=?$/, @values;
 		print ":: tagging track \"${title}\" by \"${artist}\" with rating of \"${rating}\"\n";
@@ -126,6 +145,7 @@ sub tag_oggs {
 		print $CMD "${vorbiscomment}";
 	}
 	close($CMD);
+    set_timestamp($uri, $atime, $mtime);
 }
 
 sub sync_ratings {
