@@ -57,15 +57,17 @@ sub song_handler {
 	for my $msg (@messages) {
 		my ($uri, $mode, $rating) = get_info_from_message($msg->{message});
 		my ($albumartist, $artist, $title, $album) = get_track_tags($uri);
+        my ($stats) = get_timestamp($uri);
+        my ($file_atime, $file_mtime) = ($stats->atime, $stats->mtime);
 		
 		if ($uri =~ /\.flac$/) {
-			tag_flacs($uri, $mode, $rating, $artist, $albumartist, $title, $album);
+			tag_flacs($uri, $mode, $rating, $artist, $albumartist, $title, $album, $file_atime, $file_mtime);
 		}
 		elsif ($uri =~ /\.mp3$/) {
-			tag_mp3s($uri, $mode, $rating, $artist, $albumartist, $title, $album);
+			tag_mp3s($uri, $mode, $rating, $artist, $albumartist, $title, $album, $file_atime, $file_mtime);
 		}
 		elsif ($uri =~ /\.ogg$/) {
-			tag_oggs($uri, $mode, $rating, $artist, $albumartist, $title, $album);
+			tag_oggs($uri, $mode, $rating, $artist, $albumartist, $title, $album, $file_atime, $file_mtime);
 		}
 	}
 }
@@ -97,9 +99,7 @@ sub set_timestamp {
 }
 
 sub tag_flacs {
-	my ($uri, $mode, $rating, $artist, $albumartist, $title, $album) = @_;
-    my ($stats) = get_timestamp($uri);
-    my ($atime, $mtime) = ($stats->atime, $stats->mtime);
+	my ($uri, $mode, $rating, $artist, $albumartist, $title, $album, $atime, $mtime) = @_;
 	if ($mode eq "rating") {
 		print ":: tagging track \"${title}\" by \"${artist}\" with rating of \"${rating}\"\n";
 		system('metaflac', '--remove-tag=RATING', "${music_root}/${uri}");
@@ -113,9 +113,7 @@ sub tag_flacs {
 }
 
 sub tag_mp3s {
-    my ($uri, $mode, $rating, $artist, $albumartist, $title, $album) = @_;
-    my ($stats) = get_timestamp($uri);
-    my ($atime, $mtime) = ($stats->atime, $stats->mtime);
+    my ($uri, $mode, $rating, $artist, $albumartist, $title, $album, $atime, $mtime) = @_;
     if ($mode eq "rating") {
 		print ":: tagging track \"${title}\" by \"${artist}\" with rating of \"${rating}\"\n";
 		system('mid3v2', "--TXXX", "RATING:${rating}", "${music_root}/${uri}");
@@ -127,10 +125,8 @@ sub tag_mp3s {
 }
 
 sub tag_oggs {
-    my ($uri, $mode, $rating, $artist, $albumartist, $title, $album) = @_;
+    my ($uri, $mode, $rating, $artist, $albumartist, $title, $album, $atime, $mtime) = @_;
     my @values = `vorbiscomment "${music_root}/${uri}"`;   
-    my ($stats) = get_timestamp($uri);
-    my ($atime, $mtime) = ($stats->atime, $stats->mtime);
 	if ($mode eq "rating") {
     	@values = grep !/^RATING=?$/, @values;
 		print ":: tagging track \"${title}\" by \"${artist}\" with rating of \"${rating}\"\n";
