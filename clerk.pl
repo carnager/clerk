@@ -617,8 +617,16 @@ sub mpd_add_items {
 }
 
 sub mpd_insert_items {
-    my $current_song = $mpd->current_song->{Pos};
-    $mpd->add_id($_, ($current_song + 1)) for reverse(@{$_[0]});
+    my $song;
+    my $bla = $mpd->playlist_info();
+    my $pos = ($mpd->current_song->{Pos} +1);
+    my $prio = "10";
+    foreach $song (reverse(@{$_[0]})) {
+        my $id = $mpd->add_id($song, $pos);
+        $mpd->prio_id($prio, $id);
+        $prio--;
+        $pos++;
+    }
 }
 
 sub mpd_rate_items {
