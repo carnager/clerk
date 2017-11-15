@@ -48,9 +48,21 @@ for the tagging_client:
 
 ### Others
 
-* Install dependencies
-* Copy `clerk` and `clerk_rating_client` scripts to $PATH and make them executable.
-* Run clerk
+#### For user only:
+
+* Install local::lib module (Most distributions should have it)
+* Install cpanm
+* Put `eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)` to your shell config and restart your terminal
+* Clone this repository and change to clerk directory
+* Run `cpanm --installdeps .`
+* Move clerk.pl and clerk_rating_client to PATH
+
+#### Globally:
+
+* Install cpanm
+* Clone this repository and change to clerk directory
+* Run `cpanm --installdeps .` as root
+* Move clerk.pl and clerk_rating_client to PATH
 
 ## Ratings
 
