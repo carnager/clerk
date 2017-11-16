@@ -52,7 +52,7 @@ for the tagging_client:
 
 * Install local::lib module (Most distributions should have it)
 * Install cpanm
-* Put `eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)` to your shell config and restart your terminal
+* Put `eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib=~/.local/share/perl5)` to your shell config and restart your terminal
 * Clone this repository and change to clerk directory
 * Run `cpanm --installdeps .`
 * Move clerk.pl and clerk_rating_client to PATH
