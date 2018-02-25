@@ -307,10 +307,10 @@ sub backend_call {
     if ($rvar{rofi_width} !~ /default/) {
         push @{$backends{rofi}}, "-width";
 	    push @{$backends{rofi}}, $rvar{rofi_width};
-	    p $backends{rofi};
     }
 
 	if ($rvar{rofi_theme} !~ /default/) {
+	    push @{$backends{rofi}}, "-theme";
 	    push @{$backends{rofi}}, $rvar{rofi_theme}
 	}
 
