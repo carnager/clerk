@@ -104,6 +104,7 @@ sub parse_config {
 	
 
 	my $g = $cfg->param(-block=>'General');
+	my $r = $cfg->param(-block=>'Rofi');
 	%rvar = (%rvar,
 		mpd_host     => $g->{mpd_host},
 		songs        => $g->{songs},
@@ -111,7 +112,9 @@ sub parse_config {
 		player       => $g->{player},
 		tagging      => $g->{tagging},
 		randomartist => $g->{randomartist},
-		jump_queue   => $g->{jump_queue}
+		jump_queue   => $g->{jump_queue},
+		rofi_width   => $r->{width},
+		rofi_theme   => $r->{theme}
 	);
 
 	my $c = $cfg->param(-block=>'Columns');
@@ -125,10 +128,7 @@ sub parse_config {
 		albumartist => $c->{albumartist_l}
 	};
 
-	my $r = $cfg->param(-block=>'Rofi');
 	%rvar = (%rvar,
-	    rofi_width  => $r->{width},
-	    rofi_theme       => $r->{theme}
     );
 
 	$rvar{db} = { file => $rvar{db}, mtime => 0 };
@@ -304,14 +304,14 @@ sub backend_call {
 		rofi => [ "rofi", "-matching", "regex", "-dmenu", "-kb-row-tab", "", "-kb-move-word-forward", "", "-kb-accept-alt", "Tab", "-multi-select", "-no-levensthein-sort", "-i", "-p", "> " ]
 	);
 
-    if ($rvar{rofi_width} !~ /default/) {
-        push @{$backends{rofi}}, "-width";
-	    push @{$backends{rofi}}, $rvar{rofi_width};
-    }
+	if ($rvar{backend} eq 'rofi') {
+		if ($rvar{rofi_width} ne 'default') {
+			push $backends{rofi}->@*, '-width', $rvar{rofi_width};
+		}
 
-	if ($rvar{rofi_theme} !~ /default/) {
-	    push @{$backends{rofi}}, "-theme";
-	    push @{$backends{rofi}}, $rvar{rofi_theme}
+		if ($rvar{rofi_theme} ne 'default') {
+			push $backends{rofi}->@*, '-theme', $rvar{rofi_theme};
+		}
 	}
 
 	my $handle = start $backends{$rvar{backend}} // die('backend not found'), \$input, \$out;
