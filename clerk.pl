@@ -125,6 +125,12 @@ sub parse_config {
 		albumartist => $c->{albumartist_l}
 	};
 
+	my $r = $cfg->param(-block=>'Rofi');
+	%rvar = (%rvar,
+	    rofi_width  => $r->{width},
+	    rofi_theme       => $r->{theme}
+    );
+
 	$rvar{db} = { file => $rvar{db}, mtime => 0 };
 }
 
@@ -295,8 +301,19 @@ sub backend_call {
 	$fields //= "1,2,3,4,5";
 	my %backends = (
 		fzf => [ "fzf", "--reverse", "--no-sort", "-m", "-e", "--no-hscroll", "-i", "-d", "\t", "--tabstop=4", "+s", "--ansi", "--bind=esc:$random,alt-a:toggle-all,alt-n:deselect-all", "--with-nth=$fields" ],
-		rofi => [ "rofi", "-matching", "regex", "-dmenu", "-kb-row-tab", "", "-kb-move-word-forward", "", "-kb-accept-alt", "Tab", "-multi-select", "-no-levensthein-sort", "-i", "-p", "> "  ]
+		rofi => [ "rofi", "-matching", "regex", "-dmenu", "-kb-row-tab", "", "-kb-move-word-forward", "", "-kb-accept-alt", "Tab", "-multi-select", "-no-levensthein-sort", "-i", "-p", "> " ]
 	);
+
+    if ($rvar{rofi_width} !~ /default/) {
+        push @{$backends{rofi}}, "-width";
+	    push @{$backends{rofi}}, $rvar{rofi_width};
+	    p $backends{rofi};
+    }
+
+	if ($rvar{rofi_theme} !~ /default/) {
+	    push @{$backends{rofi}}, $rvar{rofi_theme}
+	}
+
 	my $handle = start $backends{$rvar{backend}} // die('backend not found'), \$input, \$out;
 	$input = join "", (@{$in});
 	finish $handle or die "No selection";
@@ -776,6 +793,10 @@ date_l=6
 title_l=50
 track_l=2
 rating_l=4
+
+[Rofi]
+width=default
+theme=default
 
 @@ clerk.tmux
 # !Dont move this section.
