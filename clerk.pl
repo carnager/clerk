@@ -795,6 +795,7 @@ track_l=2
 rating_l=4
 
 [Rofi]
+# to use rofi default values, set "default" here
 width=default
 theme=default
 
