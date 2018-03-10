@@ -113,8 +113,8 @@ sub parse_config {
 		tagging      => $g->{tagging},
 		randomartist => $g->{randomartist},
 		jump_queue   => $g->{jump_queue},
-		rofi_width   => $r->{width} // default,
-		rofi_theme   => $r->{theme} // default
+		rofi_width   => $r->{width} // 'default',
+		rofi_theme   => $r->{theme} // 'default'
 	);
 
 	my $c = $cfg->param(-block=>'Columns');
