@@ -249,10 +249,11 @@ sub renew_db {
 	my $mpd_stats = $mpd->stats();
 	my $songcount = $mpd_stats->{songs};
 	my $times = int($songcount / $rvar{chunksize} + 1);
-
+    
 	if ($rvar{backend} eq "rofi") {
-		system('notify-send', '-t', '5', 'clerk', 'Updating Cache File');
+		system('notify-send', '-t', '5000', 'clerk', 'Updating Cache File');
 	}
+
 	elsif ($rvar{backend} eq "fzf") {
 		print STDERR "::: No cache found or cache file outdated\n";
 		print STDERR "::: Chunksize set to $rvar{chunksize} songs\n";
