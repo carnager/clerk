@@ -278,6 +278,12 @@ sub renew_db {
 		+{$_->%{qw/Album Artist Date AlbumArtist Title Track rating albumrating uri mtime/}}
 	} @db;
 	pack_msgpack(\@filtered);
+    if ($rvar{backend} eq "rofi") {
+        system('notify-send', '-t', '5000', 'clerk', 'DONE: Updating Cache File');
+    }
+    elsif ($rvar{backend} eq "fzf") {
+        print STDERR "::: Cache files updated\n";
+    }
 }
 
 sub maybe_renew_db {
