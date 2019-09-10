@@ -144,7 +144,7 @@ All tmux hotkeys can be changed in `clerk.tmux` file.
 
 ## Files and Variables
 
-clerk uses `$XDG_CONFIG_HOME` and `$XDG_DATA_HOME` for its files. Both variables are usally unset
+clerk uses `$XDG_CONFIG_HOME` and `$XDG_DATA_HOME` for its files. Both variables are usually unset
 and default to `$HOME/.config` and `$HOME/.local/share`. These files are stored by clerk:
 
 ### XDG_CONFIG_HOME
