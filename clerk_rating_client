@@ -101,9 +101,10 @@ sub set_timestamp {
 sub tag_flacs {
 	my ($uri, $mode, $rating, $artist, $albumartist, $title, $album, $atime, $mtime) = @_;
 	if ($mode eq "rating") {
-		my $fmps_rating = $rating/10
+		my $fmps_rating = $rating/10;
 		print ":: tagging track \"${title}\" by \"${artist}\" with rating of \"${rating}\"\n";
 		system('metaflac', '--remove-tag=FMPS_RATING', "${music_root}/${uri}");
+		print "metaflac", "--set-tag=FMPS_RATING=${fmps_rating}", "${music_root}/${uri}";
 		system('metaflac', "--set-tag=FMPS_RATING=${fmps_rating}", "${music_root}/${uri}");
 	} elsif ($mode eq "albumrating") {
 		print ":: tagging track \"${title}\" by \"${albumartist}\" with albumrating of \"${rating}\"\n";
@@ -116,7 +117,7 @@ sub tag_flacs {
 sub tag_mp3s {
 	my ($uri, $mode, $rating, $artist, $albumartist, $title, $album, $atime, $mtime) = @_;
 	if ($mode eq "rating") {
-		my $fmps_rating = $rating/10
+		my $fmps_rating = $rating/10;
 		print ":: tagging track \"${title}\" by \"${artist}\" with rating of \"${rating}\"\n";
 		system('mid3v2', "--TXXX", "FMPS_RATING:${fmps_rating}", "${music_root}/${uri}");
 	} elsif ($mode eq "albumrating") {
@@ -130,7 +131,7 @@ sub tag_oggs {
     my ($uri, $mode, $rating, $artist, $albumartist, $title, $album, $atime, $mtime) = @_;
     my @values = `vorbiscomment "${music_root}/${uri}"`;
 	if ($mode eq "rating") {
-		my $fmps_rating = $rating/10
+		my $fmps_rating = $rating/10;
 		@values = grep !/^FMPS_RATING=?$/, @values;
 		print ":: tagging track \"${title}\" by \"${artist}\" with rating of \"${rating}\"\n";
 		push (@values, "FMPS_RATING=$fmps_rating");
@@ -167,7 +168,7 @@ sub sync_ratings {
 	foreach my $unrated_song (@diff) {
 		if ( $unrated_song =~ /.*.flac$/) {
 			my $fmps_rating = system('metaflac', '--show-tag=FMPS_RATING', "${music_root}/${unrated_song}");
-			my $rating = $fmps_rating*10
+			my $rating = $fmps_rating*10;
 			print "$rating\n";
 			if ($rating ne "0") {
 				print "rating ${music_root}/${unrated_song} with $rating\n";
@@ -182,7 +183,7 @@ sub tag_from_sticker {
 	foreach my $rated_song (@available_stickers) {
 		my $uri = $rated_song->{file};
 		my $rating = $rated_song->{sticker};
-		my $fmps_rating = $rating/10
+		my $fmps_rating = $rating/10;
 		if ($uri =~ /\.flac$/) {
 			system('metaflac', '--remove-tag=FMPS_RATING', "${music_root}/${uri}");
 			system('metaflac', "--set-tag=FMPS_RATING=$fmps_rating", "${music_root}/${uri}");
