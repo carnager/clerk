@@ -51,7 +51,7 @@ sub idle_loop {
 		song_handler();
 	}
 }
-	
+
 sub song_handler {
 	my @messages = $mpd->read_messages;
 	for my $msg (@messages) {
@@ -59,7 +59,7 @@ sub song_handler {
 		my ($albumartist, $artist, $title, $album) = get_track_tags($uri);
         my ($stats) = get_timestamp($uri);
         my ($file_atime, $file_mtime) = ($stats->atime, $stats->mtime);
-		
+
 		if ($uri =~ /\.flac$/) {
 			tag_flacs($uri, $mode, $rating, $artist, $albumartist, $title, $album, $file_atime, $file_mtime);
 		}
@@ -101,9 +101,10 @@ sub set_timestamp {
 sub tag_flacs {
 	my ($uri, $mode, $rating, $artist, $albumartist, $title, $album, $atime, $mtime) = @_;
 	if ($mode eq "rating") {
+		my $fmps_rating = $rating/10;
 		print ":: tagging track \"${title}\" by \"${artist}\" with rating of \"${rating}\"\n";
-		system('metaflac', '--remove-tag=RATING', "${music_root}/${uri}");
-		system('metaflac', "--set-tag=RATING=${rating}", "${music_root}/${uri}");
+		system('metaflac', '--remove-tag=FMPS_RATING', "${music_root}/${uri}");
+		system('metaflac', "--set-tag=FMPS_RATING=${fmps_rating}", "${music_root}/${uri}");
 	} elsif ($mode eq "albumrating") {
 		print ":: tagging track \"${title}\" by \"${albumartist}\" with albumrating of \"${rating}\"\n";
 		system('metaflac', '--remove-tag=ALBUMRATING', "${music_root}/${uri}");
@@ -113,10 +114,11 @@ sub tag_flacs {
 }
 
 sub tag_mp3s {
-    my ($uri, $mode, $rating, $artist, $albumartist, $title, $album, $atime, $mtime) = @_;
-    if ($mode eq "rating") {
+	my ($uri, $mode, $rating, $artist, $albumartist, $title, $album, $atime, $mtime) = @_;
+	if ($mode eq "rating") {
+		my $fmps_rating = $rating/10;
 		print ":: tagging track \"${title}\" by \"${artist}\" with rating of \"${rating}\"\n";
-		system('mid3v2', "--TXXX", "RATING:${rating}", "${music_root}/${uri}");
+		system('mid3v2', "--TXXX", "FMPS_RATING:${fmps_rating}", "${music_root}/${uri}");
 	} elsif ($mode eq "albumrating") {
 		print ":: tagging track \"${title}\" by \"${albumartist}\" with albumrating of \"${rating}\"\n";
 		system('mid3v2', "--TXXX", "ALBUMRATING:${rating}", "${music_root}/${uri}");
@@ -126,22 +128,23 @@ sub tag_mp3s {
 
 sub tag_oggs {
     my ($uri, $mode, $rating, $artist, $albumartist, $title, $album, $atime, $mtime) = @_;
-    my @values = `vorbiscomment "${music_root}/${uri}"`;   
+    my @values = `vorbiscomment "${music_root}/${uri}"`;
 	if ($mode eq "rating") {
-    	@values = grep !/^RATING=?$/, @values;
+		my $fmps_rating = $rating/10;
+		@values = grep !/^FMPS_RATING=?$/, @values;
 		print ":: tagging track \"${title}\" by \"${artist}\" with rating of \"${rating}\"\n";
-        push (@values, "RATING=$rating");        
+		push (@values, "FMPS_RATING=$fmps_rating");
 	} elsif ($mode eq "albumrating") {
-    	@values = grep !/^ALBUMRATING=?$/, @values;
+		@values = grep !/^ALBUMRATING=?$/, @values;
 		print ":: tagging track \"${title}\" by \"${albumartist}\" with albumrating of \"${rating}\"\n";
-        push (@values, "ALBUMRATING=$rating");
+		push (@values, "ALBUMRATING=$rating");
 	}
-    open(my $CMD, '|-', 'vorbiscomment', '-a', "$music_root/$uri");
+	open(my $CMD, '|-', 'vorbiscomment', '-a', "$music_root/$uri");
 	for my $vorbiscomment (@values) {
 		print $CMD "${vorbiscomment}";
 	}
 	close($CMD);
-    set_timestamp("${music_root}/$uri", $atime, $mtime);
+	set_timestamp("${music_root}/$uri", $atime, $mtime);
 }
 
 sub sync_ratings {
@@ -159,11 +162,12 @@ sub sync_ratings {
 		}, $music_root);
 	my @relative = map { File::Spec->abs2rel($_, $music_root) } @absolute;
 	push @actual_uris, $_ for @relative;
-	
+
 	my @diff = array_diff(@sticker_uris, @actual_uris);
 	foreach my $unrated_song (@diff) {
 		if ( $unrated_song =~ /.*.flac$/) {
-			my $rating = system('metaflac', '--show-tag=RATING', "${music_root}/${unrated_song}");
+			my $fmps_rating = system('metaflac', '--show-tag=FMPS_RATING', "${music_root}/${unrated_song}");
+			my $rating = $fmps_rating*10;
 			print "$rating\n";
 			if ($rating ne "0") {
 				print "rating ${music_root}/${unrated_song} with $rating\n";
@@ -178,12 +182,13 @@ sub tag_from_sticker {
 	foreach my $rated_song (@available_stickers) {
 		my $uri = $rated_song->{file};
 		my $rating = $rated_song->{sticker};
+		my $fmps_rating = $rating/10;
 		if ($uri =~ /\.flac$/) {
-			system('metaflac', '--remove-tag=RATING', "${music_root}/${uri}");
-			system('metaflac', "--set-tag=RATING=$rating", "${music_root}/${uri}");
+			system('metaflac', '--remove-tag=FMPS_RATING', "${music_root}/${uri}");
+			system('metaflac', "--set-tag=FMPS_RATING=$fmps_rating", "${music_root}/${uri}");
 		}
 		elsif ($uri =~ /\.mp3$/) {
-			system('mid3v2', "--TXXX", "RATING:${rating}", "${music_root}/${uri}");
+			system('mid3v2', "--TXXX", "FMPS_RATING:${fmps_rating}", "${music_root}/${uri}");
 		}
 		elsif ($uri =~ /\.ogg$/) {
 			print "!! OGG files not supported, yet\n";
