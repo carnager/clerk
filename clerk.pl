@@ -165,7 +165,7 @@ sub parse_options {
 		'renewdb|u' => \$rvar{renewdb},
 		'tmux-ui!'  => \$rvar{tmux_ui},
 		'endless!'  => \$rvar{endless},
-		'backend=s' => $choices->(\$rvar{backend}, qw/fzf rofi/),
+		'backend=s' => $choices->(\$rvar{backend}, qw/fzf rofi fuzzel/),
 		'f'         => sub { $rvar{backend} = 'fzf'; },
 
 		# action
@@ -308,7 +308,8 @@ sub backend_call {
 	$fields //= "1,2,3,4,5";
 	my %backends = (
 		fzf => [ "fzf", "--reverse", "--no-sort", "-m", "-e", "--no-hscroll", "-i", "-d", "\t", "--tabstop=4", "+s", "--ansi", "--bind=esc:$random,alt-a:toggle-all,alt-n:deselect-all", "--with-nth=$fields" ],
-		rofi => [ "rofi", "-matching", "regex", "-dmenu", "-kb-row-tab", "", "-kb-move-word-forward", "", "-kb-accept-alt", "Tab", "-multi-select", "-no-levensthein-sort", "-i", "-p", "> " ]
+		rofi => [ "rofi", "-matching", "regex", "-dmenu", "-kb-row-tab", "", "-kb-move-word-forward", "", "-kb-accept-alt", "Tab", "-multi-select", "-no-levensthein-sort", "-i", "-p", "> " ],
+		fuzzel => [ "fuzzel", "--dmenu" ]
 	);
 
 	if ($rvar{backend} eq 'rofi') {
