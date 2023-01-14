@@ -157,7 +157,7 @@ sub parse_options {
 		};
 	};
 
-	$rvar{backend} = 'rofi';
+	#$rvar{backend} = 'rofi';
 	GetOptions(
 		'help|h' => sub { pod2usage(1) },
 
@@ -791,6 +791,10 @@ randomartist=albumartist
 # write tags to audio files. Needs running clerk_rating_client on machine with audio files
 # ratings will always be written to sticker database.
 tagging=false
+
+# define graphical backend. Possible options: rofi, fuzzel
+backend=rofi
+
 
 [Columns]
 # width of columns
