@@ -326,6 +326,7 @@ Options:
      -T  Play random Tracks
      -c  Rate current Track
      -u  Update local caches
+     -x  Create fresh config
 """
 
 ### chech for XDG directory and create if needed
