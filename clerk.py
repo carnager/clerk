@@ -18,18 +18,18 @@ m = MPDClient()
 def create_config():
     config_content = """
 [general]
-menu_tool = ["rofi", "-dmenu", "-i", "-p"]
-mpd_host = ""
-number_of_tracks = "20"
+menu_tool         = ["rofi", "-dmenu", "-i", "-p"]
+mpd_host          = ""
+number_of_tracks  = "20"
 
 [columns]
-artist_width = "40"
+artist_width      = "40"
 albumartist_width = "40"
-date_width = "6"
-album_width = "200"
-id_width = "0"
-title_width = "40"
-track_width = "4"
+date_width        = "6"
+album_width       = "200"
+id_width          = "0"
+title_width       = "40"
+track_width       = "4"
 """
     content_fix = config_content.split("\n",1)[1]
     with open(xdg_config+"/clerk/config", 'w') as configfile:
