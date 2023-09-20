@@ -307,6 +307,7 @@ clerk version: 5.0
 Options:
 
      -a  add Album
+     -l  add Album (sorted by mtime)
      -t  add Track(s)
      -A  Play random Album
      -T  Play random Tracks
