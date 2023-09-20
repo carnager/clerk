@@ -345,6 +345,7 @@ config = toml.load(xdg_config+"/clerk/config")
 menu_tool = config['general']['menu_tool']
 mpd_host = config['general']['mpd_host']
 number_of_tracks = config['general']['number_of_tracks']
+number_of_tracks = int(number_of_tracks)
 artist_width = config['columns']['artist_width']
 albumartist_width = config['columns']['albumartist_width']
 album_width = config['columns']['album_width']
