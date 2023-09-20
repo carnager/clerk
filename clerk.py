@@ -260,6 +260,7 @@ def action_tracks(tracks, action):
                     print("Nothing")
                 else:
                     m.sticker_set('song', track['file'], 'rating', str(value))
+                    
 def input_rating():
     rating_options = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '---', 'Delete']
     rating = _menu(rating_options, "no")
