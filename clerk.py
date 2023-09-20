@@ -21,6 +21,7 @@ def create_config():
 menu_tool         = ["rofi", "-dmenu", "-i", "-p", "> ", "-multi-select"]
 mpd_host          = ""
 number_of_tracks  = "20"
+random_artist     = "albumartist"
 
 [columns]
 artist_width      = "40"
@@ -299,11 +300,11 @@ def random_album():
     m.play()
 
 def random_tracks():
-    artist = m.list('albumartist')
+    artist = m.list(random_artist)
     artists = random.sample(artist, number_of_tracks)
     m.clear()
     for x in artists:
-        result = m.find('albumartist', x['albumartist'])
+        result = m.find(random_artist, x[random_artist])
         track = random.sample(result, 1)
         for x in track:
             m.findadd('file', x['file'])
@@ -346,6 +347,7 @@ menu_tool = config['general']['menu_tool']
 mpd_host = config['general']['mpd_host']
 number_of_tracks = config['general']['number_of_tracks']
 number_of_tracks = int(number_of_tracks)
+random_artist = config['general']['random_artist']
 artist_width = config['columns']['artist_width']
 albumartist_width = config['columns']['albumartist_width']
 album_width = config['columns']['album_width']
