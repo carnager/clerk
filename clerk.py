@@ -385,9 +385,9 @@ if len(sys.argv) > 1:
             current_track()
         case "-u":
             create_cache()
+        case "-x":
+            create_config()
         case "-h":
             print(help_text)
 else:
     print(help_text)
-
-
