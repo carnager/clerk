@@ -44,12 +44,17 @@ def _menu(input_list, trim):
     for line in list_of_albums:
         menu.stdin.write((line + "\n").encode())
     stdout, _ = menu.communicate()
-    match trim:
-        case "yes":
-            stdout = stdout.decode().rstrip().split(' ')[-1]
-        case "no":
-            stdout = stdout.decode().rstrip()
-    return stdout
+    new=stdout.decode().splitlines()
+    results = []
+    for line in new:
+        match trim:
+            case "yes":
+                x = line.rstrip().split(' ')[-1]
+            case "no":
+                x = line.rstrip()
+                return x
+        results.append(x)
+    return results
 
 ### create a local album and track cache and add unique id to each entry
 def create_cache():
@@ -165,26 +170,31 @@ def add_album(mode):
 
     # lookup selected album in local cache
     match = []
-    for search in album_cache:
-        if search['id'] == album_result:
-            match = search
-            break
+    for album in album_result:
+        for search in album_cache:
+            if album == search['id']:
+                match.append(search)
+                #break
     action_album(match, action)
         
-def action_album(match, action):
+def action_album(albums, action):
+    print(action)
     match action:
         case "Replace":
             m.clear()
-            m.findadd('albumartist', match['albumartist'], 'album', match['album'], 'date', match['date'])
+            for match in albums:
+                m.findadd('albumartist', match['albumartist'], 'album', match['album'], 'date', match['date'])
             m.play()
         case "Add":
-            m.findadd('albumartist', match['albumartist'], 'album', match['album'], 'date', match['date'])
+            for match in albums:
+                m.findadd('albumartist', match['albumartist'], 'album', match['album'], 'date', match['date'])
         case "Insert":
             position=int(m.currentsong()['pos'])
             pos=position + 1
-            results = m.find('albumartist', match['albumartist'], 'album', match['album'], 'date', match['date'])
-            for x in results:
-                m.addid(x['file'], pos)
+            for match in albums:
+                results = m.find('albumartist', match['albumartist'], 'album', match['album'], 'date', match['date'])
+                for x in results:
+                    m.addid(x['file'], pos)
         case "Rate":
             value = input_rating()
             results = m.find('albumartist', match['albumartist'], 'album', match['album'], 'date', match['date'])
@@ -196,7 +206,7 @@ def action_album(match, action):
                 else:
                     m.sticker_set('song', track['file'], 'albumrating', str(value))
             subprocess.run(["import_albums.rb", "--html", "-s"])
-
+            
 def add_tracks():
     tracks_cache = read_tracks_cache()
     list_of_tracks = []
