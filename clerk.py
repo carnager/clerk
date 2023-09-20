@@ -18,7 +18,7 @@ m = MPDClient()
 def create_config():
     config_content = """
 [general]
-menu_tool         = ["rofi", "-dmenu", "-i", "-p"]
+menu_tool         = ["rofi", "-dmenu", "-i", "-p", "-multi-select"]
 mpd_host          = ""
 number_of_tracks  = "20"
 
