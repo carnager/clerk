@@ -35,6 +35,7 @@ track_width       = "4"
     content_fix = config_content.split("\n",1)[1]
     with open(xdg_config+"/clerk/config", 'w') as configfile:
         configfile.writelines(content_fix)
+    print("Config file written to "+xdg_config+"/clerk/config")
 
 ### function to create menus in menu_tool
 # trim value if "yes", means only the last element of a line will be returned.
