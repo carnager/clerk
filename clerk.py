@@ -159,7 +159,7 @@ def add_album(mode):
     
     # show a list of albums using menu_tool
     album_result = _menu(list_of_albums, "yes")
-    if album_result == "":
+    if album_result == []:
         sys.exit()
     
     # choose what to do with selected album
@@ -217,7 +217,7 @@ def add_tracks():
             print("")
         list_of_tracks.append(a)
     track_result = _menu(list_of_tracks, "yes")
-    if track_result == "":
+    if track_result == []:
         sys.exit()
     list_of_options = ['Add', 'Insert', 'Replace', '---', 'Rate']
     action = _menu(list_of_options, "no")
