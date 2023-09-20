@@ -223,28 +223,31 @@ def add_tracks():
     action = _menu(list_of_options, "no")
     if action == "":
         sys.exit()
-        
+
     match = []
-    for search in tracks_cache:
-        if search['id'] == track_result:
-            match = search
-            break
+    for track in track_result:
+        for search in tracks_cache:
+            if search['id'] == track:
+                match.append(search)
     action_tracks(match, action)
     
-def action_tracks(match, action):
+def action_tracks(tracks, action):
     match action:
         case "Replace":
             m.clear()
-            m.findadd('artist', match['artist'], 'album', match['album'], 'date', match['date'], 'track', match['track'], 'title', match['title'])
+            for match in tracks:
+                m.findadd('artist', match['artist'], 'album', match['album'], 'date', match['date'], 'track', match['track'], 'title', match['title'])
             m.play()
         case "Add":
-            m.findadd('artist', match['artist'], 'album', match['album'], 'date', match['date'], 'track', match['track'], 'title', match['title'])
+            for match in tracks:
+                m.findadd('artist', match['artist'], 'album', match['album'], 'date', match['date'], 'track', match['track'], 'title', match['title'])
         case "Insert":
             position=int(m.currentsong()['pos'])
             pos=position + 1
-            results = m.find('artist', match['artist'], 'album', match['album'], 'date', match['date'], 'track', match['track'], 'title', match['title'])
-            for x in results:
-                m.addid(x['file'], pos)
+            for match in tracks:
+                results = m.find('artist', match['artist'], 'album', match['album'], 'date', match['date'], 'track', match['track'], 'title', match['title'])
+                for x in results:
+                    m.addid(x['file'], pos)
         case "Rate":
             value = input_rating()
             results = m.find('artist', match['artist'], 'album', match['album'], 'date', match['date'], 'track', match['track'], 'title', match['title'])
@@ -255,7 +258,6 @@ def action_tracks(match, action):
                     print("Nothing")
                 else:
                     m.sticker_set('song', track['file'], 'rating', str(value))
-
 def input_rating():
     rating_options = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '---', 'Delete']
     rating = _menu(rating_options, "no")
