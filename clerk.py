@@ -8,32 +8,32 @@ import sys;
 import os;
 import subprocess;
 import random;
-import configparser;
+import toml;
 
 ### Connect to MPD
 # create variables for MPDClient
 m = MPDClient()
 
-
 #### FUNCTIONS
 def create_config():
-    config = configparser.ConfigParser()
-    config['general'] = {}
-    config['columns'] = {}
-    general = config['general']
-    general['menu_tool'] = "rofi -i -dmenu"
-    general['mpd_host'] = ""
-    general['number_of_tracks'] = '20'
-    columns = config['columns']
-    columns['artist_width'] = '40'
-    columns['albumartist_width'] = '40'
-    columns['date_width'] = '6'
-    columns['album_width'] = '200'
-    columns['id_width'] = '0'
-    columns['title_width'] = '40'
-    columns['track_width'] = '4'
+    config_content = """
+[general]
+menu_tool = ["rofi", "-dmenu", "-i", "-p"]
+mpd_host = ""
+number_of_tracks = "20"
+
+[columns]
+artist_width = "40"
+albumartist_width = "40"
+date_width = "6"
+album_width = "200"
+id_width = "0"
+title_width = "40"
+track_width = "4"
+"""
+    content_fix = config_content.split("\n",1)[1]
     with open(xdg_config+"/clerk/config", 'w') as configfile:
-        config.write(configfile)
+        configfile.writelines(content_fix)
 
 ### function to create menus in menu_tool
 # trim value if "yes", means only the last element of a line will be returned.
@@ -329,18 +329,17 @@ if not os.path.exists(xdg_config+"/clerk/config"):
     create_config()
 
 # Read Configuration
-config = configparser.ConfigParser()
-config.read(xdg_config+"/clerk/config")
-mpd_host = config.get('general', 'mpd_host')
-number_of_tracks = config.getint('general', 'number_of_tracks')
-menu_tool = config.get("general", "menu_tool").split()
-artist_width = config.get('columns', 'artist_width')
-albumartist_width = config.get('columns', 'albumartist_width')
-date_width = config.get('columns', 'date_width')
-album_width = config.get('columns', 'album_width')
-id_width = config.get('columns', 'id_width')
-title_width = config.get('columns', 'title_width')
-track_width = config.get('columns', 'track_width')
+config = toml.load(xdg_config+"/clerk/config")
+menu_tool = config['general']['menu_tool']
+mpd_host = config['general']['mpd_host']
+number_of_tracks = config['general']['number_of_tracks']
+artist_width = config['columns']['artist_width']
+albumartist_width = config['columns']['albumartist_width']
+album_width = config['columns']['album_width']
+track_width = config['columns']['track_width']
+title_width = config['columns']['title_width']
+id_width = config['columns']['id_width']
+date_width = config['columns']['date_width']
 
 # check for config option "mpd_host", otherwise set it to "localhost"
 if 'mpd_host' in globals():
