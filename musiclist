@@ -1,0 +1,154 @@
+#!/usr/bin/env python3
+
+from os import environ as environ
+from pprint import pprint as pp
+from itertools import groupby
+import numpy as np
+import mpd
+import dateutil.parser
+import datetime
+import subprocess
+
+client = mpd.MPDClient()
+
+# Configuration
+mpd_host = 'localhost'
+mpd_port = '6600'
+mpd_pass = ''
+
+# which path of mpd database to include
+relative_path = '/'
+
+# sync target and css file to use
+musiclistcss = '/PATH/TO/musicstyle.css'
+target = 'SSHSERVER:/PATH/'
+
+if 'MPD_HOST' in environ:
+    mpd_connection = environ['MPD_HOST'].split('@')
+    if len(mpd_connection) == 1:
+        mpd_host = mpd_connection[0]
+    elif len(mpd_connection) == 2:
+        mpd_host = mpd_connection[1]
+        mpd_pass = mpd_connection[0]
+    else:
+        print('Unable to parse MPD_HOST, using defaults')
+
+if 'MPD_PORT' in environ:
+    mpd_port = environ['MPD_PORT']
+
+client.connect(mpd_host, mpd_port)
+if mpd_pass:
+    client.password(mpd_pass)
+
+def reduceToFstElm(maybeList):
+    return maybeList[0] if isinstance(maybeList, list) else maybeList
+
+def createAlbumsList(tracks):
+    ks = ['date', 'albumartist', 'album']
+    for t in tracks:
+        t.update([(k, reduceToFstElm(v)) for (k, v) in t.items() if k in ks])
+    return tracks
+
+alist=client.search('filename', relative_path)
+albumlist=createAlbumsList(alist)
+newlist = []
+for album in albumlist:
+    if album['track'] == '1':
+        try:
+            rating = client.sticker_get('song', album['file'], 'albumrating')
+        except mpd.CommandError:
+            rating = "-"
+        album['rating'] = rating
+        mtime_date = str(dateutil.parser.parse(album['last-modified']))
+        mtime_list = mtime_date.split(" ")
+        mtime = mtime_list[0]
+        entry={'artist': album['albumartist'], 'album': album['album'], 'date': album['date'], 'added': mtime, 'rating': album['rating']} # albumartist, date
+        newlist.append(entry)
+
+with open("/tmp/index.html", "a") as f:
+    print('''
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+    <meta charset="utf-8"/>
+    <title>music player daemon library</title>
+    
+    <link rel="stylesheet" href="static/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="static/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="static/dataTables.bootstrap4.min.css">
+    
+    <script src="static/jquery-3.3.1.js"></script>
+    <script src="static/jquery.dataTables.min.js"></script>
+    <script src="static/dataTables.bootstrap4.min.js"></script>
+    
+    <link rel="stylesheet" href="static/custom.css">
+    <script src="static/search.js"></script>
+    </head>
+    <body>
+    ''', file=f)
+    
+    print('''
+    <h2 class="text-center">music player daemon library</h2>
+    <p class="small text-secondary text-center">generated on
+    ''', file=f)
+    now = datetime.datetime.now()
+    print(now, file=f)
+    
+    
+    print('''
+    </p>
+    <div class="container-fluid">
+    <div class="row justify-content-md-center">
+    </div>
+    <table id="library" class="table table-striped table-bordered">
+    <thead>
+    <tr>
+    <th scope="col">Artist</th>
+    <th scope="col">Album</th>
+    <th scope="col">Year</th>
+    <th scope="col">Modified</th>
+    <th scope="col">Rating</th>
+    </tr>
+    </thead>
+    <tbody>
+    ''', file=f)
+    
+    byAlbum = lambda t: t['album']
+    byArtist = lambda t: t['artist']
+    for artist, albs in groupby(sorted(newlist, key=byArtist), key=byArtist):
+        albs = [list(albs)[0] for alb, albs in groupby(albs, key=byAlbum)]
+        albums = list(albs)
+        rowspan=len(albums)
+    
+        for x in albums:
+            print("<tr>", file=f)
+            print("<td>"+artist+"</td>", file=f)
+    
+            rating = 0
+    
+            if x['rating'] != None and x['rating'] != '-':
+                rating = x['rating']
+    
+            ratePercent = int(rating) * 10
+            ratePercentStr = str(ratePercent)
+    
+            print("<td>"+x['album']+"</td>", file=f)
+            print("<td>"+x['date']+"</td>", file=f)
+            print("<td>"+x['added']+"</td>", file=f)
+            print("<td><div class=\"progress\"><div class=\"progress-bar progress-bar-success progress-bar-striped\" role=\"progressbar\" aria-valuenow=\""+str(int(rating))+"\" aria-valuemin=\"0\" aria-valuemax=\"10\" style=\"color: black;width:"+ratePercentStr+"%\">"+ratePercentStr+"%</div></div></td>", file=f)
+            print("</tr>", file=f)
+            album=x['album']
+    print('''
+    </table>
+    </div>
+    </div>
+    </div>
+    </body>
+    </html>
+    ''', file=f)
+
+f.close()
+subprocess.Popen(['scp', '/tmp/index.html', target]).communicate()
+subprocess.Popen(['scp', musiclistcss, target]).communicate()
+subprocess.Popen(['rm', '/tmp/index.html'])
+subprocess.Popen(['notify-send', 'Musiclist Sync', 'Syncing of Musiclist done'])
