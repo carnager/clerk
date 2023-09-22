@@ -314,15 +314,18 @@ def current_track():
     action = _menu(rofi_options, "no")
     if action == "":
         sys.exit()
-    value = input_rating()
     if action == "Rate Album":
+        value = input_rating(currentsong['albumartist'], currentsong['album'])
         results = m.find('albumartist', currentsong['albumartist'], 'album', currentsong['album'], 'date', currentsong['date'])
         for track in results:
             if str(value) == "Delete":
                 m.sticker_delete('song', track['file'], 'albumrating')
             else:
                 m.sticker_set('song', track['file'], 'albumrating', str(value))
+    if sync_online_list == True:
+        subprocess.run(sync_command)
     elif action == "Rate Track":
+        value = input_rating(currentsong['albumartist'], currentsong['title'])
         if str(value) == "Delete":
             m.sticker_delete('song', track['file'], 'rating')
         else:
