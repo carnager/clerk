@@ -14,11 +14,14 @@ import toml;
 # create variables for MPDClient
 m = MPDClient()
 
+parameter = "> "
 #### FUNCTIONS
 def create_config():
     config_content = """
 [general]
-menu_tool         = ["rofi", "-dmenu", "-i", "-p", "> ", "-multi-select"]
+# Important: String for prompt has to be PLACEHOLDER, define the string in menu_prompt
+menu_tool         = ["rofi", "-dmenu", "-i", "-p", "PLACEHOLDER", "-multi-select"]
+menu_prompt       = "> "
 mpd_host          = ""
 number_of_tracks  = "20"
 random_artist     = "albumartist"
@@ -35,14 +38,43 @@ track_width       = "4"
     content_fix = config_content.split("\n",1)[1]
     with open(xdg_config+"/clerk/config", 'w') as configfile:
         configfile.writelines(content_fix)
-    print("Config file written to "+xdg_config+"/clerk/config")
+
+### chech for XDG directory and create if needed
+xdg_data = os.environ.get('XDG_DATA_HOME', os.environ.get('HOME')+"/.local/share")
+xdg_config = os.environ.get('XDG_CONFIG_HOME', os.environ.get('HOME')+"/.config")
+if not os.path.exists(xdg_data+"/clerk"):
+    os.makedirs(xdg_data+"/clerk")
+if not os.path.exists(xdg_config+"/clerk"):
+    os.makedirs(xdg_data+"/clerk")
+
+### Configuration
+# create config if it doesn't exist
+if not os.path.exists(xdg_config+"/clerk/config"):
+    create_config()
+
+# Read Configuration
+config = toml.load(xdg_config+"/clerk/config")
+menu_tool = config['general']['menu_tool']
+menu_prompt = config['general']['menu_prompt']
+menu_tool = [w.replace('PLACEHOLDER', menu_prompt) for w in menu_tool]
+mpd_host = config['general']['mpd_host']
+number_of_tracks = config['general']['number_of_tracks']
+number_of_tracks = int(number_of_tracks)
+artist_width = config['columns']['artist_width']
+albumartist_width = config['columns']['albumartist_width']
+album_width = config['columns']['album_width']
+track_width = config['columns']['track_width']
+title_width = config['columns']['title_width']
+id_width = config['columns']['id_width']
+date_width = config['columns']['date_width']
+random_artist = config['general']['random_artist']
 
 ### function to create menus in menu_tool
 # trim value if "yes", means only the last element of a line will be returned.
 # used for album/track lists, where the last element is the unique ID.
-def _menu(input_list, trim):
+def _menu(input_list, trim, custom_menu = menu_tool):
     list_of_albums = input_list
-    menu = subprocess.Popen(menu_tool, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    menu = subprocess.Popen(custom_menu, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     for line in list_of_albums:
         menu.stdin.write((line + "\n").encode())
     stdout, _ = menu.communicate()
@@ -180,7 +212,6 @@ def add_album(mode):
     action_album(match, action)
         
 def action_album(albums, action):
-    print(action)
     match action:
         case "Replace":
             m.clear()
@@ -198,17 +229,18 @@ def action_album(albums, action):
                 for x in results:
                     m.addid(x['file'], pos)
         case "Rate":
-            value = input_rating()
-            results = m.find('albumartist', match['albumartist'], 'album', match['album'], 'date', match['date'])
-            for track in results:
-                if str(value) == "Delete":
-                    m.sticker_delete('song', track['file'], 'albumrating')
-                elif str(value) == "---":
-                    print("Nothing")
-                else:
-                    m.sticker_set('song', track['file'], 'albumrating', str(value))
+            for match in albums:
+                value = input_rating(match['albumartist'], match['album'])
+                results = m.find('albumartist', match['albumartist'], 'album', match['album'], 'date', match['date'])
+                for track in results:
+                    if str(value) == "Delete":
+                        m.sticker_delete('song', track['file'], 'albumrating')
+                    elif str(value) == "---":
+                        print("Nothing")
+                    else:
+                        m.sticker_set('song', track['file'], 'albumrating', str(value))
             subprocess.run(["import_albums.rb", "--html", "-s"])
-            
+
 def add_tracks():
     tracks_cache = read_tracks_cache()
     list_of_tracks = []
@@ -225,7 +257,7 @@ def add_tracks():
     action = _menu(list_of_options, "no")
     if action == "":
         sys.exit()
-
+        
     match = []
     for track in track_result:
         for search in tracks_cache:
@@ -251,20 +283,23 @@ def action_tracks(tracks, action):
                 for x in results:
                     m.addid(x['file'], pos)
         case "Rate":
-            value = input_rating()
-            results = m.find('artist', match['artist'], 'album', match['album'], 'date', match['date'], 'track', match['track'], 'title', match['title'])
-            for track in results:
-                if str(value) == "Delete":
-                    m.sticker_delete('song', track['file'], 'rating')
-                elif str(value) == "---":
-                    print("Nothing")
-                else:
-                    m.sticker_set('song', track['file'], 'rating', str(value))
-                    
-def input_rating():
+            for match in tracks:
+                value = input_rating(match['albumartist'], match['title'])
+                results = m.find('artist', match['artist'], 'album', match['album'], 'date', match['date'], 'track', match['track'], 'title', match['title'])
+                for track in results:
+                    if str(value) == "Delete":
+                        m.sticker_delete('song', track['file'], 'rating')
+                    elif str(value) == "---":
+                        print("Nothing")
+                    else:
+                        m.sticker_set('song', track['file'], 'rating', str(value))
+
+def input_rating(artist, album):
     rating_options = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '---', 'Delete']
-    rating = _menu(rating_options, "no")
-    if rating == "":
+    prompt = artist+" - "+album+" "+menu_prompt
+    custom_menu = [w.replace('> ', prompt) for w in menu_tool]
+    rating = _menu(rating_options, "no", custom_menu)
+    if not rating:
         sys.exit()
     return(rating)
 
@@ -328,36 +363,9 @@ Options:
      -T  Play random Tracks
      -c  Rate current Track
      -u  Update local caches
-     -x  Create fresh config
 """
 
-### chech for XDG directory and create if needed
-xdg_data = os.environ.get('XDG_DATA_HOME', os.environ.get('HOME')+"/.local/share")
-xdg_config = os.environ.get('XDG_CONFIG_HOME', os.environ.get('HOME')+"/.config")
-if not os.path.exists(xdg_data+"/clerk"):
-    os.makedirs(xdg_data+"/clerk")
-if not os.path.exists(xdg_config+"/clerk"):
-    os.makedirs(xdg_data+"/clerk")
 
-### Configuration
-# create config if it doesn't exist
-if not os.path.exists(xdg_config+"/clerk/config"):
-    create_config()
-
-# Read Configuration
-config = toml.load(xdg_config+"/clerk/config")
-menu_tool = config['general']['menu_tool']
-mpd_host = config['general']['mpd_host']
-number_of_tracks = config['general']['number_of_tracks']
-number_of_tracks = int(number_of_tracks)
-random_artist = config['general']['random_artist']
-artist_width = config['columns']['artist_width']
-albumartist_width = config['columns']['albumartist_width']
-album_width = config['columns']['album_width']
-track_width = config['columns']['track_width']
-title_width = config['columns']['title_width']
-id_width = config['columns']['id_width']
-date_width = config['columns']['date_width']
 
 # check for config option "mpd_host", otherwise set it to "localhost"
 if 'mpd_host' in globals():
