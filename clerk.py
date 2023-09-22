@@ -25,6 +25,8 @@ menu_prompt       = "> "
 mpd_host          = ""
 number_of_tracks  = "20"
 random_artist     = "albumartist"
+sync_online_list  = true
+sync_command      = ["/home/carnager/.bin/import.rb", "--html", "-s"]
 
 [columns]
 artist_width      = "40"
@@ -60,6 +62,8 @@ menu_tool = [w.replace('PLACEHOLDER', menu_prompt) for w in menu_tool]
 mpd_host = config['general']['mpd_host']
 number_of_tracks = config['general']['number_of_tracks']
 number_of_tracks = int(number_of_tracks)
+sync_online_list = config['general']['sync_online_list']
+sync_command = config['general']['sync_command']
 artist_width = config['columns']['artist_width']
 albumartist_width = config['columns']['albumartist_width']
 album_width = config['columns']['album_width']
@@ -239,7 +243,8 @@ def action_album(albums, action):
                         print("Nothing")
                     else:
                         m.sticker_set('song', track['file'], 'albumrating', str(value))
-            subprocess.run(["import_albums.rb", "--html", "-s"])
+            if sync_online_list == True:
+                subprocess.run(sync_command)
 
 def add_tracks():
     tracks_cache = read_tracks_cache()
@@ -317,8 +322,6 @@ def current_track():
                 m.sticker_delete('song', track['file'], 'albumrating')
             else:
                 m.sticker_set('song', track['file'], 'albumrating', str(value))
-        print("updating online list")
-        subprocess.run(["import_albums.rb", "--html", "-s"])
     elif action == "Rate Track":
         if str(value) == "Delete":
             m.sticker_delete('song', track['file'], 'rating')
