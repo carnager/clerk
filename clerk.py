@@ -26,7 +26,7 @@ mpd_host          = ""
 number_of_tracks  = "20"
 random_artist     = "albumartist"
 sync_online_list  = true
-sync_command      = ["/home/carnager/.bin/import.rb", "--html", "-s"]
+sync_command      = ["/path/to/script", "--argument`", "-option1"]
 
 [columns]
 artist_width      = "40"
