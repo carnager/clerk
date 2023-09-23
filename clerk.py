@@ -20,7 +20,7 @@ def create_config():
     config_content = """
 [general]
 # Important: String for prompt has to be PLACEHOLDER, define the string in menu_prompt
-menu_tool         = ["rofi", "-dmenu", "-i", "-p", "PLACEHOLDER", "-multi-select"]
+menu_tool         = ["rofi", "-dmenu", "-matching", "regex", "-i", "-p", "PLACEHOLDER", "-multi-select", "-kb-row-tab", "", "-kb-move-word-forward", "", "-kb-accept-alt", "Tab", "-no-levensthein-sort"]
 # fzf example
 #menu_tool         = ["fzf", "--reverse", "--no-sort", "-m", "-e", "--no-hscroll", "-i", "+s", "--ansi", "--prompt", "PLACEHOLDER"]
 menu_prompt       = "> "
