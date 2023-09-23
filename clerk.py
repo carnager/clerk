@@ -27,6 +27,8 @@ menu_prompt       = "> "
 mpd_host          = ""
 number_of_tracks  = "20"
 random_artist     = "albumartist"
+
+# clerk can create a html list of all albums and sync it to a ssh location. The musiclist script that can be used is part of this repository
 sync_online_list  = true
 sync_command      = ["/path/to/musiclist"]
 
