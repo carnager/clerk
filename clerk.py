@@ -99,9 +99,29 @@ def _menu(input_list, trim, custom_menu = menu_tool):
         results.append(x)
     return results
 
+def get_songs_in_batches(client, batch_size=10000):
+    # Get the total number of songs
+    stats = m.stats()
+    total_songs = int(stats['songs'])
+
+    # Calculate the number of batches
+    num_batches = (total_songs + batch_size - 1) // batch_size
+
+    all_songs = []
+
+    for i in range(num_batches):
+        start = i * batch_size
+        end = start + batch_size - 1
+        window = f"{start}:{end}"
+        batch_songs = m.search('filename', '', 'window', window)
+        all_songs.extend(batch_songs)
+
+    return all_songs
+
+
 ### create a local album and track cache and add unique id to each entry
 def create_cache():
-    db=m.search('filename', '')
+    db = get_songs_in_batches(m)
     latest_cache = []
     album_cache = []
     tracks_cache = []
