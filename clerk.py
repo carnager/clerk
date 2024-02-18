@@ -20,12 +20,11 @@ def create_config():
     config_content = """
 [general]
 # Important: String for prompt has to be PLACEHOLDER, define the string in menu_prompt
-Sa 23 Sep 2023 23:15:18  - Rasi: 
 menu_tool         = ["rofi", "-dmenu", "-matching", "regex", "-i", "-p", "PLACEHOLDER", "-multi-select", "-kb-element-next", "", "-kb-row-tab", "", "-kb-move-word-forward", "", "-kb-accept-alt", "Tab", "-no-levensthein-sort", "-ballot-unselected-str",  " ", "-ballot-selected-str",  "·"]
 # fzf example
 #menu_tool         = ["fzf", "--reverse", "--no-sort", "-m", "-e", "--no-hscroll", "-i", "+s", "--ansi", "--prompt", "PLACEHOLDER"]
 menu_prompt       = "> "
-mpd_host          = ""
+mpd_host          = "localhost"
 number_of_tracks  = "20"
 random_artist     = "albumartist"
 
@@ -49,10 +48,13 @@ track_width       = "4"
 ### chech for XDG directory and create if needed
 xdg_data = os.environ.get('XDG_DATA_HOME', os.environ.get('HOME')+"/.local/share")
 xdg_config = os.environ.get('XDG_CONFIG_HOME', os.environ.get('HOME')+"/.config")
+
 if not os.path.exists(xdg_data+"/clerk"):
-    os.makedirs(xdg_data+"/clerk")
+    os.makedirs(xdg_data+"/clerk", exist_ok=True)
 if not os.path.exists(xdg_config+"/clerk"):
-    os.makedirs(xdg_data+"/clerk")
+    # This line should probably create the directory in `xdg_config` instead of `xdg_data`
+    os.makedirs(xdg_config+"/clerk", exist_ok=True)
+
 
 ### Configuration
 # create config if it doesn't exist
