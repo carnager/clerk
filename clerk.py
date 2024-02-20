@@ -50,11 +50,18 @@ xdg_data = os.environ.get('XDG_DATA_HOME', os.environ.get('HOME')+"/.local/share
 xdg_config = os.environ.get('XDG_CONFIG_HOME', os.environ.get('HOME')+"/.config")
 
 if not os.path.exists(xdg_data+"/clerk"):
-    os.makedirs(xdg_data+"/clerk", exist_ok=True)
+    try:
+        os.makedirs(xdg_data+"/clerk", exist_ok=True)
+    except Exception as e:
+        print(f"Error creating configuration directory: {e}")
+        sys.exit(1)
 if not os.path.exists(xdg_config+"/clerk"):
     # This line should probably create the directory in `xdg_config` instead of `xdg_data`
-    os.makedirs(xdg_config+"/clerk", exist_ok=True)
-
+    try:
+        os.makedirs(xdg_config+"/clerk", exist_ok=True)
+    except Exception as e:
+        print(f"Error creating configuration directory: {e}")
+        sys.exit(1)
 
 ### Configuration
 # create config if it doesn't exist
